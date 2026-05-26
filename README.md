@@ -1,67 +1,330 @@
 # Voice Agent SDK
 
-Base SDK agnostique pour agents conversationnels voix. Le coeur publie une
-surface declarative, un runtime serveur voix/media/provides, et un client
-browser voice sans UI produit.
+Provider-pluggable SDK for building realtime conversational voice agents with
+declarative prompts, tools, knowledge, safe stores, browser audio, and server
+runtime orchestration.
 
-## Structure
+In plain English: this repo turns "make me an AI that talks" into a structured
+voice agent with a goal, tools, retrieval, providers, and guardrails, so it does
+not confidently improvise its way into production.
 
-- `src/sdk`: builders, types et compilation declarative du SDK.
-- `src/server`: runtime serveur agnostique VOIP/RTC/provider/media conserve
-  depuis la logique mature.
-- `src/client/browser`: client WebSocket/audio browser voice.
-- `starters/voip-rtc`: starter reutilisable Bun + React/Vite pour projets
-  VOIP RTC.
-- `examples/packs/wine-investment`: exemple de pack metier hors core.
+## What You Get
 
-## Store Builder
+- Declarative SDK for agents, prompts, tools, providers, media bridges, stores,
+  databases, plans, onboarding metadata, and domain packs.
+- Server runtime for realtime voice sessions, provider transports, tool calls,
+  media handlers, state machines, and browser WebSocket sessions.
+- Browser client for microphone capture, playback, WebSocket control messages,
+  mute state, transcripts, tool call snapshots, and audio levels.
+- VOIP RTC starter with Bun, React, Vite, Gemini Live, OpenAI Realtime, builder
+  workflows, knowledge compilation, and Postgres/pgvector adapters.
+- Safe repository layer that enforces tenant/user scope, allowed operations,
+  filter fields, sort fields, writable fields, and page limits.
 
-`createStoreBuilder()` decrit des entites de donnees et leurs policies:
-scope tenant/user, operations autorisees, champs filtrables, triables,
-creables et modifiables. `createSafeRepository()` transforme ensuite une
-entite en repository borne par contrat: il injecte le scope, limite les pages,
-et refuse les champs ou operations non declares avant d'appeler l'adapter DB.
+## Architecture
 
-## Public Exports
+```mermaid
+flowchart TD
+  UI[Browser UI] --> Client[client/browser]
+  Client --> WS[Browser WebSocket]
+  WS --> BrowserService[server/browser BrowserVoiceService]
+  BrowserService --> Session[RealtimeVoiceSession]
+  Session --> Provider[IRealtimeProvider]
+  Provider --> Model[Realtime Model]
 
-- `@voiceagentsdk/core`
-- `@voiceagentsdk/core/sdk`
-- `@voiceagentsdk/core/server`
-- `@voiceagentsdk/core/server/adapters/fastify`
-- `@voiceagentsdk/core/server/providers`
-- `@voiceagentsdk/core/server/media`
-- `@voiceagentsdk/core/server/browser`
-- `@voiceagentsdk/core/client/browser`
+  BuilderUI[Builder UI] --> BuilderAPI[starter builder routes]
+  BuilderAPI --> Draft[AgentBuildDraft]
+  Draft --> Planner[Planner ports]
+  Planner --> Artifact[CompiledAgentArtifact]
+  Artifact --> Session
 
-## Commands
+  Artifact --> KnowledgeTool[search_knowledge]
+  KnowledgeTool --> KnowledgeStore[Postgres FTS + pgvector]
+```
+
+## Repository Map
+
+| Path | Role |
+| --- | --- |
+| `src/sdk` | Declarative SDK types, builders, compiler, ports, store, diagnostics. |
+| `src/server` | Server runtime: sessions, transports, media handlers, providers. |
+| `src/client/browser` | Browser WebSocket and audio session client. |
+| `starters/voip-rtc` | Reusable Bun + React/Vite starter for RTC voice projects. |
+| `examples/packs/wine-investment` | Example domain pack outside core SDK. |
+| `scripts` | Audits, harnesses, and runtime tool call checks. |
+
+## Mental Model
+
+```mermaid
+flowchart LR
+  Define[Define SDK contract] --> Compile[Compile SDK runtime]
+  Compile --> Adapt[Bind app adapters]
+  Adapt --> Start[Start voice session]
+  Start --> Stream[Stream audio]
+  Stream --> Tools[Run tools and knowledge]
+```
+
+The SDK defines contracts. Your app binds real adapters: auth, secrets,
+provider keys, persistence, database, observability, and product routing.
+
+## Builder Flow
+
+```mermaid
+sequenceDiagram
+  participant User
+  participant UI as Builder UI
+  participant API as Builder Routes
+  participant Planner as Planner Ports
+  participant Store as Draft State
+  participant Runtime as Voice Runtime
+
+  User->>UI: Identity, intent, rules, documents
+  UI->>API: POST /builder/prompt-plan
+  API->>Planner: createPromptPlan(draft)
+  Planner-->>API: PromptBuildPlan
+  API->>Store: save draft
+  UI->>API: compile knowledge / compile agent
+  API->>Planner: composeFinalPrompt()
+  API->>Store: save compiled artifact
+  Runtime->>Store: load compiled prompt by agent id
+```
+
+The user-facing "goal" is represented as `identity.intent`. There is no
+separate `/set goal` command in core.
+
+## Runtime Voice Flow
+
+```mermaid
+sequenceDiagram
+  participant Browser
+  participant Service as BrowserVoiceService
+  participant Session as RealtimeVoiceSession
+  participant Provider as Realtime Provider
+  participant Tool as Runtime Tool
+
+  Browser->>Service: session.start + binary PCM16 audio
+  Service->>Session: create session + callbacks
+  Session->>Provider: connect + sendAudio
+  Provider-->>Session: transcript/audio/function_call
+  Session->>Tool: execute(args, context)
+  Tool-->>Session: result
+  Session->>Provider: submitFunctionResult
+  Session-->>Browser: audio + state + transcript + tool result
+```
+
+## Quick Start
 
 ```bash
-pnpm typecheck:sdk
-pnpm typecheck:examples
-pnpm typecheck:starters
-pnpm audit:sdk-boundary
-pnpm audit:imports
-pnpm build
-pnpm pack --dry-run --json
+pnpm install
+cp starters/voip-rtc/.env.example starters/voip-rtc/.env
+pnpm dev:voip-rtc
 ```
+
+Open `http://localhost:5177`.
+
+The starter server runs on `http://localhost:8787` by default.
+
+## Public Export Cheat Sheet
+
+| Import | Use it for |
+| --- | --- |
+| `@voiceagentsdk/core` | Main SDK export. |
+| `@voiceagentsdk/core/sdk` | Builders, SDK types, runtime compiler, stores, ports. |
+| `@voiceagentsdk/core/server` | Sessions, transports, handlers, provider/runtime types. |
+| `@voiceagentsdk/core/server/browser` | `BrowserVoiceService` WebSocket bridge. |
+| `@voiceagentsdk/core/server/providers` | Realtime provider transport facade. |
+| `@voiceagentsdk/core/server/media` | Media handlers and audio utilities. |
+| `@voiceagentsdk/core/server/adapters/fastify` | Placeholder adapter contract. |
+| `@voiceagentsdk/core/client/browser` | Browser voice session client. |
+
+## SDK Builder Example
+
+```ts
+import {
+  compileVoiceAgentSdk,
+  createAgentBuilder,
+  createToolBuilder,
+} from "@voiceagentsdk/core/sdk";
+
+const lookupOrder = createToolBuilder("lookup_order")
+  .describe("Look up an order by id after the user provides it.")
+  .parameters({
+    type: "object",
+    properties: { orderId: { type: "string" } },
+    required: ["orderId"],
+  })
+  .handler(async (input, context) => {
+    return context.database?.query("orders", input) ?? null;
+  })
+  .build();
+
+const definition = createAgentBuilder()
+  .tenant({
+    id: "local",
+    displayName: "Local Lab",
+    defaultProviderId: "gemini",
+    defaultMediaBridgeId: "browser",
+  })
+  .provider({
+    id: "gemini",
+    kind: "gemini-live",
+    apiKey: { name: "GEMINI_API_KEY" },
+    model: "gemini-3.1-flash-live-preview",
+    voice: "Puck",
+  })
+  .mediaBridge({
+    id: "browser",
+    kind: "browser-websocket",
+    providerId: "gemini",
+    inputEncoding: "pcm16",
+    outputEncoding: "pcm16",
+    sampleRate: 24000,
+  })
+  .prompt({
+    id: "voice-system",
+    channels: ["voice"],
+    priority: 1,
+    body: "You are concise, grounded, and confirm before external actions.",
+  })
+  .tool(lookupOrder)
+  .build();
+
+const runtime = compileVoiceAgentSdk(definition);
+const prompt = runtime.promptFor({ channel: "voice" });
+```
+
+## Safe Store Cheat Sheet
+
+```ts
+import {
+  createSafeRepository,
+  createStoreBuilder,
+} from "@voiceagentsdk/core/sdk";
+
+const store = createStoreBuilder("crm")
+  .entity("contacts", (entity) => {
+    entity
+      .field("name", "string")
+      .field("email", "string")
+      .tenantScoped("tenantId")
+      .operations(["get", "list", "create", "update"])
+      .filterable(["tenantId", "email"])
+      .sortable(["email"])
+      .maxPageSize(50);
+  })
+  .build();
+
+const contacts = createSafeRepository(store.entities[0], adapter);
+```
+
+The safe repository injects scope and rejects undeclared operations, filters,
+sorts, writes, and oversized page requests before your database adapter runs.
+
+## Command Cheat Sheet
+
+| Command | Purpose |
+| --- | --- |
+| `pnpm build` | Compile the SDK to `dist`. |
+| `pnpm typecheck:sdk` | Typecheck core SDK and runtime. |
+| `pnpm typecheck:examples` | Typecheck example domain packs. |
+| `pnpm typecheck:starters` | Build SDK and typecheck the VOIP RTC starter. |
+| `pnpm dev:voip-rtc` | Run the reusable RTC voice starter. |
+| `pnpm harness:route-wines` | Run the route-wines builder harness. |
+| `pnpm test:knowledge-tool` | Check runtime knowledge tool wiring. |
+| `pnpm test:runtime-tool-call` | Check runtime tool call flow. |
+| `pnpm test:rtc-e2e` | Run the RTC WebSocket e2e script. |
+| `pnpm audit:sdk-boundary` | Verify core SDK boundary rules. |
+| `pnpm audit:imports` | Audit core import boundaries. |
+| `pnpm pack:dry-run` | Inspect package contents. |
+
+## Starter Routes
+
+| Route | Purpose |
+| --- | --- |
+| `GET /health` | Server status and active session count. |
+| `GET /config` | Public runtime provider/audio config. |
+| `GET /voice/ws` | Browser voice WebSocket upgrade. |
+| `GET /builder/config` | Builder providers, tools, availability, budgets. |
+| `GET /builder/session` | Active compiled builder session. |
+| `GET /builder/agents` | Draft/compiled agent bank. |
+| `GET /builder/drafts/:draftId` | One persisted draft. |
+| `POST /builder/prompt-plan` | Create prompt plan from identity and intent. |
+| `POST /builder/prompt-clarifications` | Merge builder answers into prompt part 1. |
+| `POST /builder/ingest-document` | Parse a document into knowledge input. |
+| `POST /builder/run-research` | Run budget-aware autonomous research. |
+| `POST /builder/autonomous-knowledge` | Research, plan, provision, and compile knowledge. |
+| `POST /builder/knowledge-plan` | Plan RAG/KG strategy. |
+| `POST /builder/database-plan` | Plan Postgres/pgvector schema. |
+| `POST /builder/apply-database` | Apply validated DB plan. |
+| `POST /builder/compile-knowledge` | Chunk, embed, and store knowledge. |
+| `POST /builder/compile-agent` | Compose final prompt and activate artifact. |
+| `POST /builder/session` | Activate an existing compiled draft. |
+
+## Environment Cheat Sheet
+
+Realtime providers:
+
+```bash
+DEFAULT_REALTIME_PROVIDER=gemini
+GEMINI_API_KEY=
+GEMINI_REALTIME_MODEL=gemini-3.1-flash-live-preview
+GEMINI_REALTIME_VOICE=Puck
+OPENAI_API_KEY=
+OPENAI_REALTIME_MODEL=gpt-realtime-1.5
+OPENAI_REALTIME_VOICE=marin
+```
+
+Builder, research, embeddings, and knowledge store:
+
+```bash
+DEEPSEEK_API_KEY=
+DEEPSEEK_MODEL=deepseek-v4-pro
+DEEPSEEK_BASE_URL=https://api.deepseek.com
+BUILDER_RESEARCH_PROVIDER=deepseek
+BUILDER_RESEARCH_MODEL=deepseek-v4-pro
+VOYAGE_API_KEY=
+VOYAGE_EMBEDDING_MODEL=voyage-4-large
+VOYAGE_EMBEDDING_DIMENSIONS=1024
+DATABASE_URL=postgres://...
+```
+
+## Boundary Rules
+
+`src` is reusable SDK/runtime code. Product logic does not belong there.
+
+Keep product-specific prompts, schemas, tools, repositories, routes, auth,
+observability, and workflows in:
+
+- a starter;
+- a domain pack;
+- a downstream app.
+
+Internal generated documentation is intentionally ignored from Git through
+`docs/`.
 
 ## VOIP RTC Starter
 
-Le starter `starters/voip-rtc` est le premier kit reutilisable pour projets
-voix:
+The starter in `starters/voip-rtc` is the fastest way to test the runtime:
 
 ```bash
 cp starters/voip-rtc/.env.example starters/voip-rtc/.env
 pnpm dev:voip-rtc
 ```
 
-Il lance un serveur Bun WebSocket et un client React/Vite autour des exports
-publics du package.
+It launches:
 
-## Boundary
+- Bun WebSocket voice server;
+- React/Vite RTC lab;
+- builder workflow UI;
+- runtime config endpoint;
+- Gemini/OpenAI provider wiring;
+- browser PCM16 capture/playback;
+- Postgres/pgvector knowledge adapters.
 
-Le dossier `src` ne doit pas contenir de logique produit. Les noms, prompts,
-tools, schemas et repositories metier restent dans des packs, des exemples ou
-des repos consommateurs. Le core garde uniquement les primitives SDK,
-transports, sessions, handlers media, types provider/session/event, et utils
-audio.
+## Project Status
+
+This is an early clean-core SDK and starter. The Fastify adapter is a placeholder
+until the next adapter pass wires tenant resolution, secrets, provider factories,
+media bridge factories, tools, prompts, and database adapters behind public
+ports.
+

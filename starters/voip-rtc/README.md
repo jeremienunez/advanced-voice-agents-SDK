@@ -15,6 +15,29 @@ projects:
   (Gemini 16 kHz input, browser/OpenAI 24 kHz).
 - Reusable SDK bridge through `BrowserVoiceService`.
 
+## Flow
+
+```mermaid
+flowchart LR
+  React[React RTC Lab] --> Client[BrowserVoiceSessionClient]
+  Client --> WS[/voice/ws]
+  WS --> Service[BrowserVoiceService]
+  Service --> Session[RealtimeVoiceSession]
+  Session --> Provider[Gemini Live or OpenAI Realtime]
+```
+
+## Builder Flow
+
+```mermaid
+flowchart TD
+  Identity[Identity + Intent] --> PromptPlan[/builder/prompt-plan]
+  PromptPlan --> Draft[AgentBuildDraft]
+  Draft --> Knowledge[Knowledge + Research]
+  Knowledge --> Database[Postgres/pgvector plan]
+  Database --> Compile[CompiledAgentArtifact]
+  Compile --> RTC[RTC Lab session agent id]
+```
+
 ## Run
 
 ```bash
@@ -29,6 +52,20 @@ The server listens on `http://localhost:8787` by default and exposes:
 - `GET /health`
 - `GET /config`
 - `GET /voice/ws`
+
+## Route Cheat Sheet
+
+| Route | Purpose |
+| --- | --- |
+| `GET /health` | Server status and active session count. |
+| `GET /config` | Runtime providers, models, voices, and audio contracts. |
+| `GET /voice/ws` | Browser voice WebSocket endpoint. |
+| `GET /builder/config` | Builder provider/tool availability. |
+| `GET /builder/session` | Active compiled builder session. |
+| `GET /builder/agents` | Agent bank. |
+| `POST /builder/prompt-plan` | Create a draft from identity and intent. |
+| `POST /builder/autonomous-knowledge` | Research, plan, provision, compile knowledge. |
+| `POST /builder/compile-agent` | Compose final prompt and activate the agent. |
 
 ## Runtime Configuration
 
@@ -45,6 +82,27 @@ Useful env vars:
 - `OPENAI_API_KEY`
 - `OPENAI_REALTIME_MODEL`
 - `OPENAI_REALTIME_VOICE`
+
+Builder and knowledge env vars:
+
+- `DEEPSEEK_API_KEY`
+- `DEEPSEEK_MODEL`
+- `BUILDER_RESEARCH_PROVIDER`
+- `BUILDER_RESEARCH_MODEL`
+- `VOYAGE_API_KEY`
+- `VOYAGE_EMBEDDING_MODEL`
+- `VOYAGE_EMBEDDING_DIMENSIONS`
+- `DATABASE_URL`
+
+## Commands
+
+```bash
+pnpm --filter @voiceagentsdk/starter-voip-rtc dev
+pnpm --filter @voiceagentsdk/starter-voip-rtc typecheck
+pnpm --filter @voiceagentsdk/starter-voip-rtc harness:route-wines
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:knowledge-tool
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:rtc-e2e
+```
 
 ## Production Notes
 
