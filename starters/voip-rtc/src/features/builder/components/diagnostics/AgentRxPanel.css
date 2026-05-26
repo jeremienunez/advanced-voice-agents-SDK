@@ -1,0 +1,149 @@
+.agentrx-panel {
+  margin-top: 24px;
+  padding: 18px;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #ffffff, #f8fbff);
+  box-shadow: var(--shadow-sm);
+}
+
+.agentrx-header,
+.agentrx-summary,
+.agentrx-trajectory {
+  display: grid;
+  gap: 12px;
+}
+
+.agentrx-header {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+}
+
+.agentrx-eyebrow,
+.agentrx-summary,
+.agentrx-critical span,
+.agentrx-recommendation {
+  color: var(--slate-500);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.agentrx-header h3 {
+  margin: 4px 0 0;
+  color: var(--slate-900);
+  font-size: 16px;
+}
+
+.agentrx-header > strong {
+  border-radius: 999px;
+  padding: 7px 11px;
+  background: var(--slate-100);
+  color: var(--slate-700);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.agentrx-failed .agentrx-header > strong {
+  background: var(--google-red-light);
+  color: var(--google-red);
+}
+
+.agentrx-watch .agentrx-header > strong {
+  background: var(--google-yellow-light);
+  color: var(--google-yellow);
+}
+
+.agentrx-healthy .agentrx-header > strong {
+  background: #e8f5e9;
+  color: #188038;
+}
+
+.agentrx-summary {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 16px;
+}
+
+.agentrx-critical {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(26, 115, 232, 0.06);
+}
+
+.agentrx-critical strong,
+.agentrx-critical p {
+  display: block;
+  margin-top: 6px;
+}
+
+.agentrx-critical p {
+  color: var(--slate-600);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.agentrx-trajectory {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.agentrx-trajectory li {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  background: #ffffff;
+}
+
+.agentrx-trajectory li > span {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--slate-100);
+  color: var(--slate-600);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.agentrx-trajectory li[data-status="completed"] > span {
+  background: #e8f5e9;
+  color: #188038;
+}
+
+.agentrx-trajectory li[data-status="failed"] > span {
+  background: var(--google-red-light);
+  color: var(--google-red);
+}
+
+.agentrx-trajectory strong,
+.agentrx-trajectory small {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agentrx-trajectory strong {
+  color: var(--slate-800);
+  font-size: 12px;
+}
+
+.agentrx-trajectory small {
+  color: var(--slate-500);
+  font-size: 10px;
+}
+
+.agentrx-recommendation {
+  margin: 16px 0 0;
+  text-transform: none;
+}

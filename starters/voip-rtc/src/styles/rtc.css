@@ -1,0 +1,118 @@
+.span2 {
+  grid-column: span 2;
+}
+
+.metric {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 16px;
+  align-items: baseline;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.metric span,
+.eventRow time,
+.timelineItem span {
+  color: #8d8a81;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.metric strong {
+  overflow-wrap: anywhere;
+  font-size: 14px;
+}
+
+.diagnosticBox {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.diagnosticBox strong {
+  display: block;
+  margin-bottom: 10px;
+  color: #f4efe4;
+  font-size: 13px;
+}
+
+.diagnosticBox dl {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 10px;
+}
+
+.diagnosticBox dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.diagnosticBox dt,
+.diagnosticBox dd,
+.diagnosticBox p {
+  margin: 0;
+  color: #b9b3a6;
+  font-size: 13px;
+}
+
+.diagnosticBox dd {
+  color: #f4efe4;
+  font-weight: 700;
+  text-align: right;
+}
+
+.muted {
+  color: #918d82;
+}
+
+.error {
+  margin-top: 14px;
+  color: #f0b3b3;
+  font-weight: 750;
+}
+
+.timeline,
+.events {
+  display: grid;
+  gap: 10px;
+}
+
+.timelineItem,
+.eventRow {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.045);
+  padding: 12px;
+}
+
+.timelineItem {
+  display: grid;
+  gap: 6px;
+}
+
+.timelineItem p {
+  line-height: 1.45;
+}
+
+.eventRow {
+  display: grid;
+  grid-template-columns: 92px 160px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.eventRow strong {
+  color: #d5c38f;
+  font-size: 12px;
+}
+
+.eventRow span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #d7d3c8;
+}

@@ -1,0 +1,245 @@
+/* 🌌 Hub & Space Selector 'Luminous Launchpad' - Minimalist Editorial Version 🌌 */
+
+.select-space-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: transparent;
+  color: var(--slate-800);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  z-index: 1002;
+  font-family: var(--font-sans);
+}
+
+/* Atmospheric Nacred Gradient & GPU Blobs */
+.hub-ambient-canvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  opacity: 0.9;
+}
+
+.hub-sphere {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.14;
+  mix-blend-mode: multiply;
+}
+
+.hub-sphere.blue {
+  width: 450px;
+  height: 450px;
+  background: #4285f4;
+  top: -80px;
+  left: -80px;
+  animation: hubFloatOrb1 25s ease-in-out infinite alternate;
+}
+
+.hub-sphere.green {
+  width: 500px;
+  height: 500px;
+  background: #34a853;
+  bottom: -120px;
+  right: -80px;
+  animation: hubFloatOrb2 30s ease-in-out infinite alternate;
+}
+
+.hub-sphere.yellow {
+  width: 350px;
+  height: 350px;
+  background: #fbbc05;
+  top: 40%;
+  left: 20%;
+  animation: hubFloatOrb3 20s ease-in-out infinite alternate;
+}
+
+@keyframes hubFloatOrb1 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(60px, 50px) scale(1.1); }
+}
+
+@keyframes hubFloatOrb2 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-70px, -60px) scale(1.08); }
+}
+
+@keyframes hubFloatOrb3 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(40px, -70px) scale(1.15); }
+}
+
+/* Top Header Bar */
+.hub-header {
+  height: 72px;
+  border-bottom: 1px solid var(--slate-100);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 48px;
+  position: relative;
+  z-index: 10;
+}
+
+.hub-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hub-brand-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--google-blue);
+  box-shadow: 0 0 8px rgba(26, 115, 232, 0.5);
+}
+
+.hub-brand span {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: var(--slate-500);
+}
+
+.hub-server-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--slate-400);
+}
+
+.hub-server-status .pulse-led {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--google-green);
+  box-shadow: 0 0 6px var(--google-green);
+}
+
+/* Asymmetric Launchpad Grid (42vw / 58vw) */
+.hub-grid {
+  display: grid;
+  grid-template-columns: 42vw 58vw;
+  flex-grow: 1;
+  height: calc(100vh - 72px);
+  overflow: hidden;
+  position: relative;
+  z-index: 5;
+}
+
+/* ==========================================
+   LEFT COLUMN: Storytelling Onboarding (42vw)
+   ========================================== */
+.hub-left-pane {
+  height: 100%;
+  border-right: 1px solid var(--slate-100);
+  padding: 56px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.hub-welcome h1 {
+  font-size: clamp(32px, 3.8vw, 54px);
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  color: var(--slate-900);
+  line-height: 1.05;
+  margin: 8px 0 16px 0;
+}
+
+.hub-subtitle {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--slate-500);
+  max-width: 90%;
+}
+
+/* Minimalist Onboarding Checklist */
+.hub-onboarding-panel {
+  margin: 32px 0;
+}
+
+.hub-onboarding-panel h3 {
+  font-size: 10px;
+  font-weight: 850;
+  color: var(--slate-400);
+  margin-bottom: 18px;
+  letter-spacing: 1px;
+}
+
+.onboarding-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.onboarding-steps li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--slate-400);
+  transition: var(--transition-fast);
+}
+
+.onboarding-steps li .step-icon {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--slate-300);
+  width: 14px;
+  display: inline-block;
+  text-align: center;
+}
+
+.onboarding-steps li.completed {
+  color: var(--slate-700);
+}
+
+.onboarding-steps li.completed .step-icon {
+  color: var(--google-green);
+}
+
+.onboarding-steps li.active {
+  color: var(--google-blue);
+}
+
+.onboarding-steps li.active .step-icon {
+  color: var(--google-blue);
+  animation: pulseActiveArrow 1s ease-in-out infinite alternate;
+}
+
+@keyframes pulseActiveArrow {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(3px); }
+}
+
+.step-inline-link {
+  background: transparent;
+  border: none;
+  color: var(--google-blue);
+  font-weight: 800;
+  cursor: pointer;
+  padding-left: 6px;
+  font-size: 12px;
+  text-decoration: underline;
+}

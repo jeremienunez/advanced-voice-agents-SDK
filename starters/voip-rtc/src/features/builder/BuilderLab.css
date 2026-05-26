@@ -1,0 +1,262 @@
+/* 💎 Immersive Full-Page Wizard 'Luminous Cloud' Styling 💎 */
+
+.immersive-wizard-container {
+  display: grid;
+  grid-template-columns: 42vw 58vw;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: transparent;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  font-family: var(--font-sans);
+}
+
+/* ==========================================
+   LEFT PANE: Monumental Storytelling (42vw)
+   ========================================== */
+.immersive-left-pane {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 64px 48px;
+  border-right: 1px solid var(--slate-200);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  overflow: hidden;
+}
+
+/* Atmosphere Glow Canvas (Spectre Google AI) */
+.ambient-glow-canvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.85;
+}
+
+.ambient-sphere {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.18;
+  mix-blend-mode: multiply;
+}
+
+.ambient-sphere.blue {
+  width: 350px;
+  height: 350px;
+  background: #4285f4;
+  top: -50px;
+  left: -50px;
+  animation: floatOrb1 25s ease-in-out infinite alternate;
+}
+
+.ambient-sphere.green {
+  width: 400px;
+  height: 400px;
+  background: #34a853;
+  bottom: -100px;
+  right: -50px;
+  animation: floatOrb2 30s ease-in-out infinite alternate;
+}
+
+.ambient-sphere.yellow {
+  width: 300px;
+  height: 300px;
+  background: #fbbc05;
+  top: 40%;
+  left: 30%;
+  animation: floatOrb3 22s ease-in-out infinite alternate;
+}
+
+@keyframes floatOrb1 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(80px, 60px) scale(1.15); }
+}
+
+@keyframes floatOrb2 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-90px, -80px) scale(1.1); }
+}
+
+@keyframes floatOrb3 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(50px, -100px) scale(1.2); }
+}
+
+/* Left Pane Content Layout */
+.immersive-left-pane > * {
+  position: relative;
+  z-index: 1;
+}
+
+.left-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.left-brand-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--google-blue);
+  box-shadow: 0 0 8px rgba(26, 115, 232, 0.6);
+}
+
+.left-header span {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--slate-500);
+}
+
+/* Odometer Rolling Index */
+.rolling-index-viewport {
+  height: 80px;
+  overflow: hidden;
+  margin-top: 24px;
+}
+
+.rolling-index-strip {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.75s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.rolling-index-digit {
+  height: 80px;
+  font-size: 80px;
+  font-weight: 900;
+  line-height: 80px;
+  color: var(--google-blue);
+  letter-spacing: -3px;
+  opacity: 0.85;
+}
+
+/* Staggered WordsPullUp */
+.words-pullup-container {
+  font-size: clamp(28px, 3.2vw, 42px);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.05em;
+  color: var(--slate-900);
+  margin: 16px 0 24px 0;
+  display: flex;
+  flex-wrap: wrap;
+  perspective: 800px;
+}
+
+.pullup-word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(24px) rotateX(15deg);
+  transform-origin: top;
+  animation: wordReveal 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(var(--word-index) * 0.07s);
+}
+
+@keyframes wordReveal {
+  to {
+    opacity: 1;
+    transform: translateY(0) rotateX(0deg);
+  }
+}
+
+.step-description-text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--slate-500);
+  margin-bottom: 32px;
+  max-width: 90%;
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Developer Glassmorphic Console */
+.dev-console-wrapper {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  height: calc(100% - 280px);
+  margin-top: 12px;
+}
+
+.dev-console-half {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  padding: 20px 24px;
+  min-height: 0;
+}
+
+.dev-console-half.top-half {
+  border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.console-header {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--slate-400);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pulse-led {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--google-green);
+  box-shadow: 0 0 6px var(--google-green);
+}
+
+.pulse-led.busy {
+  background: var(--google-blue);
+  box-shadow: 0 0 8px var(--google-blue);
+  animation: pulseLed 1.2s ease-in-out infinite alternate;
+}
+
+.pulse-led.error {
+  background: var(--google-red);
+  box-shadow: 0 0 8px var(--google-red);
+}
+
+@keyframes pulseLed {
+  0% { opacity: 0.4; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1.1); }
+}
+
+.console-code {
+  font-family: 'Fira Code', 'Courier New', Courier, monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--slate-700);
+  margin: 0;
+  overflow-y: auto;
+  flex-grow: 1;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.console-code.prompt-code {
+  color: var(--slate-600);
+  font-style: italic;
+}

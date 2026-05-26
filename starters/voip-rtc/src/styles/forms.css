@@ -1,0 +1,137 @@
+.controlPanel {
+  display: grid;
+  grid-template-columns: minmax(280px, 1.2fr) minmax(140px, 0.6fr) minmax(280px, 1fr) minmax(130px, 0.5fr);
+  gap: 12px 16px;
+  align-items: end;
+  padding: 16px 24px;
+  border-top: 0;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+.field {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.field span,
+.inlineControl span {
+  color: var(--slate-500);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.field span {
+  font-size: 11px;
+}
+
+.inlineControl {
+  display: grid;
+  min-width: 140px;
+  gap: 4px;
+}
+
+.inlineControl span {
+  font-size: 10px;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--slate-300);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--slate-900);
+  outline: none;
+  padding: 0 12px;
+  transition: var(--transition-fast);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--google-blue);
+  box-shadow: 0 0 0 3px var(--google-blue-light);
+}
+
+input,
+select {
+  height: 36px;
+}
+
+textarea {
+  min-height: 120px;
+  resize: vertical;
+  padding: 12px;
+  line-height: 1.5;
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled {
+  background: var(--slate-100);
+  color: var(--slate-400);
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  align-items: end;
+  margin-top: 4px;
+}
+
+button {
+  height: 36px;
+  border: 1px solid var(--slate-300);
+  border-radius: var(--radius-sm);
+  background: #ffffff;
+  color: var(--slate-700);
+  padding: 0 16px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-fast);
+}
+
+button:hover:not(:disabled) {
+  background: var(--slate-100);
+  border-color: var(--slate-400);
+  color: var(--slate-900);
+}
+
+button.primary {
+  background: var(--google-blue);
+  border-color: var(--google-blue);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+button.primary:hover:not(:disabled) {
+  background: var(--google-blue-hover);
+  border-color: var(--google-blue-hover);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.25);
+}
+
+button.ghost {
+  background: transparent;
+  box-shadow: none;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  background: var(--slate-100);
+  border-color: var(--slate-200);
+  color: var(--slate-400);
+  box-shadow: none;
+}

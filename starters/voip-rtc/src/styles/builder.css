@@ -1,0 +1,274 @@
+.builderGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 390px;
+  gap: 16px;
+  margin-top: 16px;
+  align-items: start;
+}
+
+.builderMain {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.builderPreview {
+  position: sticky;
+  top: 24px;
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.formGrid,
+.decisionGrid,
+.strategySummary,
+.budgetGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.budgetGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 14px;
+}
+
+.field + .field,
+.formGrid + .field,
+.field + .formGrid {
+  margin-top: 14px;
+}
+
+.stepRail {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid rgba(211, 184, 116, 0.2);
+  border-radius: 10px;
+  background: rgba(22, 21, 19, 0.74);
+}
+
+.stepRail span {
+  min-height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  color: #8d8a81;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.stepRail span.active {
+  color: #17130b;
+  background: #d2b66c;
+}
+
+.stack {
+  display: grid;
+  gap: 8px;
+}
+
+.stack h3 {
+  margin: 0;
+  color: var(--slate-500);
+  font-size: 12px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.questionLine {
+  color: var(--slate-700);
+  line-height: 1.45;
+}
+
+.promptBlueprintGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.promptQuestionStack,
+.promptAssumptionStack {
+  display: grid;
+  gap: 14px;
+}
+
+.promptQuestionStack h3,
+.promptAssumptionStack h3 {
+  margin: 0;
+  color: var(--slate-600);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+.promptQuestionCard {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: var(--shadow-sm);
+}
+
+.promptQuestionCard span {
+  color: var(--slate-800);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.promptQuestionCard textarea {
+  min-height: 86px;
+}
+
+.promptConfirmButton {
+  justify-self: start;
+}
+
+.assumptionLine {
+  margin: 0;
+  padding: 12px 14px;
+  border-left: 3px solid var(--google-blue);
+  border-radius: var(--radius-sm);
+  background: rgba(26, 115, 232, 0.05);
+  color: var(--slate-600);
+  line-height: 1.5;
+}
+
+.uploadRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.filePicker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f4efe4;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 850;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.filePicker input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.documentList,
+.toolGrid {
+  display: grid;
+  gap: 10px;
+}
+
+.documentRow,
+.toolOption {
+  display: grid;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.045);
+  padding: 12px;
+}
+
+.documentRow {
+  grid-template-columns: minmax(0, 1fr) 70px 94px;
+  align-items: center;
+}
+
+.documentRow strong,
+.documentRow span,
+.documentRow em {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.documentRow span,
+.documentRow em {
+  color: #9c988b;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.toolGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.toolOption {
+  grid-template-columns: 18px minmax(0, 1fr);
+  cursor: pointer;
+}
+
+.toolOption input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: #d2b66c;
+}
+
+.toolOption span {
+  display: grid;
+  gap: 5px;
+}
+
+.toolOption strong {
+  color: #f2efe6;
+}
+
+.toolOption em {
+  color: #9c988b;
+  font-style: normal;
+  line-height: 1.35;
+}
+
+.promptPreview,
+.sqlPreview {
+  max-height: 560px;
+  overflow: auto;
+  margin: 0;
+  white-space: pre-wrap;
+  color: #f4efe4;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.sqlPreview {
+  max-height: 320px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.22);
+  padding: 12px;
+}
+
+.databasePlan {
+  display: grid;
+  gap: 14px;
+}
+
+.warning {
+  margin-bottom: 14px;
+  color: #e8ca78;
+  font-weight: 760;
+}

@@ -1,0 +1,134 @@
+@media (max-width: 860px) {
+  .shell {
+    width: min(100vw - 24px, 760px);
+    padding: 16px 0;
+  }
+
+  .modeTabs {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .modeTabs button {
+    min-width: 0;
+  }
+
+  .topbar,
+  .controlPanel {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .topbar {
+    min-height: 0;
+    gap: 14px;
+    padding: 20px;
+    border-radius: var(--radius-lg);
+  }
+
+  .status {
+    width: 100%;
+  }
+
+  .controlPanel {
+    gap: 14px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 20px;
+    border-top: 1px solid var(--slate-200);
+    border-radius: var(--radius-lg);
+  }
+
+  .fieldWide {
+    grid-column: 1 / -1;
+  }
+
+  .actions {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-content: stretch;
+  }
+
+  .inlineControl {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .inlineControl,
+  .actions button {
+    width: 100%;
+    flex: 1;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .span2 {
+    grid-column: span 1;
+  }
+
+  .builderGrid,
+  .agent-grid,
+    .formGrid,
+    .decisionGrid,
+    .promptBlueprintGrid,
+    .strategySummary,
+  .researchProviderGrid,
+  .budgetGrid,
+  .toolGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .builderPreview {
+    position: static;
+  }
+
+  .workLoader {
+    grid-template-columns: 1fr;
+  }
+
+  .agentCreatedOverlay {
+    grid-template-columns: 1fr;
+  }
+
+  .createdCore {
+    width: 64px;
+    height: 64px;
+  }
+
+  .agentBankToolbar,
+  .agent-header,
+  .agentMetaLine,
+  .agentActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .bankStats {
+    min-width: 0;
+  }
+
+  .stepRail {
+    grid-template-columns: 1fr;
+  }
+
+  .documentRow {
+    grid-template-columns: 1fr;
+  }
+
+  .eventRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workLoader::after,
+  .loaderSteps span,
+  .createdCore span,
+  .agentCreatedOverlay {
+    animation: none;
+  }
+}

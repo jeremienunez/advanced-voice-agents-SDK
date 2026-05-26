@@ -1,0 +1,137 @@
+/* StepRail Component Styles - Luminous Cloud */
+
+.wizard-rail {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  margin-bottom: 40px;
+  padding: 16px 32px;
+  background: var(--bg-card);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.wizard-rail::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 56px;
+  right: 56px;
+  height: 2px;
+  background: var(--slate-200);
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+.wizard-rail-progress {
+  position: absolute;
+  top: 50%;
+  left: 56px;
+  height: 2px;
+  background: var(--google-blue);
+  transform: translateY(-50%);
+  z-index: 2;
+  transition: width var(--transition-normal);
+}
+
+.wizard-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 3;
+  height: auto;
+  min-width: 76px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  color: inherit;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.wizard-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: var(--bg-card);
+  border: 2px solid var(--slate-300);
+  color: var(--slate-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-normal);
+}
+
+.wizard-label {
+  margin-top: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--slate-500);
+  transition: var(--transition-normal);
+}
+
+.wizard-node:hover:not(.locked) .wizard-circle {
+  border-color: var(--google-blue);
+  color: var(--google-blue);
+  transform: scale(1.05);
+}
+
+.wizard-node:hover:not(:disabled) {
+  background: transparent;
+  color: inherit;
+}
+
+/* Completed Steps */
+.wizard-node.completed .wizard-circle {
+  background: var(--google-green-light);
+  border-color: var(--google-green);
+  color: var(--google-green);
+}
+
+.wizard-node.completed .wizard-label {
+  color: var(--slate-800);
+}
+
+.wizard-node.available .wizard-circle {
+  border-color: var(--google-blue);
+  color: var(--google-blue);
+}
+
+.wizard-node.available .wizard-label {
+  color: var(--slate-700);
+}
+
+/* Active Step */
+.wizard-node.active .wizard-circle {
+  background: var(--google-blue);
+  border-color: var(--google-blue);
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(26, 115, 232, 0.4);
+}
+
+.wizard-node.active .wizard-label {
+  color: var(--slate-900);
+  font-weight: 700;
+}
+
+/* Locked Steps */
+.wizard-node.locked {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.wizard-node:disabled {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  box-shadow: none;
+}

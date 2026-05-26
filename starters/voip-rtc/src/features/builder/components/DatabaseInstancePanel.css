@@ -1,0 +1,68 @@
+/* DatabaseInstancePanel Component Styles - Luminous Cloud */
+
+.databasePlan {
+  display: grid;
+  gap: 20px;
+}
+
+.sqlPreview {
+  max-height: 320px;
+  overflow: auto;
+  margin: 0;
+  white-space: pre-wrap;
+  color: var(--slate-800);
+  font-size: 11px;
+  font-family: monospace;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  padding: 16px;
+  line-height: 1.5;
+}
+
+.db-schema-card {
+  margin-top: 24px;
+  padding: 24px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--slate-200);
+}
+
+.db-schema-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.db-schema-column {
+  background: #ffffff;
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--slate-200);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-normal);
+}
+
+.db-schema-column.blue {
+  border-left: 4px solid var(--google-blue);
+}
+
+.db-schema-column.green {
+  border-left: 4px solid var(--google-green);
+}
+
+.db-schema-column:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.error-box {
+  color: var(--google-red);
+  background: var(--google-red-light);
+  padding: 12px 18px;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--google-red);
+  font-size: 12px;
+  margin-top: 12px;
+}

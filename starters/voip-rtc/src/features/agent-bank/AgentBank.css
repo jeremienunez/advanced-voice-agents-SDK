@@ -1,0 +1,29 @@
+/* AgentBank Component Styles - Luminous Cloud */
+
+.agentsTopbar {
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.bankStats {
+  display: flex;
+  gap: 16px;
+}
+
+.agentBankToolbar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin: 28px 0;
+  padding: 16px 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.agent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 28px;
+  margin-top: 28px;
+}

@@ -1,0 +1,32 @@
+/* ==========================================
+   RESPONSIVE DESIGN (Screens < 1024px)
+   ========================================== */
+@media (max-width: 1024px) {
+  .hub-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    height: auto;
+    overflow-y: auto;
+  }
+
+  .hub-left-pane {
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--slate-100);
+    padding: 40px 24px;
+  }
+
+  .hub-performance-console {
+    height: 280px;
+  }
+
+  .hub-right-pane {
+    height: auto;
+    padding: 40px 24px;
+    overflow-y: visible;
+  }
+  
+  .space-card {
+    grid-template-columns: 40px 1fr 24px;
+  }
+}

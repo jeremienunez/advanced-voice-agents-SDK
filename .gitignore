@@ -1,0 +1,13 @@
+node_modules/
+dist/
+coverage/
+*.tgz
+.codex
+.env
+.env.*
+!.env.example
+.builder-state/
+starters/voip-rtc/.builder-state/
+
+# Internal LLM-generated documentation
+docs/

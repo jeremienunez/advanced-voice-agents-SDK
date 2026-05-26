@@ -1,0 +1,296 @@
+/* ==========================================
+   RIGHT COLUMN: Selectable Spaces (58vw)
+   ========================================== */
+.hub-right-pane {
+  height: 100%;
+  padding: 64px 80px 140px 80px; /* High bottom padding */
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  scroll-behavior: smooth;
+}
+
+.section-title {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  color: var(--slate-400);
+  text-transform: uppercase;
+  margin: 0 0 16px 0;
+  border-bottom: 1px solid var(--slate-100);
+  padding-bottom: 8px;
+}
+
+/* Minimalist Editorial Space Rows */
+.spaces-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.spaces-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+.space-card {
+  position: relative;
+  background: transparent;
+  border: none;
+  border-top: 1px solid var(--slate-100);
+  padding: 24px 0;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: 56px 1fr 32px;
+  gap: 20px;
+  align-items: center;
+  transition: var(--transition-normal);
+}
+
+.spaces-grid > .space-card:last-child {
+  border-bottom: 1px solid var(--slate-100);
+}
+
+.space-card:hover {
+  padding-left: 8px;
+  padding-right: 8px;
+  background: rgba(248, 250, 252, 0.5);
+}
+
+.space-glow-bg {
+  display: none; /* Removed for ultimate minimalism */
+}
+
+.space-icon-wrapper {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--slate-200);
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-normal);
+}
+
+.space-card:hover .space-icon-wrapper {
+  color: var(--google-blue);
+  transform: scale(1.1);
+}
+
+.space-card.bank:hover .space-icon-wrapper { color: var(--google-green); }
+.space-card.rtc:hover .space-icon-wrapper { color: var(--google-yellow); }
+
+.space-content h3 {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--slate-900);
+  margin: 0 0 4px 0;
+  letter-spacing: -0.3px;
+}
+
+.space-content p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--slate-500);
+  margin: 0;
+}
+
+.space-action-link {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--slate-300);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  transition: var(--transition-fast);
+}
+
+.space-card:hover .space-action-link {
+  color: var(--google-blue);
+  transform: translateX(4px);
+}
+
+.space-card.bank:hover .space-action-link { color: var(--google-green); }
+.space-card.rtc:hover .space-action-link { color: var(--google-yellow); }
+
+/* Quick Vault List (Minimalist Rows) */
+.quick-vault-empty {
+  font-size: 13px;
+  color: var(--slate-400);
+  padding: 16px 0;
+  font-style: italic;
+}
+
+.quick-vault-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.quick-vault-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--slate-100);
+  padding: 14px 0;
+  transition: var(--transition-fast);
+}
+
+.quick-agent-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 75%;
+}
+
+.quick-agent-meta strong {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--slate-900);
+}
+
+.quick-agent-badge {
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--slate-100);
+  color: var(--slate-600);
+}
+
+.quick-agent-desc {
+  font-size: 12px;
+  color: var(--slate-400);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quick-agent-actions button {
+  height: 32px;
+  padding: 0 14px;
+  font-size: 11px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid var(--slate-200);
+  color: var(--slate-600);
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.quick-agent-actions button:hover {
+  background: var(--slate-50);
+  border-color: var(--slate-300);
+  color: var(--slate-900);
+}
+
+/* Minimalist Global Configuration Panel */
+.config-card {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.config-fields-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  gap: 32px;
+  align-items: end;
+}
+
+.config-fields-grid .field {
+  gap: 6px;
+}
+
+.config-fields-grid .field span {
+  font-size: 10px;
+  font-weight: 850;
+  color: var(--slate-400);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.config-fields-grid input {
+  background: #ffffff;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--slate-800);
+  transition: var(--transition-fast);
+}
+
+.config-fields-grid input:focus {
+  border-color: var(--google-blue);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.08);
+}
+
+.config-stats-switches {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.config-indicator-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--slate-500);
+}
+
+.status-label {
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.status-label.green {
+  color: var(--google-green);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.status-label.green::before {
+  content: "•";
+  font-size: 14px;
+  color: var(--google-green);
+}
+
+.config-actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 8px;
+}
+
+.config-actions button {
+  padding: 10px 24px;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--google-blue);
+  color: #ffffff;
+  border: none;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.config-actions button:hover {
+  background: var(--google-blue-hover);
+  box-shadow: var(--shadow-md);
+}
+
+.config-actions button:active {
+  transform: scale(0.98);
+}
+

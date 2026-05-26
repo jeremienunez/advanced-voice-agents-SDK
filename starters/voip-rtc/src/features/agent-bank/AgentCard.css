@@ -1,0 +1,82 @@
+/* AgentCard Component Styles - Luminous Cloud */
+
+.agent-profile-card {
+  background: #ffffff;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  transition: var(--transition-normal);
+}
+
+.agent-profile-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--google-blue);
+  box-shadow: var(--shadow-lg);
+}
+
+.agent-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.agent-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--slate-900);
+}
+
+.agent-badge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+}
+
+.agent-badge.compiled {
+  background: var(--google-green-light);
+  color: var(--google-green);
+}
+
+.agent-badge.draft {
+  background: var(--google-yellow-light);
+  color: var(--google-yellow);
+}
+
+.agent-metadata-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  row-gap: 8px;
+  column-gap: 12px;
+  background: var(--bg-secondary);
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  border: 1px solid var(--slate-200);
+}
+
+.agent-meta-label {
+  color: var(--slate-500);
+  font-weight: 600;
+}
+
+.agent-meta-value {
+  color: var(--slate-800);
+  font-weight: 700;
+  text-align: right;
+}
+
+.agentActions {
+  display: flex;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.agentActionButton {
+  flex: 1;
+}

@@ -1,0 +1,85 @@
+{
+  "name": "@voiceagentsdk/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Agnostic SDK for building provider-pluggable conversational voice agents.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "TODO.md",
+    "examples/packs/wine-investment"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./sdk": {
+      "types": "./dist/sdk/index.d.ts",
+      "import": "./dist/sdk/index.js"
+    },
+    "./server": {
+      "types": "./dist/server/index.d.ts",
+      "import": "./dist/server/index.js"
+    },
+    "./server/adapters/fastify": {
+      "types": "./dist/server/adapters/fastify/index.d.ts",
+      "import": "./dist/server/adapters/fastify/index.js"
+    },
+    "./server/providers": {
+      "types": "./dist/server/providers/index.d.ts",
+      "import": "./dist/server/providers/index.js"
+    },
+    "./server/media": {
+      "types": "./dist/server/media/index.d.ts",
+      "import": "./dist/server/media/index.js"
+    },
+    "./server/browser": {
+      "types": "./dist/server/browser/index.d.ts",
+      "import": "./dist/server/browser/index.js"
+    },
+    "./client/browser": {
+      "types": "./dist/client/browser/index.d.ts",
+      "import": "./dist/client/browser/index.js"
+    }
+  },
+  "scripts": {
+    "prepack": "pnpm build",
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "typecheck:sdk": "tsc --noEmit -p tsconfig.json",
+    "typecheck:examples": "tsc --noEmit --target ES2023 --module NodeNext --moduleResolution NodeNext --lib ES2023,DOM --strict --skipLibCheck examples/packs/wine-investment/index.ts",
+    "typecheck:starters": "pnpm --filter @voiceagentsdk/starter-voip-rtc typecheck",
+    "dev:voip-rtc": "pnpm --filter @voiceagentsdk/starter-voip-rtc dev",
+    "harness:route-wines": "pnpm --filter @voiceagentsdk/starter-voip-rtc harness:route-wines",
+    "test:db": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:db",
+    "test:knowledge-tool": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:knowledge-tool",
+    "test:runtime-tool-call": "bun run scripts/test-runtime-tool-call.ts",
+    "test:rtc-e2e": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:rtc-e2e",
+    "audit:sdk-boundary": "node scripts/audit-sdk-boundary.mjs",
+    "audit:imports": "node scripts/audit-core-imports.mjs",
+    "audit:loc": "bun scripts/audit-loc.mjs",
+    "pack:dry-run": "pnpm pack --dry-run --json"
+  },
+  "dependencies": {
+    "@shiguredo/rnnoise-wasm": "^2025.1.5",
+    "ws": "^8.20.1"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.14",
+    "@types/node": "^25.4.0",
+    "@types/react": "^19.2.15",
+    "@types/react-dom": "^19.2.3",
+    "@types/ws": "^8.18.1",
+    "@vitejs/plugin-react": "^6.0.2",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.14"
+  }
+}
