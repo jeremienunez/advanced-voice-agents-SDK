@@ -1,5 +1,31 @@
 # Changelog
 
+## test: cover builder llm harness
+
+Status: implemented locally
+Date: 2026-05-27
+
+### Intent
+
+Verrouiller le harness LLM provider-agnostique avec des tests rapides et
+deterministes avant les prochaines passes de hardening.
+
+### Journal
+
+- Ajout de `pnpm test:llm-harness`.
+- Ajout d'un faux `LlmTaskRunnerPort` enregistrant les taches emises.
+- Couverture des comportements suivants:
+  - fallback JSON du prompt planner;
+  - creation document/checkpoints de recherche autonome;
+  - normalisation des verdicts verifier;
+  - selection resolver avec provider demande puis fallback.
+- `pnpm audit:solid` execute maintenant aussi `pnpm test:llm-harness`.
+
+### Validation
+
+- `pnpm test:llm-harness` OK
+- `pnpm typecheck:starters` OK
+
 ## chore/refactor: enforce SOLID architecture gates
 
 Status: implemented locally

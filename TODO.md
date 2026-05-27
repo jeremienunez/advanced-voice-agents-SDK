@@ -1,27 +1,30 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: finish the remaining SOLID cleanup until the repo is boringly
-predictable to navigate.
+Current goal: continue the hardening backlog with focused, falsifiable tests
+before taking larger runtime/security slices.
 
-Target commit title candidate: `refactor: finish solid cleanup backlog`
+Target commit title candidate: `test: cover builder llm harness`
 
 ## Active Focus
 
-### SOLID Finish Line
+### Builder LLM Harness Coverage
 
 Outcome:
-A new contributor can locate code by responsibility in under one minute:
-`sdk`, `server`, `client`, `starter app`, `http`, `voice`, `runtime`,
-`builder`, `learning`, `infra`, and `adapters` each have explicit ownership.
+Builder planning, research, verification, and model selection can be refactored
+without silently breaking provider-agnostic behavior.
 
 Next work:
 
-- [ ] Pick the next hardening slice after the SOLID finish-line commit.
+- [ ] Pick the next hardening slice after the LLM harness test commit.
 
 Done in this focus:
 
+- `pnpm test:llm-harness` covers prompt planner JSON fallback, autonomous
+  research document/checkpoint creation, verifier verdict normalization, and
+  resolver requested-provider fallback with a fake `LlmTaskRunnerPort`.
 - `pnpm audit:solid` now runs architecture, responsibility, LOC, SDK boundary,
-  import boundary, core/starter typechecks, focused seam tests, and RTC E2E.
+  import boundary, core/starter typechecks, focused seam tests, LLM harness
+  tests, and RTC E2E.
 - Dependency Cruiser enforces SOA/SOLID import boundaries, including
   `server/app`, `server/http`, `server/voice`, and `server/adapters`.
 - Responsibility audit enforces max 5 runtime exports, one TSX component per
@@ -47,6 +50,7 @@ Run before commit:
 Recently green:
 
 - [x] `pnpm typecheck:starters`
+- [x] `pnpm test:llm-harness`
 - [x] `pnpm test:solid-seams`
 - [x] `pnpm test:infra-plan`
 - [x] `pnpm test:learning`
@@ -88,7 +92,7 @@ Optional security/network checks:
 - [x] Remove frontend/server defaults that forced DeepSeek/Kimi before
   `/builder/config` loaded.
 - [x] Make builder prompt templates provider-agnostic.
-- [ ] Add focused tests with fake `LlmTaskRunnerPort` for:
+- [x] Add focused tests with fake `LlmTaskRunnerPort` for:
   - prompt planner JSON fallback;
   - research document/checkpoint creation;
   - verifier verdict normalization;

@@ -10,7 +10,7 @@ import { summarizeDraftForSession } from "../server/builder/state/session-draft-
 import { accessGuard, originGuard } from "../server/http/guards.js";
 import { createSessionEndedLearningHook } from "../server/voice/learning-hook.js";
 import { createProvider } from "../server/voice/provider-factory.js";
-import { assert, assertThrows } from "./solid-seams/assertions.js";
+import { assert, assertThrows } from "./shared/assertions.js";
 import {
   agentDraft,
   builderService,
