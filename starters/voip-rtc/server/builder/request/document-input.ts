@@ -4,9 +4,11 @@ import {
   readNumber,
   readString,
 } from "../utils/record-readers.js";
-
-const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
-const MAX_TEXT_DOCUMENT_CHARS = 1_000_000;
+import {
+  enforceContentLength,
+  enforceDocumentPolicy,
+  maxTextDocumentChars,
+} from "./document-policy.js";
 
 export async function readDocumentInput(
   request: Request,
@@ -19,9 +21,11 @@ export async function readDocumentInput(
     if (!(file instanceof File)) {
       throw new Error("FormData upload requires a file field");
     }
-    if (file.size > MAX_UPLOAD_BYTES) {
-      throw new Error(`Uploaded file is too large; max ${MAX_UPLOAD_BYTES} bytes`);
-    }
+    enforceDocumentPolicy({
+      name: file.name,
+      mimeType: file.type || undefined,
+      sizeBytes: file.size,
+    });
     return {
       id: readString(Object.fromEntries(form), "id") || undefined,
       name: file.name,
@@ -40,25 +44,20 @@ export function normalizeDocumentInput(
 ): DocumentIngestionInput {
   const source = asRecord(body);
   const content = readString(source, "content");
-  if (content.length > MAX_TEXT_DOCUMENT_CHARS) {
+  if (content.length > maxTextDocumentChars) {
     throw new Error(
-      `Document content is too large; max ${MAX_TEXT_DOCUMENT_CHARS} characters`,
+      `Document content is too large; max ${maxTextDocumentChars} characters`,
     );
   }
+  const name = readString(source, "name") || "document.txt";
+  const mimeType = readString(source, "mimeType") || undefined;
+  const sizeBytes = readNumber(source, "sizeBytes");
+  enforceDocumentPolicy({ name, mimeType, sizeBytes });
   return {
     id: readString(source, "id") || undefined,
-    name: readString(source, "name") || "document.txt",
-    mimeType: readString(source, "mimeType") || undefined,
-    sizeBytes: readNumber(source, "sizeBytes"),
+    name,
+    mimeType,
+    sizeBytes,
     content,
   };
-}
-
-function enforceContentLength(request: Request): void {
-  const raw = request.headers.get("content-length");
-  if (!raw) return;
-  const bytes = Number(raw);
-  if (Number.isFinite(bytes) && bytes > MAX_UPLOAD_BYTES) {
-    throw new Error(`Request body is too large; max ${MAX_UPLOAD_BYTES} bytes`);
-  }
 }

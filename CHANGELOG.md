@@ -1,5 +1,34 @@
 # Changelog
 
+## test: harden document ingestion limits
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Rendre l'ingestion document falsifiable avant qu'un upload puisse alimenter les
+prompts builder, le planning knowledge ou la compilation RAG.
+
+### Journal
+
+- Ajout de `pnpm test:document-ingestion:bdd`.
+- Le scenario BDD rejette les uploads sans `content-length`.
+- Le scenario BDD rejette les corps declares au-dessus de la limite.
+- Le scenario BDD rejette les types document non allowlistes, dont `.exe` et
+  `.xls`.
+- Le chemin nominal accepte un Markdown borne et le parse via le vrai
+  `PlainTextDocumentIngestion`.
+- La politique d'ingestion est isolee dans `request/document-policy.ts`.
+- `pnpm audit:solid` execute maintenant ce scenario BDD.
+
+### Validation
+
+- `pnpm test:document-ingestion:bdd` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: enforce postgres least privilege provisioning
 
 Status: implemented locally

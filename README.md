@@ -423,11 +423,12 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `pnpm test:knowledge-tool` | Check runtime knowledge tool wiring. |
 | `pnpm test:llm-harness` | Check provider-agnostic builder LLM planner, research, verifier, and resolver behavior. |
 | `pnpm test:builder-draft-ownership:bdd` | Check privileged builder workflows reload server-owned drafts by authenticated owner. |
+| `pnpm test:document-ingestion:bdd` | Check document upload bounds, content-length enforcement, and type allowlists. |
 | `pnpm test:database-provisioning` | Run the real starter database provisioner validation against the pgvector template and hostile SQL cases. |
 | `pnpm test:solid-seams` | Run focused BDD seam tests for HTTP guards, voice factory/learning, builder summaries, and infra validation. |
 | `pnpm test:runtime-tool-call` | Check runtime tool call flow. |
 | `pnpm test:rtc-e2e` | Run the RTC WebSocket e2e script. |
-| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/ownership/DB provisioning tests, and RTC E2E. |
+| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/ownership/ingestion/DB provisioning tests, and RTC E2E. |
 | `pnpm audit:architecture` | Enforce Dependency Cruiser SOA/SOLID import boundaries. |
 | `pnpm audit:responsibility` | Enforce SRP/LSP clean-code responsibility rules. |
 | `pnpm audit:sdk-boundary` | Verify core SDK boundary rules. |

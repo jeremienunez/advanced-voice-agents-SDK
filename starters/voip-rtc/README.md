@@ -288,6 +288,7 @@ pnpm --filter @voiceagentsdk/starter-voip-rtc harness:route-wines
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:knowledge-tool
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-plan
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:builder-draft-ownership:bdd
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:document-ingestion:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:database-provisioning
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:learning
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:learning:bdd
