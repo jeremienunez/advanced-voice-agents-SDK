@@ -12,7 +12,12 @@
     "db:stop": "bun run scripts/dev-db.ts stop",
     "db:status": "bun run scripts/dev-db.ts status",
     "harness:route-wines": "bun run scripts/route-wines-harness.ts",
+    "infra:plan": "bun run scripts/infra-apply.ts plan",
+    "infra:apply": "bun run scripts/infra-apply.ts apply",
+    "infra:status": "bun run scripts/infra-apply.ts status",
+    "infra:destroy": "bun run scripts/infra-apply.ts destroy",
     "test:db": "bun run scripts/test-db.ts",
+    "test:infra-plan": "bun run scripts/test-infra-plan.ts",
     "test:knowledge-tool": "bun run scripts/test-knowledge-tool.ts",
     "test:rtc-e2e": "pnpm build:sdk && bun run scripts/test-rtc-e2e.ts",
     "typecheck": "pnpm build:sdk && tsc --noEmit -p tsconfig.json"

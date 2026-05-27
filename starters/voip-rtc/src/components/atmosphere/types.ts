@@ -6,7 +6,7 @@ export interface Particle {
   size: number;
   alpha: number;
   colorType: "gold" | "accent";
-  accentSubtype: "white" | "cream";
+  accentSubtype: "blue" | "green";
 }
 
 export interface RgbColor {

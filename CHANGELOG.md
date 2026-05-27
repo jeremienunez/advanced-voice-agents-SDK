@@ -1,5 +1,5 @@
 # Changelog
-
+rezch
 ## feat: validate builder tool contracts before RTC compile
 
 Status: implemented locally

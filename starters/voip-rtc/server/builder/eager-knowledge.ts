@@ -14,6 +14,7 @@ import { runTeacherVerification } from "./teacher-verification.js";
 import type {
   BuilderWorkflowDependencies,
 } from "./types.js";
+import { createValidatedInfraPlan } from "./workflow-infra.js";
 
 export interface EagerKnowledgeInput {
   budget: Partial<KnowledgeResearchBudget>;
@@ -92,9 +93,20 @@ export async function buildEagerKnowledge(input: EagerKnowledgeInput) {
     status: validation.ok ? "validated" : "failed",
     validationErrors: validation.errors,
   };
-  draft = mutateDraft(draft).databasePlan(validatedPlan).build();
+  const infra = await createValidatedInfraPlan({
+    databasePlan: validatedPlan,
+    deps: input.deps,
+    documents: knowledgePlan.documents,
+    draft,
+    knowledgePlan,
+  });
+  draft = mutateDraft(draft)
+    .databasePlan(validatedPlan)
+    .infraPlan(infra.plan)
+    .build();
   saveDraft(draft);
   steps.push({ name: "database-plan", status: validatedPlan.status });
+  steps.push({ name: "infra-plan", status: infra.plan.status });
 
   if (validation.ok && input.deps.databaseProvisioner.isConfigured()) {
     const provision = await input.deps.databaseProvisioner.apply({

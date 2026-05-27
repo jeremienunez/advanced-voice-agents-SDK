@@ -27,7 +27,7 @@
   position: absolute;
   border-radius: 50%;
   filter: blur(90px);
-  opacity: 0.14;
+  opacity: 0.12;
   mix-blend-mode: multiply;
 }
 
@@ -35,8 +35,8 @@
   width: 450px;
   height: 450px;
   background: #4285f4;
-  top: -80px;
-  left: -80px;
+  top: -180px;
+  left: -210px;
   animation: hubFloatOrb1 25s ease-in-out infinite alternate;
 }
 
@@ -44,8 +44,8 @@
   width: 500px;
   height: 500px;
   background: #34a853;
-  bottom: -120px;
-  right: -80px;
+  bottom: -220px;
+  right: -230px;
   animation: hubFloatOrb2 30s ease-in-out infinite alternate;
 }
 
@@ -53,8 +53,8 @@
   width: 350px;
   height: 350px;
   background: #fbbc05;
-  top: 40%;
-  left: 20%;
+  top: 34%;
+  left: calc(42vw - 175px);
   animation: hubFloatOrb3 20s ease-in-out infinite alternate;
 }
 

@@ -1,9 +1,13 @@
 import type {
+  AgentInfraPlan,
   AgentBuilderLlmProvider,
   DatabasePlannerPort,
   DatabaseProvisionerPort,
   DocumentIngestionPort,
   EmbeddingPort,
+  InfraPlannerPort,
+  InfraProvisionerPort,
+  InfraIacBundle,
   KnowledgeResearchBudget,
   KnowledgeResearchPort,
   KnowledgeVerifierPort,
@@ -82,12 +86,19 @@ export interface ConfigurableKnowledgeVerifierPort
   isConfigured(settings?: { provider?: string; model?: string }): boolean;
 }
 
+export interface InfraIacGeneratorPort {
+  createBundle(plan: AgentInfraPlan): InfraIacBundle;
+}
+
 export interface BuilderWorkflowDependencies {
   planner: BuilderPlannerPort;
   embeddings: EmbeddingPort;
   ingestion: DocumentIngestionPort;
   knowledgeStore: KnowledgeStorePort;
   databaseProvisioner: DatabaseProvisionerPort;
+  infraPlanner: InfraPlannerPort;
+  infraProvisioner: InfraProvisionerPort;
+  infraIacGenerator: InfraIacGeneratorPort;
   research: ConfigurableKnowledgeResearchPort;
   knowledgeVerifier?: ConfigurableKnowledgeVerifierPort;
   knowledgeVerificationPasses: number;

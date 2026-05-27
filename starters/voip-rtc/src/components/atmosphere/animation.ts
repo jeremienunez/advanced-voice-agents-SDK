@@ -1,7 +1,20 @@
+import {
+  type AtmosphereMode,
+  resolveOrbAnchor,
+} from "./anchor.js";
 import { getParticleRgb } from "./colors.js";
 import { createParticles, isFormTarget } from "./particles.js";
 
-export function runAtmosphere(canvas: HTMLCanvasElement): () => void {
+export type { AtmosphereMode } from "./anchor.js";
+
+interface AtmosphereOptions {
+  mode?: AtmosphereMode;
+}
+
+export function runAtmosphere(
+  canvas: HTMLCanvasElement,
+  options: AtmosphereOptions = {},
+): () => void {
   const ctx = canvas.getContext("2d");
   if (!ctx) return () => {};
 
@@ -61,24 +74,24 @@ export function runAtmosphere(canvas: HTMLCanvasElement): () => void {
     speedMultiplier += (targetSpeed - speedMultiplier) * 0.05;
     typingEnergy *= 0.94;
     const currentSpeed = speedMultiplier + typingEnergy * 1.6;
-    const time = Date.now() * 0.0005;
+    const time = Date.now() * 0.00072;
 
     phaseTimer += 1;
-    if (orbPhase === "boids" && phaseTimer > 720) {
+    if (orbPhase === "boids" && phaseTimer > 260) {
       orbPhase = "entering";
       phaseTimer = 0;
     } else if (orbPhase === "entering") {
-      orbTransition += 0.012;
+      orbTransition += 0.022;
       if (orbTransition >= 1) {
         orbTransition = 1;
         orbPhase = "spinning";
         phaseTimer = 0;
       }
-    } else if (orbPhase === "spinning" && phaseTimer > 260) {
+    } else if (orbPhase === "spinning" && phaseTimer > 170) {
       orbPhase = "exiting";
       phaseTimer = 0;
     } else if (orbPhase === "exiting") {
-      orbTransition -= 0.012;
+      orbTransition -= 0.018;
       if (orbTransition <= 0) {
         orbTransition = 0;
         orbPhase = "boids";
@@ -148,23 +161,23 @@ export function runAtmosphere(canvas: HTMLCanvasElement): () => void {
         Math.cos(particle.y * 0.003 + time) *
         Math.PI *
         2;
-      particle.vx += Math.cos(flowAngle) * 0.055 * (1 - orbTransition);
-      particle.vy += Math.sin(flowAngle) * 0.055 * (1 - orbTransition);
+      particle.vx += Math.cos(flowAngle) * 0.074 * (1 - orbTransition);
+      particle.vy += Math.sin(flowAngle) * 0.074 * (1 - orbTransition);
 
       const phi = Math.acos(1 - (2 * (i + 0.5)) / particleCount);
       const theta = Math.PI * (1 + Math.sqrt(5)) * (i + 0.5);
-      const radius = Math.min(width, height) * 0.23;
+      const anchor = resolveOrbAnchor(width, height, options.mode);
+      const radius = Math.min(width, height) * anchor.radiusRatio;
       const sx = radius * Math.sin(phi) * Math.cos(theta);
       const sy = radius * Math.sin(phi) * Math.sin(theta);
       const sz = radius * Math.cos(phi);
-      const rotY = time * 0.45;
-      const rotX = Math.sin(time * 0.25) * 0.35;
+      const rotY = time * 0.72;
+      const rotX = Math.sin(time * 0.42) * 0.38;
       const rx = sx * Math.cos(rotY) - sz * Math.sin(rotY);
       const rz = sx * Math.sin(rotY) + sz * Math.cos(rotY);
       const ry = sy * Math.cos(rotX) - rz * Math.sin(rotX);
-      const cx = width >= 1024 ? width * 0.38 : width * 0.5;
-      const targetX = cx + rx;
-      const targetY = height * 0.5 + ry;
+      const targetX = anchor.x + rx;
+      const targetY = anchor.y + ry;
 
       if (orbTransition > 0) {
         particle.vx += (targetX - particle.x) * 0.075 * orbTransition;
@@ -253,7 +266,7 @@ function renderParticle(
 
   const rgb = getParticleRgb(width, particle.x, particle.colorType, particle.accentSubtype);
   const nodeAlpha = particle.alpha * (0.85 + typingEnergy * 0.5);
-  const alphaMultiplier = 1.55 - (1.55 - 1) * rgb.t;
+  const alphaMultiplier = 1.2 - (1.2 - 1) * rgb.t;
   const finalAlpha = Math.min(0.88, nodeAlpha * alphaMultiplier);
 
   ctx.beginPath();

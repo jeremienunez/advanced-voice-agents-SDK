@@ -44,7 +44,7 @@
   position: absolute;
   border-radius: 50%;
   filter: blur(80px);
-  opacity: 0.18;
+  opacity: 0.14;
   mix-blend-mode: multiply;
 }
 
@@ -52,8 +52,8 @@
   width: 350px;
   height: 350px;
   background: #4285f4;
-  top: -50px;
-  left: -50px;
+  top: -170px;
+  left: -190px;
   animation: floatOrb1 25s ease-in-out infinite alternate;
 }
 
@@ -61,8 +61,8 @@
   width: 400px;
   height: 400px;
   background: #34a853;
-  bottom: -100px;
-  right: -50px;
+  bottom: -190px;
+  right: -210px;
   animation: floatOrb2 30s ease-in-out infinite alternate;
 }
 
@@ -70,8 +70,8 @@
   width: 300px;
   height: 300px;
   background: #fbbc05;
-  top: 40%;
-  left: 30%;
+  top: 32%;
+  right: -145px;
   animation: floatOrb3 22s ease-in-out infinite alternate;
 }
 

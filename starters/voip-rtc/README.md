@@ -51,6 +51,73 @@ The builder harness exposes model profiles by role:
 | `builder.researcher` | autonomous budget-aware research briefs | DeepSeek, Qwen, Kimi |
 | `builder.verifier` | teacher checks and follow-up query generation | DeepSeek, Qwen, Kimi, Gemini |
 
+## Builder Infra Plan
+
+Database planning now also creates `draft.infraPlan`. The onboarding script can
+turn that contract into real Kubernetes resources on a local K3s cluster.
+
+```mermaid
+flowchart LR
+  Draft[Agent draft] --> DB[DatabaseBuildPlan]
+  DB --> Infra[AgentInfraPlan]
+  Infra --> PG[Postgres pgvector]
+  Infra -. optional .-> Milvus[Milvus]
+  Infra -. optional .-> Graph[Graph DB]
+  Infra -. optional .-> Redis[Redis]
+```
+
+Intent routing rules are intentionally simple in this slice:
+
+- Postgres/pgvector is always planned as `postgres-primary`.
+- Milvus appears when `BUILDER_VECTOR_BACKEND=milvus`, `MILVUS_URL` is set, or
+  the intent looks vector/scale heavy.
+- Graph appears when the knowledge plan enables KG, graph env is present, or
+  the intent talks about entities/relationships.
+- Redis appears when `REDIS_URL` is set or the intent asks for cache/session
+  state.
+- `BUILDER_INFRA_COMPUTE_TARGET`, `BUILDER_INFRA_ISOLATION`, and
+  `BUILDER_INFRA_PROVISIONING_MODE` prepare the VM/K3s/Kubernetes/IaC path.
+
+When an infra plan is valid, the starter attaches an `iac` bundle to the draft:
+
+| Target | Generated artifacts |
+| --- | --- |
+| `local` | `agent-infra.plan.json`, `local/README.txt` |
+| `vm` | `agent-infra.plan.json`, `vm/agent.auto.tfvars.json`, `vm/cloud-init.yaml` |
+| `k3s` | namespace/config/network YAML plus `k3s/agent.auto.tfvars.json` |
+| `kubernetes` | namespace/config/network YAML plus `kubernetes/agent.auto.tfvars.json` |
+| `managed` | `agent-infra.plan.json`, `managed/agent.auto.tfvars.json` |
+
+These files contain secret names, not secret values. `pnpm run infra:apply`
+writes them under `.builder-state/iac`, creates or reuses a Docker-backed K3s
+cluster, applies the K3s manifests with `kubectl`, and verifies the resulting
+namespace, ConfigMap, and NetworkPolicy.
+
+The browser starter opens on `Onboarding` before Builder or RTC Lab. It checks
+Docker, kubectl, K3s readiness, Terraform/OpenTofu availability, writes
+allowlisted runtime/auth/infra values to ignored `.env.local`, and guides
+non-dev users through preview, local apply, and status checks. Destructive
+cleanup is kept behind an advanced confirmation. The form also warns when the
+runtime is missing at least one Gemini/OpenAI voice key, at least one
+DeepSeek/Qwen builder key, or the database plus embedding keys needed for RAG.
+
+Onboarding infra commands:
+
+```bash
+pnpm run infra:plan
+pnpm run infra:apply
+pnpm run infra:status
+pnpm run infra:destroy
+```
+
+Useful apply env vars:
+
+- `BUILDER_INFRA_APPLY_DRIVER=dev-local` keeps onboarding in plan-only dev mode.
+- `BUILDER_INFRA_APPLY_DRIVER=k3s-docker` creates local K3s through Docker.
+- `BUILDER_INFRA_APPLY_DRIVER=kubectl` applies to the active kubectl context.
+- `BUILDER_INFRA_K3S_IMAGE` defaults to `rancher/k3s:v1.31.5-k3s1`.
+- `BUILDER_INFRA_K3S_PORT` defaults to `16443`.
+
 ## Run
 
 ```bash
@@ -59,6 +126,9 @@ pnpm --filter @voiceagentsdk/starter-voip-rtc dev
 ```
 
 Open `http://localhost:5177`.
+
+The first screen is the guided onboarding flow. Use `Launchpad` after the local
+checks and required settings are clear.
 
 The server listens on `http://localhost:8787` by default and exposes:
 
@@ -74,11 +144,14 @@ The server listens on `http://localhost:8787` by default and exposes:
 | `GET /config` | Runtime providers, models, voices, and audio contracts. |
 | `GET /voice/ws` | Browser voice WebSocket endpoint. |
 | `GET /builder/config` | Builder provider/tool availability. |
+| `GET /builder/onboarding` | Dependency checks plus redacted `.env.local` state. |
 | `GET /builder/session` | Active compiled builder session. |
 | `GET /builder/agents` | Agent bank. |
 | `POST /builder/prompt-plan` | Create a draft from identity and intent. |
 | `POST /builder/autonomous-knowledge` | Research, plan, provision, compile knowledge. |
 | `POST /builder/compile-agent` | Compose final prompt and activate the agent. |
+| `POST /builder/onboarding/env` | Save allowlisted onboarding keys to `.env.local`. |
+| `POST /builder/onboarding/infra/:action` | Run `plan`, `apply`, `status`, or `destroy`. |
 
 ## Runtime Configuration
 
@@ -120,14 +193,23 @@ Builder and knowledge env vars:
 - `VOYAGE_EMBEDDING_MODEL`
 - `VOYAGE_EMBEDDING_DIMENSIONS`
 - `DATABASE_URL`
+- `BUILDER_INFRA_COMPUTE_TARGET`
+- `BUILDER_INFRA_ISOLATION`
+- `BUILDER_INFRA_PROVISIONING_MODE`
+- `BUILDER_VECTOR_BACKEND`
+- `MILVUS_URL` or `MILVUS_ADDRESS`
+- `NEO4J_URI` or `GRAPH_DATABASE_URL`
+- `REDIS_URL`
 
 ## Commands
 
 ```bash
 pnpm --filter @voiceagentsdk/starter-voip-rtc dev
+pnpm --filter @voiceagentsdk/starter-voip-rtc infra:apply
 pnpm --filter @voiceagentsdk/starter-voip-rtc typecheck
 pnpm --filter @voiceagentsdk/starter-voip-rtc harness:route-wines
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:knowledge-tool
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-plan
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:rtc-e2e
 ```
 

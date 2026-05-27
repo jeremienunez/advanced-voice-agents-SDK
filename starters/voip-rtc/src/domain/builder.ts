@@ -1,13 +1,12 @@
-import type {
-  ToolBuildPlan,
-  ToolValidationReport,
-} from "./builder-tooling.js";
+import type { ToolBuildPlan, ToolValidationReport } from "./builder-tooling.js";
+import type { AgentInfraPlan } from "./builder-infra.js";
 
 export type {
   ToolBuildContract,
   ToolBuildPlan,
   ToolValidationReport,
 } from "./builder-tooling.js";
+export type { AgentInfraPlan } from "./builder-infra.js";
 
 export interface ToolRegistryItem {
   name: string;
@@ -192,6 +191,7 @@ export interface AgentBuildDraft {
     warnings?: string[];
   };
   databasePlan?: DatabaseBuildPlan;
+  infraPlan?: AgentInfraPlan;
   toolBuildPlan?: ToolBuildPlan;
   toolValidation?: ToolValidationReport;
   toolRegistry: ToolRegistryItem[];
@@ -295,4 +295,4 @@ export interface BuilderConfig {
     verification: BuilderProviderOption[];
   };
 }
-export type AppMode = "hub" | "builder" | "agents" | "rtc";
+export type AppMode = "hub" | "builder" | "agents" | "rtc" | "onboarding";

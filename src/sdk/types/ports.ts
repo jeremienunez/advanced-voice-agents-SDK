@@ -17,6 +17,12 @@ import type {
   LlmTask,
   LlmTaskResult,
 } from "./llm.js";
+import type {
+  AgentInfraPlan,
+  DatabaseBackendPlan,
+  InfraResourceRef,
+  KnowledgeBackendPlan,
+} from "./infra.js";
 import type { ToolBuildPlan, ToolValidationReport } from "./tooling.js";
 import type {
   AgentBuildDraft,
@@ -57,6 +63,13 @@ export interface DatabaseBuildRequest {
   draft: AgentBuildDraft;
   documents: KnowledgeDocument[];
   knowledgePlan?: KnowledgeBuildPlan;
+}
+
+export interface InfraPlanRequest {
+  draft: AgentBuildDraft;
+  documents?: KnowledgeDocument[];
+  knowledgePlan?: KnowledgeBuildPlan;
+  databasePlan?: DatabaseBuildPlan;
 }
 
 export interface FinalPromptBuildRequest {
@@ -108,6 +121,28 @@ export interface KnowledgeVerifierPort {
 
 export interface DatabasePlannerPort {
   createDatabasePlan(input: DatabaseBuildRequest): Promise<DatabaseBuildPlan>;
+}
+
+export interface InfraPlannerPort {
+  createInfraPlan(input: InfraPlanRequest): Promise<AgentInfraPlan> | AgentInfraPlan;
+}
+
+export interface DatabaseBackendResolverPort {
+  resolveDatabaseBackend(input: InfraPlanRequest): DatabaseBackendPlan;
+}
+
+export interface KnowledgeBackendResolveResult {
+  defaultBackendId: string;
+  backends: KnowledgeBackendPlan[];
+  reasons: string[];
+  warnings?: string[];
+}
+
+export interface KnowledgeBackendPort {
+  id: string;
+  plan: KnowledgeBackendPlan;
+  isConfigured(): boolean;
+  ensure?(): Promise<void>;
 }
 
 export interface EmbeddingInput {
@@ -201,6 +236,11 @@ export interface DatabaseProvisionInput {
   plan: DatabaseBuildPlan;
 }
 
+export interface InfraProvisionInput {
+  draft: AgentBuildDraft;
+  plan: AgentInfraPlan;
+}
+
 export interface DatabaseProvisionResult {
   status: DatabaseBuildStatus;
   schemaName: string;
@@ -209,10 +249,31 @@ export interface DatabaseProvisionResult {
   appliedAt: string;
 }
 
+export interface InfraProvisionResult {
+  status: AgentInfraPlan["status"];
+  planId: string;
+  resources: InfraResourceRef[];
+  warnings: string[];
+  appliedAt?: string;
+}
+
+export interface InfraProvisionValidation {
+  ok: boolean;
+  status: AgentInfraPlan["status"];
+  errors: string[];
+  warnings: string[];
+}
+
 export interface DatabaseProvisionerPort {
   isConfigured(): boolean;
   validate(input: DatabaseProvisionInput): DatabaseProvisionValidation;
   apply(input: DatabaseProvisionInput): Promise<DatabaseProvisionResult>;
+}
+
+export interface InfraProvisionerPort {
+  isConfigured(): boolean;
+  validate(input: InfraProvisionInput): InfraProvisionValidation;
+  apply(input: InfraProvisionInput): Promise<InfraProvisionResult>;
 }
 
 export interface DocumentIngestionInput {

@@ -9,13 +9,13 @@ import type {
 } from "./domain/builder.js";
 import { AgentBank } from "./features/agent-bank/AgentBank.js";
 import { BuilderLab } from "./features/builder/BuilderLab.js";
+import { OnboardingConfig } from "./features/onboarding/OnboardingConfig.js";
 import { RtcLab } from "./features/rtc/RtcLab.js";
 import { SelectSpace } from "./features/hub/SelectSpace.js";
 import { useBuilderSessionRestore } from "./hooks/useBuilderSessionRestore.js";
-import { WebGLShader } from "./features/builder/components/WebGLShader.js";
 
 export function App() {
-  const [mode, setMode] = useState<AppMode>("hub");
+  const [mode, setMode] = useState<AppMode>("onboarding");
   const [compiledAgent, setCompiledAgent] =
     useState<CompiledAgentSummary | null>(null);
   const [restoredDraft, setRestoredDraft] = useState<AgentBuildDraft | null>(
@@ -30,6 +30,10 @@ export function App() {
     setMode("rtc");
   }, []);
 
+  const restoreCompiledAgent = useCallback((artifact: CompiledAgentSummary) => {
+    setCompiledAgent(artifact);
+  }, []);
+
   const handleCompiled = useCallback(
     (artifact: CompiledAgentSummary) => {
       setAgentBankRefreshKey((current) => current + 1);
@@ -40,13 +44,12 @@ export function App() {
 
   useBuilderSessionRestore({
     apiBase: builderApiBase,
-    onCompiled: loadRtcAgent,
+    onCompiled: restoreCompiledAgent,
   });
 
   return (
     <main className="appFrame">
-      <Atmosphere />
-      <WebGLShader />
+      <Atmosphere mode={mode} />
       {mode === "hub" ? (
         <SelectSpace
           apiBase={builderApiBase}
@@ -65,7 +68,9 @@ export function App() {
             id={`panel-${mode}`}
             role="tabpanel"
           >
-            {mode === "builder" ? (
+            {mode === "onboarding" ? (
+              <OnboardingConfig apiBase={builderApiBase} />
+            ) : mode === "builder" ? (
               <BuilderLab
                 apiBase={builderApiBase}
                 restoredDraft={restoredDraft}

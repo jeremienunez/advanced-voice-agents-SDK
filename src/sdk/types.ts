@@ -2,6 +2,8 @@ export * from "./types/json.js";
 export * from "./types/core.js";
 export * from "./types/store.js";
 export * from "./types/llm.js";
+export * from "./types/infra.js";
+export * from "./types/iac.js";
 export * from "./types/tooling.js";
 export * from "./types/builder.js";
 export * from "./types/draft.js";

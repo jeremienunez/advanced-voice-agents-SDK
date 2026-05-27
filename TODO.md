@@ -1,11 +1,25 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current commit title candidate: `feat: add provider agnostic builder llm harness`
+Current commit title candidate: `feat: add actionable infra onboarding`
 
 ## Current Verification - 2026-05-27
 
 - [x] `pnpm run typecheck`
 - [x] `pnpm --filter @voiceagentsdk/starter-voip-rtc typecheck`
+  - rerun after onboarding became the first screen.
+- [x] `pnpm run test:infra-plan`
+- [x] `pnpm run infra:plan`
+- [x] `pnpm run infra:apply`
+  - result: applied to Docker-backed K3s namespace `agent-draft-onboarding`.
+- [x] `pnpm run infra:status`
+  - result: verified namespace, ConfigMap, and NetworkPolicy.
+- [x] `curl http://127.0.0.1:18888/builder/onboarding`
+  - result: returned dependency checks and redacted env-store state.
+- [x] `POST /builder/onboarding/infra/status`
+  - result: verified the existing Docker-backed K3s apply through the UI API.
+- [x] Browser check `http://127.0.0.1:5178/`
+  - result: first screen is `Onboarding`, abort noise is gone, destructive
+    cleanup is hidden by default.
 - [x] `pnpm run audit:sdk-boundary`
 - [x] `pnpm run audit:imports`
 - [x] `pnpm run audit:tool-contracts`
@@ -13,15 +27,14 @@ Current commit title candidate: `feat: add provider agnostic builder llm harness
 - [x] `pnpm run audit:loc`
 - [x] `git diff --check`
 - [x] `pnpm run pack:dry-run`
-- [x] `pnpm audit --json`
-  - result: 0 info, 0 low, 0 moderate, 0 high, 0 critical
-- [x] `pnpm audit --dev --json`
-  - result: 0 info, 0 low, 0 moderate, 0 high, 0 critical
-- [x] `curl http://127.0.0.1:8787/config`
-  - runtime config endpoint is reachable.
-- [x] `curl http://127.0.0.1:8787/builder/config`
-  - builder config endpoint is reachable.
-- [x] Reconcile historical TODO checkboxes against source files.
+- [ ] `pnpm audit --json`
+  - not re-run in this infra slice; no dependency changes.
+- [ ] `pnpm audit --dev --json`
+  - not re-run in this infra slice; no dependency changes.
+- [ ] `curl http://127.0.0.1:8787/config`
+  - not re-run in this infra slice; dev server was not started.
+- [ ] `curl http://127.0.0.1:8787/builder/config`
+  - not re-run in this infra slice; dev server was not started.
 - [ ] Run `pnpm install` before the next runtime demo if local
   `node_modules` predates the current lockfile.
 
@@ -57,6 +70,62 @@ Current commit title candidate: `feat: add provider agnostic builder llm harness
   - research document/checkpoint creation;
   - verifier verdict normalization;
   - resolver role selection and requested-provider fallback.
+
+## Architecture Backlog - Agent Infra / DB Harness
+
+- [x] Add SDK-level infra contracts:
+  - `AgentInfraPlan`;
+  - compute target;
+  - isolation mode;
+  - provisioning mode;
+  - database backend plan;
+  - knowledge backend plan;
+  - migration and security policy metadata.
+- [x] Attach `infraPlan` to `AgentBuildDraft` and preserve it through draft
+  mutation.
+- [x] Add starter `IntentInfraPlanner` that keeps Postgres/pgvector as source
+  of truth and routes optional Milvus, graph, and Redis slots by env/intent.
+- [x] Generate and save `infraPlan` during database planning and autonomous
+  knowledge flows.
+- [x] Surface the infra plan in the builder database panel.
+- [x] Document infra env vars in the root and starter READMEs.
+- [x] Add fake-planner tests for:
+  - default Postgres plan;
+  - explicit Milvus selection;
+  - KG/graph plan;
+  - Redis cache plan.
+- [x] Add `pnpm run test:infra-plan`.
+- [x] Add an `InfraProvisionerPort` implementation that can validate plans
+  without applying cloud resources.
+- [x] Add plan-only IaC bundle output for local, VM, K3s, Kubernetes, and
+  managed targets.
+- [x] Add filesystem writer/export command for generated IaC bundles.
+- [x] Add actionable onboarding apply command:
+  - Docker-backed K3s creation/reuse;
+  - kubectl manifest apply;
+  - status verification;
+  - local cluster destroy command.
+- [x] Add solution-owned onboarding UI:
+  - checks Docker, kubectl, K3s readiness, Terraform, and OpenTofu;
+  - writes allowlisted voice/auth/infra keys to ignored `.env.local`;
+  - runs infra `plan`, `apply`, `status`, and `destroy` from the starter.
+- [x] Make onboarding the default non-dev entrypoint:
+  - app starts on `Onboarding`;
+  - restored compiled agents no longer auto-switch the first view to RTC;
+  - safe guided actions show preview/apply/status first;
+  - destructive cleanup is hidden behind advanced confirmation.
+- [x] Add form-level onboarding key warnings:
+  - at least one Gemini/OpenAI key for voice runtime;
+  - at least one DeepSeek/Qwen key for builder research/planning;
+  - `DATABASE_URL` plus `VOYAGE_API_KEY` for RAG compilation.
+- [x] Replace long onboarding lists with drawers:
+  - env keys grouped by Voice, Builder, Knowledge, Infra, and Auth;
+  - local prerequisite checks collapsed when healthy.
+- [ ] Add real OpenTofu/cloud-init external runner integration beyond K3s
+  manifest apply.
+- [ ] Add least-privilege Postgres role creation and per-agent credential refs.
+- [ ] Decide whether Milvus/graph stay starter adapters or graduate into
+  reusable SDK adapter packages.
 
 ## Immediate Risk Backlog - 2026-05-27
 
@@ -121,10 +190,10 @@ Current commit title candidate: `feat: add provider agnostic builder llm harness
   - no selected tool without an executable runtime binding;
   - no compiled runtime artifact that claims executable tools but only has
     serializable manifests.
-- [ ] Align README starter URL docs with current defaults:
+- [x] Align README starter URL docs with current defaults:
   - `.env.example` and client defaults use `127.0.0.1:8787`;
-  - Vite defaults to localhost dev client unless configured;
-  - README still references `http://localhost:5177`.
+  - Vite config defaults to `http://localhost:5177`;
+  - `VOICE_ALLOWED_ORIGINS` example now includes port `5177`.
 
 ## Sprint 1 - Clean Core Base
 

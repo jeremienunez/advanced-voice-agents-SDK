@@ -1,19 +1,9 @@
-import {
-  createAgentBuildDraftBuilder,
-  type DatabaseBuildPlan,
-  type EmbeddingInput,
-} from "@voiceagentsdk/core/sdk";
+import { createAgentBuildDraftBuilder, type DatabaseBuildPlan, type EmbeddingInput } from "@voiceagentsdk/core/sdk";
 import { chunkDocuments } from "./domain/knowledge.js";
-import {
-  compileArtifact,
-  promptPlanWithClarifications,
-} from "./domain/prompt.js";
+import { compileArtifact, promptPlanWithClarifications } from "./domain/prompt.js";
 import { toolInstructionsFromPlan } from "./domain/tooling/compile.js";
 import { createToolBuildPlan } from "./domain/tooling/contracts.js";
-import {
-  validatedToolPlan,
-  validateToolBuildPlan,
-} from "./domain/tooling/validation.js";
+import { validatedToolPlan, validateToolBuildPlan } from "./domain/tooling/validation.js";
 import { mutateDraft } from "./domain/drafts.js";
 import {
   normalizeKnowledgeDocuments,
@@ -23,15 +13,11 @@ import {
   readDocumentInput,
 } from "./request.js";
 import { normalizeResearchBudget } from "./domain/research.js";
-import {
-  resolveDraft,
-  requireDraft,
-  saveDraft,
-  setActiveDraft,
-} from "./state.js";
+import { resolveDraft, requireDraft, saveDraft, setActiveDraft } from "./state.js";
 import type { BuilderWorkflowDependencies } from "./types.js";
 import { asRecord, readString } from "./utils.js";
 import { buildEagerKnowledge } from "./eager-knowledge.js";
+import { createValidatedInfraPlan } from "./workflow-infra.js";
 
 export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
   return {
@@ -154,9 +140,19 @@ export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
         status: validation.ok ? "validated" : "failed",
         validationErrors: validation.errors,
       };
-      const nextDraft = mutateDraft(draft).databasePlan(nextPlan).build();
+      const infra = await createValidatedInfraPlan({
+        databasePlan: nextPlan,
+        deps,
+        documents,
+        draft,
+        knowledgePlan: draft.knowledgePlan,
+      });
+      const nextDraft = mutateDraft(draft)
+        .databasePlan(nextPlan)
+        .infraPlan(infra.plan)
+        .build();
       saveDraft(nextDraft);
-      return { draft: nextDraft, validation };
+      return { draft: nextDraft, infraValidation: infra.validation, validation };
     },
 
     async applyDatabase(body: unknown) {

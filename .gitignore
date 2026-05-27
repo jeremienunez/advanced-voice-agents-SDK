@@ -3,6 +3,7 @@ dist/
 coverage/
 *.tgz
 .codex
+.playwright-mcp/
 .env
 .env.*
 !.env.example

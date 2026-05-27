@@ -60,6 +60,13 @@
   box-shadow: 0 18px 70px rgba(15, 23, 42, 0.08);
 }
 
+.orbLoaderShader {
+  width: 96px;
+  height: 96px;
+  justify-self: end;
+  margin-bottom: 2px;
+}
+
 .loaderStatus > span,
 .loaderSteps span {
   color: var(--google-blue);

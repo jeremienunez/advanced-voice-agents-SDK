@@ -12,7 +12,12 @@
 @import "./features/builder/components/DatabaseInstancePanel.css";
 @import "./features/agent-bank/AgentBank.css";
 @import "./features/agent-bank/AgentCard.css";
+@import "./features/rtc/RtcLab.css";
 @import "./features/rtc/components/RtcPanels.css";
+@import "./features/onboarding/OnboardingConfig.css";
+@import "./features/onboarding/RequirementWarnings.css";
+@import "./features/onboarding/EnvDrawers.css";
+@import "./features/onboarding/GuidedInfraPanel.css";
 @import "./features/hub/SelectSpace.css";
 @import "./features/hub/SelectSpace.console.css";
 @import "./features/hub/SelectSpace.right.css";

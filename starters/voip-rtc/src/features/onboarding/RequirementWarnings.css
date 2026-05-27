@@ -1,0 +1,55 @@
+.requirementWarnings {
+  display: grid;
+  gap: 10px;
+}
+
+.requirementCard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px;
+  border: 1px solid var(--google-yellow);
+  border-radius: var(--radius-md);
+  background: var(--google-yellow-light);
+}
+
+.requirementCard.ok {
+  border-color: var(--google-green);
+  background: var(--google-green-light);
+}
+
+.requirementCard strong {
+  display: block;
+  color: var(--slate-900);
+  font-size: 13px;
+}
+
+.requirementCard p {
+  margin-top: 4px;
+  color: var(--slate-700);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.requirementCard span {
+  display: block;
+  margin-top: 6px;
+  color: var(--slate-500);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 11px;
+}
+
+.requirementCard a {
+  color: var(--google-blue);
+  font-size: 11px;
+  font-weight: 850;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+@media (max-width: 920px) {
+  .requirementCard {
+    grid-template-columns: 1fr;
+  }
+}

@@ -2,6 +2,7 @@ import { PlainTextDocumentIngestion } from "./adapters/document-ingestion.js";
 import { LlmKnowledgeResearch } from "./adapters/llm-knowledge-research.js";
 import { LlmKnowledgeVerifier } from "./adapters/llm-knowledge-verifier.js";
 import { LlmPromptPlanner } from "./adapters/llm-prompt-planner.js";
+import { PlannedInfraProvisioner } from "./adapters/planned-infra-provisioner.js";
 import { PostgresAgentDatabaseProvisioner } from "./adapters/postgres-database-provisioner.js";
 import { PostgresPgVectorKnowledgeStore } from "./adapters/postgres-knowledge-store.js";
 import { VoyageEmbeddingPort } from "./adapters/voyage-embeddings.js";
@@ -11,6 +12,8 @@ import {
   researchBudgetFromEnv,
   strategyLabels,
 } from "./catalog.js";
+import { IntentInfraPlanner } from "./domain/infra.js";
+import { PlanOnlyInfraIacGenerator } from "./domain/infra-iac.js";
 import { createBuilderLlmCatalog } from "./llm/profiles.js";
 import { AdaptiveLlmModelResolver } from "./llm/resolver.js";
 import { BuilderLlmTaskRunner } from "./llm/task-runner.js";
@@ -149,6 +152,18 @@ export function createBuilderServiceCompositionFromEnv(
       databaseProvisioner: new PostgresAgentDatabaseProvisioner({
         databaseUrl: env.DATABASE_URL,
       }),
+      infraPlanner: new IntentInfraPlanner({
+        computeTarget: env.BUILDER_INFRA_COMPUTE_TARGET,
+        databaseUrl: env.DATABASE_URL,
+        defaultVectorBackend: env.BUILDER_VECTOR_BACKEND,
+        graphUrl: env.NEO4J_URI ?? env.GRAPH_DATABASE_URL,
+        isolation: env.BUILDER_INFRA_ISOLATION,
+        milvusUrl: env.MILVUS_URL ?? env.MILVUS_ADDRESS,
+        provisioningMode: env.BUILDER_INFRA_PROVISIONING_MODE,
+        redisUrl: env.REDIS_URL,
+      }),
+      infraProvisioner: new PlannedInfraProvisioner(),
+      infraIacGenerator: new PlanOnlyInfraIacGenerator(),
       research: new LlmKnowledgeResearch({
         profiles: llmCatalog.profiles,
         runner: llmRunner,

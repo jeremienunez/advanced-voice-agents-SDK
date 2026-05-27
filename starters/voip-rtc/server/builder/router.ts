@@ -1,5 +1,6 @@
 import { builderAgentBankPayload, builderSessionPayload, requireDraft } from "./state.js";
 import { json } from "./http.js";
+import { routeOnboardingRequest } from "./onboarding/routes.js";
 import type { BuilderConfig, BuilderRouteResult } from "./types.js";
 import type { createBuilderWorkflows } from "./workflows.js";
 
@@ -41,6 +42,15 @@ export function createBuilderRouter(options: {
           if (!draftId) throw new Error("draftId is required");
           return {
             response: json({ draft: requireDraft(draftId) }, corsHeaders),
+          };
+        }
+
+        const onboarding = await routeOnboardingRequest(request, url);
+        if (onboarding) {
+          return {
+            response: json(onboarding.body, corsHeaders, {
+              status: onboarding.status,
+            }),
           };
         }
 

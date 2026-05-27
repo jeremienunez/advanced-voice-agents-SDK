@@ -1,5 +1,6 @@
 import type { BusyState } from "../../domain/builderProgress.js";
 import { AnimatedGradientBackground } from "./AnimatedGradientBackground.js";
+import { OrbLoaderShader } from "./OrbLoaderShader.js";
 
 export function ProcessingLoader({ state }: { state: BusyState }) {
   return (
@@ -13,6 +14,7 @@ export function ProcessingLoader({ state }: { state: BusyState }) {
         topOffset={18}
       />
       <div className="loaderStatus" aria-hidden="true">
+        <OrbLoaderShader />
         <span>Processing</span>
         <strong>{state.title}</strong>
         <div className="loaderSteps">

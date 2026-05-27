@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { StatusBadge } from "../../components/ui/StatusBadge.js";
 import type { CompiledAgentSummary } from "../../domain/builder.js";
 import { useRtcLab } from "../../hooks/useRtcLab.js";
@@ -43,8 +44,8 @@ export function RtcLab({
   );
 
   return (
-    <>
-      <section className="topbar">
+    <section className="rtcLab">
+      <section className="topbar rtcTopbar">
         <div>
           <p className="eyebrow">VoiceAgentSDK Starter</p>
           <h1>VOIP RTC Lab</h1>
@@ -57,56 +58,90 @@ export function RtcLab({
         <StatusBadge state={rtc.snapshot.state} />
       </section>
 
-      {renderVoiceStage("mobile-orb-slot")}
+      {renderVoiceStage("rtcCentralStage")}
 
-      <RtcControlPanel
-        wsUrl={rtc.wsUrl}
-        setWsUrl={rtc.setWsUrl}
-        provider={rtc.provider}
-        setProvider={rtc.setProvider}
-        model={rtc.model}
-        setModel={rtc.setModel}
-        voice={rtc.voice}
-        setVoice={rtc.setVoice}
-        audioMode={rtc.audioMode}
-        setAudioMode={rtc.setAudioMode}
-        providerOptions={rtc.providerOptions}
-        selectedProvider={rtc.selectedProvider}
-        isActive={rtc.isActive}
-        canStart={rtc.canStart}
-        isMuted={rtc.snapshot.isMuted}
-        onDiagnose={rtc.runMicrophoneDiagnostic}
-        onStart={rtc.startRtc}
-        onStop={() => rtc.client.disconnect()}
-        onToggleMute={() => rtc.client.toggleMute()}
-      />
-
-      <div className="jarvis-hud-layout">
-        {/* LEFT COLUMN : Session Metrics & Transcript */}
-        <div className="hud-column left">
-          <SessionPanel
-            snapshot={rtc.snapshot}
+      <section className="rtcDrawerDeck" aria-label="RTC lab drawers">
+        <RtcDrawer
+          title="Connection"
+          detail={`${rtc.provider} · ${rtc.snapshot.state}`}
+          defaultOpen
+        >
+          <RtcControlPanel
+            wsUrl={rtc.wsUrl}
+            setWsUrl={rtc.setWsUrl}
+            provider={rtc.provider}
+            setProvider={rtc.setProvider}
+            model={rtc.model}
+            setModel={rtc.setModel}
+            voice={rtc.voice}
+            setVoice={rtc.setVoice}
             audioMode={rtc.audioMode}
-            microphoneDiagnostic={rtc.microphoneDiagnostic}
-            configError={rtc.configError}
+            setAudioMode={rtc.setAudioMode}
+            providerOptions={rtc.providerOptions}
             selectedProvider={rtc.selectedProvider}
+            isActive={rtc.isActive}
+            canStart={rtc.canStart}
+            isMuted={rtc.snapshot.isMuted}
+            onDiagnose={rtc.runMicrophoneDiagnostic}
+            onStart={rtc.startRtc}
+            onStop={() => rtc.client.disconnect()}
+            onToggleMute={() => rtc.client.toggleMute()}
           />
-          <TranscriptPanel snapshot={rtc.snapshot} />
-        </div>
+        </RtcDrawer>
 
-        {/* CENTER : 3D ORB & Live Transcript Bubble */}
-        {renderVoiceStage("hud-centerpiece")}
+        <div className="rtcDrawerGrid">
+          <RtcDrawer title="Session" detail={rtc.snapshot.sessionId ?? "idle"}>
+            <SessionPanel
+              snapshot={rtc.snapshot}
+              audioMode={rtc.audioMode}
+              microphoneDiagnostic={rtc.microphoneDiagnostic}
+              configError={rtc.configError}
+              selectedProvider={rtc.selectedProvider}
+            />
+          </RtcDrawer>
 
-        {/* RIGHT COLUMN : Audio Contract & Events Log */}
-        <div className="hud-column right">
-          <AudioContractPanel
-            audioMode={rtc.audioMode}
-            runtimeConfig={rtc.runtimeConfig}
-            selectedProvider={rtc.selectedProvider}
-          />
-          <EventsPanel events={rtc.events} />
+          <RtcDrawer
+            title="Transcript"
+            detail={`${rtc.snapshot.transcript.length} lines`}
+          >
+            <TranscriptPanel snapshot={rtc.snapshot} />
+          </RtcDrawer>
+
+          <RtcDrawer title="Audio contract" detail={rtc.audioMode}>
+            <AudioContractPanel
+              audioMode={rtc.audioMode}
+              runtimeConfig={rtc.runtimeConfig}
+              selectedProvider={rtc.selectedProvider}
+            />
+          </RtcDrawer>
+
+          <RtcDrawer title="SDK events" detail={`${rtc.events.length} events`}>
+            <EventsPanel events={rtc.events} />
+          </RtcDrawer>
         </div>
-      </div>
-    </>
+      </section>
+    </section>
+  );
+}
+
+function RtcDrawer({
+  title,
+  detail,
+  children,
+  defaultOpen = false,
+}: {
+  title: string;
+  detail: string;
+  children: ReactNode;
+  defaultOpen?: boolean;
+}) {
+  return (
+    <details className="rtcDrawer" open={defaultOpen}>
+      <summary>
+        <span>{title}</span>
+        <small>{detail}</small>
+      </summary>
+      <div className="rtcDrawerBody">{children}</div>
+    </details>
   );
 }

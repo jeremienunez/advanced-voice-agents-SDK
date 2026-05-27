@@ -68,6 +68,44 @@ export function DatabaseInstancePanel({
             />
           </div>
 
+          {draft.infraPlan ? (
+            <div className="infraPlan">
+              <h4 style={{ margin: '0 0 10px', fontSize: '11px', color: 'var(--slate-500)', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+                Plan Infra Agent
+              </h4>
+              <div className="strategySummary">
+                <Metric label="Compute" value={draft.infraPlan.computeTarget} />
+                <Metric label="Isolation" value={draft.infraPlan.isolation} />
+                <Metric label="Provisioning" value={draft.infraPlan.provisioningMode} />
+                <Metric label="Backend par Défaut" value={draft.infraPlan.defaultBackendId} />
+              </div>
+              <div className="infraBackendList">
+                {draft.infraPlan.knowledgeBackends.map((backend) => (
+                  <div key={backend.id} className="infraBackend">
+                    <strong>{backend.provider}</strong>
+                    <span>{backend.role}</span>
+                    <span>{backend.configured ? "configuré" : "à configurer"}</span>
+                  </div>
+                ))}
+              </div>
+              {draft.infraPlan.iac ? (
+                <div className="iacBundle">
+                  <strong>IaC</strong>
+                  <span>{draft.infraPlan.iac.target}</span>
+                  <span>{draft.infraPlan.iac.artifacts.length} artefacts</span>
+                  <code>{draft.infraPlan.iac.artifacts[0]?.path}</code>
+                </div>
+              ) : null}
+              {draft.infraPlan.warnings?.length ? (
+                <div className="infraWarnings">
+                  {draft.infraPlan.warnings.map((warning) => (
+                    <p key={warning}>{warning}</p>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
           {/* Database visual schema card */}
           <div className="db-schema-card">
             <h4 style={{ margin: '0 0 10px', fontSize: '11px', color: 'var(--slate-500)', textTransform: 'uppercase', letterSpacing: '0.8px' }}>

@@ -1,0 +1,84 @@
+.envDrawer,
+.checkDrawer {
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-md);
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.envDrawer[open],
+.checkDrawer[open] {
+  box-shadow: var(--shadow-sm);
+}
+
+.envDrawer.attention {
+  border-color: var(--google-yellow);
+}
+
+.envDrawerSummary,
+.checkDrawer summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 0 14px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.envDrawerSummary::-webkit-details-marker,
+.checkDrawer summary::-webkit-details-marker {
+  display: none;
+}
+
+.envDrawerSummary::after,
+.checkDrawer summary::after {
+  content: "+";
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border: 1px solid var(--slate-200);
+  border-radius: 999px;
+  color: var(--slate-500);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.envDrawer[open] > .envDrawerSummary::after,
+.checkDrawer[open] > summary::after {
+  content: "-";
+}
+
+.envDrawerSummary span,
+.checkDrawer summary span {
+  color: var(--slate-800);
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+.envDrawerSummary small,
+.checkDrawer summary small {
+  margin-left: auto;
+  color: var(--slate-500);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.envDrawer.attention .envDrawerSummary small {
+  color: var(--google-yellow);
+}
+
+.envDrawerBody {
+  display: grid;
+  padding: 0 14px 8px;
+  border-top: 1px solid var(--slate-100);
+}
+
+.checkDrawer .dependencyList {
+  padding: 0 14px 8px;
+  border-top: 1px solid var(--slate-100);
+}

@@ -57,6 +57,76 @@
   box-shadow: var(--shadow-md);
 }
 
+.infraPlan {
+  margin-top: 20px;
+  padding: 18px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-md);
+}
+
+.infraBackendList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.infraBackend {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-sm);
+  color: var(--slate-600);
+  font-size: 12px;
+}
+
+.infraBackend strong {
+  color: var(--slate-900);
+}
+
+.iacBundle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 14px;
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-sm);
+  color: var(--slate-600);
+  font-size: 12px;
+}
+
+.iacBundle strong {
+  color: var(--slate-900);
+}
+
+.iacBundle code {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: var(--google-blue);
+}
+
+.infraWarnings {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.infraWarnings p {
+  margin: 0;
+  color: var(--slate-700);
+  background: var(--google-yellow-light);
+  border-left: 3px solid var(--google-yellow);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 12px;
+}
+
 .error-box {
   color: var(--google-red);
   background: var(--google-red-light);

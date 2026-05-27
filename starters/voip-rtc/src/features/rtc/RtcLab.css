@@ -1,0 +1,165 @@
+.rtcLab {
+  display: grid;
+  gap: 18px;
+  padding-bottom: 40px;
+}
+
+.rtcTopbar {
+  border-radius: var(--radius-lg);
+}
+
+.rtcCentralStage {
+  display: flex;
+  min-height: clamp(480px, 58vh, 620px);
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  isolation: isolate;
+}
+
+.rtcCentralStage::before {
+  content: "";
+  position: absolute;
+  inset: 8% 14%;
+  z-index: -1;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 42% 28%, rgba(255, 255, 255, 0.9), transparent 20%),
+    radial-gradient(circle, rgba(66, 133, 244, 0.055), rgba(52, 168, 83, 0.035) 45%, transparent 72%);
+  filter: blur(34px);
+}
+
+.rtcDrawerDeck,
+.rtcDrawerGrid {
+  display: grid;
+  gap: 12px;
+}
+
+.rtcDrawerGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.rtcDrawer {
+  overflow: hidden;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: var(--shadow-sm);
+}
+
+.rtcDrawer[open] {
+  box-shadow: var(--shadow-md);
+}
+
+.rtcDrawer summary {
+  display: flex;
+  min-height: 50px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 16px;
+  cursor: pointer;
+  list-style: none;
+  position: relative;
+}
+
+.rtcDrawer summary::-webkit-details-marker {
+  display: none;
+}
+
+.rtcDrawer summary::after {
+  content: "+";
+  display: grid;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--slate-200);
+  border-radius: 999px;
+  color: var(--slate-500);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.rtcDrawer[open] > summary::after {
+  content: "-";
+}
+
+.rtcDrawer summary span {
+  color: var(--slate-800);
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+.rtcDrawer summary small {
+  margin-left: auto;
+  overflow: hidden;
+  color: var(--slate-500);
+  font-size: 11px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rtcDrawerBody {
+  padding: 16px;
+  border-top: 1px solid var(--slate-100);
+}
+
+.rtcDrawerBody > .panel,
+.rtcDrawerBody > .controlPanel {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.rtcDrawerBody > .panel > h2 {
+  display: none;
+}
+
+.rtcDrawerBody > .controlPanel {
+  grid-template-columns: minmax(260px, 1.2fr) minmax(140px, 0.6fr) minmax(220px, 0.9fr) minmax(120px, 0.45fr);
+}
+
+@media (max-width: 1200px) {
+  .rtcDrawerBody > .controlPanel {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .rtcLab {
+    gap: 14px;
+  }
+
+  .rtcCentralStage {
+    min-height: clamp(360px, 54vh, 500px);
+  }
+
+  .rtcDrawerGrid,
+  .rtcDrawerBody > .controlPanel {
+    grid-template-columns: 1fr;
+  }
+
+  .rtcDrawer summary {
+    min-height: 62px;
+    align-items: flex-start;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .rtcDrawer summary::after {
+    position: absolute;
+    right: 16px;
+  }
+
+  .rtcDrawer summary small {
+    max-width: calc(100% - 36px);
+    margin-left: 0;
+  }
+}

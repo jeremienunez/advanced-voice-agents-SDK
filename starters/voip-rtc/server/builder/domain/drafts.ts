@@ -14,6 +14,7 @@ export function mutateDraft(draft: AgentBuildDraft) {
   if (draft.promptPlan) builder.promptPlan(draft.promptPlan);
   if (draft.knowledgePlan) builder.knowledgePlan(draft.knowledgePlan);
   if (draft.databasePlan) builder.databasePlan(draft.databasePlan);
+  if (draft.infraPlan) builder.infraPlan(draft.infraPlan);
   if (draft.toolBuildPlan) builder.toolBuildPlan(draft.toolBuildPlan);
   if (draft.toolValidation) builder.toolValidation(draft.toolValidation);
   if (draft.promptParts.tools) builder.toolPrompt(draft.promptParts.tools);

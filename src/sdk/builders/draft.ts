@@ -4,6 +4,7 @@ import type {
   AgentBuildDraftStatus,
   CompiledAgentArtifact,
   DatabaseBuildPlan,
+  AgentInfraPlan,
   KnowledgeBuildPlan,
   PromptBuildPlan,
   ToolBuildPlan,
@@ -55,6 +56,12 @@ export class AgentBuildDraftBuilder {
     this.draft.databasePlan = copy(plan);
     this.draft.status =
       plan.status === "applied" ? "database-applied" : "database-planned";
+    this.touch();
+    return this;
+  }
+
+  infraPlan(plan: AgentInfraPlan): this {
+    this.draft.infraPlan = copy(plan);
     this.touch();
     return this;
   }
@@ -130,6 +137,7 @@ export class AgentBuildDraftBuilder {
       databasePlan: this.draft.databasePlan
         ? copy(this.draft.databasePlan)
         : undefined,
+      infraPlan: this.draft.infraPlan ? copy(this.draft.infraPlan) : undefined,
       toolBuildPlan: this.draft.toolBuildPlan
         ? copy(this.draft.toolBuildPlan)
         : undefined,

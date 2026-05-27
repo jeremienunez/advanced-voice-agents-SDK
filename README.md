@@ -124,6 +124,79 @@ OpenAI-compatible JSON response formats, Gemini `generationConfig`, token caps,
 usage normalization, retries, and tool-call normalization. Legacy direct
 DeepSeek/Kimi builder adapters have been removed.
 
+## Agent Infra Plan
+
+The builder now emits a typed `AgentInfraPlan` next to the knowledge and
+database plans. This is the bridge toward infra-as-code without putting cloud,
+Kubernetes, or auth opinions inside the SDK definition.
+
+```mermaid
+flowchart TD
+  Intent[Agent intent + documents] --> Knowledge[KnowledgeBuildPlan]
+  Knowledge --> Database[DatabaseBuildPlan]
+  Database --> Infra[IntentInfraPlanner]
+  Infra --> Draft[AgentBuildDraft.infraPlan]
+  Infra --> PG[Postgres + pgvector source of truth]
+  Infra -. vector-heavy intent .-> Milvus[Milvus vector index]
+  Infra -. graph intent .-> Graph[Graph index]
+  Infra -. cache/session intent .-> Redis[Redis cache]
+  Draft --> IaC[Onboarding IaC apply]
+```
+
+Current behavior is deliberately conservative:
+
+- Postgres/pgvector remains the source of truth for documents, chunks, and the
+  default retrieval path.
+- Milvus, graph, and Redis are planned as optional backend slots when env or
+  intent asks for them.
+- Generated SQL stays planning material; executable migrations stay
+  server-owned templates.
+- The plan carries compute target, isolation mode, provisioning mode, resource
+  refs, migration policy, and security notes so a future IaC runner can consume
+  it without changing agent code.
+- The starter also attaches an `InfraIacBundle` with actionable artifacts:
+  portable JSON, OpenTofu variable files, VM cloud-init, and K3s/Kubernetes
+  namespace/config/network manifests.
+- `pnpm run infra:apply` is the onboarding apply path: it creates or reuses a
+  local K3s cluster through Docker, applies the generated manifests with
+  `kubectl`, then verifies the namespace, ConfigMap, and NetworkPolicy.
+- The starter opens on a guided Onboarding Config UI first. It checks
+  Docker/kubectl, writes allowlisted values to ignored `.env.local`, and runs
+  safe plan/apply/status actions through the same infra script. Destructive
+  cleanup stays behind an advanced confirmation. It also warns when the form is
+  missing a Gemini/OpenAI voice key, a DeepSeek/Qwen builder key, or the
+  database plus embedding keys needed for RAG.
+
+Infra env cheat sheet:
+
+| Env var | Purpose |
+| --- | --- |
+| `BUILDER_INFRA_COMPUTE_TARGET` | `local`, `vm`, `k3s`, `kubernetes`, or `managed`. |
+| `BUILDER_INFRA_ISOLATION` | `namespace`, `dedicated_database`, `dedicated_vm`, etc. |
+| `BUILDER_INFRA_PROVISIONING_MODE` | `server_template`, `iac_plan`, `manual`, or `external`. |
+| `BUILDER_VECTOR_BACKEND` | Set `milvus` to force Milvus as the vector backend. |
+| `MILVUS_URL` / `MILVUS_ADDRESS` | Marks the Milvus backend as configured. |
+| `NEO4J_URI` / `GRAPH_DATABASE_URL` | Marks the graph backend as configured. |
+| `REDIS_URL` | Marks the cache backend as configured. |
+| `BUILDER_INFRA_APPLY_DRIVER` | `dev-local` by default, `k3s-docker` for local K3s, or `kubectl` for an existing context. |
+| `BUILDER_INFRA_K3S_IMAGE` | K3s Docker image used by `infra:apply`. |
+| `BUILDER_INFRA_K3S_PORT` | Local K3s API port, default `16443`. |
+
+Generated IaC artifacts never include secret values. They reference secret/env
+names such as `DATABASE_URL`, `MILVUS_URL`, `NEO4J_URI`, and `REDIS_URL`.
+
+Onboarding commands:
+
+```bash
+pnpm run infra:plan
+pnpm run infra:apply
+pnpm run infra:status
+pnpm run infra:destroy
+```
+
+The starter UI opens directly on `Onboarding` before Builder, Agent Bank, or
+RTC Lab.
+
 ## Runtime Voice Flow
 
 ```mermaid
@@ -298,6 +371,7 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `GET /config` | Public runtime provider/audio config. |
 | `GET /voice/ws` | Browser voice WebSocket upgrade. |
 | `GET /builder/config` | Builder providers, tools, availability, budgets. |
+| `GET /builder/onboarding` | Local dependency checks plus redacted env-store state. |
 | `GET /builder/session` | Active compiled builder session. |
 | `GET /builder/agents` | Draft/compiled agent bank. |
 | `GET /builder/drafts/:draftId` | One persisted draft. |
@@ -311,6 +385,8 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `POST /builder/apply-database` | Apply validated DB plan. |
 | `POST /builder/compile-knowledge` | Chunk, embed, and store knowledge. |
 | `POST /builder/compile-agent` | Compose final prompt and activate artifact. |
+| `POST /builder/onboarding/env` | Persist allowlisted onboarding keys to `.env.local`. |
+| `POST /builder/onboarding/infra/:action` | Run `plan`, `apply`, `status`, or `destroy`. |
 | `POST /builder/session` | Activate an existing compiled draft. |
 
 ## Environment Cheat Sheet
@@ -331,7 +407,7 @@ Builder LLMs, research, embeddings, and knowledge store:
 
 ```bash
 VOICE_SERVER_HOST=127.0.0.1
-VOICE_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+VOICE_ALLOWED_ORIGINS=http://localhost:5177,http://127.0.0.1:5177
 VOICE_DEV_AUTH_TOKEN=
 VITE_VOICE_DEV_AUTH_TOKEN=
 

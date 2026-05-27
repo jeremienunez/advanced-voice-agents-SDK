@@ -142,6 +142,18 @@ export function SelectSpace({
           <div className="spaces-section">
             <h2 className="section-title">📂 WORKSPACES</h2>
             <div className="spaces-grid">
+              <div
+                className="space-card onboarding"
+                onClick={() => onEnterMode("onboarding")}
+              >
+                <div className="space-icon-wrapper">00</div>
+                <div className="space-content">
+                  <h3>Onboarding Config</h3>
+                  <p>Vérifiez Docker, kubectl et l'infra locale, puis persistez les clés runtime dans le store .env.local ignoré par Git.</p>
+                </div>
+                <span className="space-action-link">→</span>
+              </div>
+
               {/* Card 1: Agent Builder */}
               <div 
                 className="space-card builder" 
