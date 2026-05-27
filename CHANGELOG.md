@@ -1,5 +1,37 @@
 # Changelog
 
+## feat: add auth ticket port
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Proteger le control plane du starter avec un port d'identite explicite, sans
+casser le mode dev pilote par env.
+
+### Journal
+
+- Ajout des types SDK `AuthTicketPort`, `AuthTicketInput` et
+  `AuthTicketIdentity`.
+- Ajout d'un adapter starter dev-token base sur `VOICE_DEV_AUTH_TOKEN`.
+- `/builder/*` et `/voice/ws` passent maintenant par le verifier du contexte
+  route.
+- L'upgrade `/voice/ws` transmet l'identite verifiee au runtime voix au lieu de
+  relire directement `tenantId` / `userId` depuis la query.
+- `pnpm test:solid-seams` verifie que l'identite WebSocket vient du verifier.
+- Le workflow learning continue si le graph memory Postgres optionnel est
+  indisponible; la memoire temporelle et l'evolution restent appliquees.
+- `pnpm test:learning` couvre ce fallback graph-memory.
+
+### Validation
+
+- `pnpm test:solid-seams` OK
+- `pnpm test:learning` OK
+- `pnpm typecheck:starters` OK
+- `pnpm typecheck:sdk` OK
+- `pnpm audit:solid` OK
+
 ## test: cover builder llm harness
 
 Status: implemented locally

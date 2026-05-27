@@ -46,7 +46,6 @@ export class LearnFromSessionWorkflow {
     }
 
     await this.deps.memoryStore.ensure?.();
-    await this.deps.graphStore.ensure?.();
 
     const learned = classifySession(input);
     const scope = {
@@ -62,14 +61,7 @@ export class LearnFromSessionWorkflow {
       })),
       ttlSeconds: this.deps.memoryTtlSeconds,
     });
-    const graphResult = await this.deps.graphStore.upsert({
-      tenantId: input.tenantId,
-      agentId: draftId,
-      userId: input.userId,
-      sourceSessionId: input.summary.sessionId,
-      nodes: learned.nodes,
-      edges: learned.edges,
-    });
+    const graphResult = await this.writeGraphMemory(input, draftId, learned);
     const evolution = await this.deps.evolution.validateAndApply({
       runId: input.runId ?? `learn_${crypto.randomUUID()}`,
       draftId,
@@ -94,6 +86,30 @@ export class LearnFromSessionWorkflow {
       graphEdgeCount: graphResult.edgeCount,
       evolution,
     };
+  }
+
+  private async writeGraphMemory(
+    input: LearningSessionInput,
+    draftId: string,
+    learned: ReturnType<typeof classifySession>,
+  ): Promise<{ nodeCount: number; edgeCount: number }> {
+    try {
+      await this.deps.graphStore.ensure?.();
+      return await this.deps.graphStore.upsert({
+        tenantId: input.tenantId,
+        agentId: draftId,
+        userId: input.userId,
+        sourceSessionId: input.summary.sessionId,
+        nodes: learned.nodes,
+        edges: learned.edges,
+      });
+    } catch (error) {
+      console.warn(
+        "Graph memory unavailable; continuing learning:",
+        error instanceof Error ? error.message : String(error),
+      );
+      return { nodeCount: 0, edgeCount: 0 };
+    }
   }
 }
 

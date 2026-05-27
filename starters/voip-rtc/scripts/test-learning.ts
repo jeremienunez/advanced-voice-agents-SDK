@@ -1,13 +1,18 @@
 import type { LearnFromSessionResult } from "../server/learning/workflow.js";
-import type { LearningSessionInput } from "@voiceagentsdk/core/sdk";
+import type {
+  AgentEvolutionPort,
+  GraphMemoryStorePort,
+  LearningSessionInput,
+} from "@voiceagentsdk/core/sdk";
 import { LocalGraphMemoryStore } from "../server/learning/graph-store.js";
 import { LocalRedisTemporalMemoryStore } from "../server/learning/memory-store.js";
 import { LocalTemporalWorkflowPort } from "../server/learning/temporal-workflow.js";
-import type { LearnFromSessionWorkflow } from "../server/learning/workflow.js";
+import { LearnFromSessionWorkflow } from "../server/learning/workflow.js";
 
 await Promise.all([
   testTemporalMemoryTtl(),
   testGraphUpsertIdempotency(),
+  testGraphFailureDoesNotFailLearning(),
   testLearningJobPayload(),
 ]);
 
@@ -60,6 +65,27 @@ async function testGraphUpsertIdempotency() {
   await store.upsert(input);
   assert(store.nodeCount === 2, "graph nodes should upsert idempotently");
   assert(store.edgeCount === 1, "graph edges should upsert idempotently");
+}
+
+async function testGraphFailureDoesNotFailLearning() {
+  const memoryStore = new LocalRedisTemporalMemoryStore();
+  const workflow = new LearnFromSessionWorkflow({
+    memoryStore,
+    graphStore: failingGraphStore(),
+    evolution: appliedEvolution(),
+    memoryTtlSeconds: 60,
+  });
+  const input = learningSessionInput();
+  const result = await workflow.learnFromSession(input);
+  const memories = await memoryStore.list({
+    tenantId: input.tenantId,
+    agentId: input.draftId,
+    userId: input.userId,
+  });
+
+  assert(result.status === "applied", "graph failure must not fail learning");
+  assert(result.graphNodeCount === 0, "failed graph writes must report zero nodes");
+  assert(memories.length > 0, "memory should still be written when graph fails");
 }
 
 async function testLearningJobPayload() {
@@ -138,6 +164,59 @@ async function testLearningJobPayload() {
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) fail(message);
+}
+
+function learningSessionInput(): LearningSessionInput {
+  return {
+    agentId: "agent-a",
+    draftId: "draft-a",
+    tenantId: "tenant-a",
+    userId: "user-a",
+    summary: {
+      sessionId: "session-a",
+      tenantId: "tenant-a",
+      userId: "user-a",
+      channel: "voice",
+      startedAt: 0,
+      endedAt: 10,
+      durationMs: 10,
+      messageCount: 1,
+      toolCallCount: 1,
+      endReason: "completed",
+    },
+    transcript: [
+      {
+        role: "user",
+        text: "I prefer concise answers.",
+        isFinal: true,
+        timestamp: 5,
+      },
+    ],
+    toolCalls: [],
+  };
+}
+
+function failingGraphStore(): GraphMemoryStorePort {
+  return {
+    isConfigured: () => true,
+    ensure: () => {
+      throw new Error("intentional graph failure");
+    },
+    upsert: async () => ({ nodeCount: 0, edgeCount: 0 }),
+  };
+}
+
+function appliedEvolution(): AgentEvolutionPort {
+  return {
+    async validateAndApply(input) {
+      return {
+        status: "applied",
+        draftId: input.draftId,
+        version: 2,
+        reason: "ok",
+      };
+    },
+  };
 }
 
 function fail(message: string): never {

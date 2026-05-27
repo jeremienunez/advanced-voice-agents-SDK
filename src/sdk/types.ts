@@ -4,6 +4,7 @@ export * from "./types/browser-voice.js";
 export * from "./types/store.js";
 export * from "./types/llm.js";
 export * from "./types/infra.js";
+export * from "./types/auth.js";
 export * from "./types/learning.js";
 export * from "./types/provisioning.js";
 export * from "./types/iac.js";

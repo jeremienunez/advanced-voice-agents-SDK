@@ -1,4 +1,5 @@
 import { createBuilderServiceFromEnv } from "../builder/index.js";
+import { createDevAuthTicketVerifier } from "../auth/dev-ticket-verifier.js";
 import { createStarterLearningServiceFromEnv } from "../learning/service.js";
 import {
   createProviderCatalog,
@@ -34,6 +35,7 @@ export function createStarterServerApp() {
   });
 
   return {
+    authTicketVerifier: createDevAuthTicketVerifier(env),
     builderService,
     defaultProviderId,
     env,

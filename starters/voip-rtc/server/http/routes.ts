@@ -6,7 +6,7 @@ import { accessGuard, originGuard } from "./guards.js";
 import type { StarterRouteContext } from "./types.js";
 
 export function createFetchHandler(app: StarterRouteContext) {
-  return (request: Request, server: Bun.Server<WsData>) => {
+  return async (request: Request, server: Bun.Server<WsData>) => {
     const url = new URL(request.url);
     const originFailure = originGuard(app.env, request);
     if (originFailure) return originFailure;
@@ -21,21 +21,23 @@ export function createFetchHandler(app: StarterRouteContext) {
     if (url.pathname === "/health") return healthResponse(app, request);
     if (url.pathname === "/config") return configResponse(app, request);
 
-    const accessFailure = accessGuard(app.env, request, url);
-    if (accessFailure) return accessFailure;
+    const access = await accessGuard(
+      app.env,
+      app.authTicketVerifier,
+      request,
+      url,
+    );
+    if (access.response) return access.response;
 
     if (url.pathname.startsWith("/builder/")) {
       return handleBuilderRoute(app, request, url);
     }
 
     if (url.pathname === "/voice/ws") {
+      if (!access.identity) return new Response("Unauthorized", { status: 401 });
       const upgraded = server.upgrade(request, {
         data: {
-          user: {
-            tenantId: url.searchParams.get("tenantId") ?? "local",
-            userId: url.searchParams.get("userId") ?? "demo",
-            planId: url.searchParams.get("planId") ?? "dev",
-          },
+          user: access.identity,
         },
       });
       if (upgraded) return;

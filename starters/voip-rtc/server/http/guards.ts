@@ -1,6 +1,16 @@
+import type {
+  AuthTicketIdentity,
+  AuthTicketPort,
+} from "@voiceagentsdk/core/sdk";
+import { authTicketInputFromRequest } from "../auth/ticket-input.js";
 import type { StarterServerEnv } from "./types.js";
 import { corsHeadersFor } from "./cors.js";
 import { isAllowedOrigin } from "./origins.js";
+
+export interface AccessGuardResult {
+  identity?: AuthTicketIdentity;
+  response?: Response;
+}
 
 export function originGuard(
   env: StarterServerEnv,
@@ -14,32 +24,23 @@ export function originGuard(
   });
 }
 
-export function accessGuard(
+export async function accessGuard(
   env: StarterServerEnv,
+  verifier: AuthTicketPort,
   request: Request,
   url: URL,
-): Response | null {
+): Promise<AccessGuardResult> {
   if (!url.pathname.startsWith("/builder/") && url.pathname !== "/voice/ws") {
-    return null;
+    return {};
   }
-  if (isAuthorized(env, request, url)) return null;
-  return new Response("Unauthorized", {
-    status: 401,
-    headers: corsHeadersFor(env, request),
-  });
-}
-
-function isAuthorized(
-  env: StarterServerEnv,
-  request: Request,
-  url: URL,
-): boolean {
-  if (!env.authToken) return true;
-  const authorization = request.headers.get("authorization") ?? "";
-  const bearer = authorization.match(/^Bearer\s+(.+)$/i)?.[1];
-  const headerToken = request.headers.get("x-voice-agent-token");
-  const queryToken = url.searchParams.get("token");
-  return [bearer, headerToken, queryToken].some((candidate) => {
-    return candidate === env.authToken;
-  });
+  const identity = await verifier.verifyTicket(
+    authTicketInputFromRequest(request, url),
+  );
+  if (identity) return { identity };
+  return {
+    response: new Response("Unauthorized", {
+      status: 401,
+      headers: corsHeadersFor(env, request),
+    }),
+  };
 }

@@ -454,6 +454,18 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `POST /builder/onboarding/infra/:action` | Run `plan`, `apply`, `status`, or `destroy`. |
 | `POST /builder/session` | Activate an existing compiled draft. |
 
+## Control Plane Auth
+
+The SDK exposes an `AuthTicketPort` for application-owned identity checks. The
+VOIP starter wires a dev-token adapter from `VOICE_DEV_AUTH_TOKEN`; downstream
+apps can provide a verifier backed by their own session, JWT, or one-time
+WebSocket ticket system.
+
+Protected starter routes are `/builder/*` and `/voice/ws`. The WebSocket route
+passes the verified `tenantId`, `userId`, and `planId` into the voice runtime;
+query params are only requested identity hints for the dev adapter, not the
+runtime source of truth.
+
 ## Environment Cheat Sheet
 
 Realtime providers:

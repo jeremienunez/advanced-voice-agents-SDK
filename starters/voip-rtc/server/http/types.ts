@@ -1,3 +1,4 @@
+import type { AuthTicketPort } from "@voiceagentsdk/core/sdk";
 import type { RuntimeProviderConfig } from "../providers/catalog.js";
 
 export interface StarterServerEnv {
@@ -19,6 +20,7 @@ export interface StarterRouteContext {
   };
   defaultProviderId: string;
   env: StarterServerEnv;
+  authTicketVerifier: AuthTicketPort;
   learningService: {
     rollback(draftId: string): Promise<unknown>;
   };

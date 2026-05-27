@@ -3,11 +3,15 @@ import type {
   LearningSessionInput,
   ProviderDefinition,
 } from "@voiceagentsdk/core/sdk";
+import type { WsData } from "../server/adapters/bun/voice-socket-adapter.js";
+import { createDevAuthTicketVerifier } from "../server/auth/dev-ticket-verifier.js";
 import { validateInfraProvisionInput } from "../server/builder/domain/infra-provisioning.js";
 import { summarizeDraftForBank } from "../server/builder/state/draft-bank-summary.js";
 import { summarizePlannedKnowledge } from "../server/builder/state/draft-knowledge-summary.js";
 import { summarizeDraftForSession } from "../server/builder/state/session-draft-summary.js";
 import { accessGuard, originGuard } from "../server/http/guards.js";
+import { createFetchHandler } from "../server/http/routes.js";
+import type { StarterRouteContext } from "../server/http/types.js";
 import { createSessionEndedLearningHook } from "../server/voice/learning-hook.js";
 import { createProvider } from "../server/voice/provider-factory.js";
 import { assert, assertThrows } from "./shared/assertions.js";
@@ -26,6 +30,7 @@ const results = await Promise.all([
   scenarioHttpGuardsRejectCrossOriginAndMissingTokens(),
   scenarioVoiceProviderFactoryRejectsUnsupportedCatalogChoices(),
   scenarioVoiceLearningHookSkipsAndEnqueuesSessionLearning(),
+  scenarioVoiceWsUsesVerifiedIdentity(),
   scenarioBuilderStateSerializersKeepDraftSummariesStable(),
   scenarioInfraProvisioningRejectsUnsafePlans(),
 ]);
@@ -34,6 +39,7 @@ console.log(JSON.stringify({ status: "ok", results }, null, 2));
 
 async function scenarioHttpGuardsRejectCrossOriginAndMissingTokens() {
   const env = serverEnv();
+  const verifier = createDevAuthTicketVerifier(env);
   const allowed = new Request("http://starter.test/builder/config", {
     headers: { origin: "http://localhost:5177" },
   });
@@ -44,25 +50,73 @@ async function scenarioHttpGuardsRejectCrossOriginAndMissingTokens() {
   assert(originGuard(env, allowed) === null, "allowed origins must pass");
   assert(originGuard(env, blocked)?.status === 403, "unknown origins must fail");
   assert(
-    accessGuard(env, new Request("http://starter.test/health"), new URL("http://starter.test/health")) === null,
+    (await accessGuard(
+      env,
+      verifier,
+      new Request("http://starter.test/health"),
+      new URL("http://starter.test/health"),
+    )).response === undefined,
     "unprotected routes must not require a token",
   );
   assert(
-    accessGuard(env, new Request("http://starter.test/builder/config"), new URL("http://starter.test/builder/config"))?.status === 401,
+    (await accessGuard(
+      env,
+      verifier,
+      new Request("http://starter.test/builder/config"),
+      new URL("http://starter.test/builder/config"),
+    )).response?.status === 401,
     "builder routes must reject missing tokens",
   );
   assert(
-    accessGuard(
+    (await accessGuard(
       env,
+      verifier,
       new Request("http://starter.test/builder/config", {
         headers: { "x-voice-agent-token": "secret-token" },
       }),
       new URL("http://starter.test/builder/config"),
-    ) === null,
+    )).identity?.tenantId === "local",
     "builder routes must accept the configured token",
   );
 
   return "http-guards";
+}
+
+async function scenarioVoiceWsUsesVerifiedIdentity() {
+  const env = serverEnv();
+  let captured: unknown;
+  const app: StarterRouteContext = {
+    authTicketVerifier: {
+      verifyTicket: () => ({
+        tenantId: "verified-tenant",
+        userId: "verified-user",
+        planId: "verified-plan",
+      }),
+    },
+    builderService: { handle: async () => ({ response: null }) },
+    defaultProviderId: "gemini",
+    env,
+    learningService: { rollback: async () => ({}) },
+    providerCatalog: [],
+    voiceService: { activeSessionCount: 0 },
+  };
+  const server = {
+    upgrade(_request: Request, options: { data: unknown }) {
+      captured = options.data;
+      return true;
+    },
+  } as unknown as Bun.Server<WsData>;
+  const response = await createFetchHandler(app)(
+    new Request("http://starter.test/voice/ws?tenantId=query&userId=query"),
+    server,
+  );
+  const data = captured as { user?: { tenantId?: string; userId?: string } };
+
+  assert(response === undefined, "successful websocket upgrade must return undefined");
+  assert(data.user?.tenantId === "verified-tenant", "voice ws must use verified tenant");
+  assert(data.user?.userId === "verified-user", "voice ws must use verified user");
+
+  return "voice-ws-verified-identity";
 }
 
 async function scenarioVoiceProviderFactoryRejectsUnsupportedCatalogChoices() {

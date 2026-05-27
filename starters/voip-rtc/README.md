@@ -203,6 +203,17 @@ The server listens on `http://localhost:8787` by default and exposes:
 | `POST /builder/onboarding/env` | Save allowlisted onboarding keys to `.env.local`. |
 | `POST /builder/onboarding/infra/:action` | Run `plan`, `apply`, `status`, or `destroy`. |
 
+## Control Plane Auth
+
+`/builder/*` and `/voice/ws` are protected through the SDK `AuthTicketPort`.
+This starter provides a dev-token verifier using `VOICE_DEV_AUTH_TOKEN`; an
+application can replace it with its own session, JWT, or one-time WebSocket
+ticket verifier.
+
+The voice runtime receives the verifier result as user context. Query params
+such as `tenantId` and `userId` are only dev-mode requested identity hints, not
+the trusted runtime identity source.
+
 ## Runtime Configuration
 
 Provider setup is env-driven and UI-discoverable. Set `GEMINI_API_KEY` or

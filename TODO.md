@@ -1,24 +1,32 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: continue the hardening backlog with focused, falsifiable tests
-before taking larger runtime/security slices.
+Current goal: harden the starter control plane without breaking local dev mode.
 
-Target commit title candidate: `test: cover builder llm harness`
+Target commit title candidate: `feat: add auth ticket port`
 
 ## Active Focus
 
-### Builder LLM Harness Coverage
+### Starter Control Plane Hardening
 
 Outcome:
-Builder planning, research, verification, and model selection can be refactored
-without silently breaking provider-agnostic behavior.
+`/builder/*` and `/voice/ws` go through a typed ticket verifier, and RTC user
+identity comes from the verified ticket result instead of raw query params.
 
 Next work:
 
-- [ ] Pick the next hardening slice after the LLM harness test commit.
+- [ ] Pick the next hardening slice after the control-plane commit.
 
 Done in this focus:
 
+- Added SDK `AuthTicketPort`, `AuthTicketInput`, and `AuthTicketIdentity`.
+- Added starter dev-token verifier adapter backed by `VOICE_DEV_AUTH_TOKEN`.
+- `/builder/*` and `/voice/ws` now call the verifier through the starter route
+  context; WebSocket upgrades pass `access.identity` to the voice runtime.
+- `pnpm test:solid-seams` now falsifies direct query identity use by checking
+  that `/voice/ws` upgrades with the verified tenant/user.
+- Learning now treats graph memory as optional at runtime: if the Postgres graph
+  backend is unavailable, temporal memory and agent evolution still apply.
+- `pnpm test:learning` covers the optional graph-memory fallback.
 - `pnpm test:llm-harness` covers prompt planner JSON fallback, autonomous
   research document/checkpoint creation, verifier verdict normalization, and
   resolver requested-provider fallback with a fake `LlmTaskRunnerPort`.
@@ -50,10 +58,11 @@ Run before commit:
 Recently green:
 
 - [x] `pnpm typecheck:starters`
+- [x] `pnpm typecheck:sdk`
 - [x] `pnpm test:llm-harness`
 - [x] `pnpm test:solid-seams`
-- [x] `pnpm test:infra-plan`
 - [x] `pnpm test:learning`
+- [x] `pnpm test:infra-plan`
 - [x] `pnpm test:learning:bdd`
 - [x] `pnpm test:knowledge-tool`
 - [x] `pnpm pack:dry-run`
@@ -219,7 +228,7 @@ Optional security/network checks:
 
 ## Immediate Risk Backlog - 2026-05-27
 
-- [ ] Protect the starter control plane:
+- [x] Protect the starter control plane:
   - require an application-provided session/ticket verifier on `/builder/*`;
   - require an application-provided session/ticket verifier on `/voice/ws`;
   - derive tenant/user from verified identity instead of query params;
@@ -353,7 +362,7 @@ Optional security/network checks:
 - [ ] `PromptCompilerPort`
   - compiler tenant/channel/plan/tools/promptSections/variables vers
     instructions runtime.
-- [ ] `AuthTicketPort`
+- [x] `AuthTicketPort`
   - verifier des tickets/session browser voice.
   - retourner `tenantId`, `userId`, `planId`, scopes et metadata.
   - ne pas embarquer login, users, RBAC ou fournisseur JWT dans le SDK.
@@ -366,7 +375,7 @@ Optional security/network checks:
 
 - [ ] Brancher `src/server/adapters/fastify` sur le runtime nettoye.
 - [x] Ajouter un starter VOIP RTC Bun + React/Vite reutilisable.
-- [ ] Ajouter un `AuthTicketPort` reusable pour remplacer le query auth local du starter.
+- [x] Ajouter un `AuthTicketPort` reusable pour remplacer le query auth local du starter.
   - doit couvrir `/builder/*` et `/voice/ws`.
   - doit remplacer `tenantId` / `userId` query params par une identite verifiee.
   - l'implementation concrete reste fournie par l'application.
