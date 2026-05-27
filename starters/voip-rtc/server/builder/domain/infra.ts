@@ -185,11 +185,12 @@ export class IntentInfraPlanner implements InfraPlannerPort {
       },
       security: {
         tenantScoped: true,
-        leastPrivilegeRole: false,
+        leastPrivilegeRole: true,
         secretRefs,
         networkPolicy: computeTarget === "local" ? "local_only" : "private_network",
         notes: [
-          "Least-privileged database roles are not automated in this starter slice yet.",
+          "Server-owned Postgres templates create a no-login per-agent runtime role.",
+          "Runtime role grants stay read-only and carry a statement_timeout.",
           "Application auth must still protect builder and voice control-plane routes.",
         ],
       },

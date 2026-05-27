@@ -7,7 +7,10 @@ import type {
 import postgres from "postgres";
 import { validateDatabaseProvisionInput } from "../domain/database-provisioning.js";
 import { splitSqlStatements } from "../domain/sql.js";
-import { ensureAgentKnowledgeTables } from "../../infra/postgres/knowledge-schema.js";
+import {
+  agentRuntimeRoleName,
+  ensureAgentKnowledgeTables,
+} from "../../infra/postgres/knowledge-schema.js";
 
 export class PostgresAgentDatabaseProvisioner
   implements DatabaseProvisionerPort {
@@ -50,6 +53,8 @@ export class PostgresAgentDatabaseProvisioner
       appliedStatements: [
         `validated ${statements.length} planned migration statements`,
         "applied server-owned pgvector knowledge schema templates",
+        "enforced provisioning and runtime statement_timeout",
+        `ensured least-privilege runtime role ${agentRuntimeRoleName(input.plan.schemaName)}`,
       ],
       warnings: validation.warnings,
       appliedAt: new Date().toISOString(),

@@ -2,9 +2,11 @@ import type {
   AgentBuildDraft,
   DatabaseBuildPlan,
 } from "@voiceagentsdk/core/sdk";
+import type postgres from "postgres";
 import { PostgresAgentDatabaseProvisioner } from "../server/builder/adapters/postgres-database-provisioner.js";
 import { fallbackDatabasePlan } from "../server/builder/domain/database.js";
 import { quoteIdentifier } from "../server/builder/domain/sql.js";
+import { ensureAgentKnowledgeTables } from "../server/infra/postgres/knowledge-schema.js";
 import { assert } from "./shared/assertions.js";
 
 const draft = agentDraft();
@@ -15,6 +17,7 @@ const provisioner = new PostgresAgentDatabaseProvisioner({});
 const results = [
   scenarioValidTemplatePlanPasses(),
   scenarioHostileSqlIsRejected(),
+  await scenarioServerTemplateEnforcesLeastPrivilege(),
 ];
 
 console.log(JSON.stringify({ status: "ok", results }, null, 2));
@@ -73,6 +76,49 @@ function scenarioHostileSqlIsRejected() {
   return "hostile-sql-rejections";
 }
 
+async function scenarioServerTemplateEnforcesLeastPrivilege() {
+  const captured: string[] = [];
+  const sql = {
+    unsafe(query: string) {
+      captured.push(compact(query));
+      return Promise.resolve([]);
+    },
+  };
+
+  await ensureAgentKnowledgeTables(
+    sql as unknown as Pick<postgres.Sql, "unsafe">,
+    baseline.schemaName,
+    Number(baseline.vectorization.dimensions),
+  );
+
+  assert(
+    captured.some((statement) => statement.startsWith("set local statement_timeout")),
+    "server-owned template must bound provisioning statements with statement_timeout",
+  );
+  assert(
+    captured.some((statement) => /\bcreate role\b.+\bnologin\b/i.test(statement)),
+    "server-owned template must create a no-login least-privilege runtime role",
+  );
+  assert(
+    captured.some((statement) => /\balter role\b.+\bstatement_timeout\b/i.test(statement)),
+    "runtime role must have a statement_timeout",
+  );
+  assert(
+    captured.some((statement) => /\bgrant usage on schema\b/i.test(statement)),
+    "runtime role must receive schema usage only",
+  );
+  assert(
+    captured.some((statement) => /\bgrant select on all tables in schema\b/i.test(statement)),
+    "runtime role must receive table select only",
+  );
+  assert(
+    !captured.some((statement) => /\bgrant\s+(insert|update|delete|all|create)\b/i.test(statement)),
+    "runtime role must not receive write or create grants",
+  );
+
+  return "server-template-least-privilege";
+}
+
 function withMigration(
   plan: DatabaseBuildPlan,
   sqlMigration: string,
@@ -110,4 +156,8 @@ function agentDraft(): AgentBuildDraft {
     createdAt: now,
     updatedAt: now,
   };
+}
+
+function compact(sql: string): string {
+  return sql.replace(/\s+/g, " ").trim().toLowerCase();
 }

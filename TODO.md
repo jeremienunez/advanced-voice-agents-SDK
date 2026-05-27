@@ -1,23 +1,31 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: enforce builder draft ownership for privileged DB workflows.
+Current goal: enforce least-privilege Postgres provisioning.
 
-Target commit title candidate: `test: enforce builder draft ownership`
+Target commit title candidate: `test: enforce postgres least privilege provisioning`
 
 ## Active Focus
 
-### Builder Draft Ownership BDD
+### Postgres Least Privilege BDD
 
 Outcome:
-Privileged database/knowledge workflows reload server-side drafts by `draftId`,
-verify the authenticated owner, and ignore request-supplied draft payloads.
+Server-owned Postgres provisioning bounds DDL with `statement_timeout`, creates
+a per-agent no-login runtime role, and grants only read access.
 
 Next work:
 
-- [ ] Pick the next database hardening slice after this commit.
+- [ ] Pick the next immediate hardening slice after this commit.
 
 Done in this focus:
 
+- `pnpm test:database-provisioning` now covers
+  `server-template-least-privilege`.
+- Postgres server-owned templates set provisioning and runtime
+  `statement_timeout`.
+- Postgres server-owned templates create a per-agent no-login runtime role.
+- Runtime grants are limited to schema `USAGE` and table `SELECT`.
+- Infra plans now set `security.leastPrivilegeRole`.
+- `pnpm audit:solid` is green after the least-privilege slice.
 - `pnpm test:builder-draft-ownership:bdd` rejects cross-owner DB apply.
 - The same BDD scenario proves request-supplied draft payloads are ignored.
 - `/builder/prompt-plan` tags drafts with `metadata.builderOwner`.
@@ -72,10 +80,10 @@ Recently green:
 - [x] `pnpm typecheck:sdk`
 - [x] `pnpm test:builder-draft-ownership:bdd`
 - [x] `pnpm test:database-provisioning`
+- [x] `pnpm test:infra-plan`
 - [x] `pnpm test:llm-harness`
 - [x] `pnpm test:solid-seams`
 - [x] `pnpm test:learning`
-- [x] `pnpm test:infra-plan`
 - [x] `pnpm test:learning:bdd`
 - [x] `pnpm test:knowledge-tool`
 - [x] `pnpm pack:dry-run`
@@ -172,7 +180,8 @@ Optional security/network checks:
   - local prerequisite checks collapsed when healthy.
 - [ ] Add real OpenTofu/cloud-init external runner integration beyond K3s
   manifest apply.
-- [ ] Add least-privilege Postgres role creation and per-agent credential refs.
+- [x] Add least-privilege Postgres runtime role creation.
+- [ ] Add per-agent credential refs for runtime DB users.
 - [ ] Decide whether Milvus/graph stay starter adapters or graduate into
   reusable SDK adapter packages.
 
@@ -253,7 +262,7 @@ Optional security/network checks:
   - [x] replace broad SQL allowlists with typed migration/templates;
   - [x] ban `AS SELECT`, arbitrary function calls, arbitrary extensions and
     expression indexes from generated/user-influenced SQL;
-  - [ ] enforce least-privileged Postgres roles and `statement_timeout`.
+  - [x] enforce least-privileged Postgres roles and `statement_timeout`.
 - [ ] Harden document ingestion:
   - request and file size limits;
   - content-length enforcement;

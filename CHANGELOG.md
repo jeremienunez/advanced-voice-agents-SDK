@@ -1,5 +1,36 @@
 # Changelog
 
+## test: enforce postgres least privilege provisioning
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Fermer la derniere tranche DB immediate: le provisioner Postgres reel doit
+borner ses DDL avec `statement_timeout` et creer une surface runtime
+least-privilege en lecture seule.
+
+### Journal
+
+- `pnpm test:database-provisioning` couvre maintenant un scenario BDD
+  `server-template-least-privilege`.
+- Le template server-owned Postgres emet `set local statement_timeout`.
+- Le template cree un role runtime par agent avec `NOLOGIN`.
+- Le role runtime recoit son propre `statement_timeout`.
+- Les grants runtime sont limites a `USAGE` sur le schema et `SELECT` sur les
+  tables du schema.
+- Le resultat du provisioner annonce les timeouts et le role runtime assure.
+- Le plan infra marque maintenant `security.leastPrivilegeRole` comme actif.
+
+### Validation
+
+- `pnpm test:database-provisioning` OK
+- `pnpm test:infra-plan` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: enforce builder draft ownership
 
 Status: implemented locally

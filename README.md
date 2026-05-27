@@ -157,6 +157,9 @@ Current behavior is deliberately conservative:
 - Database provisioning validation rejects non-vector extensions, extension
   options, `CREATE TABLE AS SELECT`, arbitrary function calls, and expression
   indexes before those templates can apply.
+- Server-owned Postgres templates bound provisioning with `statement_timeout`,
+  create a per-agent no-login runtime role, and grant only schema `USAGE` plus
+  table `SELECT`.
 - The plan carries compute target, isolation mode, provisioning mode, resource
   refs, migration policy, and security notes so a future IaC runner can consume
   it without changing agent code.

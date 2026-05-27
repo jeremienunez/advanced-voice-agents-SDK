@@ -83,6 +83,9 @@ Intent routing rules are intentionally simple in this slice:
   rejects non-vector extensions, extension options, `CREATE TABLE AS SELECT`,
   arbitrary function calls, and expression indexes before server-owned
   templates apply.
+- Server-owned Postgres templates set a provisioning `statement_timeout`,
+  create a per-agent no-login runtime role, set its runtime timeout, and grant
+  only schema `USAGE` plus table `SELECT`.
 
 When an infra plan is valid, the starter attaches an `iac` bundle to the draft:
 
