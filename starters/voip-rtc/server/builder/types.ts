@@ -17,6 +17,7 @@ import type {
   ToolRegistryItem,
 } from "@voiceagentsdk/core/sdk";
 import type { strategyLabels } from "./catalog.js";
+import type { DocumentIngestionQuotaPort } from "./quotas/document-ingestion-quota.js";
 
 export interface BuilderServiceOptions {
   port: number;
@@ -33,6 +34,8 @@ export interface BuilderConfig {
     voyageEmbeddingModel: string;
     voyageEmbeddingDimensions: number;
     documentParseTimeoutMs: number;
+    documentIngestionQuotaPerIp: number;
+    documentIngestionQuotaWindowMs: number;
     knowledgeVerificationProvider: string;
     knowledgeVerificationModel: string;
     knowledgeVerificationPasses: number;
@@ -73,6 +76,7 @@ export interface BuilderRouteResult {
 
 export interface BuilderRequestContext {
   identity?: AuthTicketIdentity;
+  clientIp?: string;
 }
 
 export interface BuilderSessionState {
@@ -101,6 +105,7 @@ export interface BuilderWorkflowDependencies {
   embeddings: EmbeddingPort;
   ingestion: DocumentIngestionPort;
   documentParseTimeoutMs: number;
+  documentIngestionQuota: DocumentIngestionQuotaPort;
   knowledgeStore: KnowledgeStorePort;
   databaseProvisioner: DatabaseProvisionerPort;
   infraPlanner: InfraPlannerPort;

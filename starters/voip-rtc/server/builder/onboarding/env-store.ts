@@ -67,6 +67,8 @@ export const envFieldDefinitions: EnvFieldDefinition[] = [
   field("MOONSHOT_API_KEY", "builder", "Moonshot API key", "Alternative Kimi key name supported by the starter.", undefined, undefined, true),
   field("KIMI_MODEL", "builder", "Kimi model", "Kimi model for verification tasks.", undefined, "kimi-k2.6"),
   field("BUILDER_DOCUMENT_PARSE_TIMEOUT_MS", "builder", "Document parse timeout", "Max parser time before ingestion fails closed.", undefined, "5000"),
+  field("BUILDER_DOCUMENT_INGESTION_QUOTA_PER_IP", "builder", "Document quota", "Max document ingestions per IP in the quota window.", undefined, "20"),
+  field("BUILDER_DOCUMENT_INGESTION_QUOTA_WINDOW_MS", "builder", "Document quota window", "Rolling quota window for document ingestion.", undefined, "60000"),
   field("VOYAGE_API_KEY", "knowledge", "Voyage API key", "Enables embeddings for RAG/knowledge search.", undefined, undefined, true),
   field("DATABASE_URL", "knowledge", "Postgres URL", "Postgres/pgvector source of truth.", undefined, undefined, true),
   field("BUILDER_INFRA_APPLY_DRIVER", "infra", "Apply driver", "Dev-local plans by default; K3s/kubectl are opt-in.", ["dev-local", "k3s-docker", "kubectl"], "dev-local"),

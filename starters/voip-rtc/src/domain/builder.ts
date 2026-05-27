@@ -194,6 +194,8 @@ export interface BuilderConfig {
     voyageEmbeddingModel: string;
     voyageEmbeddingDimensions: number;
     documentParseTimeoutMs: number;
+    documentIngestionQuotaPerIp: number;
+    documentIngestionQuotaWindowMs: number;
     researchBudget: KnowledgeResearchBudget;
   };
   availability: {

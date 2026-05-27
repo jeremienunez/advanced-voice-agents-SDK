@@ -1,5 +1,6 @@
 import type { WsData } from "../adapters/bun/voice-socket-adapter.js";
 import { publicProviderConfig } from "../providers/catalog.js";
+import { resolveClientIp } from "./client-ip.js";
 import { corsHeadersFor } from "./cors.js";
 import { readDraftId } from "./draft-id.js";
 import { accessGuard, originGuard } from "./guards.js";
@@ -31,7 +32,10 @@ export function createFetchHandler(app: StarterRouteContext) {
     if (access.response) return access.response;
 
     if (url.pathname.startsWith("/builder/")) {
-      return handleBuilderRoute(app, request, url, { identity: access.identity });
+      return handleBuilderRoute(app, request, url, {
+        identity: access.identity,
+        clientIp: resolveClientIp(request, server),
+      });
     }
 
     if (url.pathname === "/voice/ws") {

@@ -423,7 +423,7 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `pnpm test:knowledge-tool` | Check runtime knowledge tool wiring. |
 | `pnpm test:llm-harness` | Check provider-agnostic builder LLM planner, research, verifier, and resolver behavior. |
 | `pnpm test:builder-draft-ownership:bdd` | Check privileged builder workflows reload server-owned drafts by authenticated owner. |
-| `pnpm test:document-ingestion:bdd` | Check document upload bounds, content-length/type guards, and xlsx sheet/row/cell/text caps. |
+| `pnpm test:document-ingestion:bdd` | Check document upload bounds, type guards, xlsx caps, parser timeouts, and IP quotas. |
 | `pnpm test:database-provisioning` | Run the real starter database provisioner validation against the pgvector template and hostile SQL cases. |
 | `pnpm test:solid-seams` | Run focused BDD seam tests for HTTP guards, voice factory/learning, builder summaries, and infra validation. |
 | `pnpm test:runtime-tool-call` | Check runtime tool call flow. |
@@ -511,6 +511,8 @@ BUILDER_KNOWLEDGE_VERIFICATION_MODEL=
 BUILDER_KNOWLEDGE_VERIFICATION_MAX_TOKENS=65536
 BUILDER_KNOWLEDGE_VERIFICATION_PASSES=3
 BUILDER_DOCUMENT_PARSE_TIMEOUT_MS=5000
+BUILDER_DOCUMENT_INGESTION_QUOTA_PER_IP=20
+BUILDER_DOCUMENT_INGESTION_QUOTA_WINDOW_MS=60000
 
 DEEPSEEK_API_KEY=
 DEEPSEEK_MODEL=deepseek-v4-pro

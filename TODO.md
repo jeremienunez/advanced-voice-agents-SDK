@@ -1,20 +1,24 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: finish document ingestion request quotas.
+Current goal: harden prompt and tool orchestration.
 
-Target commit title candidate: `test: add document ingestion quota seam`
+Target commit title candidate: `test: enforce server-owned prompt policy`
 
 ## Active Focus
 
-### Document Ingestion Hardening
+### Prompt And Tool Orchestration
 
 Outcome:
-Document ingestion has bounded uploads, parser caps, and parser timeout seams.
-The remaining guardrail is request-rate quota enforcement.
+Compiled prompts and selected tools cannot be weakened by generated model text,
+uploaded documents, or request-supplied tool bindings.
 
 Next work:
 
-- [ ] Add per-IP quota seam.
+- [ ] Append immutable server-owned safety and tool policy after generated
+  prompts.
+- [ ] Quote builder input and document content as data.
+- [ ] Lint compiled prompts for required invariants.
+- [ ] Enforce tool authorization server-side, independent of model text.
 
 ### Current Gates
 
@@ -31,10 +35,6 @@ Optional security/network checks:
 - [ ] `curl http://127.0.0.1:8787/builder/config`
 
 ## Immediate Risk Backlog
-
-### Document Ingestion
-
-- [ ] Per-IP quotas.
 
 ### Prompt And Tool Orchestration
 

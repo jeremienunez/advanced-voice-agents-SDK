@@ -1,5 +1,36 @@
 # Changelog
 
+## test: add document ingestion quota seam
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Limiter l'ingestion document par IP avant lecture et parsing du corps, afin
+d'eviter qu'un client puisse saturer le builder avec des uploads repetes.
+
+### Journal
+
+- Ajout d'un BDD dedie qui prouve qu'une deuxieme ingestion depuis la meme IP
+  est rejetee avant parsing et qu'une autre IP garde son propre quota.
+- Ajout du port `DocumentIngestionQuotaPort` et d'un adapter memoire local par
+  fenetre glissante.
+- Le contexte builder transporte maintenant `clientIp` depuis la couche HTTP.
+- `x-forwarded-for`, `x-real-ip`, puis `server.requestIP` alimentent la
+  resolution d'IP.
+- `BUILDER_DOCUMENT_INGESTION_QUOTA_PER_IP` et
+  `BUILDER_DOCUMENT_INGESTION_QUOTA_WINDOW_MS` configurent le dev mode et sont
+  exposes dans l'onboarding.
+
+### Validation
+
+- `pnpm test:document-ingestion:bdd` OK
+- `pnpm typecheck:sdk` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: add document parser timeout seam
 
 Status: implemented locally

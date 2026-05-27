@@ -254,6 +254,8 @@ Builder and knowledge env vars:
 - `BUILDER_KNOWLEDGE_VERIFICATION_MODEL`
 - `BUILDER_KNOWLEDGE_VERIFICATION_MAX_TOKENS`
 - `BUILDER_DOCUMENT_PARSE_TIMEOUT_MS`
+- `BUILDER_DOCUMENT_INGESTION_QUOTA_PER_IP`
+- `BUILDER_DOCUMENT_INGESTION_QUOTA_WINDOW_MS`
 - `DEEPSEEK_API_KEY`
 - `DEEPSEEK_MODEL`
 - `QWEN_API_KEY` or `DASHSCOPE_API_KEY`
@@ -296,8 +298,8 @@ pnpm --filter @voiceagentsdk/starter-voip-rtc test:learning:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:rtc-e2e
 ```
 
-`test:document-ingestion:bdd` covers upload bounds, type allowlists, and xlsx
-sheet, row, cell, and cell-text caps before parsed content can feed knowledge.
+`test:document-ingestion:bdd` covers upload bounds, type allowlists, xlsx caps,
+parser timeouts, and IP quotas before parsed content can feed knowledge.
 
 ## Production Notes
 

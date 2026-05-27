@@ -98,7 +98,7 @@ async function routePostRequest(
   }
 
   if (url.pathname === "/builder/ingest-document") {
-    return workflows.ingestDocument(request);
+    return workflows.ingestDocument(request, context);
   }
 
   if (url.pathname === "/builder/run-research") {

@@ -4,6 +4,43 @@ import type {
   KnowledgeDocument,
 } from "@voiceagentsdk/core/sdk";
 import { documentKind } from "./domain/document-kind.js";
+import type { BuilderRequestContext } from "./types.js";
+import type { DocumentIngestionQuotaPort } from "./quotas/document-ingestion-quota.js";
+import { readDocumentInput } from "./request/document-input.js";
+
+export interface DocumentIngestionWorkflowInput {
+  context: BuilderRequestContext;
+  deps: DocumentIngestionWorkflowDependencies;
+  request: Request;
+}
+
+export interface DocumentIngestionWorkflowDependencies {
+  documentIngestionQuota: DocumentIngestionQuotaPort;
+  documentParseTimeoutMs: number;
+  ingestion: DocumentIngestionPort;
+}
+
+export async function ingestDocumentWithGuards({
+  context,
+  deps,
+  request,
+}: DocumentIngestionWorkflowInput): Promise<{ document: KnowledgeDocument }> {
+  const quota = deps.documentIngestionQuota.consume({
+    clientIp: context.clientIp,
+  });
+  if (!quota.allowed) {
+    throw new Error(
+      `Document ingestion quota exceeded; retry after ${quota.retryAfterMs ?? 0}ms`,
+    );
+  }
+  const documentInput = await readDocumentInput(request);
+  const document = await parseDocumentWithTimeout({
+    ingestion: deps.ingestion,
+    input: documentInput,
+    timeoutMs: deps.documentParseTimeoutMs,
+  });
+  return { document };
+}
 
 export interface TimedDocumentIngestionInput {
   ingestion: DocumentIngestionPort;

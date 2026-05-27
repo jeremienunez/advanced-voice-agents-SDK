@@ -5,7 +5,6 @@ import { toolInstructionsFromPlan } from "./domain/tooling/compile.js";
 import { createToolBuildPlan } from "./domain/tooling/contracts.js";
 import { validatedToolPlan, validateToolBuildPlan } from "./domain/tooling/validation.js";
 import { mutateDraft } from "./domain/drafts.js";
-import { readDocumentInput } from "./request/document-input.js";
 import { normalizeIdentity } from "./request/identity.js";
 import { normalizeKnowledgeDocuments } from "./request/knowledge-documents.js";
 import { normalizeResearchSettings } from "./request/research-settings.js";
@@ -17,7 +16,7 @@ import { setActiveDraft } from "./state/session-store.js";
 import type { BuilderRequestContext, BuilderWorkflowDependencies } from "./types.js";
 import { asRecord, readString } from "./utils/record-readers.js";
 import { buildEagerKnowledge } from "./eager-knowledge.js";
-import { parseDocumentWithTimeout } from "./workflow-document-ingestion.js";
+import { ingestDocumentWithGuards } from "./workflow-document-ingestion.js";
 import { createValidatedInfraPlan } from "./workflow-infra.js";
 
 export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
@@ -74,14 +73,11 @@ export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
       return { draft: nextDraft };
     },
 
-    async ingestDocument(request: Request) {
-      const documentInput = await readDocumentInput(request);
-      const document = await parseDocumentWithTimeout({
-        ingestion: deps.ingestion,
-        input: documentInput,
-        timeoutMs: deps.documentParseTimeoutMs,
-      });
-      return { document };
+    async ingestDocument(
+      request: Request,
+      context: BuilderRequestContext = {},
+    ) {
+      return ingestDocumentWithGuards({ context, deps, request });
     },
 
     async runResearch(body: unknown) {

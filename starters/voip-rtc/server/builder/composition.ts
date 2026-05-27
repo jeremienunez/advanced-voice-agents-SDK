@@ -17,6 +17,7 @@ import { PlanOnlyInfraIacGenerator } from "./domain/infra-iac.js";
 import { createBuilderLlmCatalog } from "./llm/profiles.js";
 import { AdaptiveLlmModelResolver } from "./llm/resolver.js";
 import { BuilderLlmTaskRunner } from "./llm/task-runner.js";
+import { InMemoryDocumentIngestionQuota } from "./quotas/document-ingestion-quota.js";
 import { loadBuilderPromptLibrary } from "./prompts/template.js";
 import type {
   AgentBuilderLlmProvider,
@@ -46,6 +47,14 @@ export function createBuilderServiceCompositionFromEnv(
   const documentParseTimeoutMs = readPositiveNumber(
     env.BUILDER_DOCUMENT_PARSE_TIMEOUT_MS,
     5000,
+  );
+  const documentIngestionQuotaPerIp = readPositiveNumber(
+    env.BUILDER_DOCUMENT_INGESTION_QUOTA_PER_IP,
+    20,
+  );
+  const documentIngestionQuotaWindowMs = readPositiveNumber(
+    env.BUILDER_DOCUMENT_INGESTION_QUOTA_WINDOW_MS,
+    60_000,
   );
   const researchBudget = researchBudgetFromEnv(env);
   const promptLibrary = loadBuilderPromptLibrary();
@@ -97,6 +106,8 @@ export function createBuilderServiceCompositionFromEnv(
       voyageEmbeddingModel: voyageModel,
       voyageEmbeddingDimensions: voyageDimensions,
       documentParseTimeoutMs,
+      documentIngestionQuotaPerIp,
+      documentIngestionQuotaWindowMs,
       knowledgeVerificationProvider,
       knowledgeVerificationModel,
       knowledgeVerificationPasses,
@@ -151,6 +162,10 @@ export function createBuilderServiceCompositionFromEnv(
       }),
       ingestion: new PlainTextDocumentIngestion(),
       documentParseTimeoutMs,
+      documentIngestionQuota: new InMemoryDocumentIngestionQuota({
+        maxRequests: documentIngestionQuotaPerIp,
+        windowMs: documentIngestionQuotaWindowMs,
+      }),
       knowledgeStore: new PostgresPgVectorKnowledgeStore({
         databaseUrl: env.DATABASE_URL,
         dimensions: voyageDimensions,

@@ -170,6 +170,7 @@ async function scenarioParserTimeoutFailsClosed() {
   let observedSignal: AbortSignal | undefined;
   const workflows = createBuilderWorkflows({
     documentParseTimeoutMs: 1,
+    documentIngestionQuota: { consume: () => ({ allowed: true, remaining: 1 }) },
     ingestion: {
       parse(
         input: DocumentIngestionInput,
