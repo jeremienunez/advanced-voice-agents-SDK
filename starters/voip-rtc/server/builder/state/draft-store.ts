@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { isAgentDraft } from "../domain/drafts.js";
 import { draftStatePath } from "./paths.js";
-import { readString } from "../utils.js";
+import { readString } from "../utils/record-readers.js";
 
 const drafts = loadDrafts();
 

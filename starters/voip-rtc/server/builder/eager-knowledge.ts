@@ -9,7 +9,7 @@ import type {
 } from "@voiceagentsdk/core/sdk";
 import { chunkDocuments } from "./domain/knowledge.js";
 import { mutateDraft } from "./domain/drafts.js";
-import { saveDraft } from "./state.js";
+import { saveDraft } from "./state/draft-store.js";
 import { runTeacherVerification } from "./teacher-verification.js";
 import type {
   BuilderWorkflowDependencies,

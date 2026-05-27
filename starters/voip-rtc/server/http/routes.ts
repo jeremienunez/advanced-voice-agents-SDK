@@ -1,11 +1,11 @@
 import type { WsData } from "../adapters/bun/voice-socket-adapter.js";
-import type { StarterServerApp } from "../app/bootstrap.js";
 import { publicProviderConfig } from "../providers/catalog.js";
 import { corsHeadersFor } from "./cors.js";
 import { readDraftId } from "./draft-id.js";
 import { accessGuard, originGuard } from "./guards.js";
+import type { StarterRouteContext } from "./types.js";
 
-export function createFetchHandler(app: StarterServerApp) {
+export function createFetchHandler(app: StarterRouteContext) {
   return (request: Request, server: Bun.Server<WsData>) => {
     const url = new URL(request.url);
     const originFailure = originGuard(app.env, request);
@@ -47,7 +47,7 @@ export function createFetchHandler(app: StarterServerApp) {
 }
 
 function healthResponse(
-  app: StarterServerApp,
+  app: StarterRouteContext,
   request: Request,
 ): Response {
   return json(
@@ -62,7 +62,7 @@ function healthResponse(
 }
 
 function configResponse(
-  app: StarterServerApp,
+  app: StarterRouteContext,
   request: Request,
 ): Response {
   return json(
@@ -83,7 +83,7 @@ function configResponse(
 }
 
 async function handleBuilderRoute(
-  app: StarterServerApp,
+  app: StarterRouteContext,
   request: Request,
   url: URL,
 ): Promise<Response> {
@@ -98,7 +98,7 @@ async function handleBuilderRoute(
 
 function json(
   data: unknown,
-  app: StarterServerApp,
+  app: StarterRouteContext,
   request: Request,
 ): Response {
   return Response.json(data, { headers: corsHeadersFor(app.env, request) });

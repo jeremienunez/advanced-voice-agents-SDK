@@ -20,6 +20,7 @@
     "test:infra-plan": "bun run scripts/test-infra-plan.ts",
     "test:learning": "bun run scripts/test-learning.ts",
     "test:learning:bdd": "bun run scripts/test-learning-bdd.ts",
+    "test:solid-seams": "bun run scripts/test-solid-seams.ts",
     "test:knowledge-tool": "bun run scripts/test-knowledge-tool.ts",
     "test:rtc-e2e": "pnpm build:sdk && bun run scripts/test-rtc-e2e.ts",
     "typecheck": "pnpm build:sdk && tsc --noEmit -p tsconfig.json"

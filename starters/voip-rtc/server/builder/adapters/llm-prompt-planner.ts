@@ -24,7 +24,7 @@ import {
 import { fallbackFinalPrompt, fallbackPromptPlan } from "../domain/prompt.js";
 import type { BuilderPromptLibrary } from "../prompts/template.js";
 import { renderPromptTemplate } from "../prompts/template.js";
-import { parseJsonPayload } from "../utils.js";
+import { parseJsonPayload } from "../utils/json-payload.js";
 
 export class LlmPromptPlanner
   implements PromptPlannerPort, DatabasePlannerPort {

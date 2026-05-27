@@ -8,7 +8,7 @@ import type {
 } from "@voiceagentsdk/core/sdk";
 import type { BuilderPromptLibrary } from "../prompts/template.js";
 import { renderPromptTemplate } from "../prompts/template.js";
-import { parseJsonPayload } from "../utils.js";
+import { parseJsonPayload } from "../utils/json-payload.js";
 
 export class LlmKnowledgeVerifier implements KnowledgeVerifierPort {
   constructor(

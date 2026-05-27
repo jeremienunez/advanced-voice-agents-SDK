@@ -4,7 +4,8 @@ import type {
   DatabaseBuildRequest,
   JsonObject,
 } from "@voiceagentsdk/core/sdk";
-import { asRecord, readString, toJsonValue } from "../utils.js";
+import { toJsonValue } from "../utils/json-payload.js";
+import { asRecord, readString } from "../utils/record-readers.js";
 import { validateDatabaseProvisionInput } from "./database-provisioning.js";
 import {
   agentSchemaName,

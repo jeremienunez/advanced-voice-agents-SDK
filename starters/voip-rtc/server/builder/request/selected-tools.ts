@@ -2,7 +2,7 @@ import type {
   AgentBuildDraft,
   ToolName,
 } from "@voiceagentsdk/core/sdk";
-import { asRecord } from "../utils.js";
+import { asRecord } from "../utils/record-readers.js";
 
 export function normalizeSelectedTools(
   body: unknown,

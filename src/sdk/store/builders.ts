@@ -7,7 +7,12 @@ import type {
   StoreOperation,
   StoreSearchDefinition,
 } from "../types.js";
-import { clone, defaultPolicy, mergeFields, unique } from "./utils.js";
+import {
+  clone,
+  defaultPolicy,
+  mergeFields,
+  unique,
+} from "./store-policy-values.js";
 import { validateEntity } from "./validation.js";
 import { cloneStoreEntity } from "./clone.js";
 

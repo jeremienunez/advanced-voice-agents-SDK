@@ -5,7 +5,7 @@ import type {
   LlmProviderId,
   LlmTaskRole,
 } from "@voiceagentsdk/core/sdk";
-import { trimTrailingSlash } from "../utils.js";
+import { trimTrailingSlash } from "../utils/url-format.js";
 
 const builderRoles: LlmTaskRole[] = [
   "builder.planner",

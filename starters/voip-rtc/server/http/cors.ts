@@ -1,4 +1,4 @@
-import type { StarterServerEnv } from "../app/env.js";
+import type { StarterServerEnv } from "./types.js";
 import {
   firstAllowedOrigin,
   isAllowedOrigin,

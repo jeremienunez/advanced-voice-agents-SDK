@@ -5,17 +5,16 @@ import { toolInstructionsFromPlan } from "./domain/tooling/compile.js";
 import { createToolBuildPlan } from "./domain/tooling/contracts.js";
 import { validatedToolPlan, validateToolBuildPlan } from "./domain/tooling/validation.js";
 import { mutateDraft } from "./domain/drafts.js";
-import {
-  normalizeKnowledgeDocuments,
-  normalizeIdentity,
-  normalizeResearchSettings,
-  normalizeSelectedTools,
-  readDocumentInput,
-} from "./request.js";
+import { readDocumentInput } from "./request/document-input.js";
+import { normalizeIdentity } from "./request/identity.js";
+import { normalizeKnowledgeDocuments } from "./request/knowledge-documents.js";
+import { normalizeResearchSettings } from "./request/research-settings.js";
+import { normalizeSelectedTools } from "./request/selected-tools.js";
 import { normalizeResearchBudget } from "./domain/research.js";
-import { resolveDraft, requireDraft, saveDraft, setActiveDraft } from "./state.js";
+import { requireDraft, resolveDraft, saveDraft } from "./state/draft-store.js";
+import { setActiveDraft } from "./state/session-store.js";
 import type { BuilderWorkflowDependencies } from "./types.js";
-import { asRecord, readString } from "./utils.js";
+import { asRecord, readString } from "./utils/record-readers.js";
 import { buildEagerKnowledge } from "./eager-knowledge.js";
 import { createValidatedInfraPlan } from "./workflow-infra.js";
 

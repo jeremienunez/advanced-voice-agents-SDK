@@ -7,7 +7,7 @@ import {
   asRecord,
   listFromUnknown,
   readString,
-} from "../utils.js";
+} from "../utils/record-readers.js";
 
 export function normalizeIdentity(
   body: unknown,

@@ -4,7 +4,10 @@ import type {
   KnowledgeResearchRequest,
 } from "@voiceagentsdk/core/sdk";
 import { defaultResearchBudget } from "../catalog.js";
-import { asRecord, readPositiveNumber } from "../utils.js";
+import {
+  asRecord,
+  readPositiveNumber,
+} from "../utils/record-readers.js";
 
 export function normalizeResearchBudget(
   body: unknown,

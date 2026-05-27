@@ -1,5 +1,5 @@
 import type { StoreEntityDefinition, StoreOperation } from "../types.js";
-import { unique } from "./utils.js";
+import { unique } from "./store-policy-values.js";
 
 function fieldIds(entity: StoreEntityDefinition): Set<string> {
   return new Set(entity.fields.map((field) => field.id));

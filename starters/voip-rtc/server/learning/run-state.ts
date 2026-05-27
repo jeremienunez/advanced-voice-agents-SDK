@@ -1,7 +1,7 @@
 import type { LearningJobStatus } from "@voiceagentsdk/core/sdk";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { asRecord } from "../builder/utils.js";
+import { asRecord } from "../builder/utils/record-readers.js";
 
 const learningRunsPath = join(process.cwd(), ".builder-state", "learning-runs.json");
 const runs = loadRuns();

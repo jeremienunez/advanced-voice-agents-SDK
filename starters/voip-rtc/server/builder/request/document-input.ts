@@ -1,5 +1,9 @@
 import type { DocumentIngestionInput } from "@voiceagentsdk/core/sdk";
-import { asRecord, readNumber, readString } from "../utils.js";
+import {
+  asRecord,
+  readNumber,
+  readString,
+} from "../utils/record-readers.js";
 
 const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
 const MAX_TEXT_DOCUMENT_CHARS = 1_000_000;

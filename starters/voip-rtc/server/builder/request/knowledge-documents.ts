@@ -1,6 +1,10 @@
 import type { KnowledgeDocument } from "@voiceagentsdk/core/sdk";
 import { documentKind } from "../domain/document-kind.js";
-import { asRecord, readNumber, readString } from "../utils.js";
+import {
+  asRecord,
+  readNumber,
+  readString,
+} from "../utils/record-readers.js";
 
 export function normalizeKnowledgeDocuments(
   body: unknown,

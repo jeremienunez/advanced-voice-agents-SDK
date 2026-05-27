@@ -7,7 +7,10 @@ import type {
   VoiceAgentSdkDefinition,
 } from "@voiceagentsdk/core/sdk";
 import { compileToolDefinitions } from "./tooling/compile.js";
-import { readChunkCount, readKnowledgeStoreId } from "../utils.js";
+import {
+  readChunkCount,
+  readKnowledgeStoreId,
+} from "../utils/knowledge-metadata.js";
 
 export function fallbackPromptPlan(draft: AgentBuildDraft): PromptBuildPlan {
   const identity = draft.identity;

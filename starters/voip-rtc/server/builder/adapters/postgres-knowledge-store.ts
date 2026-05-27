@@ -5,7 +5,7 @@ import type {
 } from "@voiceagentsdk/core/sdk";
 import postgres from "postgres";
 import { appliedAgentSchema, quoteIdentifier, vectorLiteral } from "../domain/sql.js";
-import { toJsonValue } from "../utils.js";
+import { toJsonValue } from "../utils/json-payload.js";
 import { ensureAgentKnowledgeTables } from "../../infra/postgres/knowledge-schema.js";
 
 export class PostgresPgVectorKnowledgeStore implements KnowledgeStorePort {

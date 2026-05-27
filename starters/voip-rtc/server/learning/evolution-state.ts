@@ -2,7 +2,7 @@ import type {
   AgentBuildDraft,
   CompiledAgentArtifact,
 } from "@voiceagentsdk/core/sdk";
-import { asRecord } from "../builder/utils.js";
+import { asRecord } from "../builder/utils/record-readers.js";
 import type {
   AgentEvolutionMetadata,
   EvolutionAudit,

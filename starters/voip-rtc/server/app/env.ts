@@ -2,16 +2,7 @@ import {
   isLoopbackHost,
   resolveAllowedOrigins,
 } from "../http/origins.js";
-
-export interface StarterServerEnv {
-  allowedOrigins: Set<string>;
-  authToken?: string;
-  browserSampleRate: number;
-  hostname: string;
-  isProduction: boolean;
-  port: number;
-  publicHost: string;
-}
+import type { StarterServerEnv } from "../http/types.js";
 
 export function loadStarterServerEnv(): StarterServerEnv {
   const env = {

@@ -1,5 +1,6 @@
 import type { AgentBuildDraft } from "@voiceagentsdk/core/sdk";
-import { asRecord, readChunkCount } from "../utils.js";
+import { readChunkCount } from "../utils/knowledge-metadata.js";
+import { asRecord } from "../utils/record-readers.js";
 
 export function summarizePlannedKnowledge(
   draft: AgentBuildDraft,

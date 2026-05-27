@@ -1,41 +1,65 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current commit title candidate: `chore: enforce solid architecture gates`
+Current goal: finish the remaining SOLID cleanup until the repo is boringly
+predictable to navigate.
 
-## Current Verification - 2026-05-27
+Target commit title candidate: `refactor: finish solid cleanup backlog`
 
-- [x] `pnpm audit:architecture`
-  - result: Dependency Cruiser passes with strict SOA/SOLID import boundaries.
-- [x] `pnpm audit:responsibility`
-  - result: SRP/LSP audit passes with max 5 runtime exports per implementation
-    file, one exported TSX component per file, role purity, layer purity, and
-    concrete inheritance blocked except platform base classes. Starter server
-    root is also locked to `server/index.ts` only.
-- [x] `pnpm --filter @voiceagentsdk/starter-voip-rtc typecheck`
-- [x] `pnpm typecheck:sdk`
-- [x] `pnpm run test:infra-plan`
-- [x] `pnpm run test:learning`
-- [x] `pnpm run test:learning:bdd`
-  - result: Popper-style BDD scenarios falsify missing learning stores, async
-    failure handling, TTL memory, secret redaction, graph idempotency, and
-    append-only version evolution.
-- [x] `pnpm run test:knowledge-tool`
-- [x] `pnpm run test:rtc-e2e`
-  - result: RTC start/stop returns `activeSessions: 0`, emits
-    `learning.status`, and increments learned agent version.
-- [x] `pnpm run audit:sdk-boundary`
-- [x] `pnpm run audit:imports`
-- [x] `pnpm run audit:loc`
+## Active Focus
+
+### SOLID Finish Line
+
+Outcome:
+A new contributor can locate code by responsibility in under one minute:
+`sdk`, `server`, `client`, `starter app`, `http`, `voice`, `runtime`,
+`builder`, `learning`, `infra`, and `adapters` each have explicit ownership.
+
+Next work:
+
+- [ ] Pick the next hardening slice after the SOLID finish-line commit.
+
+Done in this focus:
+
+- `pnpm audit:solid` now runs architecture, responsibility, LOC, SDK boundary,
+  import boundary, core/starter typechecks, focused seam tests, and RTC E2E.
+- Dependency Cruiser enforces SOA/SOLID import boundaries, including
+  `server/app`, `server/http`, `server/voice`, and `server/adapters`.
+- Responsibility audit enforces max 5 runtime exports, one TSX component per
+  file, explicit file names, starter server root entrypoint only,
+  barrel-only files for `index/utils/state/request/routing/protocol`, and
+  Liskov-safe substitution by blocking concrete inheritance except platform
+  base classes.
+- `pnpm test:solid-seams` covers HTTP origin/auth guards, voice provider
+  catalog validation, voice learning skipped/enqueued paths, builder state
+  serializers, and infra provisioning validation.
+- Starter builder compatibility barrels were removed:
+  `server/builder/state.ts`, `server/builder/request.ts`, and
+  `server/builder/utils.ts`. Only explicit public indexes remain:
+  `server/index.ts` and `server/builder/index.ts`.
+
+### Current Gates
+
+Run before commit:
+
+- [x] `pnpm audit:solid`
 - [x] `git diff --check`
-- [x] `pnpm run pack:dry-run`
+
+Recently green:
+
+- [x] `pnpm typecheck:starters`
+- [x] `pnpm test:solid-seams`
+- [x] `pnpm test:infra-plan`
+- [x] `pnpm test:learning`
+- [x] `pnpm test:learning:bdd`
+- [x] `pnpm test:knowledge-tool`
+- [x] `pnpm pack:dry-run`
+
+Optional security/network checks:
+
 - [ ] `pnpm audit --json`
-  - not re-run in this learning/docs slice; no dependency changes.
 - [ ] `pnpm audit --dev --json`
-  - not re-run in this learning/docs slice; no dependency changes.
 - [ ] `curl http://127.0.0.1:8787/config`
-  - not re-run in this documentation/LOC pass.
 - [ ] `curl http://127.0.0.1:8787/builder/config`
-  - not re-run in this documentation/LOC pass.
 
 ## Architecture Backlog - Builder LLM Harness
 

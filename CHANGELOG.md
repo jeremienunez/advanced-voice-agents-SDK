@@ -30,7 +30,19 @@ SDK/runtime/client inverse, pas d'heritage concret fragile hors bases plateforme
   - un composant exporte par fichier TSX;
   - noms de fichiers explicites;
   - primitives UI en feuilles;
+  - fichiers `index/utils/state/request/routing/protocol` limites a des
+    barrels;
   - interdiction d'heritage concret hors `Error` et `AudioWorkletProcessor`.
+- Ajout de `pnpm audit:solid` pour enchainer architecture, responsabilite,
+  LOC, boundaries, typechecks, tests de coutures et E2E RTC.
+- Ajout de `pnpm test:solid-seams`, un test BDD falsifiable pour les coutures
+  HTTP origin/auth, voice provider factory, hook learning, serializers builder
+  et validation infra.
+- Ajout de frontieres Dependency Cruiser dediees a `server/app`, `server/http`,
+  `server/voice` et `server/adapters`.
+- Suppression des barrels de compatibilite internes `server/builder/state.ts`,
+  `server/builder/request.ts` et `server/builder/utils.ts`; les imports internes
+  pointent maintenant vers les modules responsables.
 - Decoupage SRP de modules trop larges:
   - racine `starters/voip-rtc/server` reduite a `index.ts`;
   - composition starter rangee dans `server/app`;
@@ -56,7 +68,9 @@ SDK/runtime/client inverse, pas d'heritage concret fragile hors bases plateforme
 - `pnpm audit:architecture` OK
 - `pnpm typecheck:sdk` OK
 - `pnpm --filter @voiceagentsdk/starter-voip-rtc typecheck` OK
+- `pnpm test:solid-seams` OK
 - `pnpm audit:loc` OK
+- `pnpm audit:solid` OK
 
 ## feat/refactor: add post-session learning stores and nest modules
 

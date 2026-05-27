@@ -1,5 +1,5 @@
 import type { DomainPack, ToolRegistryItem } from "../types.js";
-import { copy } from "./utils.js";
+import { copy } from "./builder-values.js";
 
 export function defineToolRegistryItem(item: ToolRegistryItem): ToolRegistryItem {
   return copy(item);

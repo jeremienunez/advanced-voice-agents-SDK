@@ -2,7 +2,7 @@ import {
   createAgentBuildDraftBuilder,
   type AgentBuildDraft,
 } from "@voiceagentsdk/core/sdk";
-import { asRecord } from "../utils.js";
+import { asRecord } from "../utils/record-readers.js";
 
 export function mutateDraft(draft: AgentBuildDraft) {
   const builder = createAgentBuildDraftBuilder(draft.id, draft.identity)

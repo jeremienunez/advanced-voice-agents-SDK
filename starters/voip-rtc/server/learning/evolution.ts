@@ -5,11 +5,8 @@ import type {
   CompiledAgentArtifact,
 } from "@voiceagentsdk/core/sdk";
 import { mutateDraft } from "../builder/domain/drafts.js";
-import {
-  requireDraft,
-  saveDraft,
-  setActiveDraft,
-} from "../builder/state.js";
+import { requireDraft, saveDraft } from "../builder/state/draft-store.js";
+import { setActiveDraft } from "../builder/state/session-store.js";
 import { buildPromptVersion } from "./evolution-prompt.js";
 import {
   artifactIdFor,

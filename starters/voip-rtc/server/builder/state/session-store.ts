@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { sessionStatePath } from "./paths.js";
 import type { BuilderSessionState } from "../types.js";
-import { asRecord, readString } from "../utils.js";
+import { asRecord, readString } from "../utils/record-readers.js";
 
 const builderSession = loadBuilderSession();
 

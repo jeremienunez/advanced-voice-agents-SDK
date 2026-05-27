@@ -1,11 +1,9 @@
 import { createBuilderServiceCompositionFromEnv } from "./composition.js";
 import { createBuilderRouter } from "./router.js";
 import { createBuilderWorkflows } from "./workflows.js";
-import {
-  activeCompiledDraft,
-  builderSessionPayload,
-  getDraft,
-} from "./state.js";
+import { activeCompiledDraft } from "./state/active-draft.js";
+import { getDraft } from "./state/draft-store.js";
+import { builderSessionPayload } from "./state/session-payload.js";
 import type {
   BuilderRouteResult,
   BuilderServiceOptions,

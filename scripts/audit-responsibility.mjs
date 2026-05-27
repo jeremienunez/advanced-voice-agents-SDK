@@ -5,12 +5,8 @@ const roots = ["src", "starters/voip-rtc/src", "starters/voip-rtc/server"];
 const extensions = new Set([".ts", ".tsx", ".mjs", ".js"]);
 const ignoredSegments = new Set(["node_modules", "dist", ".builder-state"]);
 const vagueNames = new Set(["utils", "helpers", "common", "misc", "stuff", "manager"]);
-const permittedLegacyVagueFiles = new Set([
-  "src/sdk/builders/utils.ts",
-  "src/sdk/store/utils.ts",
-  "starters/voip-rtc/server/builder/utils.ts",
-]);
 const barrelPattern = /(^|\/)index\.(?:ts|tsx|mjs|js)$/;
+const barrelOnlyNamePattern = /(^|\/)(?:index|utils|state|request|routing|protocol)\.(?:ts|tsx|mjs|js)$/;
 const typeModulePattern = /(^|\/)(?:types|.*-types|.*\.types)\.(?:ts|tsx)$/;
 const generatedTypeHubPattern = /^src\/sdk\/types\.ts$/;
 const maxRuntimeExports = 5;
@@ -39,7 +35,8 @@ console.log("Responsibility audit clean: files keep one visible responsibility")
 
 function inspectFile(file, source) {
   assertServerRootEntryPoint(file);
-  assertFileName(file);
+  assertBarrelOnlyFile(file, source);
+  assertFileName(file, source);
   assertExportSurface(file, source);
   assertSubstitutionSafety(file, source);
   assertRolePurity(file, source);
@@ -59,10 +56,22 @@ function assertServerRootEntryPoint(file) {
   }
 }
 
-function assertFileName(file) {
+function assertFileName(file, source) {
   const base = file.split("/").pop()?.replace(/\.(?:tsx?|mjs|js)$/, "") ?? "";
-  if (vagueNames.has(base) && !permittedLegacyVagueFiles.has(file)) {
+  if (vagueNames.has(base) && !isBarrelOnly(source)) {
     add(file, "solid-explicit-file-name", "rename vague files after the exact responsibility");
+  }
+}
+
+function assertBarrelOnlyFile(file, source) {
+  if (!barrelOnlyNamePattern.test(file)) return;
+  if (permittedStarterServerRootFiles.has(file)) return;
+  if (!isBarrelOnly(source)) {
+    add(
+      file,
+      "solid-barrel-only",
+      "files named index/utils/state/request/routing/protocol must only re-export contracts",
+    );
   }
 }
 
@@ -140,6 +149,16 @@ function countRuntimeExports(source) {
     /^export\s+(?:async\s+)?(?:function|class|const|let|var|enum)\s+[A-Za-z0-9_]+/gm,
   );
   return Array.from(matches).length;
+}
+
+function isBarrelOnly(source) {
+  const cleaned = source
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/^\s*\/\/.*$/gm, "")
+    .replace(/^\s*import[\s\S]*?;\s*/gm, "")
+    .replace(/^\s*export[\s\S]*?;\s*/gm, "")
+    .trim();
+  return cleaned.length === 0;
 }
 
 function countComponentExports(source) {

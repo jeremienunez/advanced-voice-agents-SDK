@@ -1,6 +1,6 @@
 import type { AgentBuildDraft } from "@voiceagentsdk/core/sdk";
 import { latestLearningRunForDraft } from "../../learning/run-state.js";
-import { asRecord, readString } from "../utils.js";
+import { asRecord, readString } from "../utils/record-readers.js";
 
 export function summarizeEvolution(draft: AgentBuildDraft): Record<string, unknown> {
   const raw = asRecord(draft.metadata?.agentEvolution);

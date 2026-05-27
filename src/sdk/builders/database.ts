@@ -6,7 +6,7 @@ import type {
   DatabaseVectorIndexDefinition,
   DomainDataAdapter,
 } from "../types.js";
-import { assertUnique, copy } from "./utils.js";
+import { assertUnique, copy } from "./builder-values.js";
 
 export class DatabaseBuilder {
   private readonly definition: DatabaseDefinition;

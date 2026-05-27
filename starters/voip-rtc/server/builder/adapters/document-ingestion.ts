@@ -5,7 +5,7 @@ import type {
 } from "@voiceagentsdk/core/sdk";
 import * as XLSX from "xlsx";
 import { documentKind } from "../domain/document-kind.js";
-import { asRecord, readString } from "../utils.js";
+import { asRecord, readString } from "../utils/record-readers.js";
 
 const MAX_WORKBOOK_BYTES = 8 * 1024 * 1024;
 const MAX_WORKBOOK_SHEETS = 12;

@@ -12,7 +12,7 @@ import type {
   ToolRegistryItem,
   ToolValidationReport,
 } from "../types.js";
-import { assertUnique, copy } from "./utils.js";
+import { assertUnique, copy } from "./builder-values.js";
 
 export class AgentBuildDraftBuilder {
   private readonly draft: AgentBuildDraft;

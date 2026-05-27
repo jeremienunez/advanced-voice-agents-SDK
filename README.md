@@ -253,6 +253,7 @@ Learning test commands:
 ```bash
 pnpm test:learning
 pnpm test:learning:bdd
+pnpm test:solid-seams
 pnpm test:rtc-e2e
 ```
 
@@ -414,8 +415,10 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `pnpm dev:voip-rtc` | Run the reusable RTC voice starter. |
 | `pnpm harness:route-wines` | Run the route-wines builder harness. |
 | `pnpm test:knowledge-tool` | Check runtime knowledge tool wiring. |
+| `pnpm test:solid-seams` | Run focused BDD seam tests for HTTP guards, voice factory/learning, builder summaries, and infra validation. |
 | `pnpm test:runtime-tool-call` | Check runtime tool call flow. |
 | `pnpm test:rtc-e2e` | Run the RTC WebSocket e2e script. |
+| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam tests, and RTC E2E. |
 | `pnpm audit:architecture` | Enforce Dependency Cruiser SOA/SOLID import boundaries. |
 | `pnpm audit:responsibility` | Enforce SRP/LSP clean-code responsibility rules. |
 | `pnpm audit:sdk-boundary` | Verify core SDK boundary rules. |
@@ -520,15 +523,18 @@ This repo treats architecture rules as executable constraints:
   unresolved imports, undeclared packages, production code importing dev-only
   packages, `dist` imports, SDK-to-server/client coupling, server-to-client
   coupling, starter UI/server coupling, feature-to-feature imports, builder
-  domain impurity, runtime importing builder internals, and tests leaking into
-  production modules.
+  domain impurity, runtime importing builder internals, app/http/voice adapter
+  boundary drift, and tests leaking into production modules.
 - `pnpm audit:responsibility` enforces one visible responsibility per file:
   max 5 runtime exports per implementation file, one exported component per
   TSX file, explicit file names, pure UI domain modules, UI primitive leaves,
-  SDK foundation purity, builder domain purity, and Liskov-safe substitution by
-  rejecting concrete inheritance except platform base classes.
+  SDK foundation purity, builder domain purity, barrel-only files for names
+  like `index.ts`, `utils.ts`, `state.ts`, `request.ts`, `routing.ts`, and
+  `protocol.ts`, and Liskov-safe substitution by rejecting concrete inheritance
+  except platform base classes.
 - Barrels may preserve public imports, but logic belongs in named modules with
-  one reason to change.
+  one reason to change. The VOIP starter currently keeps only
+  `server/index.ts` and `server/builder/index.ts` as public server indexes.
 - New cross-layer behavior must go through typed contracts or ports. Do not
   reach across service boundaries to reuse an implementation detail.
 - In the VOIP starter server, `server/index.ts` is the only allowed root file.

@@ -2,7 +2,7 @@ import {
   asRecord,
   readNumber,
   readString,
-} from "../utils.js";
+} from "../utils/record-readers.js";
 
 export function normalizeResearchSettings(
   body: unknown,
