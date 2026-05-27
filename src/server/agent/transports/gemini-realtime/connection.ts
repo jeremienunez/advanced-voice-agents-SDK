@@ -39,7 +39,6 @@ export function connectGeminiRealtimeSocket(
       deps.logger.info("Gemini setup payload", {
         model: deps.model,
         payloadLength: payload.length,
-        payloadPreview: payload.substring(0, 300),
       });
       ws.send(payload);
     });
@@ -47,7 +46,7 @@ export function connectGeminiRealtimeSocket(
     ws.on("message", (data) => {
       const raw = data.toString();
       deps.logger.debug("Gemini raw message", {
-        preview: raw.substring(0, 500),
+        byteLength: raw.length,
       });
       const msg = parseGeminiMessage(data, deps.logger);
       if (!msg) return;

@@ -26,7 +26,7 @@ export function useRtcLab(compiledAgent: CompiledAgentSummary | null) {
   const [audioMode, setAudioMode] =
     useState<BrowserVoiceAudioMode>("microphone");
   const [wsUrl, setWsUrl] = useState(
-    import.meta.env.VITE_VOICE_WS_URL ?? DEFAULT_WS_URL,
+    withWsAuthToken(import.meta.env.VITE_VOICE_WS_URL ?? DEFAULT_WS_URL),
   );
   const [runtimeConfig, setRuntimeConfig] = useState<RuntimeConfig | null>(
     null,
@@ -92,7 +92,9 @@ export function useRtcLab(compiledAgent: CompiledAgentSummary | null) {
           setModel(nextProvider.defaultModel);
           setVoice(compiledAgent?.knowledge ? "Puck" : nextProvider.defaultVoice);
         }
-        if (!import.meta.env.VITE_VOICE_WS_URL) setWsUrl(config.wsUrl);
+        if (!import.meta.env.VITE_VOICE_WS_URL) {
+          setWsUrl(withWsAuthToken(config.wsUrl));
+        }
       } catch (error) {
         if (controller.signal.aborted) return;
         setConfigError(
@@ -145,4 +147,16 @@ export function useRtcLab(compiledAgent: CompiledAgentSummary | null) {
         agent: compiledAgent?.draftId,
       }),
   };
+}
+
+function withWsAuthToken(url: string): string {
+  const token = import.meta.env.VITE_VOICE_DEV_AUTH_TOKEN;
+  if (!token) return url;
+  try {
+    const next = new URL(url);
+    next.searchParams.set("token", token);
+    return next.toString();
+  } catch {
+    return url;
+  }
 }

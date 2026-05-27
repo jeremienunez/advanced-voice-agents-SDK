@@ -277,6 +277,10 @@ OPENAI_REALTIME_VOICE=marin
 Builder, research, embeddings, and knowledge store:
 
 ```bash
+VOICE_SERVER_HOST=127.0.0.1
+VOICE_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+VOICE_DEV_AUTH_TOKEN=
+VITE_VOICE_DEV_AUTH_TOKEN=
 DEEPSEEK_API_KEY=
 DEEPSEEK_MODEL=deepseek-v4-pro
 DEEPSEEK_BASE_URL=https://api.deepseek.com
@@ -327,4 +331,3 @@ This is an early clean-core SDK and starter. The Fastify adapter is a placeholde
 until the next adapter pass wires tenant resolution, secrets, provider factories,
 media bridge factories, tools, prompts, and database adapters behind public
 ports.
-

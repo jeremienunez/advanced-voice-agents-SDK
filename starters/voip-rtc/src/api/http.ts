@@ -1,3 +1,5 @@
+const DEV_AUTH_TOKEN = import.meta.env.VITE_VOICE_DEV_AUTH_TOKEN;
+
 export async function postJson<T>(url: string, body: unknown): Promise<T> {
   const response = await fetchWithNetworkError(url, {
     method: "POST",
@@ -41,7 +43,7 @@ export async function fetchWithNetworkError(
   init?: RequestInit,
 ): Promise<Response> {
   try {
-    return await fetch(url, init);
+    return await fetch(url, withAuthHeaders(init));
   } catch (error) {
     throw new Error(
       error instanceof TypeError
@@ -51,4 +53,11 @@ export async function fetchWithNetworkError(
           : "Network request failed",
     );
   }
+}
+
+function withAuthHeaders(init?: RequestInit): RequestInit | undefined {
+  if (!DEV_AUTH_TOKEN) return init;
+  const headers = new Headers(init?.headers);
+  headers.set("Authorization", `Bearer ${DEV_AUTH_TOKEN}`);
+  return { ...init, headers };
 }

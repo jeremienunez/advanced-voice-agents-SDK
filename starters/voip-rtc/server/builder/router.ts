@@ -7,13 +7,17 @@ type BuilderWorkflows = ReturnType<typeof createBuilderWorkflows>;
 
 export function createBuilderRouter(options: {
   config: BuilderConfig;
-  corsHeaders: Record<string, string>;
+  corsHeaders: Record<string, string> | ((request: Request) => Record<string, string>);
   workflows: BuilderWorkflows;
 }) {
-  const { config, corsHeaders, workflows } = options;
+  const { config, workflows } = options;
 
   return {
     async handle(request: Request, url: URL): Promise<BuilderRouteResult> {
+      const corsHeaders =
+        typeof options.corsHeaders === "function"
+          ? options.corsHeaders(request)
+          : options.corsHeaders;
       try {
         if (url.pathname === "/builder/config" && request.method === "GET") {
           return { response: json(config, corsHeaders) };

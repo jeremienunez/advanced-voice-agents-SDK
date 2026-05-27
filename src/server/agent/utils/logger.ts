@@ -46,10 +46,16 @@ function redactContext(ctx: LogContext): LogContext {
     if (REDACT_FIELDS.some((f) => key.toLowerCase().includes(f))) {
       redacted[key] = "[REDACTED]";
     } else {
-      redacted[key] = value;
+      redacted[key] = redactValue(value);
     }
   }
   return redacted;
+}
+
+function redactValue(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(redactValue);
+  if (!value || typeof value !== "object") return value;
+  return redactContext(value as LogContext);
 }
 
 /**

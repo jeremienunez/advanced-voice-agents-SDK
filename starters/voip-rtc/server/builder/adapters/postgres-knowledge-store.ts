@@ -26,6 +26,7 @@ export class PostgresPgVectorKnowledgeStore implements KnowledgeStorePort {
     }
 
     const sql = postgres(this.config.databaseUrl, { max: 1 });
+    const dimensions = safeVectorDimensions(this.config.dimensions);
     try {
       await sql`create extension if not exists vector`;
       await sql`
@@ -48,7 +49,7 @@ export class PostgresPgVectorKnowledgeStore implements KnowledgeStorePort {
           document_id text not null references voice_agent_documents(id) on delete cascade,
           ordinal integer not null,
           content text not null,
-          embedding vector(${this.config.dimensions}),
+          embedding vector(${dimensions}),
           metadata jsonb not null default '{}'::jsonb,
           search tsvector generated always as (to_tsvector('simple', content)) stored,
           created_at timestamptz not null default now()
@@ -236,4 +237,11 @@ export class PostgresPgVectorKnowledgeStore implements KnowledgeStorePort {
       lexicalIndexId: `${schemaName}.knowledge_chunks_search_idx`,
     };
   }
+}
+
+function safeVectorDimensions(dimensions: number): number {
+  if (!Number.isInteger(dimensions) || dimensions < 1 || dimensions > 4096) {
+    throw new Error("Vector dimensions must be an integer between 1 and 4096");
+  }
+  return dimensions;
 }

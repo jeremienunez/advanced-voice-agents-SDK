@@ -24,13 +24,7 @@ export function resolveDraft(body: unknown): AgentBuildDraft {
   const draftId = readString(body, "draftId");
   const existing = drafts.get(draftId);
   if (existing) return existing;
-
-  const candidate = asRecord(body).draft;
-  if (isAgentDraft(candidate)) {
-    saveDraft(candidate);
-    return candidate;
-  }
-
+  if (!draftId) throw new Error("draftId is required");
   return requireDraft(draftId);
 }
 

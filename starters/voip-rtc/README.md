@@ -85,6 +85,10 @@ Useful env vars:
 
 Builder and knowledge env vars:
 
+- `VOICE_SERVER_HOST`
+- `VOICE_ALLOWED_ORIGINS`
+- `VOICE_DEV_AUTH_TOKEN`
+- `VITE_VOICE_DEV_AUTH_TOKEN`
 - `DEEPSEEK_API_KEY`
 - `DEEPSEEK_MODEL`
 - `BUILDER_RESEARCH_PROVIDER`
@@ -106,5 +110,7 @@ pnpm --filter @voiceagentsdk/starter-voip-rtc test:rtc-e2e
 
 ## Production Notes
 
-This starter uses no-op query auth for local demos. For production projects,
-replace it with a real `AuthTicketPort` / single-use WebSocket ticket flow.
+The server binds to loopback by default, restricts browser origins, and requires
+`VOICE_DEV_AUTH_TOKEN` when used in production or exposed off loopback. For real
+production apps, replace the dev token with a proper identity-backed
+single-use WebSocket ticket flow.

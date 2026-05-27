@@ -28,7 +28,8 @@ function spawn(name: string, command: string[]): Bun.Subprocess {
 await runBuild();
 
 const server = spawn("server", ["bun", "--watch", "server/index.ts"]);
-const client = spawn("client", ["pnpm", "exec", "vite", "--host", "0.0.0.0"]);
+const clientHost = env.VITE_DEV_HOST ?? "127.0.0.1";
+const client = spawn("client", ["pnpm", "exec", "vite", "--host", clientHost]);
 
 function shutdown(): void {
   server.kill();

@@ -56,7 +56,12 @@ export class OpenAIChatTransport implements IChatTransport {
       body.user = configOverride.user;
     }
 
-    this.logger.debug("Chat request body", { body });
+    this.logger.debug("Chat request prepared", {
+      model,
+      messageCount: messages.length,
+      toolCount: tools?.length ?? 0,
+      hasUser: Boolean(configOverride?.user),
+    });
     this.logger.info("Chat request", {
       model,
       messageCount: messages.length,

@@ -15,7 +15,7 @@ import type { strategyLabels } from "./catalog.js";
 
 export interface BuilderServiceOptions {
   port: number;
-  corsHeaders: Record<string, string>;
+  corsHeaders: Record<string, string> | ((request: Request) => Record<string, string>);
   composition?: BuilderServiceComposition;
 }
 

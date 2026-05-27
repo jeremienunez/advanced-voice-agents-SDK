@@ -28,7 +28,7 @@ export async function fetchBuilderSession(
   apiBase: string,
   signal?: AbortSignal,
 ): Promise<BuilderSessionResponse | null> {
-  const response = await fetch(`${apiBase}/session`, { signal });
+  const response = await fetchWithNetworkError(`${apiBase}/session`, { signal });
   if (!response.ok) return null;
   return (await response.json()) as BuilderSessionResponse;
 }

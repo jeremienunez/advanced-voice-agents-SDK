@@ -16,6 +16,7 @@ export function validateDatabaseProvisionInput(
   const warnings: string[] = [];
   const expectedSchema = agentSchemaName(input.draft.id);
   const schemaName = input.plan.schemaName;
+  const dimensions = Number(input.plan.vectorization?.dimensions);
 
   if (schemaName !== expectedSchema) {
     errors.push(
@@ -35,7 +36,9 @@ export function validateDatabaseProvisionInput(
     errors.push(...validateSqlStatement(statement, schemaName));
   }
 
-  if (input.plan.vectorization.dimensions !== 1024) {
+  if (!Number.isInteger(dimensions) || dimensions < 1 || dimensions > 4096) {
+    errors.push("Vector dimensions must be an integer between 1 and 4096");
+  } else if (dimensions !== 1024) {
     warnings.push("Voyage starter expects 1024-dimensional embeddings in v1");
   }
 

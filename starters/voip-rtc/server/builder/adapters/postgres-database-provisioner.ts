@@ -34,13 +34,10 @@ export class PostgresAgentDatabaseProvisioner
     const sql = postgres(this.config.databaseUrl, { max: 1 });
     try {
       await sql.begin(async (tx) => {
-        for (const statement of statements) {
-          await tx.unsafe(statement);
-        }
         await ensureAgentKnowledgeTables(
           tx,
           input.plan.schemaName,
-          input.plan.vectorization.dimensions,
+          Number(input.plan.vectorization.dimensions),
         );
       });
     } finally {
@@ -51,8 +48,8 @@ export class PostgresAgentDatabaseProvisioner
       status: "applied",
       schemaName: input.plan.schemaName,
       appliedStatements: [
-        ...statements,
-        "ensure runtime knowledge_documents/knowledge_chunks contract",
+        `validated ${statements.length} planned migration statements`,
+        "applied server-owned pgvector knowledge schema templates",
       ],
       warnings: validation.warnings,
       appliedAt: new Date().toISOString(),

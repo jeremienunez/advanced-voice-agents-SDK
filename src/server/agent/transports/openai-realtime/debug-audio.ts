@@ -17,17 +17,21 @@ export function createOpenAIDebugAudioDump(
   logger: AgentLogger,
 ): OpenAIDebugAudioDump | null {
   if (!process.env.VOICE_DEBUG_AUDIO) return null;
+  if (process.env.NODE_ENV === "production") {
+    logger.warn("VOICE_DEBUG_AUDIO ignored in production");
+    return null;
+  }
 
   const ts = new Date().toISOString().replace(/[:.]/g, "-");
   const debugDir = join("/tmp/voice-debug", ts);
-  mkdirSync(debugDir, { recursive: true });
+  mkdirSync(debugDir, { mode: 0o700, recursive: true });
   const inputPath = join(debugDir, "input.pcm");
   const outputPath = join(debugDir, "output.pcm");
   logger.info(`Audio debug dump -> ${debugDir}`);
 
   return {
-    appendInput: (chunk) => appendFileSync(inputPath, chunk),
-    appendOutput: (chunk) => appendFileSync(outputPath, chunk),
+    appendInput: (chunk) => appendFileSync(inputPath, chunk, { mode: 0o600 }),
+    appendOutput: (chunk) => appendFileSync(outputPath, chunk, { mode: 0o600 }),
     finalize: () => {
       for (const path of [inputPath, outputPath]) {
         try {
@@ -35,7 +39,7 @@ export function createOpenAIDebugAudioDump(
           if (pcm.length > 0) {
             const wav = pcmToWav(pcm, 24000);
             const wavPath = path.replace(".pcm", ".wav");
-            writeFileSync(wavPath, wav);
+            writeFileSync(wavPath, wav, { mode: 0o600 });
             logger.info(
               `WAV written: ${wavPath} (${(wav.length / 1024).toFixed(0)}KB)`,
             );

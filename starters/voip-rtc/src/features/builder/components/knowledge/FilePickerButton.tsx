@@ -1,7 +1,7 @@
 import type { ChangeEvent } from "react";
 
 const KNOWLEDGE_ACCEPT =
-  ".txt,.md,.pdf,.xlsx,.xls,text/plain,text/markdown,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel";
+  ".txt,.md,.pdf,.xlsx,text/plain,text/markdown,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
 export function FilePickerButton({
   busy,
