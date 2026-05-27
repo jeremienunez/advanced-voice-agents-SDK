@@ -1,5 +1,35 @@
 # Changelog
 
+## test: harden database provisioning validation
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Rendre falsifiable le hardening DB: le starter doit prouver que le provisioner
+reel accepte le plan Postgres/pgvector serveur et rejette les DDL dangereux
+avant toute application.
+
+### Journal
+
+- Ajout de `pnpm test:database-provisioning`.
+- Le test appelle le vrai `PostgresAgentDatabaseProvisioner.validate` avec le
+  vrai `fallbackDatabasePlan`.
+- Le validateur SQL rejette maintenant:
+  - les extensions autres que `vector`;
+  - les options arbitraires sur `create extension`;
+  - `CREATE TABLE AS SELECT`;
+  - les appels de fonctions arbitraires;
+  - les index d'expression.
+- `pnpm audit:solid` execute maintenant ce test avant le RTC E2E.
+
+### Validation
+
+- `pnpm test:database-provisioning` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## feat: add auth ticket port
 
 Status: implemented locally

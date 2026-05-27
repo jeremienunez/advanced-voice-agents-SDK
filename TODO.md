@@ -1,23 +1,29 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: harden the starter control plane without breaking local dev mode.
+Current goal: harden database provisioning with real implementation tests.
 
-Target commit title candidate: `feat: add auth ticket port`
+Target commit title candidate: `test: harden database provisioning validation`
 
 ## Active Focus
 
-### Starter Control Plane Hardening
+### Database Provisioning Hardening
 
 Outcome:
-`/builder/*` and `/voice/ws` go through a typed ticket verifier, and RTC user
-identity comes from the verified ticket result instead of raw query params.
+Generated/user-influenced SQL remains planning material and the real starter
+database provisioner rejects dangerous DDL before server-owned templates apply.
 
 Next work:
 
-- [ ] Pick the next hardening slice after the control-plane commit.
+- [ ] Pick the next database hardening slice after this commit.
 
 Done in this focus:
 
+- `pnpm test:database-provisioning` calls the real
+  `PostgresAgentDatabaseProvisioner.validate` with a real fallback DB plan.
+- SQL validation now rejects non-vector extensions, extension options,
+  `CREATE TABLE AS SELECT`, arbitrary function calls, and expression indexes.
+- `pnpm audit:solid` now includes `pnpm test:database-provisioning`.
+- `pnpm audit:solid` is green after the DB validation slice.
 - Added SDK `AuthTicketPort`, `AuthTicketInput`, and `AuthTicketIdentity`.
 - Added starter dev-token verifier adapter backed by `VOICE_DEV_AUTH_TOKEN`.
 - `/builder/*` and `/voice/ws` now call the verifier through the starter route
@@ -32,7 +38,7 @@ Done in this focus:
   resolver requested-provider fallback with a fake `LlmTaskRunnerPort`.
 - `pnpm audit:solid` now runs architecture, responsibility, LOC, SDK boundary,
   import boundary, core/starter typechecks, focused seam tests, LLM harness
-  tests, and RTC E2E.
+  tests, database provisioning tests, and RTC E2E.
 - Dependency Cruiser enforces SOA/SOLID import boundaries, including
   `server/app`, `server/http`, `server/voice`, and `server/adapters`.
 - Responsibility audit enforces max 5 runtime exports, one TSX component per
@@ -59,6 +65,7 @@ Recently green:
 
 - [x] `pnpm typecheck:starters`
 - [x] `pnpm typecheck:sdk`
+- [x] `pnpm test:database-provisioning`
 - [x] `pnpm test:llm-harness`
 - [x] `pnpm test:solid-seams`
 - [x] `pnpm test:learning`
@@ -235,12 +242,12 @@ Optional security/network checks:
   - enforce HTTP and WebSocket origin allowlists;
   - bind dev surfaces to localhost by default unless explicitly configured.
 - [ ] Harden database provisioning:
-  - stop trusting request-supplied drafts for privileged workflows;
-  - load drafts server-side by authenticated owner;
-  - replace broad SQL allowlists with typed migration/templates;
-  - ban `AS SELECT`, arbitrary function calls, arbitrary extensions and
+  - [ ] stop trusting request-supplied drafts for privileged workflows;
+  - [ ] load drafts server-side by authenticated owner;
+  - [x] replace broad SQL allowlists with typed migration/templates;
+  - [x] ban `AS SELECT`, arbitrary function calls, arbitrary extensions and
     expression indexes from generated/user-influenced SQL;
-  - enforce least-privileged Postgres roles and `statement_timeout`.
+  - [ ] enforce least-privileged Postgres roles and `statement_timeout`.
 - [ ] Harden document ingestion:
   - request and file size limits;
   - content-length enforcement;

@@ -79,6 +79,10 @@ Intent routing rules are intentionally simple in this slice:
   state.
 - `BUILDER_INFRA_COMPUTE_TARGET`, `BUILDER_INFRA_ISOLATION`, and
   `BUILDER_INFRA_PROVISIONING_MODE` prepare the VM/K3s/Kubernetes/IaC path.
+- Database provisioning validation keeps generated SQL as planning material and
+  rejects non-vector extensions, extension options, `CREATE TABLE AS SELECT`,
+  arbitrary function calls, and expression indexes before server-owned
+  templates apply.
 
 When an infra plan is valid, the starter attaches an `iac` bundle to the draft:
 
@@ -276,6 +280,7 @@ pnpm --filter @voiceagentsdk/starter-voip-rtc typecheck
 pnpm --filter @voiceagentsdk/starter-voip-rtc harness:route-wines
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:knowledge-tool
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-plan
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:database-provisioning
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:learning
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:learning:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:rtc-e2e

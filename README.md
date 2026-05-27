@@ -154,6 +154,9 @@ Current behavior is deliberately conservative:
   intent asks for them.
 - Generated SQL stays planning material; executable migrations stay
   server-owned templates.
+- Database provisioning validation rejects non-vector extensions, extension
+  options, `CREATE TABLE AS SELECT`, arbitrary function calls, and expression
+  indexes before those templates can apply.
 - The plan carries compute target, isolation mode, provisioning mode, resource
   refs, migration policy, and security notes so a future IaC runner can consume
   it without changing agent code.
@@ -416,10 +419,11 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `pnpm harness:route-wines` | Run the route-wines builder harness. |
 | `pnpm test:knowledge-tool` | Check runtime knowledge tool wiring. |
 | `pnpm test:llm-harness` | Check provider-agnostic builder LLM planner, research, verifier, and resolver behavior. |
+| `pnpm test:database-provisioning` | Run the real starter database provisioner validation against the pgvector template and hostile SQL cases. |
 | `pnpm test:solid-seams` | Run focused BDD seam tests for HTTP guards, voice factory/learning, builder summaries, and infra validation. |
 | `pnpm test:runtime-tool-call` | Check runtime tool call flow. |
 | `pnpm test:rtc-e2e` | Run the RTC WebSocket e2e script. |
-| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM tests, and RTC E2E. |
+| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/DB provisioning tests, and RTC E2E. |
 | `pnpm audit:architecture` | Enforce Dependency Cruiser SOA/SOLID import boundaries. |
 | `pnpm audit:responsibility` | Enforce SRP/LSP clean-code responsibility rules. |
 | `pnpm audit:sdk-boundary` | Verify core SDK boundary rules. |
