@@ -1,88 +1,18 @@
-export type BrowserVoiceState =
-  | "idle"
-  | "connecting"
-  | "listening"
-  | "speaking"
-  | "processing"
-  | "interrupted"
-  | "error"
-  | "ended";
+import type {
+  ClientVoiceMessage,
+  ServerVoiceMessage,
+} from "../../sdk/types/browser-voice.js";
 
-export type VoiceProvider = "openai" | "gemini" | "grok" | "cascaded";
-
-export interface VoiceSessionStartOptions {
-  provider?: VoiceProvider;
-  agent?: string;
-  conversationId?: string;
-  model?: string;
-  voice?: string;
-  providerOptions?: Record<string, unknown>;
-}
-
-export type ClientVoiceMessage =
-  | ({ type: "session.start" } & VoiceSessionStartOptions)
-  | { type: "session.end" }
-  | { type: "audio.pause" }
-  | { type: "audio.resume" };
-
-export type ServerVoiceMessage =
-  | { type: "session.started"; sessionId: string }
-  | { type: "session.ended"; summary: VoiceSessionSummary }
-  | { type: "learning.status"; learning: VoiceLearningSummary }
-  | { type: "session.error"; error: { code: string; message: string } }
-  | { type: "state.change"; state: BrowserVoiceState }
-  | { type: "tool.call"; tool: { name: string; arguments: unknown } }
-  | { type: "tool.result"; tool: { name: string; result: unknown } }
-  | {
-      type: "transcript";
-      text: string;
-      isFinal: boolean;
-      role: "user" | "assistant";
-    }
-  | { type: "text_delta"; text: string }
-  | {
-      type: "tool_start";
-      toolName: string;
-      toolCallId?: string;
-      toolArgs?: unknown;
-    }
-  | {
-      type: "tool_result";
-      toolName: string;
-      toolCallId?: string;
-      toolData: unknown;
-      durationMs?: number;
-    }
-  | { type: "tool_error"; toolName: string; toolCallId?: string; error: string }
-  | { type: "mode"; mode: string }
-  | { type: "done"; conversationId?: string };
-
-export interface VoiceSessionSummary {
-  sessionId: string;
-  durationMs: number;
-  messageCount: number;
-  toolCallCount: number;
-}
-
-export type VoiceLearningStatus =
-  | "queued"
-  | "running"
-  | "applied"
-  | "failed"
-  | "skipped";
-
-export interface VoiceLearningSummary {
-  jobId: string;
-  runId: string;
-  status: VoiceLearningStatus;
-  agentId?: string;
-  draftId?: string;
-  queuedAt: string;
-  startedAt?: string;
-  finishedAt?: string;
-  message?: string;
-  error?: string;
-}
+export type {
+  BrowserVoiceState,
+  ClientVoiceMessage,
+  ServerVoiceMessage,
+  VoiceLearningStatus,
+  VoiceLearningSummary,
+  VoiceProvider,
+  VoiceSessionStartOptions,
+  VoiceSessionSummary,
+} from "../../sdk/types/browser-voice.js";
 
 export interface VoiceWSCallbacks {
   onAudio: (buffer: ArrayBuffer) => void;

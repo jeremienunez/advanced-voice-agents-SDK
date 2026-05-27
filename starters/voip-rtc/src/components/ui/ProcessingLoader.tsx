@@ -1,8 +1,13 @@
-import type { BusyState } from "../../domain/builderProgress.js";
 import { AnimatedGradientBackground } from "./AnimatedGradientBackground.js";
 import { OrbLoaderShader } from "./OrbLoaderShader.js";
 
-export function ProcessingLoader({ state }: { state: BusyState }) {
+interface ProcessingLoaderState {
+  title: string;
+  detail: string;
+  steps: string[];
+}
+
+export function ProcessingLoader({ state }: { state: ProcessingLoaderState }) {
   return (
     <section className="workLoader" role="status" aria-live="polite">
       <AnimatedGradientBackground

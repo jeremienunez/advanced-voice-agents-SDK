@@ -1,9 +1,16 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current commit title candidate: `refactor: nest learning modules and document self-improving stores`
+Current commit title candidate: `chore: enforce solid architecture gates`
 
 ## Current Verification - 2026-05-27
 
+- [x] `pnpm audit:architecture`
+  - result: Dependency Cruiser passes with strict SOA/SOLID import boundaries.
+- [x] `pnpm audit:responsibility`
+  - result: SRP/LSP audit passes with max 5 runtime exports per implementation
+    file, one exported TSX component per file, role purity, layer purity, and
+    concrete inheritance blocked except platform base classes. Starter server
+    root is also locked to `server/index.ts` only.
 - [x] `pnpm --filter @voiceagentsdk/starter-voip-rtc typecheck`
 - [x] `pnpm typecheck:sdk`
 - [x] `pnpm run test:infra-plan`

@@ -1,7 +1,7 @@
 import type {
   ClientVoiceMessage,
   ServerVoiceMessage,
-} from "../../../client/browser/types.js";
+} from "../../../sdk/types/browser-voice.js";
 import {
   createBrowserMediaHandler,
 } from "../../agent/handlers/index.js";

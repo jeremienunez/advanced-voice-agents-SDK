@@ -1,8 +1,8 @@
 export {
   createBuilderService,
   createBuilderServiceFromEnv,
-} from "./builder/service.js";
+} from "./service.js";
 export type {
   BuilderRouteResult,
   BuilderServiceOptions,
-} from "./builder/types.js";
+} from "./types.js";

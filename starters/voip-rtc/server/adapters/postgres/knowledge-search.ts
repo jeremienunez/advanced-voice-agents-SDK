@@ -9,7 +9,7 @@ import postgres from "postgres";
 import {
   quoteIdentifier,
   vectorLiteral,
-} from "../infra/postgres/sql.js";
+} from "../../infra/postgres/sql.js";
 
 type SearchRow = Record<string, unknown>;
 

@@ -1,5 +1,63 @@
 # Changelog
 
+## chore/refactor: enforce SOLID architecture gates
+
+Status: implemented locally
+Date: 2026-05-27
+
+### Intent
+
+Transformer les principes SOLID en contraintes executables: une responsabilite
+visible par fichier, frontieres SOA strictes, pas de cycles, pas de couplage
+SDK/runtime/client inverse, pas d'heritage concret fragile hors bases plateforme.
+
+### Journal
+
+- Installation de `dependency-cruiser` et ajout de `pnpm audit:architecture`.
+- Ajout de `.dependency-cruiser.cjs` avec regles strictes:
+  - pas de cycles;
+  - imports resolus et dependances declarees;
+  - prod sans dependances dev-only;
+  - pas d'import de `dist`;
+  - SDK fondation sans dependance server/client;
+  - separation client/server et UI/server;
+  - domaines UI et builder purs;
+  - pas d'import feature -> autre feature;
+  - runtime sans internals builder;
+  - tests/BDD/scripts exclus des modules prod.
+- Ajout de `pnpm audit:responsibility`:
+  - maximum 5 exports runtime par fichier d'implementation;
+  - un composant exporte par fichier TSX;
+  - noms de fichiers explicites;
+  - primitives UI en feuilles;
+  - interdiction d'heritage concret hors `Error` et `AudioWorkletProcessor`.
+- Decoupage SRP de modules trop larges:
+  - racine `starters/voip-rtc/server` reduite a `index.ts`;
+  - composition starter rangee dans `server/app`;
+  - CORS/auth/routes HTTP ranges dans `server/http`;
+  - orchestration voix rangee dans `server/voice`;
+  - adapters techniques Bun/Postgres ranges dans `server/adapters`;
+  - panels RTC;
+  - utilitaires audio;
+  - factories SDK;
+  - metadata de state machine;
+  - setup Gemini;
+  - protocole browser voice;
+  - helpers research;
+  - backends et normalizers infra;
+  - parsing des requetes builder;
+  - store/session/payloads builder;
+  - catalogue provider;
+  - helpers SQL Postgres.
+
+### Validation
+
+- `pnpm audit:responsibility` OK
+- `pnpm audit:architecture` OK
+- `pnpm typecheck:sdk` OK
+- `pnpm --filter @voiceagentsdk/starter-voip-rtc typecheck` OK
+- `pnpm audit:loc` OK
+
 ## feat/refactor: add post-session learning stores and nest modules
 
 Status: implemented locally

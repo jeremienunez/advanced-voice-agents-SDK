@@ -1,5 +1,5 @@
 import type { KnowledgeSearchResult } from "@voiceagentsdk/core/sdk";
-import { PostgresKnowledgeSearch } from "../server/adapters/postgres-knowledge-search.js";
+import { PostgresKnowledgeSearch } from "../server/adapters/postgres/knowledge-search.js";
 import { VoyageEmbeddingPort } from "../server/builder/adapters/voyage-embeddings.js";
 import { activeCompiledDraft } from "../server/builder/state.js";
 import { runtimeAgentFromDraft } from "../server/runtime/compiled-agent.js";

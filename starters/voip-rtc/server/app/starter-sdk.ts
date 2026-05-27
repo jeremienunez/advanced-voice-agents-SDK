@@ -1,5 +1,8 @@
 import { compileVoiceAgentSdk } from "@voiceagentsdk/core/sdk";
-import type { RuntimeProviderConfig, StarterProviderId } from "./provider-catalog.js";
+import type {
+  RuntimeProviderConfig,
+  StarterProviderId,
+} from "../providers/catalog.js";
 
 export function createStarterSdk(
   providerCatalog: RuntimeProviderConfig[],

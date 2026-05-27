@@ -416,6 +416,8 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `pnpm test:knowledge-tool` | Check runtime knowledge tool wiring. |
 | `pnpm test:runtime-tool-call` | Check runtime tool call flow. |
 | `pnpm test:rtc-e2e` | Run the RTC WebSocket e2e script. |
+| `pnpm audit:architecture` | Enforce Dependency Cruiser SOA/SOLID import boundaries. |
+| `pnpm audit:responsibility` | Enforce SRP/LSP clean-code responsibility rules. |
 | `pnpm audit:sdk-boundary` | Verify core SDK boundary rules. |
 | `pnpm audit:imports` | Audit core import boundaries. |
 | `pnpm audit:tool-contracts` | Verify compiled builder tools have runtime contracts. |
@@ -509,6 +511,29 @@ observability, and workflows in:
 
 Internal generated documentation is intentionally ignored from Git through
 `docs/`.
+
+## SOLID Quality Gates
+
+This repo treats architecture rules as executable constraints:
+
+- `pnpm audit:architecture` runs Dependency Cruiser and fails on cycles,
+  unresolved imports, undeclared packages, production code importing dev-only
+  packages, `dist` imports, SDK-to-server/client coupling, server-to-client
+  coupling, starter UI/server coupling, feature-to-feature imports, builder
+  domain impurity, runtime importing builder internals, and tests leaking into
+  production modules.
+- `pnpm audit:responsibility` enforces one visible responsibility per file:
+  max 5 runtime exports per implementation file, one exported component per
+  TSX file, explicit file names, pure UI domain modules, UI primitive leaves,
+  SDK foundation purity, builder domain purity, and Liskov-safe substitution by
+  rejecting concrete inheritance except platform base classes.
+- Barrels may preserve public imports, but logic belongs in named modules with
+  one reason to change.
+- New cross-layer behavior must go through typed contracts or ports. Do not
+  reach across service boundaries to reuse an implementation detail.
+- In the VOIP starter server, `server/index.ts` is the only allowed root file.
+  Composition belongs in `server/app`, HTTP policy in `server/http`, voice
+  orchestration in `server/voice`, and technical bindings in `server/adapters`.
 
 ## VOIP RTC Starter
 

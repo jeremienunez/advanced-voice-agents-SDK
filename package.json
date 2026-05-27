@@ -70,6 +70,8 @@
     "audit:sdk-boundary": "node scripts/audit-sdk-boundary.mjs",
     "audit:imports": "node scripts/audit-core-imports.mjs",
     "audit:tool-contracts": "node scripts/audit-tool-contracts.mjs",
+    "audit:architecture": "depcruise --config .dependency-cruiser.cjs --output-type err src starters/voip-rtc/src starters/voip-rtc/server starters/voip-rtc/scripts scripts examples",
+    "audit:responsibility": "node scripts/audit-responsibility.mjs",
     "audit:loc": "bun scripts/audit-loc.mjs",
     "pack:dry-run": "pnpm pack --dry-run --json"
   },
@@ -84,6 +86,7 @@
     "@types/react-dom": "^19.2.3",
     "@types/ws": "^8.18.1",
     "@vitejs/plugin-react": "^6.0.2",
+    "dependency-cruiser": "^17.4.2",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "tsx": "^4.21.0",

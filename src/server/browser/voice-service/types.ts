@@ -1,6 +1,6 @@
 import type {
   VoiceProvider,
-} from "../../../client/browser/types.js";
+} from "../../../sdk/types/browser-voice.js";
 import type {
   LearningJobStatus,
   LearningToolCallRecord,

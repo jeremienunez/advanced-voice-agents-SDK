@@ -1,4 +1,4 @@
-import type { ServerVoiceMessage } from "../../../client/browser/types.js";
+import type { ServerVoiceMessage } from "../../../sdk/types/browser-voice.js";
 import type { BrowserMediaHandler } from "../../agent/handlers/index.js";
 import type { VoiceSessionCallbacks } from "../../agent/types/session.types.js";
 import type { AudioChunk } from "../../agent/types/transport.types.js";

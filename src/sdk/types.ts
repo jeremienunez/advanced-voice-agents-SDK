@@ -1,5 +1,6 @@
 export * from "./types/json.js";
 export * from "./types/core.js";
+export * from "./types/browser-voice.js";
 export * from "./types/store.js";
 export * from "./types/llm.js";
 export * from "./types/infra.js";
