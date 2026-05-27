@@ -17,6 +17,7 @@ import { setActiveDraft } from "./state/session-store.js";
 import type { BuilderRequestContext, BuilderWorkflowDependencies } from "./types.js";
 import { asRecord, readString } from "./utils/record-readers.js";
 import { buildEagerKnowledge } from "./eager-knowledge.js";
+import { parseDocumentWithTimeout } from "./workflow-document-ingestion.js";
 import { createValidatedInfraPlan } from "./workflow-infra.js";
 
 export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
@@ -75,7 +76,11 @@ export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
 
     async ingestDocument(request: Request) {
       const documentInput = await readDocumentInput(request);
-      const document = await deps.ingestion.parse(documentInput);
+      const document = await parseDocumentWithTimeout({
+        ingestion: deps.ingestion,
+        input: documentInput,
+        timeoutMs: deps.documentParseTimeoutMs,
+      });
       return { document };
     },
 

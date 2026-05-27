@@ -1,20 +1,19 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: finish document ingestion execution guardrails.
+Current goal: finish document ingestion request quotas.
 
-Target commit title candidate: `test: add document parser timeout seam`
+Target commit title candidate: `test: add document ingestion quota seam`
 
 ## Active Focus
 
 ### Document Ingestion Hardening
 
 Outcome:
-Parser execution is bounded under explicit time and quota seams after the
-spreadsheet parser caps were made observable.
+Document ingestion has bounded uploads, parser caps, and parser timeout seams.
+The remaining guardrail is request-rate quota enforcement.
 
 Next work:
 
-- [ ] Add parser timeout seam.
 - [ ] Add per-IP quota seam.
 
 ### Current Gates
@@ -35,7 +34,6 @@ Optional security/network checks:
 
 ### Document Ingestion
 
-- [ ] Parser timeouts.
 - [ ] Per-IP quotas.
 
 ### Prompt And Tool Orchestration

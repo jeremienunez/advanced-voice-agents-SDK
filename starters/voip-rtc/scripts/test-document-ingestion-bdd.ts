@@ -1,4 +1,10 @@
+import type {
+  DocumentIngestionInput,
+  KnowledgeDocument,
+} from "@voiceagentsdk/core/sdk";
 import { PlainTextDocumentIngestion } from "../server/builder/adapters/document-ingestion.js";
+import type { BuilderWorkflowDependencies } from "../server/builder/types.js";
+import { createBuilderWorkflows } from "../server/builder/workflows.js";
 import { readDocumentInput } from "../server/builder/request/document-input.js";
 import { assert } from "./shared/assertions.js";
 import * as XLSX from "xlsx";
@@ -8,6 +14,7 @@ const results = [
   await scenarioRejectsDisallowedDocumentTypes(),
   await scenarioAcceptsBoundedTextDocuments(),
   await scenarioWorkbookParserReportsCaps(),
+  await scenarioParserTimeoutFailsClosed(),
 ];
 
 console.log(JSON.stringify({ status: "ok", results }, null, 2));
@@ -159,6 +166,42 @@ async function scenarioWorkbookParserReportsCaps() {
   return "workbook-parser-caps";
 }
 
+async function scenarioParserTimeoutFailsClosed() {
+  let observedSignal: AbortSignal | undefined;
+  const workflows = createBuilderWorkflows({
+    documentParseTimeoutMs: 1,
+    ingestion: {
+      parse(
+        input: DocumentIngestionInput,
+        options?: { signal?: AbortSignal },
+      ): Promise<KnowledgeDocument> {
+        observedSignal = options?.signal;
+        return new Promise<KnowledgeDocument>(() => {
+          void input;
+        });
+      },
+    },
+  } as unknown as BuilderWorkflowDependencies);
+
+  const result = await Promise.race([
+    workflows.ingestDocument(jsonRequest(
+      { id: "slow-doc", name: "slow.md", content: "# slow" },
+      { "content-length": "120" },
+    )),
+    wait(50).then(() => null),
+  ]);
+
+  assert(result !== null, "parser timeout seam must settle stuck parsers");
+  assert(result.document.status === "failed", "parser timeout must fail closed");
+  assert(
+    result.document.error?.includes("timed out after 1ms") === true,
+    `parser timeout error must be explicit, got ${result.document.error ?? "none"}`,
+  );
+  assert(observedSignal?.aborted === true, "parser timeout must abort the parser signal");
+
+  return "parser-timeout-fails-closed";
+}
+
 function jsonRequest(
   body: unknown,
   headers: Record<string, string>,
@@ -182,6 +225,10 @@ async function captureError(
   } catch (error) {
     return error instanceof Error ? error : new Error(String(error));
   }
+}
+
+async function wait(ms: number): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function workbookWithOverflowingRows(): ArrayBuffer {

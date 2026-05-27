@@ -1,5 +1,36 @@
 # Changelog
 
+## test: add document parser timeout seam
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Eviter qu'un parser document bloque le workflow builder: l'ingestion doit
+echouer proprement et rester configuree par env en mode dev.
+
+### Journal
+
+- Le scenario `pnpm test:document-ingestion:bdd` couvre maintenant un parseur
+  bloque qui doit se terminer en document `failed`.
+- Le port `DocumentIngestionPort` accepte un `AbortSignal` optionnel pour les
+  adapters capables d'annuler leur parsing.
+- `parseDocumentWithTimeout` encapsule le port ingestion et retourne une erreur
+  explicite `Document parsing timed out after ...ms`.
+- `BUILDER_DOCUMENT_PARSE_TIMEOUT_MS` pilote le timeout depuis l'env et apparait
+  dans l'onboarding dev.
+- Le parseur texte/xlsx verifie le signal avant le parsing et pendant les
+  boucles workbook.
+
+### Validation
+
+- `pnpm test:document-ingestion:bdd` OK
+- `pnpm typecheck:sdk` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: cover workbook parser caps
 
 Status: implemented locally

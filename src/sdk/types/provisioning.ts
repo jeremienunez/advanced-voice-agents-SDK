@@ -63,6 +63,13 @@ export interface DocumentIngestionInput {
   content: string | ArrayBuffer;
 }
 
+export interface DocumentIngestionOptions {
+  signal?: AbortSignal;
+}
+
 export interface DocumentIngestionPort {
-  parse(input: DocumentIngestionInput): Promise<KnowledgeDocument>;
+  parse(
+    input: DocumentIngestionInput,
+    options?: DocumentIngestionOptions,
+  ): Promise<KnowledgeDocument>;
 }

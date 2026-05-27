@@ -1,5 +1,6 @@
 import type {
   DocumentIngestionInput,
+  DocumentIngestionOptions,
   DocumentIngestionPort,
   KnowledgeDocument,
 } from "@voiceagentsdk/core/sdk";
@@ -15,7 +16,11 @@ const MAX_CELL_CHARS = 500;
 const MAX_DOCUMENT_CHARS = 500_000;
 
 export class PlainTextDocumentIngestion implements DocumentIngestionPort {
-  async parse(input: DocumentIngestionInput): Promise<KnowledgeDocument> {
+  async parse(
+    input: DocumentIngestionInput,
+    options: DocumentIngestionOptions = {},
+  ): Promise<KnowledgeDocument> {
+    throwIfAborted(options.signal);
     const kind = documentKind(input.name, input.mimeType);
     const base = {
       id: input.id ?? `doc_${crypto.randomUUID()}`,
@@ -44,7 +49,7 @@ export class PlainTextDocumentIngestion implements DocumentIngestionPort {
     }
 
     if (kind === "xlsx") {
-      return parseWorkbookDocument(input, kind);
+      return parseWorkbookDocument(input, kind, options.signal);
     }
 
     if (kind !== "txt" && kind !== "md" && kind !== "web_research") {
@@ -71,7 +76,9 @@ export class PlainTextDocumentIngestion implements DocumentIngestionPort {
 async function parseWorkbookDocument(
   input: DocumentIngestionInput,
   kind: "xlsx",
+  signal?: AbortSignal,
 ): Promise<KnowledgeDocument> {
+  throwIfAborted(signal);
   const content =
     typeof input.content === "string"
       ? Buffer.from(input.content)
@@ -103,6 +110,7 @@ async function parseWorkbookDocument(
   const sections: string[] = [];
 
   for (const sheetName of workbook.SheetNames.slice(0, MAX_WORKBOOK_SHEETS)) {
+    throwIfAborted(signal);
     const sheet = workbook.Sheets[sheetName];
     if (!sheet) continue;
     sheetNames.push(sheetName);
@@ -129,6 +137,7 @@ async function parseWorkbookDocument(
     sections.push(`Headers: ${headers.join(" | ")}`);
 
     for (const [index, row] of rows.slice(1, MAX_ROWS_PER_SHEET + 1).entries()) {
+      throwIfAborted(signal);
       if (documentChars >= MAX_DOCUMENT_CHARS) {
         truncated = true;
         break;
@@ -169,6 +178,10 @@ async function parseWorkbookDocument(
       truncated,
     },
   };
+}
+
+function throwIfAborted(signal?: AbortSignal): void {
+  if (signal?.aborted) throw new Error("Document parsing aborted");
 }
 
 type CellText = {

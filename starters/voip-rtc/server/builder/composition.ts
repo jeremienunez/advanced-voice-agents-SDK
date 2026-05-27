@@ -43,6 +43,10 @@ export function createBuilderServiceCompositionFromEnv(
     : 3;
   const voyageModel = env.VOYAGE_EMBEDDING_MODEL ?? "voyage-4-large";
   const voyageDimensions = Number(env.VOYAGE_EMBEDDING_DIMENSIONS ?? 1024);
+  const documentParseTimeoutMs = readPositiveNumber(
+    env.BUILDER_DOCUMENT_PARSE_TIMEOUT_MS,
+    5000,
+  );
   const researchBudget = researchBudgetFromEnv(env);
   const promptLibrary = loadBuilderPromptLibrary();
   const llmCatalog = createBuilderLlmCatalog(env);
@@ -92,6 +96,7 @@ export function createBuilderServiceCompositionFromEnv(
       researchModel,
       voyageEmbeddingModel: voyageModel,
       voyageEmbeddingDimensions: voyageDimensions,
+      documentParseTimeoutMs,
       knowledgeVerificationProvider,
       knowledgeVerificationModel,
       knowledgeVerificationPasses,
@@ -145,6 +150,7 @@ export function createBuilderServiceCompositionFromEnv(
         dimensions: voyageDimensions,
       }),
       ingestion: new PlainTextDocumentIngestion(),
+      documentParseTimeoutMs,
       knowledgeStore: new PostgresPgVectorKnowledgeStore({
         databaseUrl: env.DATABASE_URL,
         dimensions: voyageDimensions,
@@ -199,6 +205,12 @@ export function createBuilderServiceCompositionFromEnv(
       availableSecretNames: configuredSecretNames(env),
     },
   };
+}
+
+function readPositiveNumber(value: string | undefined, fallback: number): number {
+  if (!value) return fallback;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
 function resolveRoleProfile(

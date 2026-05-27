@@ -193,6 +193,7 @@ export interface BuilderConfig {
     knowledgeVerificationPasses: number;
     voyageEmbeddingModel: string;
     voyageEmbeddingDimensions: number;
+    documentParseTimeoutMs: number;
     researchBudget: KnowledgeResearchBudget;
   };
   availability: {

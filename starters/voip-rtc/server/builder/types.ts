@@ -32,6 +32,7 @@ export interface BuilderConfig {
     researchModel: string;
     voyageEmbeddingModel: string;
     voyageEmbeddingDimensions: number;
+    documentParseTimeoutMs: number;
     knowledgeVerificationProvider: string;
     knowledgeVerificationModel: string;
     knowledgeVerificationPasses: number;
@@ -99,6 +100,7 @@ export interface BuilderWorkflowDependencies {
   planner: BuilderPlannerPort;
   embeddings: EmbeddingPort;
   ingestion: DocumentIngestionPort;
+  documentParseTimeoutMs: number;
   knowledgeStore: KnowledgeStorePort;
   databaseProvisioner: DatabaseProvisionerPort;
   infraPlanner: InfraPlannerPort;
