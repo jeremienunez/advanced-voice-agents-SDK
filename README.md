@@ -120,9 +120,9 @@ cp starters/voip-rtc/.env.example starters/voip-rtc/.env
 pnpm dev:voip-rtc
 ```
 
-Open `http://localhost:5177`.
+Open `http://127.0.0.1:5177` or `http://localhost:5177`.
 
-The starter server runs on `http://localhost:8787` by default.
+The starter server runs on `http://127.0.0.1:8787` by default.
 
 ## Public Export Cheat Sheet
 
@@ -193,6 +193,25 @@ const runtime = compileVoiceAgentSdk(definition);
 const prompt = runtime.promptFor({ channel: "voice" });
 ```
 
+## Builder Tool Contracts
+
+The builder keeps tool planning separate from the final voice prompt.
+
+- `tool-plan.system.md` and `tool-plan.user.md` describe builder-side tool
+  planning.
+- `final-prompt.system.md` and `final-prompt.user.md` compose only the voice
+  agent system prompt.
+- `ToolBuildPlan` stores serializable tool contracts: selected tools, schemas,
+  permissions, side effects, confirmation policy, and runtime binding.
+- `compile-agent` validates selected tools before composing the voice prompt.
+- The final prompt receives voice-safe tool policy only; runtime internals such
+  as `handlerRef` stay out of model-facing instructions.
+- Runtime action handlers currently cover summary creation, human handoff,
+  follow-up scheduling, structured notes, and knowledge search.
+
+Use `pnpm audit:tool-contracts` to catch compiled agents that select tools
+without validated runtime contracts.
+
 ## Safe Store Cheat Sheet
 
 ```ts
@@ -235,6 +254,8 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `pnpm test:rtc-e2e` | Run the RTC WebSocket e2e script. |
 | `pnpm audit:sdk-boundary` | Verify core SDK boundary rules. |
 | `pnpm audit:imports` | Audit core import boundaries. |
+| `pnpm audit:tool-contracts` | Verify compiled builder tools have runtime contracts. |
+| `pnpm audit:loc` | Enforce the handwritten file LOC ceiling. |
 | `pnpm pack:dry-run` | Inspect package contents. |
 
 ## Starter Routes
@@ -286,6 +307,11 @@ DEEPSEEK_MODEL=deepseek-v4-pro
 DEEPSEEK_BASE_URL=https://api.deepseek.com
 BUILDER_RESEARCH_PROVIDER=deepseek
 BUILDER_RESEARCH_MODEL=deepseek-v4-pro
+BUILDER_KNOWLEDGE_VERIFICATION_PROVIDER=kimi
+BUILDER_KNOWLEDGE_VERIFICATION_PASSES=3
+KIMI_API_KEY=
+KIMI_MODEL=kimi-k2.6
+KIMI_MAX_TOKENS=65536
 VOYAGE_API_KEY=
 VOYAGE_EMBEDDING_MODEL=voyage-4-large
 VOYAGE_EMBEDDING_DIMENSIONS=1024

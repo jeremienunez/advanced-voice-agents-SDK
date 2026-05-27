@@ -9,6 +9,7 @@ export interface PromptTemplatePair {
 export interface BuilderPromptLibrary {
   promptPlan: PromptTemplatePair;
   knowledgePlan: PromptTemplatePair;
+  toolPlan: PromptTemplatePair;
   finalPrompt: PromptTemplatePair;
   databasePlan: PromptTemplatePair;
   research: PromptTemplatePair;
@@ -19,6 +20,7 @@ export function loadBuilderPromptLibrary(): BuilderPromptLibrary {
   return {
     promptPlan: loadPair("prompt-plan"),
     knowledgePlan: loadPair("knowledge-plan"),
+    toolPlan: loadPair("tool-plan"),
     finalPrompt: loadPair("final-prompt"),
     databasePlan: loadPair("database-plan"),
     research: loadPair("research"),

@@ -62,6 +62,7 @@
     "test:rtc-e2e": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:rtc-e2e",
     "audit:sdk-boundary": "node scripts/audit-sdk-boundary.mjs",
     "audit:imports": "node scripts/audit-core-imports.mjs",
+    "audit:tool-contracts": "node scripts/audit-tool-contracts.mjs",
     "audit:loc": "bun scripts/audit-loc.mjs",
     "pack:dry-run": "pnpm pack --dry-run --json"
   },

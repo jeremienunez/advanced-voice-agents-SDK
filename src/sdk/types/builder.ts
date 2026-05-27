@@ -7,6 +7,8 @@ import type { StoreOperation } from "./store.js";
 
 export type AgentBuilderLlmProvider =
   | "deepseek"
+  | "qwen"
+  | "kimi"
   | "openai"
   | "gemini"
   | "anthropic"

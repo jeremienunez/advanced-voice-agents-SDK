@@ -7,8 +7,13 @@ import { chunkDocuments } from "./domain/knowledge.js";
 import {
   compileArtifact,
   promptPlanWithClarifications,
-  toolInstructions,
 } from "./domain/prompt.js";
+import { toolInstructionsFromPlan } from "./domain/tooling/compile.js";
+import { createToolBuildPlan } from "./domain/tooling/contracts.js";
+import {
+  validatedToolPlan,
+  validateToolBuildPlan,
+} from "./domain/tooling/validation.js";
 import { mutateDraft } from "./domain/drafts.js";
 import {
   normalizeKnowledgeDocuments,
@@ -230,11 +235,35 @@ export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
     async compileAgent(body: unknown) {
       const draft = resolveDraft(body);
       const selectedTools = normalizeSelectedTools(body, draft);
-      const prompt = await deps.planner.composeFinalPrompt({ draft, selectedTools });
-      const artifact = compileArtifact(draft, selectedTools, prompt);
-      const nextDraft = mutateDraft(draft)
+      const plannedTools = createToolBuildPlan(draft, selectedTools);
+      const validation = validateToolBuildPlan(
+        draft,
+        plannedTools,
+        new Set(deps.availableSecretNames),
+      );
+      const toolPlan = validatedToolPlan(plannedTools, validation);
+      const toolPrompt = toolInstructionsFromPlan(toolPlan);
+      const draftWithTools = mutateDraft(draft)
         .selectTools(selectedTools)
-        .toolPrompt(toolInstructions(draft, selectedTools))
+        .toolBuildPlan(toolPlan)
+        .toolValidation(validation)
+        .toolPrompt(toolPrompt)
+        .build();
+
+      if (validation.status === "invalid") {
+        saveDraft(draftWithTools);
+        const errors = validation.issues
+          .filter((issue) => issue.severity === "error")
+          .map((issue) => `${issue.toolName ?? "tool"}: ${issue.message}`);
+        throw new Error(`Tool validation failed: ${errors.join("; ")}`);
+      }
+
+      const prompt = await deps.planner.composeFinalPrompt({
+        draft: draftWithTools,
+        selectedTools,
+      });
+      const artifact = compileArtifact(draftWithTools, selectedTools, prompt, toolPlan);
+      const nextDraft = mutateDraft(draftWithTools)
         .finalPrompt(prompt)
         .compiled(artifact)
         .build();

@@ -40,6 +40,9 @@ export class KimiKnowledgeVerifier implements KnowledgeVerifierPort {
     const content = await this.fetchVerdict(user, true, model).catch(async (error) => {
       if (!isResponseFormatError(error)) throw error;
       return this.fetchVerdict(user, false, model);
+    }).catch(async (error) => {
+      if (!isThinkingBudgetError(error)) throw error;
+      return this.fetchVerdict(user, true, model, true);
     });
     const parsed = parseJsonPayload<KnowledgeVerificationVerdict>(
       content,
@@ -52,10 +55,11 @@ export class KimiKnowledgeVerifier implements KnowledgeVerifierPort {
     user: string,
     responseFormat: boolean,
     model = this.config.model,
+    disableThinking = false,
   ): Promise<string> {
     const body: Record<string, unknown> = {
       model,
-      temperature: 0.15,
+      temperature: 1,
       max_tokens: this.config.maxTokens,
       messages: [
         {
@@ -66,6 +70,7 @@ export class KimiKnowledgeVerifier implements KnowledgeVerifierPort {
       ],
     };
     if (responseFormat) body.response_format = { type: "json_object" };
+    if (disableThinking) body.thinking = { type: "disabled" };
     const response = await fetch(`${this.config.baseUrl}/chat/completions`, {
       method: "POST",
       headers: {
@@ -80,9 +85,17 @@ export class KimiKnowledgeVerifier implements KnowledgeVerifierPort {
       );
     }
     const payload = (await response.json()) as {
-      choices?: Array<{ message?: { content?: string } }>;
+      choices?: Array<{
+        finish_reason?: string;
+        message?: { content?: string; reasoning_content?: string };
+      }>;
     };
-    return payload.choices?.[0]?.message?.content?.trim() || "{}";
+    const choice = payload.choices?.[0];
+    const content = choice?.message?.content?.trim();
+    if (!content && choice?.message?.reasoning_content) {
+      throw new Error("Kimi thinking budget exhausted before final JSON");
+    }
+    return content || "{}";
   }
 }
 
@@ -153,4 +166,9 @@ function clampConfidence(value: unknown): number {
 function isResponseFormatError(error: unknown): boolean {
   return error instanceof Error &&
     /response_format|json_object|400/.test(error.message);
+}
+
+function isThinkingBudgetError(error: unknown): boolean {
+  return error instanceof Error &&
+    /thinking budget exhausted|reasoning/i.test(error.message);
 }

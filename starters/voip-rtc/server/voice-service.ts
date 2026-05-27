@@ -18,6 +18,7 @@ import {
 import { withRuntimeKnowledgePolicy } from "./runtime/knowledge-policy.js";
 import { runtimeKnowledgeTools } from "./runtime/knowledge-tools.js";
 import { runtimeAgentFromDraft } from "./runtime/compiled-agent.js";
+import { runtimeActionTools } from "./runtime/tools/action-tools.js";
 import type { createStarterSdk } from "./starter-sdk.js";
 
 type BuilderService = ReturnType<typeof createBuilderService>;
@@ -162,21 +163,24 @@ function instructionsForRequest(
 
 function toolsForRequest(
   agentId: string | undefined,
-	options: {
-	  builderService: BuilderService;
-	  runtimeKnowledge?: {
-	    embeddings: EmbeddingPort;
-	    embeddingAvailable: boolean;
-	    search: KnowledgeSearchPort;
-	  };
-	},
+  options: {
+    builderService: BuilderService;
+    runtimeKnowledge?: {
+      embeddings: EmbeddingPort;
+      embeddingAvailable: boolean;
+      search: KnowledgeSearchPort;
+    };
+  },
 ): VoiceSessionTool[] {
-  if (!options.runtimeKnowledge) return [];
-  return runtimeKnowledgeTools(agentId, {
-    ...options.runtimeKnowledge,
-    getAgent: (draftId) =>
-      runtimeAgentFromDraft(options.builderService.getCompiledDraft(draftId)),
-  });
+  const agent = runtimeAgentFromDraft(options.builderService.getCompiledDraft(agentId));
+  const knowledge = options.runtimeKnowledge
+    ? runtimeKnowledgeTools(agentId, {
+        ...options.runtimeKnowledge,
+        getAgent: () => agent,
+      })
+    : [];
+  const actions = agent ? runtimeActionTools(agent) : [];
+  return [...knowledge, ...actions];
 }
 
 function providerTools(tools: VoiceSessionTool[]) {

@@ -87,6 +87,7 @@ export interface BuilderWorkflowDependencies {
   deepseekModel: string;
   voyageConfigured: boolean;
   toolRegistry: ToolRegistryItem[];
+  availableSecretNames: string[];
 }
 
 export interface BuilderServiceComposition {

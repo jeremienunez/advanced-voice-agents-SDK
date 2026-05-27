@@ -144,7 +144,7 @@ export function createBuilderServiceCompositionFromEnv(
         ? new KimiKnowledgeVerifier({
             apiKey: kimiApiKey,
             baseUrl: kimiBaseUrl,
-            maxTokens: Number(env.KIMI_MAX_TOKENS ?? 16_384),
+            maxTokens: Number(env.KIMI_MAX_TOKENS ?? 65_536),
             model: kimiModel,
             prompts: promptLibrary,
           })
@@ -153,10 +153,17 @@ export function createBuilderServiceCompositionFromEnv(
       deepseekModel,
       voyageConfigured: Boolean(env.VOYAGE_API_KEY),
       toolRegistry: defaultToolRegistry,
+      availableSecretNames: configuredSecretNames(env),
     },
   };
 }
 
 function uniqueList(values: string[]): string[] {
   return Array.from(new Set(values.filter(Boolean)));
+}
+
+function configuredSecretNames(env: Record<string, string | undefined>): string[] {
+  return Object.entries(env)
+    .filter(([, value]) => typeof value === "string" && value.length > 0)
+    .map(([name]) => name);
 }

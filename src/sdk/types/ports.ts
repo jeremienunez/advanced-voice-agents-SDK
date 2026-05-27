@@ -13,6 +13,12 @@ import type {
 } from "./builder.js";
 import type { ToolName } from "./core.js";
 import type {
+  LlmResolvedModel,
+  LlmTask,
+  LlmTaskResult,
+} from "./llm.js";
+import type { ToolBuildPlan, ToolValidationReport } from "./tooling.js";
+import type {
   AgentBuildDraft,
 } from "./draft.js";
 
@@ -58,10 +64,35 @@ export interface FinalPromptBuildRequest {
   selectedTools: ToolName[];
 }
 
+export interface ToolBuildRequest {
+  draft: AgentBuildDraft;
+  selectedTools: ToolName[];
+  availableHandlers: string[];
+}
+
+export interface ToolValidationRequest {
+  draft: AgentBuildDraft;
+  plan: ToolBuildPlan;
+  availableSecrets: string[];
+}
+
 export interface PromptPlannerPort {
   createPromptPlan(input: PromptBuildRequest): Promise<PromptBuildPlan>;
   createKnowledgePlan(input: KnowledgeBuildRequest): Promise<KnowledgeBuildPlan>;
   composeFinalPrompt(input: FinalPromptBuildRequest): Promise<string>;
+}
+
+export interface ToolPlannerPort {
+  createToolPlan(input: ToolBuildRequest): Promise<ToolBuildPlan>;
+  validateToolPlan(input: ToolValidationRequest): Promise<ToolValidationReport>;
+}
+
+export interface LlmModelResolverPort {
+  resolveModel(input: LlmTask): Promise<LlmResolvedModel> | LlmResolvedModel;
+}
+
+export interface LlmTaskRunnerPort {
+  run<TOutput = unknown>(input: LlmTask): Promise<LlmTaskResult<TOutput>>;
 }
 
 export interface KnowledgeResearchPort {

@@ -112,11 +112,16 @@ export interface ToolDefinition<TInput = unknown, TOutput = unknown> {
   description: string;
   category?: string;
   parameters: JsonSchema;
+  outputSchema?: JsonSchema;
+  permissions?: string[];
+  requiredSecrets?: SecretRef[];
+  handlerRef?: string;
+  sideEffect?: "none" | "read" | "write" | "external_action" | "handoff";
   allowedPlans?: PlanId[];
   executionMode?: "automatic" | "confirmation" | "explicit";
   voicePreamble?: string;
   maxCallsPerSession?: number;
-  execute: (input: TInput, context: ToolRuntimeContext) => Promise<TOutput>;
+  execute?: (input: TInput, context: ToolRuntimeContext) => Promise<TOutput>;
   format?: (output: TOutput, channel: AgentChannel) => string;
   keyFacts?: (output: TOutput) => string[];
 }

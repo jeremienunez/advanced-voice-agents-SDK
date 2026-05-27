@@ -7,6 +7,7 @@ import type {
   KnowledgeStrategy,
   PromptBuildPlan,
 } from "./builder.js";
+import type { ToolBuildPlan, ToolValidationReport } from "./tooling.js";
 
 export interface ToolRegistryItem {
   name: ToolName;
@@ -28,6 +29,8 @@ export interface AgentBuildDraft {
   promptPlan?: PromptBuildPlan;
   knowledgePlan?: KnowledgeBuildPlan;
   databasePlan?: DatabaseBuildPlan;
+  toolBuildPlan?: ToolBuildPlan;
+  toolValidation?: ToolValidationReport;
   toolRegistry: ToolRegistryItem[];
   selectedTools: ToolName[];
   promptParts: {

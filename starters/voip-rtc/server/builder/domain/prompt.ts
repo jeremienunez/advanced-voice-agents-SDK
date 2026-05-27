@@ -3,8 +3,10 @@ import type {
   CompiledAgentArtifact,
   PromptBuildPlan,
   ToolName,
+  ToolBuildPlan,
   VoiceAgentSdkDefinition,
 } from "@voiceagentsdk/core/sdk";
+import { compileToolDefinitions } from "./tooling/compile.js";
 import { readChunkCount, readKnowledgeStoreId } from "../utils.js";
 
 export function fallbackPromptPlan(draft: AgentBuildDraft): PromptBuildPlan {
@@ -111,7 +113,7 @@ export function fallbackFinalPrompt(
     "- Do not invent citations or sources.",
     "",
     "Tool policy:",
-    toolInstructions(draft, selectedTools),
+    draft.promptParts.tools ?? toolInstructions(draft, selectedTools),
     "",
     "Escalation policy:",
     "- Escalate or offer human handoff when confidence is low, permission is missing, context conflicts, or the user asks for sensitive advice outside scope.",
@@ -178,6 +180,7 @@ export function compileArtifact(
   draft: AgentBuildDraft,
   selectedTools: ToolName[],
   prompt: string,
+  toolPlan?: ToolBuildPlan,
 ): CompiledAgentArtifact {
   const sdkDefinition: VoiceAgentSdkDefinition = {
     tenants: [
@@ -220,7 +223,7 @@ export function compileArtifact(
         body: prompt,
       },
     ],
-    tools: [],
+    tools: toolPlan ? compileToolDefinitions(toolPlan) : [],
     databases: draft.databasePlan
       ? [
           {

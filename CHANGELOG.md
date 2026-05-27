@@ -1,8 +1,67 @@
 # Changelog
 
+## feat: validate builder tool contracts before RTC compile
+
+Status: implemented locally
+Date: 2026-05-27
+
+### Intent
+
+Faire de l'onboarding tools une vraie etape contractuelle, separee du prompt
+final de l'agent vocal. Le builder planifie et valide les tools; le runtime les
+execute; le prompt vocal ne recoit que les regles d'usage utiles a la
+conversation.
+
+### Journal
+
+- Ajout des types SDK:
+  - `ToolBuildPlan`
+  - `ToolBuildContract`
+  - `ToolValidationReport`
+  - `ToolPlannerPort`
+- Ajout des templates builder separes:
+  - `tool-plan.system.md`
+  - `tool-plan.user.md`
+- Preservation volontaire de `final-prompt.*` pour le prompt systeme final de
+  l'agent vocal.
+- Ajout du domaine starter `builder/domain/tooling`:
+  - contrats deterministes depuis le registry;
+  - validation des handlers, schemas, secrets, knowledge store, KG et
+    confirmations;
+  - compilation des definitions tools serialisables.
+- `compile-agent` refuse maintenant les selected tools invalides avant de
+  composer le prompt vocal.
+- Ajout des handlers runtime pour tools d'action:
+  - `summary.create`
+  - `handoff.create`
+  - `task.schedule`
+  - `event.emit`
+- Ajout de `audit:tool-contracts`.
+- UI builder enrichie avec statut de contrat tool sans melanger logique runtime
+  et composants visuels.
+- Kimi teacher/verifier accepte une sortie riche, temperature compatible, max
+  tokens par defaut eleve, et fallback sans thinking si le raisonnement consomme
+  tout le budget.
+
+### Validation
+
+- `pnpm typecheck:sdk` OK
+- `pnpm typecheck:starters` OK
+- `pnpm typecheck:examples` OK
+- `pnpm audit:loc` OK
+- `pnpm audit:imports` OK
+- `pnpm audit:sdk-boundary` OK
+- `pnpm audit:tool-contracts` OK
+- `pnpm test:db` OK
+- `pnpm test:knowledge-tool` OK
+- `pnpm test:runtime-tool-call` OK
+- `RTC_E2E_AUDIO_DURATION_MS=1200 pnpm test:rtc-e2e` OK
+- `pnpm build` OK
+- `pnpm pack:dry-run` OK
+
 ## refactor: carve agnostic voice agent sdk from copied runtime
 
-Status: implemented locally  
+Status: implemented locally
 Date: 2026-05-25
 
 ### Intent

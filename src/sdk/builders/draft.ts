@@ -6,8 +6,10 @@ import type {
   DatabaseBuildPlan,
   KnowledgeBuildPlan,
   PromptBuildPlan,
+  ToolBuildPlan,
   ToolName,
   ToolRegistryItem,
+  ToolValidationReport,
 } from "../types.js";
 import { assertUnique, copy } from "./utils.js";
 
@@ -53,6 +55,18 @@ export class AgentBuildDraftBuilder {
     this.draft.databasePlan = copy(plan);
     this.draft.status =
       plan.status === "applied" ? "database-applied" : "database-planned";
+    this.touch();
+    return this;
+  }
+
+  toolBuildPlan(plan: ToolBuildPlan): this {
+    this.draft.toolBuildPlan = copy(plan);
+    this.touch();
+    return this;
+  }
+
+  toolValidation(report: ToolValidationReport): this {
+    this.draft.toolValidation = copy(report);
     this.touch();
     return this;
   }
@@ -115,6 +129,12 @@ export class AgentBuildDraftBuilder {
         : undefined,
       databasePlan: this.draft.databasePlan
         ? copy(this.draft.databasePlan)
+        : undefined,
+      toolBuildPlan: this.draft.toolBuildPlan
+        ? copy(this.draft.toolBuildPlan)
+        : undefined,
+      toolValidation: this.draft.toolValidation
+        ? copy(this.draft.toolValidation)
         : undefined,
       toolRegistry: this.draft.toolRegistry.map((item) => copy(item)),
       selectedTools: [...this.draft.selectedTools],

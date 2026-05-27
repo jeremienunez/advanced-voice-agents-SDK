@@ -1,3 +1,14 @@
+import type {
+  ToolBuildPlan,
+  ToolValidationReport,
+} from "./builder-tooling.js";
+
+export type {
+  ToolBuildContract,
+  ToolBuildPlan,
+  ToolValidationReport,
+} from "./builder-tooling.js";
+
 export interface ToolRegistryItem {
   name: string;
   title: string;
@@ -181,6 +192,8 @@ export interface AgentBuildDraft {
     warnings?: string[];
   };
   databasePlan?: DatabaseBuildPlan;
+  toolBuildPlan?: ToolBuildPlan;
+  toolValidation?: ToolValidationReport;
   toolRegistry: ToolRegistryItem[];
   selectedTools: string[];
   promptParts: {

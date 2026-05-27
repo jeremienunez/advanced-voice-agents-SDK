@@ -5,6 +5,7 @@ import type {
   AgentBuildDraft,
   ToolRegistryItem,
 } from "../../../domain/builder.js";
+import { ToolContractStatus } from "./ToolContractStatus.js";
 
 export function ToolRegistryPanel({
   draft,
@@ -21,29 +22,39 @@ export function ToolRegistryPanel({
   setSelectedTools: Dispatch<SetStateAction<string[]>>;
   compileAgent: () => Promise<void>;
 }) {
+  const contractsByName = new Map(
+    draft?.toolBuildPlan?.tools.map((tool) => [tool.name, tool]) ?? [],
+  );
   return (
     <Panel title="5. Tool Registry">
       <div className="toolGrid">
-        {toolRegistry.map((tool) => (
-          <label key={tool.name} className="toolOption">
-            <input
-              name={`tool-${tool.name}`}
-              type="checkbox"
-              checked={selectedTools.includes(tool.name)}
-              onChange={(event) => {
-                setSelectedTools((current) =>
-                  event.target.checked
-                    ? [...new Set([...current, tool.name])]
-                    : current.filter((item) => item !== tool.name),
-                );
-              }}
-            />
-            <span>
-              <strong>{tool.title}</strong>
-              <em>{tool.description}</em>
-            </span>
-          </label>
-        ))}
+        {toolRegistry.map((tool) => {
+          const contract = contractsByName.get(tool.name);
+          return (
+            <label key={tool.name} className="toolOption">
+              <input
+                name={`tool-${tool.name}`}
+                type="checkbox"
+                checked={selectedTools.includes(tool.name)}
+                onChange={(event) => {
+                  setSelectedTools((current) =>
+                    event.target.checked
+                      ? [...new Set([...current, tool.name])]
+                      : current.filter((item) => item !== tool.name),
+                  );
+                }}
+              />
+              <span>
+                <strong>{tool.title}</strong>
+                <em>{tool.description}</em>
+                <ToolContractStatus
+                  contract={contract}
+                  validation={draft?.toolValidation}
+                />
+              </span>
+            </label>
+          );
+        })}
       </div>
       <div className="actions">
         <Button
