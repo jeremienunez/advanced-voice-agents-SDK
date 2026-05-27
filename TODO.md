@@ -1,20 +1,19 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: finish document ingestion parser controls.
+Current goal: finish document ingestion execution guardrails.
 
-Target commit title candidate: `test: harden document parser controls`
+Target commit title candidate: `test: add document parser timeout seam`
 
 ## Active Focus
 
 ### Document Ingestion Hardening
 
 Outcome:
-Spreadsheet parsing and parser execution are bounded under explicit limits and
-observable seams.
+Parser execution is bounded under explicit time and quota seams after the
+spreadsheet parser caps were made observable.
 
 Next work:
 
-- [ ] Add BDD coverage for spreadsheet sheet, row, cell, and text caps.
 - [ ] Add parser timeout seam.
 - [ ] Add per-IP quota seam.
 
@@ -36,7 +35,6 @@ Optional security/network checks:
 
 ### Document Ingestion
 
-- [ ] BDD coverage for spreadsheet sheet, row, cell, and text caps.
 - [ ] Parser timeouts.
 - [ ] Per-IP quotas.
 

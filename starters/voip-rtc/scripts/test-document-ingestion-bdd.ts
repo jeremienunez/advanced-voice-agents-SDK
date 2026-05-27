@@ -1,11 +1,13 @@
 import { PlainTextDocumentIngestion } from "../server/builder/adapters/document-ingestion.js";
 import { readDocumentInput } from "../server/builder/request/document-input.js";
 import { assert } from "./shared/assertions.js";
+import * as XLSX from "xlsx";
 
 const results = [
   await scenarioRejectsUnboundedRequests(),
   await scenarioRejectsDisallowedDocumentTypes(),
   await scenarioAcceptsBoundedTextDocuments(),
+  await scenarioWorkbookParserReportsCaps(),
 ];
 
 console.log(JSON.stringify({ status: "ok", results }, null, 2));
@@ -86,6 +88,77 @@ async function scenarioAcceptsBoundedTextDocuments() {
   return "bounded-text-document-accepted";
 }
 
+async function scenarioWorkbookParserReportsCaps() {
+  const rowDocument = await new PlainTextDocumentIngestion().parse({
+    id: "xlsx-bdd",
+    name: "row-limits.xlsx",
+    mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    sizeBytes: 1,
+    content: workbookWithOverflowingRows(),
+  });
+  const rowMetadata = rowDocument.metadata ?? {};
+
+  assert(rowDocument.status === "parsed", "bounded xlsx rows must parse");
+  assert(rowMetadata.rowCount === 5000, "xlsx row cap must be enforced");
+  assert(rowMetadata.truncated === true, "xlsx row cap must be observable");
+  assert(
+    !String(rowDocument.text).includes("row-5001"),
+    "xlsx rows beyond the cap must not feed knowledge text",
+  );
+
+  const cellDocument = await new PlainTextDocumentIngestion().parse({
+    id: "xlsx-bdd-cells",
+    name: "cell-limits.xlsx",
+    mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    sizeBytes: 1,
+    content: workbookWithOverflowingCells(),
+  });
+  const cellMetadata = cellDocument.metadata ?? {};
+  const columns = Array.isArray(cellMetadata.columns) ? cellMetadata.columns : [];
+
+  assert(cellDocument.status === "parsed", "bounded xlsx cells must parse");
+  assert(columns.length === 80, "xlsx cell cap must be enforced");
+  assert(cellMetadata.truncated === true, "xlsx cell cap must be observable");
+  assert(
+    !String(cellDocument.text).includes("value-81"),
+    "xlsx cells beyond the cap must not feed knowledge text",
+  );
+
+  const textDocument = await new PlainTextDocumentIngestion().parse({
+    id: "xlsx-bdd-text",
+    name: "text-limits.xlsx",
+    mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    sizeBytes: 1,
+    content: workbookWithOverflowingText(),
+  });
+  const textMetadata = textDocument.metadata ?? {};
+
+  assert(textDocument.status === "parsed", "bounded xlsx text must parse");
+  assert(textMetadata.truncated === true, "xlsx text cap must be observable");
+  assert(
+    !String(textDocument.text).includes("x".repeat(501)),
+    "xlsx cell text must be capped before knowledge text",
+  );
+
+  const sheetDocument = await new PlainTextDocumentIngestion().parse({
+    id: "xlsx-bdd-sheets",
+    name: "sheet-limits.xlsx",
+    mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    sizeBytes: 1,
+    content: workbookWithOverflowingSheets(),
+  });
+  const metadata = sheetDocument.metadata ?? {};
+  const sheetNames = Array.isArray(metadata.sheetNames)
+    ? metadata.sheetNames
+    : [];
+
+  assert(sheetDocument.status === "parsed", "bounded xlsx sheets must parse");
+  assert(sheetNames.length === 12, "xlsx sheet cap must be enforced");
+  assert(metadata.truncated === true, "xlsx sheet cap must be observable");
+
+  return "workbook-parser-caps";
+}
+
 function jsonRequest(
   body: unknown,
   headers: Record<string, string>,
@@ -109,4 +182,57 @@ async function captureError(
   } catch (error) {
     return error instanceof Error ? error : new Error(String(error));
   }
+}
+
+function workbookWithOverflowingRows(): ArrayBuffer {
+  const workbook = XLSX.utils.book_new();
+  const rows = [["name", "notes"]];
+  for (let index = 1; index <= 5001; index += 1) {
+    rows.push([`row-${index}`, "ok"]);
+  }
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.aoa_to_sheet(rows),
+    "main",
+  );
+  return XLSX.write(workbook, { bookType: "xlsx", type: "array" }) as ArrayBuffer;
+}
+
+function workbookWithOverflowingCells(): ArrayBuffer {
+  const workbook = XLSX.utils.book_new();
+  const headers = Array.from({ length: 81 }, (_, index) => `column_${index + 1}`);
+  const values = Array.from({ length: 81 }, (_, index) => `value-${index + 1}`);
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.aoa_to_sheet([headers, values]),
+    "main",
+  );
+  return XLSX.write(workbook, { bookType: "xlsx", type: "array" }) as ArrayBuffer;
+}
+
+function workbookWithOverflowingText(): ArrayBuffer {
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.aoa_to_sheet([["name", "notes"], ["row-1", "x".repeat(600)]]),
+    "main",
+  );
+  return XLSX.write(workbook, { bookType: "xlsx", type: "array" }) as ArrayBuffer;
+}
+
+function workbookWithOverflowingSheets(): ArrayBuffer {
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.aoa_to_sheet([["name"], ["main"]]),
+    "main",
+  );
+  for (let index = 2; index <= 13; index += 1) {
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.aoa_to_sheet([["name"], [`sheet-${index}`]]),
+      `extra_${index}`,
+    );
+  }
+  return XLSX.write(workbook, { bookType: "xlsx", type: "array" }) as ArrayBuffer;
 }

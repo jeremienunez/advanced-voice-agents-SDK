@@ -92,7 +92,7 @@ async function parseWorkbookDocument(
     type: "buffer",
     cellDates: true,
     dense: true,
-    sheetRows: MAX_ROWS_PER_SHEET + 1,
+    sheetRows: MAX_ROWS_PER_SHEET + 2,
   });
 
   const sheetNames: string[] = [];
@@ -113,22 +113,32 @@ async function parseWorkbookDocument(
       raw: false,
     });
     const headerRow = rows[0] ?? [];
-    const headers = headerRow
+    if (rows.length > MAX_ROWS_PER_SHEET + 1) truncated = true;
+    if (headerRow.length > MAX_CELLS_PER_ROW) truncated = true;
+
+    const headerCells = headerRow
       .slice(0, MAX_CELLS_PER_ROW)
-      .map((value, index) => cellToText(value) || `column_${index + 1}`);
+      .map((value) => cellToText(value));
+    if (headerCells.some((cell) => cell.truncated)) truncated = true;
+
+    const headers = headerCells
+      .map((cell, index) => cell.text || `column_${index + 1}`);
     headers.forEach((header) => columns.add(header));
 
     sections.push(`# Sheet: ${sheetName}`);
     sections.push(`Headers: ${headers.join(" | ")}`);
 
-    for (const [index, row] of rows.slice(1).entries()) {
+    for (const [index, row] of rows.slice(1, MAX_ROWS_PER_SHEET + 1).entries()) {
       if (documentChars >= MAX_DOCUMENT_CHARS) {
         truncated = true;
         break;
       }
       const rowNumber = index + 2;
+      if (row.length > MAX_CELLS_PER_ROW) truncated = true;
       const rowValues = row.slice(0, MAX_CELLS_PER_ROW);
-      const values = rowValues.map((value: unknown) => cellToText(value));
+      const cellValues = rowValues.map((value: unknown) => cellToText(value));
+      if (cellValues.some((cell) => cell.truncated)) truncated = true;
+      const values = cellValues.map((cell) => cell.text);
       if (values.every((value) => !value)) continue;
       rowCount += 1;
       const rowText = headers
@@ -161,8 +171,13 @@ async function parseWorkbookDocument(
   };
 }
 
-function cellToText(value: unknown): string {
-  if (value == null) return "";
+type CellText = {
+  text: string;
+  truncated: boolean;
+};
+
+function cellToText(value: unknown): CellText {
+  if (value == null) return { text: "", truncated: false };
   if (typeof value === "string") return limitCellText(value.trim());
   if (typeof value === "number" || typeof value === "boolean") {
     return limitCellText(String(value));
@@ -182,6 +197,9 @@ function cellToText(value: unknown): string {
   return limitCellText(String(value).trim());
 }
 
-function limitCellText(value: string): string {
-  return value.slice(0, MAX_CELL_CHARS);
+function limitCellText(value: string): CellText {
+  return {
+    text: value.slice(0, MAX_CELL_CHARS),
+    truncated: value.length > MAX_CELL_CHARS,
+  };
 }

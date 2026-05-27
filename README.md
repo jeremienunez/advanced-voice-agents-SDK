@@ -423,7 +423,7 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `pnpm test:knowledge-tool` | Check runtime knowledge tool wiring. |
 | `pnpm test:llm-harness` | Check provider-agnostic builder LLM planner, research, verifier, and resolver behavior. |
 | `pnpm test:builder-draft-ownership:bdd` | Check privileged builder workflows reload server-owned drafts by authenticated owner. |
-| `pnpm test:document-ingestion:bdd` | Check document upload bounds, content-length enforcement, and type allowlists. |
+| `pnpm test:document-ingestion:bdd` | Check document upload bounds, content-length/type guards, and xlsx sheet/row/cell/text caps. |
 | `pnpm test:database-provisioning` | Run the real starter database provisioner validation against the pgvector template and hostile SQL cases. |
 | `pnpm test:solid-seams` | Run focused BDD seam tests for HTTP guards, voice factory/learning, builder summaries, and infra validation. |
 | `pnpm test:runtime-tool-call` | Check runtime tool call flow. |

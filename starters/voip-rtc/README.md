@@ -295,6 +295,9 @@ pnpm --filter @voiceagentsdk/starter-voip-rtc test:learning:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:rtc-e2e
 ```
 
+`test:document-ingestion:bdd` covers upload bounds, type allowlists, and xlsx
+sheet, row, cell, and cell-text caps before parsed content can feed knowledge.
+
 ## Production Notes
 
 The server binds to loopback by default, restricts browser origins, and requires

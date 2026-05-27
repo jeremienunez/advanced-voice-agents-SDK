@@ -1,5 +1,34 @@
 # Changelog
 
+## test: cover workbook parser caps
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Rendre les limites du parseur xlsx falsifiables: une feuille de calcul ne doit
+pas pouvoir depasser silencieusement les bornes de feuilles, lignes, cellules ou
+texte injectees dans la knowledge.
+
+### Journal
+
+- Le scenario `pnpm test:document-ingestion:bdd` genere de vrais workbooks
+  SheetJS pour les limites de feuilles, lignes, cellules et texte de cellule.
+- Le parseur xlsx lit une ligne sentinelle pour detecter un depassement de
+  `MAX_ROWS_PER_SHEET` sans alimenter la knowledge avec la ligne excedentaire.
+- Les cellules au-dela de `MAX_CELLS_PER_ROW` et le texte au-dela de
+  `MAX_CELL_CHARS` sont coupes avant generation du texte knowledge.
+- `metadata.truncated` devient observable pour chaque coupe: feuilles, lignes,
+  cellules, et texte de cellule.
+
+### Validation
+
+- `pnpm test:document-ingestion:bdd` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: harden document ingestion limits
 
 Status: implemented locally
