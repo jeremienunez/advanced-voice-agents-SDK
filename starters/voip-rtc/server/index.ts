@@ -15,7 +15,7 @@ import { createStarterVoiceService } from "./voice-service.js";
 
 const port = Number(Bun.env.VOICE_SERVER_PORT ?? 8787);
 const hostname = Bun.env.VOICE_SERVER_HOST ?? "127.0.0.1";
-const publicHost = Bun.env.VOICE_PUBLIC_HOST ?? "localhost";
+const publicHost = Bun.env.VOICE_PUBLIC_HOST ?? "127.0.0.1";
 const authToken = Bun.env.VOICE_DEV_AUTH_TOKEN;
 const isProduction = Bun.env.NODE_ENV === "production";
 const browserSampleRate = 24000;
@@ -149,8 +149,9 @@ console.log(`VOIP RTC starter server listening on http://${hostname}:${port}`);
 
 function corsHeadersFor(request: Request): Record<string, string> {
   const origin = request.headers.get("origin");
-  const allowOrigin =
-    origin && allowedOrigins.has(origin) ? origin : firstAllowedOrigin();
+  const allowOrigin = origin && isAllowedOrigin(origin)
+    ? origin
+    : firstAllowedOrigin();
   return {
     "Access-Control-Allow-Origin": allowOrigin,
     "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
@@ -162,7 +163,7 @@ function corsHeadersFor(request: Request): Record<string, string> {
 
 function originGuard(request: Request): Response | null {
   const origin = request.headers.get("origin");
-  if (!origin || allowedOrigins.has(origin)) return null;
+  if (!origin || isAllowedOrigin(origin)) return null;
   return new Response("Origin not allowed", {
     status: 403,
     headers: corsHeadersFor(request),
@@ -210,6 +211,20 @@ function firstAllowedOrigin(): string {
   return allowedOrigins.values().next().value ?? "http://localhost:5173";
 }
 
+function isAllowedOrigin(origin: string): boolean {
+  if (allowedOrigins.has(origin)) return true;
+  try {
+    return isLoopbackHost(new URL(origin).hostname);
+  } catch {
+    return false;
+  }
+}
+
 function isLoopbackHost(value: string): boolean {
-  return value === "127.0.0.1" || value === "localhost" || value === "::1";
+  return (
+    value === "127.0.0.1" ||
+    value === "localhost" ||
+    value === "[::1]" ||
+    value === "::1"
+  );
 }
