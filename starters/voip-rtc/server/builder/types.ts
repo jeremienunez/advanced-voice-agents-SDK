@@ -1,6 +1,7 @@
 import type {
   AgentInfraPlan,
   AgentBuilderLlmProvider,
+  AuthTicketIdentity,
   DatabasePlannerPort,
   DatabaseProvisionerPort,
   DocumentIngestionPort,
@@ -67,6 +68,10 @@ export interface BuilderProviderOption {
 
 export interface BuilderRouteResult {
   response: Response | null;
+}
+
+export interface BuilderRequestContext {
+  identity?: AuthTicketIdentity;
 }
 
 export interface BuilderSessionState {

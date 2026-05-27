@@ -5,6 +5,7 @@ import { activeCompiledDraft } from "./state/active-draft.js";
 import { getDraft } from "./state/draft-store.js";
 import { builderSessionPayload } from "./state/session-payload.js";
 import type {
+  BuilderRequestContext,
   BuilderRouteResult,
   BuilderServiceOptions,
 } from "./types.js";
@@ -34,8 +35,12 @@ export function createBuilderService(options: BuilderServiceOptions) {
       return builderSessionPayload();
     },
 
-    handle(request: Request, url: URL): Promise<BuilderRouteResult> {
-      return router.handle(request, url);
+    handle(
+      request: Request,
+      url: URL,
+      context?: BuilderRequestContext,
+    ): Promise<BuilderRouteResult> {
+      return router.handle(request, url, context);
     },
   };
 }

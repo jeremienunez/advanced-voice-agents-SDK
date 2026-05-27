@@ -1,16 +1,16 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: harden database provisioning with real implementation tests.
+Current goal: enforce builder draft ownership for privileged DB workflows.
 
-Target commit title candidate: `test: harden database provisioning validation`
+Target commit title candidate: `test: enforce builder draft ownership`
 
 ## Active Focus
 
-### Database Provisioning Hardening
+### Builder Draft Ownership BDD
 
 Outcome:
-Generated/user-influenced SQL remains planning material and the real starter
-database provisioner rejects dangerous DDL before server-owned templates apply.
+Privileged database/knowledge workflows reload server-side drafts by `draftId`,
+verify the authenticated owner, and ignore request-supplied draft payloads.
 
 Next work:
 
@@ -18,6 +18,11 @@ Next work:
 
 Done in this focus:
 
+- `pnpm test:builder-draft-ownership:bdd` rejects cross-owner DB apply.
+- The same BDD scenario proves request-supplied draft payloads are ignored.
+- `/builder/prompt-plan` tags drafts with `metadata.builderOwner`.
+- Privileged DB/knowledge workflows now resolve owned server-side drafts.
+- `pnpm audit:solid` is green after the ownership BDD slice.
 - `pnpm test:database-provisioning` calls the real
   `PostgresAgentDatabaseProvisioner.validate` with a real fallback DB plan.
 - SQL validation now rejects non-vector extensions, extension options,
@@ -65,6 +70,7 @@ Recently green:
 
 - [x] `pnpm typecheck:starters`
 - [x] `pnpm typecheck:sdk`
+- [x] `pnpm test:builder-draft-ownership:bdd`
 - [x] `pnpm test:database-provisioning`
 - [x] `pnpm test:llm-harness`
 - [x] `pnpm test:solid-seams`
@@ -242,8 +248,8 @@ Optional security/network checks:
   - enforce HTTP and WebSocket origin allowlists;
   - bind dev surfaces to localhost by default unless explicitly configured.
 - [ ] Harden database provisioning:
-  - [ ] stop trusting request-supplied drafts for privileged workflows;
-  - [ ] load drafts server-side by authenticated owner;
+  - [x] stop trusting request-supplied drafts for privileged workflows;
+  - [x] load drafts server-side by authenticated owner;
   - [x] replace broad SQL allowlists with typed migration/templates;
   - [x] ban `AS SELECT`, arbitrary function calls, arbitrary extensions and
     expression indexes from generated/user-influenced SQL;

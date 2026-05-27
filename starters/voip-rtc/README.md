@@ -218,6 +218,10 @@ The voice runtime receives the verifier result as user context. Query params
 such as `tenantId` and `userId` are only dev-mode requested identity hints, not
 the trusted runtime identity source.
 
+Builder drafts are owned by the verified builder identity at creation time.
+Privileged database/knowledge workflows reload the stored draft by `draftId`,
+check that owner, and ignore request-supplied draft payloads.
+
 ## Runtime Configuration
 
 Provider setup is env-driven and UI-discoverable. Set `GEMINI_API_KEY` or
@@ -280,6 +284,7 @@ pnpm --filter @voiceagentsdk/starter-voip-rtc typecheck
 pnpm --filter @voiceagentsdk/starter-voip-rtc harness:route-wines
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:knowledge-tool
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-plan
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:builder-draft-ownership:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:database-provisioning
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:learning
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:learning:bdd

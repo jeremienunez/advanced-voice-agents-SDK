@@ -1,5 +1,38 @@
 # Changelog
 
+## test: enforce builder draft ownership
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Fermer la prochaine tranche BDD du hardening DB: les workflows privilegies ne
+doivent pas faire confiance a un draft envoye par la requete, mais recharger le
+draft serveur et verifier son owner authentifie.
+
+### Journal
+
+- Ajout de `pnpm test:builder-draft-ownership:bdd`.
+- Le scenario BDD prouve qu'un utilisateur croise ne peut pas appliquer la DB
+  d'un draft owned par quelqu'un d'autre.
+- Le scenario BDD prouve aussi qu'un draft hostile envoye dans le body est
+  ignore au profit du draft serveur.
+- Les drafts crees par `/builder/prompt-plan` portent maintenant
+  `metadata.builderOwner`.
+- Les workflows `autonomous-knowledge`, `database-plan`, `apply-database` et
+  `compile-knowledge` rechargent le draft serveur et verifient son owner.
+- Le contexte d'identite verifiee est propage du guard HTTP vers le builder
+  router/workflows.
+- `pnpm audit:solid` execute maintenant ce scenario BDD.
+
+### Validation
+
+- `pnpm test:builder-draft-ownership:bdd` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: harden database provisioning validation
 
 Status: implemented locally

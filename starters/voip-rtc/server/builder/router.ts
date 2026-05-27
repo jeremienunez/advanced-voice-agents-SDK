@@ -3,7 +3,7 @@ import { requireDraft } from "./state/draft-store.js";
 import { builderSessionPayload } from "./state/session-payload.js";
 import { json } from "./http.js";
 import { routeOnboardingRequest } from "./onboarding/routes.js";
-import type { BuilderConfig, BuilderRouteResult } from "./types.js";
+import type { BuilderConfig, BuilderRequestContext, BuilderRouteResult } from "./types.js";
 import type { createBuilderWorkflows } from "./workflows.js";
 
 type BuilderWorkflows = ReturnType<typeof createBuilderWorkflows>;
@@ -16,7 +16,11 @@ export function createBuilderRouter(options: {
   const { config, workflows } = options;
 
   return {
-    async handle(request: Request, url: URL): Promise<BuilderRouteResult> {
+    async handle(
+      request: Request,
+      url: URL,
+      context: BuilderRequestContext = {},
+    ): Promise<BuilderRouteResult> {
       const corsHeaders =
         typeof options.corsHeaders === "function"
           ? options.corsHeaders(request)
@@ -56,7 +60,7 @@ export function createBuilderRouter(options: {
           };
         }
 
-        const response = await routePostRequest(request, url, workflows);
+        const response = await routePostRequest(request, url, workflows, context);
         return {
           response: response ? json(response, corsHeaders) : null,
         };
@@ -75,6 +79,7 @@ async function routePostRequest(
   request: Request,
   url: URL,
   workflows: BuilderWorkflows,
+  context: BuilderRequestContext,
 ): Promise<unknown | null> {
   if (request.method !== "POST") return null;
 
@@ -85,7 +90,7 @@ async function routePostRequest(
   }
 
   if (url.pathname === "/builder/prompt-plan") {
-    return workflows.createPromptPlan(await request.json());
+    return workflows.createPromptPlan(await request.json(), context);
   }
 
   if (url.pathname === "/builder/prompt-clarifications") {
@@ -101,7 +106,7 @@ async function routePostRequest(
   }
 
   if (url.pathname === "/builder/autonomous-knowledge") {
-    return workflows.buildAutonomousKnowledge(await request.json());
+    return workflows.buildAutonomousKnowledge(await request.json(), context);
   }
 
   if (url.pathname === "/builder/knowledge-plan") {
@@ -109,15 +114,15 @@ async function routePostRequest(
   }
 
   if (url.pathname === "/builder/database-plan") {
-    return workflows.createDatabasePlan(await request.json());
+    return workflows.createDatabasePlan(await request.json(), context);
   }
 
   if (url.pathname === "/builder/apply-database") {
-    return workflows.applyDatabase(await request.json());
+    return workflows.applyDatabase(await request.json(), context);
   }
 
   if (url.pathname === "/builder/compile-knowledge") {
-    return workflows.compileKnowledge(await request.json());
+    return workflows.compileKnowledge(await request.json(), context);
   }
 
   if (url.pathname === "/builder/compile-agent") {

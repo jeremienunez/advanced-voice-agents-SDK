@@ -3,6 +3,7 @@ import { publicProviderConfig } from "../providers/catalog.js";
 import { corsHeadersFor } from "./cors.js";
 import { readDraftId } from "./draft-id.js";
 import { accessGuard, originGuard } from "./guards.js";
+import type { BuilderRequestContext } from "../builder/types.js";
 import type { StarterRouteContext } from "./types.js";
 
 export function createFetchHandler(app: StarterRouteContext) {
@@ -30,7 +31,7 @@ export function createFetchHandler(app: StarterRouteContext) {
     if (access.response) return access.response;
 
     if (url.pathname.startsWith("/builder/")) {
-      return handleBuilderRoute(app, request, url);
+      return handleBuilderRoute(app, request, url, { identity: access.identity });
     }
 
     if (url.pathname === "/voice/ws") {
@@ -88,13 +89,14 @@ async function handleBuilderRoute(
   app: StarterRouteContext,
   request: Request,
   url: URL,
+  context: BuilderRequestContext,
 ): Promise<Response> {
   if (url.pathname === "/builder/agents/rollback" && request.method === "POST") {
     const draftId = readDraftId(await request.json());
     if (!draftId) return json({ error: "draftId is required" }, app, request);
     return json(await app.learningService.rollback(draftId), app, request);
   }
-  const { response } = await app.builderService.handle(request, url);
+  const { response } = await app.builderService.handle(request, url, context);
   return response ?? new Response("Not found", { status: 404 });
 }
 

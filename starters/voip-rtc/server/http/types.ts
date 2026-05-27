@@ -1,4 +1,5 @@
 import type { AuthTicketPort } from "@voiceagentsdk/core/sdk";
+import type { BuilderRequestContext } from "../builder/types.js";
 import type { RuntimeProviderConfig } from "../providers/catalog.js";
 
 export interface StarterServerEnv {
@@ -16,6 +17,7 @@ export interface StarterRouteContext {
     handle(
       request: Request,
       url: URL,
+      context?: BuilderRequestContext,
     ): Promise<{ response?: Response | null }>;
   };
   defaultProviderId: string;

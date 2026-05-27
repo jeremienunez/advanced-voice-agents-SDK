@@ -12,8 +12,9 @@ import { normalizeResearchSettings } from "./request/research-settings.js";
 import { normalizeSelectedTools } from "./request/selected-tools.js";
 import { normalizeResearchBudget } from "./domain/research.js";
 import { requireDraft, resolveDraft, saveDraft } from "./state/draft-store.js";
+import { ownerMetadata, resolveOwnedDraft } from "./state/draft-ownership.js";
 import { setActiveDraft } from "./state/session-store.js";
-import type { BuilderWorkflowDependencies } from "./types.js";
+import type { BuilderRequestContext, BuilderWorkflowDependencies } from "./types.js";
 import { asRecord, readString } from "./utils/record-readers.js";
 import { buildEagerKnowledge } from "./eager-knowledge.js";
 import { createValidatedInfraPlan } from "./workflow-infra.js";
@@ -28,7 +29,7 @@ export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
       setActiveDraft(draftId);
     },
 
-    async createPromptPlan(body: unknown) {
+    async createPromptPlan(body: unknown, context: BuilderRequestContext = {}) {
       const identity = normalizeIdentity(body, {
         provider: deps.promptProvider,
         model: deps.promptModel,
@@ -48,6 +49,7 @@ export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
         .registry(deps.toolRegistry)
         .selectTools(draft.selectedTools)
         .promptPlan(plan)
+        .metadata(ownerMetadata(context.identity))
         .build();
       saveDraft(nextDraft);
       return { draft: nextDraft };
@@ -102,10 +104,10 @@ export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
       };
     },
 
-    async buildAutonomousKnowledge(body: unknown) {
+    async buildAutonomousKnowledge(body: unknown, context: BuilderRequestContext = {}) {
       const result = await buildEagerKnowledge({
         deps,
-        draft: resolveDraft(body),
+        draft: resolveOwnedDraft(body, context),
         documents: normalizeKnowledgeDocuments(body),
         budget: normalizeResearchBudget(body),
         research: normalizeResearchSettings(body, researchDefaults(deps)),
@@ -122,8 +124,8 @@ export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
       return { draft: nextDraft };
     },
 
-    async createDatabasePlan(body: unknown) {
-      const draft = resolveDraft(body);
+    async createDatabasePlan(body: unknown, context: BuilderRequestContext = {}) {
+      const draft = resolveOwnedDraft(body, context);
       const documents =
         draft.knowledgePlan?.documents.length
           ? draft.knowledgePlan.documents
@@ -154,8 +156,8 @@ export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
       return { draft: nextDraft, infraValidation: infra.validation, validation };
     },
 
-    async applyDatabase(body: unknown) {
-      const draft = resolveDraft(body);
+    async applyDatabase(body: unknown, context: BuilderRequestContext = {}) {
+      const draft = resolveOwnedDraft(body, context);
       const plan = draft.databasePlan;
       if (!plan) throw new Error("Database plan is required before provisioning");
       if (!deps.databaseProvisioner.isConfigured()) {
@@ -184,8 +186,8 @@ export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
       return { status: "applied", result, draft: nextDraft };
     },
 
-    async compileKnowledge(body: unknown) {
-      const draft = resolveDraft(body);
+    async compileKnowledge(body: unknown, context: BuilderRequestContext = {}) {
+      const draft = resolveOwnedDraft(body, context);
       if (!deps.knowledgeStore.isConfigured()) {
         return {
           status: "blocked",
