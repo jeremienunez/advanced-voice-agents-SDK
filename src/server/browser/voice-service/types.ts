@@ -2,10 +2,16 @@ import type {
   VoiceProvider,
 } from "../../../client/browser/types.js";
 import type {
+  LearningJobStatus,
+  LearningToolCallRecord,
+  LearningTranscriptEntry,
+} from "../../../sdk/types.js";
+import type {
   BrowserMediaHandler,
 } from "../../agent/handlers/index.js";
 import type {
   IVoiceSession,
+  SessionSummary,
   VoiceSessionCallbacks,
 } from "../../agent/types/session.types.js";
 
@@ -49,6 +55,10 @@ export interface BrowserVoiceServiceConfig {
     callbacks: VoiceSessionCallbacks,
   ) => Promise<IVoiceSession>;
   createSessionId?: () => string;
+  onSessionEnded?: (
+    input: BrowserVoiceSessionEndedInput,
+    emitStatus: (status: LearningJobStatus) => void,
+  ) => Promise<void> | void;
   media?: {
     enableAgc?: boolean;
     enableRnnoise?: boolean;
@@ -68,9 +78,19 @@ export interface BrowserVoiceServiceConfig {
 
 export interface ActiveBrowserSession {
   sessionId: string;
+  request: BrowserVoiceSessionRequest;
   session: IVoiceSession;
   mediaHandler: BrowserMediaHandler;
   startedAt: number;
   messageCount: number;
   toolCallCount: number;
+  transcript: LearningTranscriptEntry[];
+  toolCalls: LearningToolCallRecord[];
+}
+
+export interface BrowserVoiceSessionEndedInput {
+  request: BrowserVoiceSessionRequest;
+  summary: SessionSummary;
+  transcript: LearningTranscriptEntry[];
+  toolCalls: LearningToolCallRecord[];
 }

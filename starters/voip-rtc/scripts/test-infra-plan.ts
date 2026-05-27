@@ -13,6 +13,7 @@ const results = [
   testExplicitMilvusPlan(),
   testGraphPlan(),
   testRedisPlan(),
+  testLearningStorePlan(),
 ];
 
 console.log(JSON.stringify({ status: "ok", results }, null, 2));
@@ -105,6 +106,41 @@ function testRedisPlan() {
   assertIacBundle(plan, "local/README.txt", "agent-infra.plan.json");
 
   return summary("redis", plan);
+}
+
+function testLearningStorePlan() {
+  const plan = new IntentInfraPlanner({
+    databaseUrl: "postgres://local/test",
+    learningEnabled: true,
+    redisUrl: "redis://localhost:6379",
+    temporalAddress: "localhost:7233",
+    temporalNamespace: "default",
+    temporalTaskQueue: "agent-learning",
+  }).createInfraPlan({
+    draft: draft("learning", "Self-improve after RTC sessions"),
+    databasePlan: databasePlan("learning"),
+  });
+
+  assert(plan.storePlan?.enabled, "Learning store plan should be enabled");
+  assert(
+    plan.storePlan.temporalWorkflow.provider === "temporal",
+    "Temporal workflow store should be planned",
+  );
+  assert(
+    plan.storePlan.temporalMemory.provider === "redis",
+    "Redis temporal memory should be planned",
+  );
+  assert(
+    plan.storePlan.graphMemory.kind === "graph_memory",
+    "Graph memory store should be planned",
+  );
+  assert(
+    plan.storePlan.guardrails.appendOnlyVersions,
+    "Learning versions must be append-only",
+  );
+  assertInfraValid(plan, "learning store plan should validate");
+
+  return summary("learning-stores", plan);
 }
 
 function draft(id: string, intent: string): AgentBuildDraft {
@@ -240,6 +276,14 @@ function summary(
       configured: backend.configured,
       required: backend.required,
     })),
+    learningStores: plan.storePlan
+      ? [
+          plan.storePlan.temporalWorkflow.provider,
+          plan.storePlan.temporalMemory.provider,
+          plan.storePlan.graphMemory.provider,
+          plan.storePlan.auditStore.provider,
+        ]
+      : [],
     warningCount: plan.warnings?.length ?? 0,
   };
 }

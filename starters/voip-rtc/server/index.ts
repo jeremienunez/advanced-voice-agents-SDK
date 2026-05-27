@@ -12,6 +12,7 @@ import {
 } from "./provider-catalog.js";
 import { createStarterSdk } from "./starter-sdk.js";
 import { createStarterVoiceService } from "./voice-service.js";
+import { createStarterLearningServiceFromEnv } from "./learning/service.js";
 
 const port = Number(Bun.env.VOICE_SERVER_PORT ?? 8787);
 const hostname = Bun.env.VOICE_SERVER_HOST ?? "127.0.0.1";
@@ -39,6 +40,7 @@ const builderService = createBuilderServiceFromEnv({
   port,
   corsHeaders: corsHeadersFor,
 });
+const learningService = createStarterLearningServiceFromEnv();
 const runtimeKnowledge = {
   embeddings: new VoyageEmbeddingPort({
     apiKey: Bun.env.VOYAGE_API_KEY,
@@ -53,6 +55,7 @@ const runtimeKnowledge = {
 const voiceService = createStarterVoiceService({
   builderService,
   browserSampleRate,
+  learning: learningService,
   providerCatalog,
   runtimeKnowledge,
   sdk,
@@ -109,6 +112,13 @@ Bun.serve<WsData>({
     if (accessFailure) return accessFailure;
 
     if (url.pathname.startsWith("/builder/")) {
+      if (url.pathname === "/builder/agents/rollback" && request.method === "POST") {
+        return request.json().then(async (body) => {
+          const draftId = readDraftId(body);
+          if (!draftId) return json({ error: "draftId is required" }, request);
+          return json(await learningService.rollback(draftId), request);
+        });
+      }
       return builderService.handle(request, url).then(({ response }) => {
         return response ?? new Response("Not found", { status: 404 });
       });
@@ -227,4 +237,10 @@ function isLoopbackHost(value: string): boolean {
     value === "[::1]" ||
     value === "::1"
   );
+}
+
+function readDraftId(value: unknown): string {
+  if (!value || typeof value !== "object") return "";
+  const draftId = (value as { draftId?: unknown }).draftId;
+  return typeof draftId === "string" ? draftId.trim() : "";
 }

@@ -41,7 +41,15 @@ export function createBrowserSessionCallbacks(
     },
     onTranscript: (text, isFinal) => {
       const activeSession = deps.getActiveSession(deps.socket);
-      if (isFinal && activeSession) activeSession.messageCount++;
+      if (activeSession) {
+        activeSession.transcript.push({
+          role: "user",
+          text,
+          isFinal,
+          timestamp: Date.now(),
+        });
+        if (isFinal) activeSession.messageCount++;
+      }
       deps.sendControl(deps.socket, {
         type: "transcript",
         text,
@@ -56,6 +64,28 @@ export function createBrowserSessionCallbacks(
       });
     },
     onToolCall: (call) => {
+      const activeSession = deps.getActiveSession(deps.socket);
+      if (activeSession) {
+        const index = activeSession.toolCalls.findIndex((item) => {
+          return item.callId === call.callId;
+        });
+        const record = {
+          callId: call.callId,
+          toolName: call.toolName,
+          arguments: call.arguments,
+          startedAt: call.startedAt,
+          status: call.status,
+          completedAt:
+            call.status === "completed" || call.status === "failed"
+              ? Date.now()
+              : undefined,
+          result: call.result,
+          error: call.error,
+        };
+        if (index >= 0) activeSession.toolCalls[index] = record;
+        else activeSession.toolCalls.push(record);
+      }
+
       if (call.status === "executing" || call.status === "pending") {
         deps.sendControl(deps.socket, {
           type: "tool.call",
@@ -74,7 +104,6 @@ export function createBrowserSessionCallbacks(
           result: call.result ?? call.error ?? null,
         },
       });
-      const activeSession = deps.getActiveSession(deps.socket);
       if (activeSession) activeSession.toolCallCount++;
     },
     onError: (error) => {

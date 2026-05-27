@@ -3,6 +3,7 @@ import {
   activateAgentSession,
   fetchAgents,
   fetchDraft,
+  rollbackAgentVersion,
 } from "../api/builderApi.js";
 import type {
   AgentBankItem,
@@ -70,6 +71,20 @@ export function useAgentBank({
     }
   }
 
+  async function rollbackAgent(agent: AgentBankItem) {
+    setBusyDraftId(agent.draftId);
+    setMessage(null);
+    try {
+      const result = await rollbackAgentVersion(apiBase, agent.draftId);
+      setMessage(result.reason);
+      await loadAgents();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not rollback agent");
+    } finally {
+      setBusyDraftId(null);
+    }
+  }
+
   const agents = bank?.agents ?? [];
   const compiledCount = agents.filter((agent) => agent.kind === "compiled").length;
 
@@ -84,5 +99,6 @@ export function useAgentBank({
     loadAgents,
     loadInRtc,
     resumeDraft,
+    rollbackAgent,
   };
 }

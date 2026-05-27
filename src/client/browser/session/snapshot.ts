@@ -13,6 +13,7 @@ export const INITIAL_SNAPSHOT: BrowserVoiceSessionSnapshot = {
   isMuted: false,
   outputLevel: 0,
   error: null,
+  learning: null,
 };
 
 export function cloneSnapshot(

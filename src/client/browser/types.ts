@@ -28,6 +28,7 @@ export type ClientVoiceMessage =
 export type ServerVoiceMessage =
   | { type: "session.started"; sessionId: string }
   | { type: "session.ended"; summary: VoiceSessionSummary }
+  | { type: "learning.status"; learning: VoiceLearningSummary }
   | { type: "session.error"; error: { code: string; message: string } }
   | { type: "state.change"; state: BrowserVoiceState }
   | { type: "tool.call"; tool: { name: string; arguments: unknown } }
@@ -61,6 +62,26 @@ export interface VoiceSessionSummary {
   durationMs: number;
   messageCount: number;
   toolCallCount: number;
+}
+
+export type VoiceLearningStatus =
+  | "queued"
+  | "running"
+  | "applied"
+  | "failed"
+  | "skipped";
+
+export interface VoiceLearningSummary {
+  jobId: string;
+  runId: string;
+  status: VoiceLearningStatus;
+  agentId?: string;
+  draftId?: string;
+  queuedAt: string;
+  startedAt?: string;
+  finishedAt?: string;
+  message?: string;
+  error?: string;
 }
 
 export interface VoiceWSCallbacks {

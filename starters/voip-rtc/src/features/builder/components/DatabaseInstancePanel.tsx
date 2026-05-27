@@ -2,6 +2,7 @@ import { Button } from "../../../components/ui/Button.js";
 import { Metric } from "../../../components/ui/Metric.js";
 import { Panel } from "../../../components/ui/Panel.js";
 import type { AgentBuildDraft } from "../../../domain/builder.js";
+import type { AgentLearningStoreBackendPlan } from "../../../domain/builder-infra.js";
 import "./DatabaseInstancePanel.css";
 
 export function DatabaseInstancePanel({
@@ -96,6 +97,31 @@ export function DatabaseInstancePanel({
                   <code>{draft.infraPlan.iac.artifacts[0]?.path}</code>
                 </div>
               ) : null}
+              {draft.infraPlan.storePlan ? (
+                <div className="learningStores">
+                  <h4 style={{ margin: '0 0 10px', fontSize: '11px', color: 'var(--slate-500)', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+                    Learning Stores
+                  </h4>
+                  <div className="infraBackendList">
+                    {[
+                      draft.infraPlan.storePlan.temporalWorkflow,
+                      draft.infraPlan.storePlan.temporalMemory,
+                      draft.infraPlan.storePlan.graphMemory,
+                      draft.infraPlan.storePlan.auditStore,
+                      draft.infraPlan.storePlan.vectorBackend,
+                    ].filter(isLearningStore).map((store) => (
+                      <div key={store.id} className="infraBackend">
+                        <strong>{store.provider}</strong>
+                        <span>{store.kind}</span>
+                        <span>{store.configured ? "configuré" : store.required ? "requis" : "optionnel"}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p>
+                    Création à la fin de session · scopes {draft.infraPlan.storePlan.scopes.join(" + ")} · rollback versionné.
+                  </p>
+                </div>
+              ) : null}
               {draft.infraPlan.warnings?.length ? (
                 <div className="infraWarnings">
                   {draft.infraPlan.warnings.map((warning) => (
@@ -150,4 +176,10 @@ export function DatabaseInstancePanel({
       )}
     </Panel>
   );
+}
+
+function isLearningStore(
+  store: AgentLearningStoreBackendPlan | undefined,
+): store is AgentLearningStoreBackendPlan {
+  return Boolean(store);
 }

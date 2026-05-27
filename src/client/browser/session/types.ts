@@ -1,6 +1,7 @@
 import type {
   BrowserVoiceState,
   ServerVoiceMessage,
+  VoiceLearningSummary,
 } from "../types.js";
 
 export interface BrowserVoiceSupport {
@@ -34,6 +35,7 @@ export interface BrowserVoiceSessionSnapshot {
   isMuted: boolean;
   outputLevel: number;
   error: string | null;
+  learning: VoiceLearningSummary | null;
 }
 
 export interface BrowserVoiceSessionCallbacks {

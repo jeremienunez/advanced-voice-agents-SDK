@@ -19,6 +19,7 @@ import {
 import type {
   ActiveBrowserSession,
   BrowserVoiceServiceConfig,
+  BrowserVoiceSessionEndedInput,
   BrowserVoiceSessionRequest,
   BrowserVoiceSocket,
   BrowserVoiceUserContext,
@@ -164,11 +165,14 @@ export class BrowserVoiceService {
 
       this.activeSessions.set(socket, {
         sessionId: session.sessionId,
+        request,
         session,
         mediaHandler,
         startedAt: Date.now(),
         messageCount: 0,
         toolCallCount: 0,
+        transcript: [],
+        toolCalls: [],
       });
 
       await session.start();
@@ -217,15 +221,35 @@ export class BrowserVoiceService {
   ): Promise<void> {
     const activeSession = this.activeSessions.get(socket);
     if (!activeSession) return;
+    let endedInput: BrowserVoiceSessionEndedInput | null = null;
 
     try {
       activeSession.mediaHandler.stop();
       await activeSession.session.end(reason);
+      const endedAt = Date.now();
+      const summary = {
+        sessionId: activeSession.sessionId,
+        tenantId: activeSession.request.user.tenantId,
+        userId: activeSession.request.user.userId,
+        channel: "voice" as const,
+        startedAt: activeSession.startedAt,
+        endedAt,
+        durationMs: endedAt - activeSession.startedAt,
+        messageCount: activeSession.messageCount,
+        toolCallCount: activeSession.toolCallCount,
+        endReason: reason,
+      };
+      endedInput = {
+        request: activeSession.request,
+        summary,
+        transcript: [...activeSession.transcript],
+        toolCalls: activeSession.toolCalls.map((call) => ({ ...call })),
+      };
       this.sendControl(socket, {
         type: "session.ended",
         summary: {
           sessionId: activeSession.sessionId,
-          durationMs: Date.now() - activeSession.startedAt,
+          durationMs: summary.durationMs,
           messageCount: activeSession.messageCount,
           toolCallCount: activeSession.toolCallCount,
         },
@@ -234,6 +258,19 @@ export class BrowserVoiceService {
       this.logger.error("Failed to end browser voice session", { error });
     } finally {
       this.activeSessions.delete(socket);
+    }
+
+    if (endedInput && this.config.onSessionEnded) {
+      void (async () => {
+        await this.config.onSessionEnded?.(endedInput, (status) => {
+          this.sendControl(socket, {
+            type: "learning.status",
+            learning: status,
+          });
+        });
+      })().catch((error) => {
+        this.logger.error("Post-session learning hook failed", { error });
+      });
     }
   }
 

@@ -22,6 +22,8 @@ function summarizeMessage(message: ServerVoiceMessage): string {
       return message.sessionId;
     case "session.ended":
       return `${message.summary.durationMs} ms`;
+    case "learning.status":
+      return `${message.learning.status}: ${message.learning.message ?? message.learning.runId}`;
     case "session.error":
       return message.error.message;
     case "state.change":

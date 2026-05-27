@@ -1,4 +1,10 @@
-import type { ProviderDefinition } from "@voiceagentsdk/core/sdk";
+import type {
+  EmbeddingPort,
+  KnowledgeSearchPort,
+  LearningJobStatus,
+  LearningSessionInput,
+  ProviderDefinition,
+} from "@voiceagentsdk/core/sdk";
 import {
   GeminiRealtimeTransport,
   type IRealtimeProvider,
@@ -7,7 +13,6 @@ import {
   createRealtimeVoiceSession,
 } from "@voiceagentsdk/core/server";
 import { createBrowserVoiceService } from "@voiceagentsdk/core/server/browser";
-import type { EmbeddingPort, KnowledgeSearchPort } from "@voiceagentsdk/core/sdk";
 import type { createBuilderService } from "./builder.js";
 import {
   requireEnv,
@@ -20,6 +25,7 @@ import { runtimeKnowledgeTools } from "./runtime/knowledge-tools.js";
 import { runtimeAgentFromDraft } from "./runtime/compiled-agent.js";
 import { runtimeActionTools } from "./runtime/tools/action-tools.js";
 import type { createStarterSdk } from "./starter-sdk.js";
+import type { StarterLearningService } from "./learning/service.js";
 
 type BuilderService = ReturnType<typeof createBuilderService>;
 type StarterSdk = ReturnType<typeof createStarterSdk>;
@@ -33,6 +39,7 @@ export function createStarterVoiceService(options: {
     embeddingAvailable: boolean;
     search: KnowledgeSearchPort;
   };
+  learning?: StarterLearningService;
   sdk: StarterSdk;
 }) {
   const { browserSampleRate, providerCatalog, sdk } = options;
@@ -83,7 +90,62 @@ export function createStarterVoiceService(options: {
           : browserSampleRate;
       },
     },
+    onSessionEnded: (input, emitStatus) => {
+      if (!options.learning) {
+        emitStatus(skippedLearningStatus(input.summary.sessionId, "Learning service is not configured."));
+        return;
+      }
+      const draft = options.builderService.getCompiledDraft(input.request.agent);
+      const draftId = input.request.agent ?? draft?.id;
+      if (!draftId) {
+        emitStatus(skippedLearningStatus(input.summary.sessionId, "No compiled draft was attached to the session."));
+        return;
+      }
+      options.learning.enqueueSessionLearning(
+        {
+          agentId: draftId,
+          draftId,
+          tenantId: input.summary.tenantId,
+          userId: input.summary.userId,
+          summary: input.summary,
+          transcript: input.transcript,
+          toolCalls: input.toolCalls,
+          metadata: compactMetadata({
+            conversationId: input.request.conversationId,
+            provider: input.request.provider,
+            model: input.request.model,
+            voice: input.request.voice,
+          }),
+        } satisfies LearningSessionInput,
+        emitStatus,
+      );
+    },
   });
+}
+
+function skippedLearningStatus(
+  sessionId: string,
+  message: string,
+): LearningJobStatus {
+  const now = new Date().toISOString();
+  return {
+    jobId: `job_${sessionId}`,
+    runId: `learn_${sessionId}`,
+    status: "skipped",
+    queuedAt: now,
+    finishedAt: now,
+    message,
+  };
+}
+
+function compactMetadata(
+  value: Record<string, string | undefined>,
+): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(value).filter((entry): entry is [string, string] => {
+      return typeof entry[1] === "string" && entry[1].length > 0;
+    }),
+  );
 }
 
 function createProvider(

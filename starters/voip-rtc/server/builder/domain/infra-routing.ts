@@ -9,11 +9,16 @@ export interface IntentInfraPlannerOptions {
   computeTarget?: string;
   databaseUrl?: string;
   defaultVectorBackend?: string;
+  learningEnabled?: string | boolean;
+  learningMemoryTtlSeconds?: string | number;
   graphUrl?: string;
   isolation?: string;
   milvusUrl?: string;
   provisioningMode?: string;
   redisUrl?: string;
+  temporalAddress?: string;
+  temporalNamespace?: string;
+  temporalTaskQueue?: string;
 }
 
 export const vectorScaleTerms = [
@@ -66,6 +71,21 @@ export function hasAny(value: string, terms: string[]): boolean {
 export function isMilvusRequested(value: string | undefined): boolean {
   const normalized = normalizeToken(value);
   return normalized === "milvus" || normalized === "milvus_vector";
+}
+
+export function normalizeBoolean(value: string | boolean | undefined): boolean {
+  if (typeof value === "boolean") return value;
+  const normalized = normalizeToken(value);
+  if (!normalized) return false;
+  return !["0", "false", "no", "off", "disabled"].includes(normalized);
+}
+
+export function normalizePositiveInteger(
+  value: string | number | undefined,
+  fallback: number,
+): number {
+  const parsed = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
 }
 
 export function normalizeComputeTarget(

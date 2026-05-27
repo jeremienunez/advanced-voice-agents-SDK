@@ -18,6 +18,10 @@ if (!activeDraftId) fail("No active compiled builder session");
 if (!asRecord(session.artifact).draftId) {
   fail(`Active draft has no compiled artifact: ${activeDraftId}`);
 }
+const initialVersion = readRecordNumber(
+  asRecord(asRecord(session.draft).evolution),
+  "version",
+) ?? 1;
 
 const config = await getJson(`${serverUrl}/config`);
 const wsUrl = readString(config, "wsUrl").replace("localhost", "127.0.0.1");
@@ -38,13 +42,42 @@ await new Promise<void>((resolve, reject) => {
   }, timeoutMs);
 
   const ws = new WebSocket(wsUrl);
+  let sessionEnded = false;
+  let terminalLearning = false;
+  let finished = false;
 
   function finish(error?: Error): void {
+    if (finished) return;
+    finished = true;
     if (audioTimer) clearInterval(audioTimer);
     clearTimeout(timeout);
     ws.close();
     if (error) reject(error);
     else resolve();
+  }
+
+  async function finishAfterLearning(): Promise<void> {
+    if (!sessionEnded || !terminalLearning) return;
+    const health = await getJson(`${serverUrl}/health`);
+    const activeSessions = readRecordNumber(health, "activeSessions");
+    if (activeSessions !== 0) {
+      finish(new Error(`Expected activeSessions 0, got ${activeSessions}`));
+      return;
+    }
+    const nextSession = await getJson(`${serverUrl}/builder/session`);
+    const nextVersion = readRecordNumber(
+      asRecord(asRecord(nextSession.draft).evolution),
+      "version",
+    ) ?? 0;
+    if (nextVersion <= initialVersion) {
+      finish(
+        new Error(
+          `Expected learned agent version > ${initialVersion}, got ${nextVersion}`,
+        ),
+      );
+      return;
+    }
+    finish();
   }
 
   ws.addEventListener("open", () => {
@@ -73,7 +106,31 @@ await new Promise<void>((resolve, reject) => {
       }, durationMs);
     }
 
-    if (message.type === "session.ended") finish();
+    if (message.type === "session.ended") {
+      sessionEnded = true;
+      void finishAfterLearning().catch((error: unknown) => {
+        finish(error instanceof Error ? error : new Error(String(error)));
+      });
+    }
+
+    if (message.type === "learning.status") {
+      const learning = asRecord(message.learning);
+      const status = readString(learning, "status");
+      if (status === "failed") {
+        finish(new Error(readString(learning, "error") || JSON.stringify(learning)));
+        return;
+      }
+      if (status === "skipped") {
+        finish(new Error(readString(learning, "message") || "Learning was skipped"));
+        return;
+      }
+      if (status === "applied") {
+        terminalLearning = true;
+        void finishAfterLearning().catch((error: unknown) => {
+          finish(error instanceof Error ? error : new Error(String(error)));
+        });
+      }
+    }
 
     if (message.type === "session.error") {
       finish(new Error(JSON.stringify(message.error ?? message)));
@@ -87,10 +144,12 @@ await new Promise<void>((resolve, reject) => {
 
 const started = events.find((event) => event.type === "session.started");
 const ended = events.find((event) => event.type === "session.ended");
+const learning = events.find((event) => event.type === "learning.status");
 const stateChanges = events.filter((event) => event.type === "state.change");
 
 assert(started, "session.started was not received");
 assert(ended, "session.ended was not received");
+assert(learning, "learning.status was not received");
 assert(
   stateChanges.some((event) => event.state === "listening"),
   "listening state was not received",
@@ -108,6 +167,12 @@ console.log(
       voice,
       eventTypes: events.map((event) => event.type),
       sessionId: readString(started, "sessionId"),
+      initialVersion,
+      learnedVersion: readRecordNumber(
+        asRecord(asRecord(await getJson(`${serverUrl}/builder/session`)).draft)
+          .evolution,
+        "version",
+      ),
     },
     null,
     2,
@@ -187,6 +252,11 @@ function readNumber(value: string | undefined, fallback: number): number {
   if (!value) return fallback;
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function readRecordNumber(value: unknown, key: string): number | undefined {
+  const item = asRecord(value)[key];
+  return typeof item === "number" && Number.isFinite(item) ? item : undefined;
 }
 
 function asRecord(value: unknown): JsonRecord {

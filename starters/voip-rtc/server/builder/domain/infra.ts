@@ -1,4 +1,5 @@
 import type {
+  AgentStorePlan,
   AgentInfraPlan,
   DatabaseBackendPlan,
   InfraIsolationMode,
@@ -14,8 +15,10 @@ import {
   hasAny,
   isMilvusRequested,
   type IntentInfraPlannerOptions,
+  normalizeBoolean,
   normalizeComputeTarget,
   normalizeIsolation,
+  normalizePositiveInteger,
   normalizeProvisioningMode,
   searchableIntent,
   uniqueList,
@@ -39,6 +42,7 @@ export class IntentInfraPlanner implements InfraPlannerPort {
       hasAny(intent, graphTerms) ||
       Boolean(this.options.graphUrl);
     const wantsCache = hasAny(intent, cacheTerms) || Boolean(this.options.redisUrl);
+    const learningEnabled = normalizeBoolean(this.options.learningEnabled);
     const explicitMilvus = isMilvusRequested(this.options.defaultVectorBackend);
     const includeMilvus = explicitMilvus ||
       wantsVectorScale ||
@@ -119,13 +123,27 @@ export class IntentInfraPlanner implements InfraPlannerPort {
       }
     }
 
+    const storePlan = learningEnabled
+      ? this.createStorePlan(schemaName, isolation, provisioningMode)
+      : undefined;
+    if (storePlan) {
+      resources.push(
+        ...storePlanResources(storePlan),
+      );
+      reasons.push("Post-session learning stores are planned now and created only when learning runs.");
+      if (storePlan.warnings?.length) warnings.push(...storePlan.warnings);
+    }
+
     const defaultBackendId = this.resolveDefaultBackendId(
       knowledgeBackends,
       explicitMilvus,
       wantsVectorScale,
     );
     const secretRefs = uniqueList(
-      knowledgeBackends.flatMap((backend) => backend.requiredEnv ?? []),
+      [
+        ...knowledgeBackends.flatMap((backend) => backend.requiredEnv ?? []),
+        ...(storePlan ? storePlanEnvRefs(storePlan) : []),
+      ],
     );
 
     return {
@@ -160,6 +178,7 @@ export class IntentInfraPlanner implements InfraPlannerPort {
           "Application auth must still protect builder and voice control-plane routes.",
         ],
       },
+      storePlan,
       reasons,
       warnings,
       raw: {
@@ -167,6 +186,7 @@ export class IntentInfraPlanner implements InfraPlannerPort {
         vectorScaleIntent: wantsVectorScale,
         graphIntent: wantsGraph,
         cacheIntent: wantsCache,
+        learningEnabled,
       },
     };
   }
@@ -284,6 +304,158 @@ export class IntentInfraPlanner implements InfraPlannerPort {
     };
   }
 
+  private createStorePlan(
+    schemaName: string,
+    isolation: InfraIsolationMode,
+    provisioningMode: InfraProvisioningMode,
+  ): AgentStorePlan {
+    const ttlSeconds = normalizePositiveInteger(
+      this.options.learningMemoryTtlSeconds,
+      60 * 60 * 24 * 30,
+    );
+    const namespace = `${schemaName}_learning`;
+    const temporalAddress = this.options.temporalAddress;
+    const temporalConfigured = Boolean(
+      temporalAddress || this.options.temporalNamespace || this.options.temporalTaskQueue,
+    );
+    const graphConfigured = Boolean(this.options.graphUrl || this.options.databaseUrl);
+    const warnings: string[] = [];
+
+    if (!this.options.redisUrl) {
+      warnings.push("Learning temporal memory is enabled; REDIS_URL is required for the Redis memory store.");
+    }
+    if (!temporalConfigured) {
+      warnings.push("Learning workflow is enabled; TEMPORAL_ADDRESS or a local Temporal worker must be configured.");
+    }
+    if (!this.options.databaseUrl) {
+      warnings.push("Learning audit/source store is enabled; DATABASE_URL is required for durable version audit.");
+    }
+
+    return {
+      enabled: true,
+      scopes: ["agent", "user"],
+      createOn: "session_end",
+      temporalWorkflow: {
+        id: "temporal-learning-workflow",
+        kind: "temporal_workflow",
+        provider: "temporal",
+        configured: temporalConfigured,
+        required: true,
+        namespace: this.options.temporalNamespace ?? "default",
+        provisioningMode,
+        isolation,
+        createOn: "session_end",
+        capabilities: ["workflow_queue"],
+        reason: "Runs learnFromSession after RTC shutdown without blocking the user.",
+        requiredEnv: ["TEMPORAL_ADDRESS", "TEMPORAL_NAMESPACE", "TEMPORAL_TASK_QUEUE"],
+        resources: [
+          {
+            kind: "temporal-task-queue",
+            name: this.options.temporalTaskQueue ?? "agent-learning",
+            provider: "temporal",
+            namespace: this.options.temporalNamespace ?? "default",
+          },
+        ],
+      },
+      temporalMemory: {
+        id: "redis-temporal-memory",
+        kind: "temporal_memory",
+        provider: "redis",
+        configured: Boolean(this.options.redisUrl),
+        required: true,
+        namespace,
+        provisioningMode,
+        isolation,
+        createOn: "session_end",
+        capabilities: ["session_window", "ttl", "fact_memory", "preference_memory"],
+        reason: "Stores short-lived facts, preferences, failed intents, and missing tool signals with tenant/user scope.",
+        requiredEnv: ["REDIS_URL"],
+        ttlSeconds,
+        resources: [
+          {
+            kind: "redis-namespace",
+            name: namespace,
+            provider: "redis",
+            namespace,
+          },
+        ],
+      },
+      graphMemory: {
+        id: "graph-memory",
+        kind: "graph_memory",
+        provider: this.options.graphUrl ? "graph" : "postgres",
+        configured: graphConfigured,
+        required: false,
+        namespace: `${namespace}_graph`,
+        provisioningMode,
+        isolation,
+        createOn: "session_end",
+        capabilities: ["entity_graph", "relation_graph"],
+        reason: "Upserts session entities and relations through a pluggable graph adapter; Postgres is the local default.",
+        requiredEnv: ["DATABASE_URL", "NEO4J_URI", "GRAPH_DATABASE_URL"],
+        resources: [
+          {
+            kind: "graph-memory-space",
+            name: `${namespace}_graph`,
+            provider: this.options.graphUrl ? "graph" : "postgres",
+            namespace,
+          },
+        ],
+      },
+      auditStore: {
+        id: "learning-audit-source",
+        kind: "audit_source",
+        provider: "postgres",
+        configured: Boolean(this.options.databaseUrl),
+        required: true,
+        namespace,
+        provisioningMode,
+        isolation,
+        createOn: "session_end",
+        capabilities: ["audit_log", "source_archive"],
+        reason: "Records every automatic prompt/tool/infra evolution and rollback pointer append-only.",
+        requiredEnv: ["DATABASE_URL"],
+        resources: [
+          {
+            kind: "agent-version-audit",
+            name: `${namespace}_agent_versions`,
+            provider: "postgres",
+            namespace,
+          },
+        ],
+      },
+      vectorBackend: isMilvusRequested(this.options.defaultVectorBackend)
+        ? {
+            id: "learning-vector-memory",
+            kind: "vector_memory",
+            provider: "milvus",
+            configured: Boolean(this.options.milvusUrl),
+            required: false,
+            namespace: `${namespace}_vectors`,
+            provisioningMode,
+            isolation,
+            createOn: "session_end",
+            capabilities: ["vector_search"],
+            reason: "Optional vector slot for long-horizon learned memory retrieval.",
+            requiredEnv: ["MILVUS_URL", "MILVUS_ADDRESS"],
+          }
+        : undefined,
+      guardrails: {
+        appendOnlyVersions: true,
+        rollbackPointer: true,
+        auditEveryChange: true,
+        redactSecrets: true,
+        destructiveInfraMigrations: "forbidden",
+      },
+      reasons: [
+        "Learning is queued after session end so RTC shutdown stays responsive.",
+        "Global agent memory and user personalization are both scoped explicitly.",
+        "Stores are described in the infra plan but ensured only by the learning workflow.",
+      ],
+      warnings,
+    };
+  }
+
   private resolveDefaultBackendId(
     backends: KnowledgeBackendPlan[],
     explicitMilvus: boolean,
@@ -294,4 +466,26 @@ export class IntentInfraPlanner implements InfraPlannerPort {
     if (wantsVectorScale && milvus?.configured) return milvus.id;
     return "postgres-primary";
   }
+}
+
+function storePlanEnvRefs(plan: AgentStorePlan): string[] {
+  return uniqueList(
+    [
+      plan.temporalWorkflow,
+      plan.temporalMemory,
+      plan.graphMemory,
+      plan.auditStore,
+      plan.vectorBackend,
+    ].flatMap((backend) => backend?.requiredEnv ?? []),
+  );
+}
+
+function storePlanResources(plan: AgentStorePlan): InfraResourceRef[] {
+  return [
+    plan.temporalWorkflow,
+    plan.temporalMemory,
+    plan.graphMemory,
+    plan.auditStore,
+    plan.vectorBackend,
+  ].flatMap((backend) => backend?.resources ?? []);
 }

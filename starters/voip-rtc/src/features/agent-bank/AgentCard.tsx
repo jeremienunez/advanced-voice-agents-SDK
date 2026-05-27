@@ -8,11 +8,13 @@ export function AgentCard({
   busyDraftId,
   onLoadRtc,
   onResumeBuilder,
+  onRollback,
 }: {
   agent: AgentBankItem;
   busyDraftId: string | null;
   onLoadRtc: (agent: AgentBankItem) => Promise<void>;
   onResumeBuilder: (agent: AgentBankItem) => Promise<void>;
+  onRollback: (agent: AgentBankItem) => Promise<void>;
 }) {
   const isCompiled = agent.status === "compiled" || agent.canRunRtc;
 
@@ -55,6 +57,16 @@ export function AgentCard({
 
         <span className="agent-meta-label">Outils Activés</span>
         <span className="agent-meta-value">{agent.selectedTools.length} outils</span>
+
+        <span className="agent-meta-label">Version Agent</span>
+        <span className="agent-meta-value">v{agent.evolution?.version ?? (isCompiled ? 1 : 0)}</span>
+
+        <span className="agent-meta-label">Dernier Apprentissage</span>
+        <span className="agent-meta-value">
+          {agent.evolution?.lastLearningRun
+            ? `${agent.evolution.lastLearningRun.status} · ${formatDateTime(agent.evolution.lastLearningRun.at)}`
+            : "Aucun"}
+        </span>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--slate-500)' }}>
@@ -79,6 +91,15 @@ export function AgentCard({
         >
           {busyDraftId === agent.draftId ? "Ouverture..." : "Ouvrir Éditeur"}
         </Button>
+        {agent.evolution?.rollbackAvailable ? (
+          <Button
+            className="agentActionButton"
+            onClick={() => void onRollback(agent)}
+            disabled={busyDraftId === agent.draftId}
+          >
+            {busyDraftId === agent.draftId ? "Rollback..." : "Rollback Version"}
+          </Button>
+        ) : null}
       </div>
     </article>
   );

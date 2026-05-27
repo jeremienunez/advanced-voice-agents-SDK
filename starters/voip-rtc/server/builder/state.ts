@@ -4,6 +4,7 @@ import { dirname, join } from "node:path";
 import { isAgentDraft } from "./domain/drafts.js";
 import type { BuilderSessionState } from "./types.js";
 import { asRecord, readChunkCount, readString } from "./utils.js";
+import { latestLearningRunForDraft } from "../learning/run-state.js";
 
 const draftStatePath = join(process.cwd(), ".builder-state", "drafts.json");
 const sessionStatePath = join(process.cwd(), ".builder-state", "session.json");
@@ -96,6 +97,7 @@ function compiledDraftSummaries(): Array<Record<string, unknown>> {
       createdAt: draft.compiled?.createdAt,
       knowledge: draft.compiled?.knowledge,
       selectedTools: draft.compiled?.selectedTools,
+      evolution: summarizeEvolution(draft),
     }));
 }
 
@@ -145,6 +147,7 @@ function summarizeDraftForBank(
       draft.promptParts.tools?.length ??
       draft.promptParts.part1?.length ??
       0,
+    evolution: summarizeEvolution(draft),
   };
 }
 
@@ -183,6 +186,38 @@ function summarizeDraftForSession(draft: AgentBuildDraft): Record<string, unknow
         }
       : null,
     promptChars: draft.compiled?.prompt.length ?? 0,
+    evolution: summarizeEvolution(draft),
+  };
+}
+
+function summarizeEvolution(draft: AgentBuildDraft): Record<string, unknown> {
+  const raw = asRecord(draft.metadata?.agentEvolution);
+  const version = typeof raw.version === "number" && raw.version > 0
+    ? raw.version
+    : draft.compiled
+      ? 1
+      : 0;
+  const lastRun = asRecord(raw.lastLearningRun);
+  const persistedRun = latestLearningRunForDraft(draft.id);
+  return {
+    version,
+    currentArtifactId: readString(raw, "currentArtifactId") || null,
+    rollbackAvailable: Boolean(raw.rollbackArtifact),
+    lastLearningRun: lastRun.runId
+      ? {
+          runId: readString(lastRun, "runId"),
+          status: readString(lastRun, "status"),
+          at: readString(lastRun, "at"),
+          sourceSessionId: readString(lastRun, "sourceSessionId"),
+        }
+      : persistedRun
+        ? {
+            runId: persistedRun.runId,
+            status: persistedRun.status,
+            at: persistedRun.finishedAt ?? persistedRun.startedAt ?? persistedRun.queuedAt,
+            sourceSessionId: null,
+          }
+        : null,
   };
 }
 

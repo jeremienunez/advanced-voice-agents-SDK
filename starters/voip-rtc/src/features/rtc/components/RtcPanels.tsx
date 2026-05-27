@@ -38,9 +38,18 @@ export function SessionPanel({
         <Metric label="Durée d'Appel" value={formatDuration(snapshot.durationMs)} />
         <Metric label="Microphone" value={snapshot.isMuted ? "Muet" : "Actif"} />
         <Metric label="Mode d'Entrée" value={audioMode === "microphone" ? "Microphone" : "Silence E2E"} />
+        <Metric
+          label="Apprentissage"
+          value={snapshot.learning ? snapshot.learning.status : "En attente"}
+        />
       </div>
 
       {snapshot.error ? <p className="error-box">{snapshot.error}</p> : null}
+      {snapshot.learning ? (
+        <p className={snapshot.learning.status === "failed" ? "error-box" : "warning"}>
+          {snapshot.learning.message ?? snapshot.learning.runId}
+        </p>
+      ) : null}
       {snapshot.error && audioMode === "microphone" ? (
         <p className="warning">
           Astuce : Basculez l'entrée sur "Silence E2E" pour tester la chaîne RTC sans microphone physique.

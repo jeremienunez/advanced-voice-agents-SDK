@@ -16,10 +16,19 @@ const docs = {
   k3s: "https://docs.k3s.io/",
   terraform: "https://developer.hashicorp.com/terraform/install",
   opentofu: "https://opentofu.org/docs/intro/install/",
+  temporal: "https://docs.temporal.io/cli",
 };
 
 export async function checkOnboardingDependencies(): Promise<DependencyCheck[]> {
-  const [dockerCli, dockerDaemon, kubectl, kubectlContext, terraform, opentofu] =
+  const [
+    dockerCli,
+    dockerDaemon,
+    kubectl,
+    kubectlContext,
+    terraform,
+    opentofu,
+    temporalCli,
+  ] =
     await Promise.all([
       check("docker", ["--version"], "Docker CLI", false, docs.docker),
       check("docker", ["info", "--format", "{{.ServerVersion}}"], "Docker daemon", false, docs.docker),
@@ -27,6 +36,7 @@ export async function checkOnboardingDependencies(): Promise<DependencyCheck[]> 
       check("kubectl", ["config", "current-context"], "Kubernetes context", false, docs.kubectl),
       check("terraform", ["version"], "Terraform CLI", false, docs.terraform),
       check("tofu", ["version"], "OpenTofu CLI", false, docs.opentofu),
+      check("temporal", ["--version"], "Temporal CLI", false, docs.temporal),
     ]);
 
   return [
@@ -36,6 +46,12 @@ export async function checkOnboardingDependencies(): Promise<DependencyCheck[]> 
     kubectlContext,
     terraform,
     opentofu,
+    {
+      ...temporalCli,
+      detail: temporalCli.status === "ok"
+        ? "Temporal CLI is available for local learning worker checks."
+        : "Optional for local dev; production learning needs a Temporal worker endpoint.",
+    },
     {
       id: "k3s-local",
       label: "Local K3s runtime",

@@ -171,6 +171,15 @@ export function activateAgentSession(apiBase: string, draftId: string) {
   return postJson<BuilderSessionResponse>(`${apiBase}/session`, { draftId });
 }
 
+export function rollbackAgentVersion(apiBase: string, draftId: string) {
+  return postJson<{
+    status: string;
+    draftId: string;
+    version: number;
+    reason: string;
+  }>(`${apiBase}/agents/rollback`, { draftId });
+}
+
 export async function fetchDraft(
   apiBase: string,
   draftId: string,

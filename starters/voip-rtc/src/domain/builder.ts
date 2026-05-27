@@ -217,6 +217,18 @@ export interface CompiledAgentSummary {
   };
 }
 
+export interface AgentEvolutionSummary {
+  version: number;
+  currentArtifactId?: string | null;
+  rollbackAvailable: boolean;
+  lastLearningRun: {
+    runId: string;
+    status: string;
+    at: string;
+    sourceSessionId?: string | null;
+  } | null;
+}
+
 export interface BuilderSessionResponse {
   activeDraftId: string | null;
   updatedAt: string | null;
@@ -255,6 +267,7 @@ export interface AgentBankItem {
   } | null;
   selectedTools: string[];
   promptChars: number;
+  evolution?: AgentEvolutionSummary;
 }
 
 export interface AgentBankResponse {

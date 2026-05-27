@@ -175,6 +175,12 @@ export class BrowserVoiceSessionClient {
       case "session.ended":
         this.updateSnapshot({ ...this.snapshot, state: "ended", outputLevel: 0 });
         break;
+      case "learning.status":
+        this.updateSnapshot({
+          ...this.snapshot,
+          learning: message.learning,
+        });
+        break;
       case "session.error":
         this.fail(message.error.message);
         break;

@@ -62,6 +62,8 @@
     "infra:destroy": "pnpm --filter @voiceagentsdk/starter-voip-rtc infra:destroy",
     "test:db": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:db",
     "test:infra-plan": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-plan",
+    "test:learning": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:learning",
+    "test:learning:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:learning:bdd",
     "test:knowledge-tool": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:knowledge-tool",
     "test:runtime-tool-call": "bun run scripts/test-runtime-tool-call.ts",
     "test:rtc-e2e": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:rtc-e2e",

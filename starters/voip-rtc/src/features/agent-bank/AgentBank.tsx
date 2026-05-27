@@ -79,6 +79,7 @@ export function AgentBank({
               busyDraftId={bank.busyDraftId}
               onLoadRtc={bank.loadInRtc}
               onResumeBuilder={bank.resumeDraft}
+              onRollback={bank.rollbackAgent}
             />
           ))
         )}

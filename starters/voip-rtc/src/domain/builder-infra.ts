@@ -40,6 +40,39 @@ export interface AgentInfraPlan {
     notes: string[];
     warnings?: string[];
   };
+  storePlan?: {
+    enabled: boolean;
+    scopes: string[];
+    createOn: string;
+    temporalWorkflow: AgentLearningStoreBackendPlan;
+    temporalMemory: AgentLearningStoreBackendPlan;
+    graphMemory: AgentLearningStoreBackendPlan;
+    auditStore: AgentLearningStoreBackendPlan;
+    vectorBackend?: AgentLearningStoreBackendPlan;
+    guardrails: {
+      appendOnlyVersions: boolean;
+      rollbackPointer: boolean;
+      auditEveryChange: boolean;
+      redactSecrets: boolean;
+      destructiveInfraMigrations: string;
+    };
+    reasons: string[];
+    warnings?: string[];
+  };
   reasons: string[];
   warnings?: string[];
+}
+
+export interface AgentLearningStoreBackendPlan {
+  id: string;
+  kind: string;
+  provider: string;
+  configured: boolean;
+  required: boolean;
+  namespace: string;
+  createOn: string;
+  capabilities: string[];
+  reason: string;
+  requiredEnv?: string[];
+  ttlSeconds?: number;
 }
