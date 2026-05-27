@@ -2,9 +2,9 @@ import { useCallback, useState } from "react";
 import { DEFAULT_BUILDER_URL } from "./api/constants.js";
 import { Atmosphere } from "./Atmosphere.js";
 import { AppModeTabs } from "./components/navigation/AppModeTabs.js";
+import type { AppMode } from "./domain/app-mode.js";
 import type {
   AgentBuildDraft,
-  AppMode,
   CompiledAgentSummary,
 } from "./domain/builder.js";
 import { AgentBank } from "./features/agent-bank/AgentBank.js";

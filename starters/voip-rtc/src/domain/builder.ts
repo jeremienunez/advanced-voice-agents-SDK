@@ -1,5 +1,11 @@
 import type { ToolBuildPlan, ToolValidationReport } from "./builder-tooling.js";
 import type { AgentInfraPlan } from "./builder-infra.js";
+import type { AgentEvolutionSummary } from "./builder-evolution.js";
+import type { DatabaseBuildPlan } from "./builder-database.js";
+import type {
+  KnowledgeDocument,
+  KnowledgeResearchBudget,
+} from "./builder-knowledge.js";
 
 export type {
   ToolBuildContract,
@@ -7,6 +13,13 @@ export type {
   ToolValidationReport,
 } from "./builder-tooling.js";
 export type { AgentInfraPlan } from "./builder-infra.js";
+export type { DatabaseBuildPlan } from "./builder-database.js";
+export type {
+  KnowledgeDocument,
+  KnowledgeResearchBudget,
+  KnowledgeResearchCheckpoint,
+  KnowledgeResearchResult,
+} from "./builder-knowledge.js";
 
 export interface ToolRegistryItem {
   name: string;
@@ -17,104 +30,6 @@ export interface ToolRegistryItem {
   requiresKnowledge?: boolean;
   requiresGraph?: boolean;
   selectedByDefault?: boolean;
-}
-
-export interface KnowledgeDocument {
-  id: string;
-  name: string;
-  kind: "txt" | "md" | "pdf" | "xlsx" | "xls" | "web_research" | "unknown";
-  mimeType?: string;
-  sizeBytes?: number;
-  text?: string;
-  status: string;
-  error?: string;
-  metadata?: Record<string, unknown>;
-}
-
-export interface KnowledgeResearchBudget {
-  maxQueriesPerCycle: number;
-  maxSources: number;
-  maxEstimatedTokens: number;
-  maxEstimatedCostUsd: number;
-}
-
-export interface KnowledgeResearchCheckpoint {
-  id: string;
-  label: string;
-  status: "planned" | "running" | "completed" | "failed";
-  at: string;
-  detail?: string;
-  metadata?: Record<string, unknown>;
-}
-
-export interface KnowledgeResearchResult {
-  status: string;
-  budget: KnowledgeResearchBudget;
-  spend: {
-    cycles: number;
-    queries: number;
-    sources: number;
-    estimatedTokens: number;
-    estimatedCostUsd: number;
-  };
-  documents: KnowledgeDocument[];
-  cycles: Array<{
-    id: string;
-    objective: string;
-    queries: string[];
-    status: string;
-    sourceCount: number;
-    estimatedTokens: number;
-    estimatedCostUsd: number;
-    documentId?: string;
-    checkpoints?: KnowledgeResearchCheckpoint[];
-    warnings?: string[];
-  }>;
-  checkpoints?: KnowledgeResearchCheckpoint[];
-  stopReason?: string;
-  warnings?: string[];
-}
-
-export interface DatabaseBuildPlan {
-  id: string;
-  status: string;
-  databaseProvider: string;
-  schemaName: string;
-  sqlMigration: string;
-  statements: Array<{
-    id: string;
-    sql: string;
-    purpose: string;
-    riskLevel: string;
-  }>;
-  vectorization: {
-    embeddingProvider: string;
-    embeddingModel: string;
-    dimensions: number;
-    sourceFields: string[];
-    metadataFields: string[];
-    retrievalMode: string;
-    index: {
-      kind: string;
-      metric: string;
-    };
-    rationale?: string;
-  };
-  repositories: {
-    repositories: Array<{
-      id: string;
-      table: string;
-      operations: string[];
-      vectorSearch?: boolean;
-      lexicalSearch?: boolean;
-    }>;
-    safetyRules: string[];
-    rationale?: string;
-  };
-  reasons: string[];
-  risks: string[];
-  validationErrors?: string[];
-  appliedAt?: string;
 }
 
 export interface BuilderIdentity {
@@ -217,18 +132,6 @@ export interface CompiledAgentSummary {
   };
 }
 
-export interface AgentEvolutionSummary {
-  version: number;
-  currentArtifactId?: string | null;
-  rollbackAvailable: boolean;
-  lastLearningRun: {
-    runId: string;
-    status: string;
-    at: string;
-    sourceSessionId?: string | null;
-  } | null;
-}
-
 export interface BuilderSessionResponse {
   activeDraftId: string | null;
   updatedAt: string | null;
@@ -308,4 +211,3 @@ export interface BuilderConfig {
     verification: BuilderProviderOption[];
   };
 }
-export type AppMode = "hub" | "builder" | "agents" | "rtc" | "onboarding";

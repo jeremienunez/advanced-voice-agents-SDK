@@ -1,5 +1,86 @@
 # Changelog
-rezch
+
+## feat/refactor: add post-session learning stores and nest modules
+
+Status: implemented locally
+Date: 2026-05-27
+
+### Intent
+
+Permettre aux agents RTC d'apprendre apres une session sans ralentir la
+fermeture voix: la session se termine, un job learning asynchrone classe les
+faits/preferences/echecs/outils manquants, puis met a jour la memoire
+temporelle, le graphe et une nouvelle version rollbackable de l'agent.
+
+La passe actuelle garde aussi le code maintenable: les fichiers manuscrits
+restent sous 300 LOC avec des modules dedies pour types SDK, infra learning,
+evolution, scenarios BDD et types UI.
+
+### Journal
+
+- Ajout des ports SDK learning:
+  - `TemporalWorkflowPort`
+  - `TemporalMemoryStorePort`
+  - `GraphMemoryStorePort`
+  - `AgentEvolutionPort`
+- Ajout d'un `AgentStorePlan` dans `AgentInfraPlan` quand
+  `AGENT_LEARNING_ENABLED` est actif.
+- Le plan infra decrit Redis, Temporal, graph memory, audit/source store et
+  vector memory optionnelle, mais les stores sont crees a la fin de session,
+  pas au moment du planning builder.
+- Dev mode pilote par env:
+  - `AGENT_LEARNING_ENABLED`
+  - `AGENT_LEARNING_MEMORY_TTL_SECONDS`
+  - `REDIS_URL`
+  - `TEMPORAL_ADDRESS`
+  - `TEMPORAL_NAMESPACE`
+  - `TEMPORAL_TASK_QUEUE`
+  - `NEO4J_URI` / `GRAPH_DATABASE_URL`
+- Ajout du hook RTC `onEnded`:
+  - collecte summary, transcript, tool calls, tenant/user et draft/agent ids;
+  - queue le job learning;
+  - renvoie la fin de session immediatement et publie `learning.status`.
+- Ajout du workflow local `learnFromSession`:
+  - memoire Redis TTL par tenant/agent/user;
+  - graph nodes/edges idempotents;
+  - recommandations de retrieval/tool/prompt;
+  - application automatique d'une nouvelle version d'agent.
+- Ajout des garde-fous:
+  - versions append-only;
+  - pointeur rollback;
+  - audit metadata apply/rollback;
+  - redaction des secrets appris;
+  - pas de migration infra destructive.
+- UI starter:
+  - panneau Learning Stores dans la zone database/infra;
+  - statut learning dans RTC Lab apres stop;
+  - version courante, dernier run learning et rollback dans Agent Bank;
+  - checks onboarding pour Redis, Temporal, graph et TTL.
+- Ajout du test BDD popperien `pnpm test:learning:bdd`.
+- Decoupage LOC:
+  - `src/sdk/types/learning.ts`;
+  - `src/sdk/types/provisioning.ts`;
+  - `src/sdk/types/database.ts`;
+  - `server/builder/domain/infra-backends.ts`;
+  - `server/builder/domain/infra-learning.ts`;
+  - `server/learning/evolution-*`;
+  - `scripts/learning-bdd/*`;
+  - types UI builder/app-mode dedies.
+
+### Validation
+
+- `pnpm audit:loc` OK
+- `pnpm typecheck:sdk` OK
+- `pnpm --filter @voiceagentsdk/starter-voip-rtc typecheck` OK
+- `pnpm test:learning:bdd` OK
+- `pnpm test:learning` OK
+- `pnpm test:infra-plan` OK
+- `pnpm test:knowledge-tool` OK
+- `pnpm audit:sdk-boundary` OK
+- `pnpm audit:imports` OK
+- `pnpm test:rtc-e2e` OK
+- `pnpm pack:dry-run` OK
+
 ## feat: validate builder tool contracts before RTC compile
 
 Status: implemented locally

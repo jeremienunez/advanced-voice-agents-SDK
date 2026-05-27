@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Button } from "../../components/ui/Button.js";
 import { Metric } from "../../components/ui/Metric.js";
+import type { AppMode } from "../../domain/app-mode.js";
 import type {
   AgentBuildDraft,
-  AppMode,
   CompiledAgentSummary,
 } from "../../domain/builder.js";
 import { useAgentBank } from "../../hooks/useAgentBank.js";

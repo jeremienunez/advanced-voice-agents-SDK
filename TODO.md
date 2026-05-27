@@ -1,42 +1,34 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current commit title candidate: `feat: add actionable infra onboarding`
+Current commit title candidate: `refactor: nest learning modules and document self-improving stores`
 
 ## Current Verification - 2026-05-27
 
-- [x] `pnpm run typecheck`
 - [x] `pnpm --filter @voiceagentsdk/starter-voip-rtc typecheck`
-  - rerun after onboarding became the first screen.
+- [x] `pnpm typecheck:sdk`
 - [x] `pnpm run test:infra-plan`
-- [x] `pnpm run infra:plan`
-- [x] `pnpm run infra:apply`
-  - result: applied to Docker-backed K3s namespace `agent-draft-onboarding`.
-- [x] `pnpm run infra:status`
-  - result: verified namespace, ConfigMap, and NetworkPolicy.
-- [x] `curl http://127.0.0.1:18888/builder/onboarding`
-  - result: returned dependency checks and redacted env-store state.
-- [x] `POST /builder/onboarding/infra/status`
-  - result: verified the existing Docker-backed K3s apply through the UI API.
-- [x] Browser check `http://127.0.0.1:5178/`
-  - result: first screen is `Onboarding`, abort noise is gone, destructive
-    cleanup is hidden by default.
+- [x] `pnpm run test:learning`
+- [x] `pnpm run test:learning:bdd`
+  - result: Popper-style BDD scenarios falsify missing learning stores, async
+    failure handling, TTL memory, secret redaction, graph idempotency, and
+    append-only version evolution.
+- [x] `pnpm run test:knowledge-tool`
+- [x] `pnpm run test:rtc-e2e`
+  - result: RTC start/stop returns `activeSessions: 0`, emits
+    `learning.status`, and increments learned agent version.
 - [x] `pnpm run audit:sdk-boundary`
 - [x] `pnpm run audit:imports`
-- [x] `pnpm run audit:tool-contracts`
-  - result: `tool-contracts: OK (1 compiled drafts checked, 11 legacy skipped)`
 - [x] `pnpm run audit:loc`
 - [x] `git diff --check`
 - [x] `pnpm run pack:dry-run`
 - [ ] `pnpm audit --json`
-  - not re-run in this infra slice; no dependency changes.
+  - not re-run in this learning/docs slice; no dependency changes.
 - [ ] `pnpm audit --dev --json`
-  - not re-run in this infra slice; no dependency changes.
+  - not re-run in this learning/docs slice; no dependency changes.
 - [ ] `curl http://127.0.0.1:8787/config`
-  - not re-run in this infra slice; dev server was not started.
+  - not re-run in this documentation/LOC pass.
 - [ ] `curl http://127.0.0.1:8787/builder/config`
-  - not re-run in this infra slice; dev server was not started.
-- [ ] Run `pnpm install` before the next runtime demo if local
-  `node_modules` predates the current lockfile.
+  - not re-run in this documentation/LOC pass.
 
 ## Architecture Backlog - Builder LLM Harness
 
@@ -126,6 +118,69 @@ Current commit title candidate: `feat: add actionable infra onboarding`
 - [ ] Add least-privilege Postgres role creation and per-agent credential refs.
 - [ ] Decide whether Milvus/graph stay starter adapters or graduate into
   reusable SDK adapter packages.
+
+## Architecture Backlog - Agent Self-Improving Stores
+
+- [x] Add SDK-level learning contracts:
+  - `TemporalWorkflowPort`;
+  - `TemporalMemoryStorePort`;
+  - `GraphMemoryStorePort`;
+  - `AgentEvolutionPort`;
+  - typed learning session, transcript, tool call, memory, graph, and version
+    records.
+- [x] Attach `AgentStorePlan` to `AgentInfraPlan` when learning is enabled.
+- [x] Keep store creation delayed until session end:
+  - infra plan describes Redis, Temporal, graph, audit/source, and optional
+    vector memory;
+  - actual `ensure()` happens inside learning runtime paths, not during builder
+    planning.
+- [x] Keep dev mode fully env-driven:
+  - `AGENT_LEARNING_ENABLED`;
+  - `AGENT_LEARNING_MEMORY_TTL_SECONDS`;
+  - `REDIS_URL`;
+  - `TEMPORAL_ADDRESS`;
+  - `TEMPORAL_NAMESPACE`;
+  - `TEMPORAL_TASK_QUEUE`;
+  - `NEO4J_URI` / `GRAPH_DATABASE_URL`.
+- [x] Add RTC end-session learning hook:
+  - collects transcript, tool calls, summary, tenant/user, draft/agent ids;
+  - queues learning asynchronously after shutdown;
+  - emits `learning.status` without blocking session close.
+- [x] Add local learning workflow:
+  - classifies summaries, preferences, failed intents, missing tools, entities,
+    and relations;
+  - writes TTL temporal memory;
+  - upserts graph memory idempotently;
+  - appends agent prompt/tool/infra evolution metadata.
+- [x] Add auto-evolution guardrails:
+  - append-only versions;
+  - rollback pointer and rollback action from Agent Bank;
+  - audit row metadata for every apply/rollback;
+  - learned-memory secret redaction;
+  - no destructive infra migration.
+- [x] Surface learning in the starter UI:
+  - Learning Stores panel in database/infra area;
+  - RTC Lab learning status after stop;
+  - Agent Bank current version, last learning run, and rollback action;
+  - onboarding checks for Redis, Temporal, graph backend, and TTL config.
+- [x] Add Popper-style BDD coverage:
+  - infra store planning is falsifiable through warnings/env refs;
+  - Temporal queued/running/applied and queued/running/failed paths;
+  - memory TTL/scope/redaction;
+  - graph idempotency;
+  - append-only version evolution;
+  - skipped orphan sessions produce no side effects.
+- [x] Nest learning modules under the 300 LOC handwritten-file limit:
+  - SDK learning/provisioning/database type modules;
+  - infra backend/store-plan modules;
+  - learning evolution state/prompt/type modules;
+  - BDD scenario/fixture/assertion modules;
+  - UI domain split for app mode, knowledge, database, and evolution types.
+- [ ] Add a real Temporal worker adapter beyond the local in-process queue.
+- [ ] Add production Redis adapter tests against ephemeral Redis.
+- [ ] Add Neo4j/Memgraph graph adapters; keep Postgres graph as local default.
+- [ ] Add an approval/pending workflow for infra-plan evolution before applying
+  cloud or destructive changes.
 
 ## Immediate Risk Backlog - 2026-05-27
 

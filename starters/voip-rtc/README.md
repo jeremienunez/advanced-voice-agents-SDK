@@ -16,6 +16,8 @@ projects:
 - Reusable SDK bridge through `BrowserVoiceService`.
 - Provider-agnostic builder LLM harness for prompt planning, autonomous
   research, and teacher verification.
+- Post-session learning loop with async status, Redis TTL memory, graph memory,
+  audit metadata, rollbackable agent versions, and BDD coverage.
 
 ## Flow
 
@@ -118,6 +120,53 @@ Useful apply env vars:
 - `BUILDER_INFRA_K3S_IMAGE` defaults to `rancher/k3s:v1.31.5-k3s1`.
 - `BUILDER_INFRA_K3S_PORT` defaults to `16443`.
 
+## Post-Session Learning
+
+The starter can automatically improve an active compiled agent after an RTC
+session ends. The voice session closes first; learning then continues
+asynchronously and emits `learning.status` updates to the RTC Lab.
+
+```mermaid
+flowchart LR
+  End[RTC session ended] --> Queue[Temporal workflow port]
+  Queue --> Redis[Redis TTL memory]
+  Queue --> Graph[Graph memory]
+  Queue --> Evolution[Append agent version]
+  Evolution --> Bank[Agent Bank rollback]
+```
+
+The learning plan is attached to `draft.infraPlan.storePlan` only when
+`AGENT_LEARNING_ENABLED` is active. Store provisioning is delayed until the
+learning workflow runs at session end, so builder planning does not eagerly
+create Redis, Temporal, graph, or audit resources.
+
+Learning writes are scoped by tenant, agent, and user. The local workflow
+classifies summaries, user preferences, failed intents, missing tools, graph
+entities and relations, then appends a validated agent version. Guardrails keep
+versions append-only, keep a rollback pointer, audit every apply/rollback, redact
+secret-looking learned memory, and forbid destructive infra migration.
+
+Required/optional learning env:
+
+| Env var | Purpose |
+| --- | --- |
+| `AGENT_LEARNING_ENABLED` | Enables post-session learning, default `true`. |
+| `AGENT_LEARNING_MEMORY_TTL_SECONDS` | TTL for Redis temporal memory, default `2592000`. |
+| `REDIS_URL` | Required for temporal learned memory. |
+| `TEMPORAL_ADDRESS` | Required Temporal endpoint or local worker address. |
+| `TEMPORAL_NAMESPACE` | Temporal namespace, default `default`. |
+| `TEMPORAL_TASK_QUEUE` | Temporal task queue, default `agent-learning`. |
+| `DATABASE_URL` | Required for audit/source store and default Postgres graph memory. |
+| `NEO4J_URI` / `GRAPH_DATABASE_URL` | Optional external graph backend. |
+
+BDD and regression checks:
+
+```bash
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:learning
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:learning:bdd
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:rtc-e2e
+```
+
 ## Run
 
 ```bash
@@ -147,6 +196,7 @@ The server listens on `http://localhost:8787` by default and exposes:
 | `GET /builder/onboarding` | Dependency checks plus redacted `.env.local` state. |
 | `GET /builder/session` | Active compiled builder session. |
 | `GET /builder/agents` | Agent bank. |
+| `POST /builder/agents/rollback` | Roll back a learned agent to the previous compiled artifact. |
 | `POST /builder/prompt-plan` | Create a draft from identity and intent. |
 | `POST /builder/autonomous-knowledge` | Research, plan, provision, compile knowledge. |
 | `POST /builder/compile-agent` | Compose final prompt and activate the agent. |
@@ -199,7 +249,12 @@ Builder and knowledge env vars:
 - `BUILDER_VECTOR_BACKEND`
 - `MILVUS_URL` or `MILVUS_ADDRESS`
 - `NEO4J_URI` or `GRAPH_DATABASE_URL`
+- `AGENT_LEARNING_ENABLED`
+- `AGENT_LEARNING_MEMORY_TTL_SECONDS`
 - `REDIS_URL`
+- `TEMPORAL_ADDRESS`
+- `TEMPORAL_NAMESPACE`
+- `TEMPORAL_TASK_QUEUE`
 
 ## Commands
 
@@ -210,6 +265,8 @@ pnpm --filter @voiceagentsdk/starter-voip-rtc typecheck
 pnpm --filter @voiceagentsdk/starter-voip-rtc harness:route-wines
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:knowledge-tool
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-plan
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:learning
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:learning:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:rtc-e2e
 ```
 

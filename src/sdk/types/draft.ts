@@ -2,11 +2,11 @@ import type { SecretRef, ToolName, VoiceAgentSdkDefinition } from "./core.js";
 import type {
   AgentBuilderIdentity,
   AgentBuildDraftStatus,
-  DatabaseBuildPlan,
   KnowledgeBuildPlan,
   KnowledgeStrategy,
   PromptBuildPlan,
 } from "./builder.js";
+import type { DatabaseBuildPlan } from "./database.js";
 import type { AgentInfraPlan } from "./infra.js";
 import type { ToolBuildPlan, ToolValidationReport } from "./tooling.js";
 

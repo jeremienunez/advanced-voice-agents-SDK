@@ -18,6 +18,9 @@ not confidently improvise its way into production.
   mute state, transcripts, tool call snapshots, and audio levels.
 - VOIP RTC starter with Bun, React, Vite, Gemini Live, OpenAI Realtime, builder
   workflows, knowledge compilation, and Postgres/pgvector adapters.
+- Post-session learning loop that queues async memory/evolution work after RTC
+  shutdown, with Redis TTL memory, graph memory, audit metadata, and rollbackable
+  agent versions.
 - Safe repository layer that enforces tenant/user scope, allowed operations,
   filter fields, sort fields, writable fields, and page limits.
 
@@ -177,7 +180,12 @@ Infra env cheat sheet:
 | `BUILDER_VECTOR_BACKEND` | Set `milvus` to force Milvus as the vector backend. |
 | `MILVUS_URL` / `MILVUS_ADDRESS` | Marks the Milvus backend as configured. |
 | `NEO4J_URI` / `GRAPH_DATABASE_URL` | Marks the graph backend as configured. |
-| `REDIS_URL` | Marks the cache backend as configured. |
+| `REDIS_URL` | Marks cache and learning temporal-memory backends as configured. |
+| `AGENT_LEARNING_ENABLED` | Enables post-session learning store planning, default `true` in the starter. |
+| `AGENT_LEARNING_MEMORY_TTL_SECONDS` | Redis TTL for learned temporal memory, default `2592000`. |
+| `TEMPORAL_ADDRESS` | Temporal workflow endpoint for post-session learning jobs. |
+| `TEMPORAL_NAMESPACE` | Temporal namespace used by the learning worker, default `default`. |
+| `TEMPORAL_TASK_QUEUE` | Temporal task queue consumed by the learning worker, default `agent-learning`. |
 | `BUILDER_INFRA_APPLY_DRIVER` | `dev-local` by default, `k3s-docker` for local K3s, or `kubectl` for an existing context. |
 | `BUILDER_INFRA_K3S_IMAGE` | K3s Docker image used by `infra:apply`. |
 | `BUILDER_INFRA_K3S_PORT` | Local K3s API port, default `16443`. |
@@ -196,6 +204,57 @@ pnpm run infra:destroy
 
 The starter UI opens directly on `Onboarding` before Builder, Agent Bank, or
 RTC Lab.
+
+## Agent Self-Improving Stores
+
+When learning is enabled, RTC shutdown and learning are deliberately separated:
+the user gets session end immediately, then the starter queues a learning job
+that can update memory and agent versions in the background.
+
+```mermaid
+sequenceDiagram
+  participant RTC as RTC Session
+  participant Queue as Temporal Workflow Port
+  participant Memory as Redis Temporal Memory
+  participant Graph as Graph Memory
+  participant Agent as Agent Version
+
+  RTC->>Queue: enqueue transcript, summary, tool calls
+  Queue-->>RTC: queued status
+  Queue->>Memory: write TTL facts, preferences, failed intents
+  Queue->>Graph: upsert entities and relations
+  Queue->>Agent: append validated prompt/tool/infra version
+```
+
+Learning stores are two-tier: global agent memory plus user-scoped
+personalization. The infra plan exposes required Redis, Temporal, graph, and
+audit/source resources, but actual creation is delayed until the learning
+workflow runs at session end.
+
+Guardrails stay active even though evolution is automatic:
+
+- Agent versions are append-only.
+- Rollback points to the previous compiled artifact.
+- Every apply/rollback writes audit metadata.
+- Learned memory redacts secret-looking values.
+- Infra evolution creates pending/applicable plans; destructive migration is
+  forbidden.
+
+Runtime surfaces:
+
+- RTC Lab displays queued/running/applied/failed learning status after stop.
+- Agent Bank shows current version, last learning run, and rollback action.
+- The builder database/infra panel shows Learning Stores inside the infra plan.
+- Onboarding checks Redis and Temporal as required learning runtime inputs, with
+  graph backend visible as optional local/default Postgres graph memory.
+
+Learning test commands:
+
+```bash
+pnpm test:learning
+pnpm test:learning:bdd
+pnpm test:rtc-e2e
+```
 
 ## Runtime Voice Flow
 
