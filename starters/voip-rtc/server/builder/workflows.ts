@@ -44,7 +44,10 @@ export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
     },
 
     async createPromptPlan(body: unknown) {
-      const identity = normalizeIdentity(body, deps.deepseekModel);
+      const identity = normalizeIdentity(body, {
+        provider: deps.promptProvider,
+        model: deps.promptModel,
+      });
       const draftId = readString(body, "draftId") || `draft_${crypto.randomUUID()}`;
       const draft = createAgentBuildDraftBuilder(draftId, identity)
         .registry(deps.toolRegistry)
@@ -92,7 +95,7 @@ export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
     async runResearch(body: unknown) {
       const draft = resolveDraft(body);
       const documents = normalizeKnowledgeDocuments(body);
-      const research = normalizeResearchSettings(body);
+      const research = normalizeResearchSettings(body, researchDefaults(deps));
       if (!deps.research.isConfigured(research)) {
         return {
           status: "blocked",
@@ -120,7 +123,7 @@ export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
         draft: resolveDraft(body),
         documents: normalizeKnowledgeDocuments(body),
         budget: normalizeResearchBudget(body),
-        research: normalizeResearchSettings(body),
+        research: normalizeResearchSettings(body, researchDefaults(deps)),
       });
       return { status: result.draft.status, ...result };
     },
@@ -271,6 +274,15 @@ export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
       setActiveDraft(nextDraft.id);
       return { draft: nextDraft, artifact };
     },
+  };
+}
+
+function researchDefaults(deps: BuilderWorkflowDependencies) {
+  return {
+    provider: deps.researchProvider,
+    model: deps.researchModel,
+    verifierProvider: deps.knowledgeVerificationProvider,
+    verifierModel: deps.knowledgeVerificationModel,
   };
 }
 

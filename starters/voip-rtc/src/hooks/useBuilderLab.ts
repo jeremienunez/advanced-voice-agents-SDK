@@ -38,9 +38,9 @@ export function useBuilderLab({
     useState<KnowledgeResearchBudget>(defaultResearchBudget);
   const [researchSettings, setResearchSettings] =
     useState<BuilderResearchSettings>({
-      provider: "deepseek",
+      provider: "",
       model: "",
-      verifierProvider: "kimi",
+      verifierProvider: "",
       verifierModel: "",
       verificationPasses: 3,
     });

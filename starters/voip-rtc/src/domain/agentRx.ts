@@ -44,10 +44,10 @@ function builderTrajectory(input: {
     instruction: draft?.identity.intent ?? "Build a voice agent.",
     steps: [
       step(0, "identity", "builder-ui", "collect_identity", draft ? "completed" : "running"),
-      step(1, "prompt", "deepseek", "compose_prompt_plan", draft?.promptPlan ? "completed" : "pending"),
+      step(1, "prompt", "builder-llm", "compose_prompt_plan", draft?.promptPlan ? "completed" : "pending"),
       step(2, "prompt", "builder", "confirm_clarifications", promptStatus(draft)),
-      step(3, "knowledge", "deepseek", "grow_knowledge", researchStatus(documents, researchReport)),
-      step(4, "knowledge", "deepseek", "plan_rag_strategy", draft?.knowledgePlan ? "completed" : "pending"),
+      step(3, "knowledge", "research-llm", "grow_knowledge", researchStatus(documents, researchReport)),
+      step(4, "knowledge", "builder-llm", "plan_rag_strategy", draft?.knowledgePlan ? "completed" : "pending"),
       step(5, "database", "postgres", "apply_isolated_schema", databaseReady ? "completed" : "pending"),
       step(6, "compile", "sdk", "compile_voice_agent", draft?.compiled ? "completed" : "pending"),
     ],
@@ -114,10 +114,10 @@ function builderConstraints(): AgentRxConstraint[] {
     },
     {
       id: "builder_provider_policy",
-      label: "Builder provider separation",
+      label: "Builder provider role policy",
       type: "CAPABILITY",
       taxonomyTargets: ["Instruction/Plan Adherence Failure"],
-      checkHint: "Knowledge building and diagnostics must use DeepSeek or another builder provider, not Gemini runtime voice.",
+      checkHint: "Builder providers must be selected by role/capability; Gemini is allowed for planning but voice runtime remains capability-gated.",
     },
   ];
 }
@@ -147,9 +147,6 @@ function evaluateViolations(input: {
   if (draft?.knowledgePlan && input.knowledgeBlocked) {
     violations.push(violation(5, "knowledge_sources_or_research_required", "System Failure", "medium", "Knowledge store is not configured for compilation."));
   }
-  if (draft?.identity.llmProvider === "gemini") {
-    violations.push(violation(1, "builder_provider_policy", "Instruction/Plan Adherence Failure", "high", "Gemini is selected for builder planning; reserve Gemini for RTC voice runtime."));
-  }
   return violations;
 }
 
@@ -176,9 +173,6 @@ function builderRecommendation(violations: AgentRxViolation[]): string {
   const first = violations[0];
   if (first.constraintId === "knowledge_sources_or_research_required") {
     return "Configure DeepSeek research or upload a source document before planning the knowledge base.";
-  }
-  if (first.constraintId === "builder_provider_policy") {
-    return "Switch the builder provider to DeepSeek and keep Gemini for the RTC runtime.";
   }
   return "Resolve the first unrecovered violation before compiling the agent.";
 }

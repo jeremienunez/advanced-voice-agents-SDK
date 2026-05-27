@@ -1,7 +1,7 @@
-import { DeepSeekPromptPlanner } from "./adapters/deepseek-planner.js";
-import { DeepSeekKnowledgeResearch } from "./adapters/deepseek-research.js";
 import { PlainTextDocumentIngestion } from "./adapters/document-ingestion.js";
-import { KimiKnowledgeVerifier } from "./adapters/kimi-knowledge-verifier.js";
+import { LlmKnowledgeResearch } from "./adapters/llm-knowledge-research.js";
+import { LlmKnowledgeVerifier } from "./adapters/llm-knowledge-verifier.js";
+import { LlmPromptPlanner } from "./adapters/llm-prompt-planner.js";
 import { PostgresAgentDatabaseProvisioner } from "./adapters/postgres-database-provisioner.js";
 import { PostgresPgVectorKnowledgeStore } from "./adapters/postgres-knowledge-store.js";
 import { VoyageEmbeddingPort } from "./adapters/voyage-embeddings.js";
@@ -11,26 +11,24 @@ import {
   researchBudgetFromEnv,
   strategyLabels,
 } from "./catalog.js";
+import { createBuilderLlmCatalog } from "./llm/profiles.js";
+import { AdaptiveLlmModelResolver } from "./llm/resolver.js";
+import { BuilderLlmTaskRunner } from "./llm/task-runner.js";
 import { loadBuilderPromptLibrary } from "./prompts/template.js";
+import type {
+  AgentBuilderLlmProvider,
+  LlmModelProfile,
+  LlmTaskRole,
+} from "@voiceagentsdk/core/sdk";
 import type { BuilderConfig, BuilderServiceComposition } from "./types.js";
-import { trimTrailingSlash } from "./utils.js";
 
 export function createBuilderServiceCompositionFromEnv(
   env: Record<string, string | undefined> = Bun.env,
 ): BuilderServiceComposition {
-  const deepseekModel = env.DEEPSEEK_MODEL ?? "deepseek-v4-pro";
-  const deepseekBaseUrl = trimTrailingSlash(
-    env.DEEPSEEK_BASE_URL ?? "https://api.deepseek.com",
-  );
-  const researchProvider = env.BUILDER_RESEARCH_PROVIDER ?? "deepseek";
-  const researchModel = env.BUILDER_RESEARCH_MODEL ?? deepseekModel;
+  const requestedResearchProvider = env.BUILDER_RESEARCH_PROVIDER;
   const kimiApiKey = env.KIMI_API_KEY ?? env.MOONSHOT_API_KEY;
-  const kimiBaseUrl = trimTrailingSlash(
-    env.KIMI_BASE_URL ?? env.MOONSHOT_BASE_URL ??
-      "https://api.moonshot.ai/v1",
-  );
   const kimiModel = env.KIMI_MODEL ?? "kimi-k2.6";
-  const knowledgeVerificationProvider =
+  const requestedKnowledgeVerificationProvider =
     env.BUILDER_KNOWLEDGE_VERIFICATION_PROVIDER ?? "kimi";
   const rawKnowledgeVerificationPasses = Number(
     env.BUILDER_KNOWLEDGE_VERIFICATION_PASSES ?? 3,
@@ -44,78 +42,98 @@ export function createBuilderServiceCompositionFromEnv(
   const voyageDimensions = Number(env.VOYAGE_EMBEDDING_DIMENSIONS ?? 1024);
   const researchBudget = researchBudgetFromEnv(env);
   const promptLibrary = loadBuilderPromptLibrary();
+  const llmCatalog = createBuilderLlmCatalog(env);
   const deepseekConfigured = Boolean(env.DEEPSEEK_API_KEY);
+  const promptProfile = resolveRoleProfile(
+    llmCatalog.profiles,
+    "builder.planner",
+    env.BUILDER_PROMPT_PROVIDER,
+  );
+  const promptProvider = String(
+    promptProfile?.provider ?? llmCatalog.profiles[0]?.provider ?? "custom",
+  ) as AgentBuilderLlmProvider;
+  const promptModel = promptProfile?.model ?? llmCatalog.profiles[0]?.model ?? "";
+  const researchProfile = resolveRoleProfile(
+    llmCatalog.profiles,
+    "builder.researcher",
+    requestedResearchProvider,
+  );
+  const researchProvider = String(
+    researchProfile?.provider ?? requestedResearchProvider ?? promptProvider,
+  );
+  const researchModel = env.BUILDER_RESEARCH_MODEL ??
+    researchProfile?.model ?? promptModel;
+  const knowledgeVerificationProfile = resolveRoleProfile(
+    llmCatalog.profiles,
+    "builder.verifier",
+    requestedKnowledgeVerificationProvider,
+  );
+  const knowledgeVerificationProvider = String(
+    knowledgeVerificationProfile?.provider ??
+      requestedKnowledgeVerificationProvider,
+  );
+  const knowledgeVerificationModel =
+    env.BUILDER_KNOWLEDGE_VERIFICATION_MODEL ??
+      knowledgeVerificationProfile?.model ?? kimiModel;
+  const resolver = new AdaptiveLlmModelResolver(llmCatalog.profiles);
+  const llmRunner = new BuilderLlmTaskRunner({
+    providerConfigs: llmCatalog.providerConfigs,
+    resolver,
+  });
 
   const config: BuilderConfig = {
     defaults: {
-      deepseekModel,
-      deepseekBaseUrl,
-      promptProvider: "deepseek",
+      promptProvider,
+      promptModel,
       researchProvider,
       researchModel,
       voyageEmbeddingModel: voyageModel,
       voyageEmbeddingDimensions: voyageDimensions,
       knowledgeVerificationProvider,
-      knowledgeVerificationModel: kimiModel,
+      knowledgeVerificationModel,
       knowledgeVerificationPasses,
       researchBudget,
     },
     availability: {
       deepseek: deepseekConfigured,
+      qwen: Boolean(env.QWEN_API_KEY ?? env.DASHSCOPE_API_KEY),
+      kimi: Boolean(kimiApiKey),
+      gemini: Boolean(env.GEMINI_API_KEY ?? env.GOOGLE_API_KEY ??
+        env.GOOGLE_GENERATIVE_AI_API_KEY),
       voyage: Boolean(env.VOYAGE_API_KEY),
       knowledgeStore: Boolean(env.DATABASE_URL),
       databaseProvisioner: Boolean(env.DATABASE_URL),
-      research: researchProvider === "deepseek" && deepseekConfigured,
-      knowledgeVerifier: knowledgeVerificationProvider === "kimi" &&
-        Boolean(kimiApiKey),
+      research: isRoleProviderConfigured(
+        llmCatalog.profiles,
+        researchProvider,
+        "builder.researcher",
+      ),
+      knowledgeVerifier: isRoleProviderConfigured(
+        llmCatalog.profiles,
+        knowledgeVerificationProvider,
+        "builder.verifier",
+      ),
     },
     toolRegistry: defaultToolRegistry,
     strategies: strategyLabels,
     providers: {
-      prompt: [
-        {
-          id: "deepseek",
-          label: "DeepSeek",
-          configured: deepseekConfigured,
-          defaultModel: deepseekModel,
-          models: uniqueList([deepseekModel, "deepseek-v4-pro"]),
-        },
-      ],
-      research: [
-        {
-          id: "deepseek",
-          label: "DeepSeek Knowledge Builder",
-          configured: deepseekConfigured,
-          defaultModel: researchModel,
-          models: uniqueList([researchModel, deepseekModel, "deepseek-v4-pro"]),
-          notes: [
-            "Default builder/research engine. Add a search adapter later for fully grounded live web browsing.",
-          ],
-        },
-      ],
-      verification: [
-        {
-          id: "kimi",
-          label: "Kimi 2.6 Thinking Teacher",
-          configured: Boolean(kimiApiKey),
-          defaultModel: kimiModel,
-          models: uniqueList([kimiModel, "kimi-k2.6"]),
-          notes: [
-            "Teacher/verifier pass: audits coverage, proposes follow-up searches, and emits rich RAG artifacts.",
-          ],
-        },
-      ],
+      prompt: providerOptionsForRole(llmCatalog.profiles, "builder.planner", {
+        [String(promptProvider)]: promptModel,
+      }),
+      research: providerOptionsForRole(llmCatalog.profiles, "builder.researcher", {
+        [researchProvider]: researchModel,
+      }),
+      verification: providerOptionsForRole(llmCatalog.profiles, "builder.verifier", {
+        [knowledgeVerificationProvider]: knowledgeVerificationModel,
+      }),
     },
   };
 
   return {
     config,
     workflows: {
-      planner: new DeepSeekPromptPlanner({
-        apiKey: env.DEEPSEEK_API_KEY,
-        baseUrl: deepseekBaseUrl,
-        model: deepseekModel,
-        maxRetries: Number(env.DEEPSEEK_MAX_RETRIES ?? 2),
+      planner: new LlmPromptPlanner({
+        runner: llmRunner,
         prompts: promptLibrary,
       }),
       embeddings: new VoyageEmbeddingPort({
@@ -131,31 +149,86 @@ export function createBuilderServiceCompositionFromEnv(
       databaseProvisioner: new PostgresAgentDatabaseProvisioner({
         databaseUrl: env.DATABASE_URL,
       }),
-      research: new DeepSeekKnowledgeResearch({
-        apiKey: env.DEEPSEEK_API_KEY,
-        baseUrl: deepseekBaseUrl,
-        defaultModel: researchModel,
+      research: new LlmKnowledgeResearch({
+        profiles: llmCatalog.profiles,
+        runner: llmRunner,
         estimatedCostPer1kTokens: Number(
-          env.DEEPSEEK_RESEARCH_ESTIMATED_COST_PER_1K_TOKENS ?? 0.00014,
+          env.BUILDER_RESEARCH_ESTIMATED_COST_PER_1K_TOKENS ??
+            env.DEEPSEEK_RESEARCH_ESTIMATED_COST_PER_1K_TOKENS ?? 0.00014,
         ),
         prompts: promptLibrary,
       }),
-      knowledgeVerifier: knowledgeVerificationProvider === "kimi"
-        ? new KimiKnowledgeVerifier({
-            apiKey: kimiApiKey,
-            baseUrl: kimiBaseUrl,
-            maxTokens: Number(env.KIMI_MAX_TOKENS ?? 65_536),
-            model: kimiModel,
-            prompts: promptLibrary,
-          })
-        : undefined,
+      knowledgeVerifier: new LlmKnowledgeVerifier({
+        profiles: llmCatalog.profiles,
+        runner: llmRunner,
+        maxOutputTokens: Number(
+          env.BUILDER_KNOWLEDGE_VERIFICATION_MAX_TOKENS ??
+            env.KIMI_MAX_TOKENS ?? 65_536,
+        ),
+        prompts: promptLibrary,
+      }),
       knowledgeVerificationPasses,
-      deepseekModel,
+      knowledgeVerificationProvider,
+      knowledgeVerificationModel,
+      promptProvider,
+      promptModel,
+      researchProvider,
+      researchModel,
       voyageConfigured: Boolean(env.VOYAGE_API_KEY),
       toolRegistry: defaultToolRegistry,
       availableSecretNames: configuredSecretNames(env),
     },
   };
+}
+
+function resolveRoleProfile(
+  profiles: LlmModelProfile[],
+  role: LlmTaskRole,
+  requestedProvider: string | undefined,
+) {
+  const roleProfiles = profiles.filter((profile) => {
+    return profile.roles.includes(role);
+  });
+  if (requestedProvider) {
+    const requested = roleProfiles.find((profile) => {
+      return profile.provider === requestedProvider;
+    });
+    if (requested) return requested;
+  }
+  return roleProfiles.find((profile) => profile.configured) ?? roleProfiles[0];
+}
+
+function isRoleProviderConfigured(
+  profiles: LlmModelProfile[],
+  provider: string,
+  role: LlmTaskRole,
+): boolean {
+  return profiles.some((profile) => {
+    return profile.provider === provider &&
+      profile.roles.includes(role) &&
+      profile.configured;
+  });
+}
+
+function providerOptionsForRole(
+  profiles: LlmModelProfile[],
+  role: LlmTaskRole,
+  modelOverrides: Record<string, string> = {},
+) {
+  return profiles
+    .filter((profile) => profile.roles.includes(role))
+    .map((profile) => {
+      const id = String(profile.provider);
+      const defaultModel = modelOverrides[id] || profile.model;
+      return {
+        id,
+        label: profile.label,
+        configured: profile.configured,
+        defaultModel,
+        models: uniqueList([defaultModel, profile.model]),
+        notes: profile.notes,
+      };
+    });
 }
 
 function uniqueList(values: string[]): string[] {

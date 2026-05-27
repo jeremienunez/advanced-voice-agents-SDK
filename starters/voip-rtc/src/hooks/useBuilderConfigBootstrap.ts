@@ -33,7 +33,7 @@ export function useBuilderConfigBootstrap({
         setForm((current) => ({
           ...current,
           llmProvider: current.llmProvider || nextConfig.defaults.promptProvider,
-          llmModel: current.llmModel || nextConfig.defaults.deepseekModel,
+          llmModel: current.llmModel || nextConfig.defaults.promptModel,
         }));
         setResearchSettings({
           provider: nextConfig.defaults.researchProvider,
@@ -52,8 +52,8 @@ export function useBuilderConfigBootstrap({
         if (controller.signal.aborted) return;
         setForm((current) => ({
           ...current,
-          llmProvider: current.llmProvider || "deepseek",
-          llmModel: current.llmModel || "deepseek-v4-pro",
+          llmProvider: current.llmProvider,
+          llmModel: current.llmModel,
         }));
         setConfigError(
           error instanceof Error ? error.message : "Failed to load builder config",

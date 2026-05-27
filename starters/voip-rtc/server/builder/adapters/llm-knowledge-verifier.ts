@@ -3,30 +3,33 @@ import type {
   KnowledgeVerificationRequest,
   KnowledgeVerificationVerdict,
   KnowledgeVerifierPort,
+  LlmModelProfile,
+  LlmTaskRunnerPort,
 } from "@voiceagentsdk/core/sdk";
 import type { BuilderPromptLibrary } from "../prompts/template.js";
 import { renderPromptTemplate } from "../prompts/template.js";
 import { parseJsonPayload } from "../utils.js";
 
-export class KimiKnowledgeVerifier implements KnowledgeVerifierPort {
+export class LlmKnowledgeVerifier implements KnowledgeVerifierPort {
   constructor(
     private readonly config: {
-      apiKey?: string;
-      baseUrl: string;
-      maxTokens: number;
-      model: string;
+      maxOutputTokens: number;
+      profiles: LlmModelProfile[];
       prompts: BuilderPromptLibrary;
+      runner: LlmTaskRunnerPort;
     },
   ) {}
 
-  isConfigured(): boolean {
-    return Boolean(this.config.apiKey);
+  isConfigured(settings?: { provider?: string }): boolean {
+    return this.verifierProfiles(settings).some((profile) => profile.configured);
   }
 
   async verifyKnowledge(
     input: KnowledgeVerificationRequest,
   ): Promise<KnowledgeVerificationVerdict> {
-    if (!this.isConfigured()) return fallbackVerdict("Kimi is not configured.");
+    if (!this.isConfigured(input.settings)) {
+      return fallbackVerdict("Knowledge verifier provider is not configured.");
+    }
     const user = renderPromptTemplate(
       this.config.prompts.knowledgeVerification.user,
       {
@@ -35,67 +38,51 @@ export class KimiKnowledgeVerifier implements KnowledgeVerifierPort {
         researchJson: input.research ?? null,
       },
     );
-    const fallback = fallbackVerdict("Kimi returned an invalid verdict.");
-    const model = input.settings?.model || this.config.model;
-    const content = await this.fetchVerdict(user, true, model).catch(async (error) => {
-      if (!isResponseFormatError(error)) throw error;
-      return this.fetchVerdict(user, false, model);
-    }).catch(async (error) => {
-      if (!isThinkingBudgetError(error)) throw error;
-      return this.fetchVerdict(user, true, model, true);
-    });
-    const parsed = parseJsonPayload<KnowledgeVerificationVerdict>(
-      content,
-      fallback,
-    );
-    return normalizeVerdict(parsed, fallback);
+    const fallback = fallbackVerdict("Verifier returned an invalid verdict.");
+    try {
+      const result = await this.config.runner.run<KnowledgeVerificationVerdict>({
+        id: `builder.verifier:${input.draft.id}:${crypto.randomUUID()}`,
+        role: "builder.verifier",
+        intent: input.draft.identity.intent,
+        skillRef: "builder.knowledge_verification",
+        messages: [
+          {
+            role: "system",
+            content: this.config.prompts.knowledgeVerification.system,
+          },
+          { role: "user", content: user },
+        ],
+        outputContract: { kind: "json_object" },
+        requestedModel: {
+          provider: input.settings?.provider,
+          model: input.settings?.model,
+        },
+        needs: {
+          cost: "quality",
+          latency: "batch",
+          maxOutputTokens: this.config.maxOutputTokens,
+          reasoning: "adaptive",
+          tools: "none",
+        },
+        metadata: {
+          draftId: input.draft.id,
+          documentCount: input.documents.length,
+        },
+      });
+      const parsed = result.parsed ??
+        parseJsonPayload<KnowledgeVerificationVerdict>(result.content, fallback);
+      return normalizeVerdict(parsed, fallback);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Verifier failed.";
+      return fallbackVerdict(message);
+    }
   }
 
-  private async fetchVerdict(
-    user: string,
-    responseFormat: boolean,
-    model = this.config.model,
-    disableThinking = false,
-  ): Promise<string> {
-    const body: Record<string, unknown> = {
-      model,
-      temperature: 1,
-      max_tokens: this.config.maxTokens,
-      messages: [
-        {
-          role: "system",
-          content: this.config.prompts.knowledgeVerification.system,
-        },
-        { role: "user", content: user },
-      ],
-    };
-    if (responseFormat) body.response_format = { type: "json_object" };
-    if (disableThinking) body.thinking = { type: "disabled" };
-    const response = await fetch(`${this.config.baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${this.config.apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
+  private verifierProfiles(settings?: { provider?: string }): LlmModelProfile[] {
+    return this.config.profiles.filter((profile) => {
+      return profile.roles.includes("builder.verifier") &&
+        (!settings?.provider || profile.provider === settings.provider);
     });
-    if (!response.ok) {
-      throw new Error(
-        `Kimi verifier failed: ${response.status} ${await response.text()}`,
-      );
-    }
-    const payload = (await response.json()) as {
-      choices?: Array<{
-        finish_reason?: string;
-        message?: { content?: string; reasoning_content?: string };
-      }>;
-    };
-    const choice = payload.choices?.[0];
-    const content = choice?.message?.content?.trim();
-    if (!content && choice?.message?.reasoning_content) {
-      throw new Error("Kimi thinking budget exhausted before final JSON");
-    }
-    return content || "{}";
   }
 }
 
@@ -161,14 +148,4 @@ function stringList(value: unknown, fallback: string[]): string[] {
 function clampConfidence(value: unknown): number {
   if (typeof value !== "number" || !Number.isFinite(value)) return 0.35;
   return Math.min(Math.max(value, 0), 1);
-}
-
-function isResponseFormatError(error: unknown): boolean {
-  return error instanceof Error &&
-    /response_format|json_object|400/.test(error.message);
-}
-
-function isThinkingBudgetError(error: unknown): boolean {
-  return error instanceof Error &&
-    /thinking budget exhausted|reasoning/i.test(error.message);
 }

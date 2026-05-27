@@ -21,9 +21,8 @@ export interface BuilderServiceOptions {
 
 export interface BuilderConfig {
   defaults: {
-    deepseekModel: string;
-    deepseekBaseUrl: string;
     promptProvider: AgentBuilderLlmProvider;
+    promptModel: string;
     researchProvider: string;
     researchModel: string;
     voyageEmbeddingModel: string;
@@ -35,6 +34,9 @@ export interface BuilderConfig {
   };
   availability: {
     deepseek: boolean;
+    qwen: boolean;
+    kimi: boolean;
+    gemini: boolean;
     voyage: boolean;
     knowledgeStore: boolean;
     databaseProvisioner: boolean;
@@ -75,6 +77,11 @@ export interface ConfigurableKnowledgeResearchPort
   isConfigured(settings?: { provider?: string; model?: string }): boolean;
 }
 
+export interface ConfigurableKnowledgeVerifierPort
+  extends KnowledgeVerifierPort {
+  isConfigured(settings?: { provider?: string; model?: string }): boolean;
+}
+
 export interface BuilderWorkflowDependencies {
   planner: BuilderPlannerPort;
   embeddings: EmbeddingPort;
@@ -82,9 +89,14 @@ export interface BuilderWorkflowDependencies {
   knowledgeStore: KnowledgeStorePort;
   databaseProvisioner: DatabaseProvisionerPort;
   research: ConfigurableKnowledgeResearchPort;
-  knowledgeVerifier?: KnowledgeVerifierPort;
+  knowledgeVerifier?: ConfigurableKnowledgeVerifierPort;
   knowledgeVerificationPasses: number;
-  deepseekModel: string;
+  knowledgeVerificationProvider: string;
+  knowledgeVerificationModel: string;
+  promptProvider: AgentBuilderLlmProvider;
+  promptModel: string;
+  researchProvider: string;
+  researchModel: string;
   voyageConfigured: boolean;
   toolRegistry: ToolRegistryItem[];
   availableSecretNames: string[];

@@ -7,7 +7,7 @@ export const emptyIdentity: BuilderIdentity = {
   intent: "",
   mustDo: "",
   mustNotDo: "",
-  llmProvider: "deepseek",
+  llmProvider: "",
   llmModel: "",
 };
 

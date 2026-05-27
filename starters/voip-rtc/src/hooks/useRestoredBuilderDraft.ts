@@ -32,7 +32,7 @@ export function useRestoredBuilderDraft({
     setForm({
       ...emptyIdentity,
       ...restoredDraft.identity,
-      llmProvider: restoredDraft.identity.llmProvider || "deepseek",
+      llmProvider: restoredDraft.identity.llmProvider,
     });
     setDocuments(restoredDraft.knowledgePlan?.documents ?? []);
     setSelectedTools(restoredDraft.selectedTools);

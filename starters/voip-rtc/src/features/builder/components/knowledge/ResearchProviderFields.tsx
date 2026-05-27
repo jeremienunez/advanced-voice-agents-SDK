@@ -20,19 +20,31 @@ export function ResearchProviderFields({
   const selectedVerifier = verifiers.find((item) => {
     return item.id === settings.verifierProvider;
   });
+  const researchOptions = providers.length
+    ? providers.map((provider) => ({
+        value: provider.id,
+        label: provider.configured
+          ? provider.label
+          : `${provider.label} - missing key`,
+        disabled: !provider.configured,
+      }))
+    : [{ value: "", label: "Waiting for builder config", disabled: true }];
+  const verifierOptions = verifiers.length
+    ? verifiers.map((provider) => ({
+        value: provider.id,
+        label: provider.configured
+          ? provider.label
+          : `${provider.label} - missing key`,
+        disabled: !provider.configured,
+      }))
+    : [{ value: "", label: "Waiting for builder config", disabled: true }];
 
   return (
     <div className="researchProviderGrid">
       <SelectField
         label="Knowledge builder"
         name="researchProvider"
-        options={providers.map((provider) => ({
-          value: provider.id,
-          label: provider.configured
-            ? provider.label
-            : `${provider.label} - missing key`,
-          disabled: !provider.configured,
-        }))}
+        options={researchOptions}
         value={settings.provider}
         onValueChange={(provider) => {
           const nextProvider = providers.find((item) => item.id === provider);
@@ -45,21 +57,15 @@ export function ResearchProviderFields({
       <TextField
         label="Research model"
         name="researchModel"
-        placeholder={selected?.defaultModel ?? "deepseek-v4-pro"}
+        placeholder={selected?.defaultModel ?? "model from /config"}
         value={settings.model}
         onValueChange={(model) => updateResearchSettings({ model })}
       />
       <SelectField
         label="Teacher verifier"
         name="teacherVerifier"
-        options={verifiers.map((provider) => ({
-          value: provider.id,
-          label: provider.configured
-            ? provider.label
-            : `${provider.label} - missing key`,
-          disabled: !provider.configured,
-        }))}
-        value={settings.verifierProvider ?? "kimi"}
+        options={verifierOptions}
+        value={settings.verifierProvider ?? ""}
         onValueChange={(verifierProvider) => {
           const next = verifiers.find((item) => item.id === verifierProvider);
           updateResearchSettings({
@@ -71,7 +77,7 @@ export function ResearchProviderFields({
       <TextField
         label="Teacher model"
         name="teacherModel"
-        placeholder={selectedVerifier?.defaultModel ?? "kimi-k2.6"}
+        placeholder={selectedVerifier?.defaultModel ?? "model from /config"}
         value={settings.verifierModel ?? ""}
         onValueChange={(verifierModel) => updateResearchSettings({
           verifierModel,

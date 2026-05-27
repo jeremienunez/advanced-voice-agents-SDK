@@ -268,9 +268,8 @@ export interface BuilderDraftResponse {
 
 export interface BuilderConfig {
   defaults: {
-    deepseekModel: string;
-    deepseekBaseUrl: string;
     promptProvider: string;
+    promptModel: string;
     researchProvider: string;
     researchModel: string;
     knowledgeVerificationProvider: string;
@@ -296,5 +295,4 @@ export interface BuilderConfig {
     verification: BuilderProviderOption[];
   };
 }
-
 export type AppMode = "hub" | "builder" | "agents" | "rtc";

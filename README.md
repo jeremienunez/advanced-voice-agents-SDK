@@ -92,6 +92,38 @@ sequenceDiagram
 The user-facing "goal" is represented as `identity.intent`. There is no
 separate `/set goal` command in core.
 
+## Builder LLM Harness
+
+Builder prompts are no longer tied to one model vendor. The starter turns
+planner, research, and teacher/verifier work into typed `LlmTask` requests, then
+routes them through an adaptive resolver and provider adapters.
+
+```mermaid
+flowchart TD
+  Routes[Builder routes] --> Task[LlmTask]
+  Task --> Resolver[AdaptiveLlmModelResolver]
+  Resolver --> Catalog[Role-aware model catalog]
+  Catalog --> Runner[BuilderLlmTaskRunner]
+  Runner --> OpenAICompat[OpenAI-compatible providers]
+  Runner --> Gemini[Gemini generateContent]
+  OpenAICompat --> DeepSeek[DeepSeek]
+  OpenAICompat --> Qwen[Qwen]
+  OpenAICompat --> Kimi[Kimi]
+```
+
+Current builder roles:
+
+| Role | Used for | Supported starter providers |
+| --- | --- | --- |
+| `builder.planner` | prompt plans, knowledge plans, DB plans, final prompt composition | DeepSeek, Qwen, Kimi, Gemini |
+| `builder.researcher` | budget-aware autonomous research briefs | DeepSeek, Qwen, Kimi |
+| `builder.verifier` | teacher pass, coverage review, follow-up queries | DeepSeek, Qwen, Kimi, Gemini |
+
+Provider-specific params stay behind the adapter layer: thinking toggles,
+OpenAI-compatible JSON response formats, Gemini `generationConfig`, token caps,
+usage normalization, retries, and tool-call normalization. Legacy direct
+DeepSeek/Kimi builder adapters have been removed.
+
 ## Runtime Voice Flow
 
 ```mermaid
@@ -295,23 +327,34 @@ OPENAI_REALTIME_MODEL=gpt-realtime-1.5
 OPENAI_REALTIME_VOICE=marin
 ```
 
-Builder, research, embeddings, and knowledge store:
+Builder LLMs, research, embeddings, and knowledge store:
 
 ```bash
 VOICE_SERVER_HOST=127.0.0.1
 VOICE_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 VOICE_DEV_AUTH_TOKEN=
 VITE_VOICE_DEV_AUTH_TOKEN=
+
+BUILDER_PROMPT_PROVIDER=deepseek
+BUILDER_RESEARCH_PROVIDER=deepseek
+BUILDER_RESEARCH_MODEL=
+BUILDER_RESEARCH_ESTIMATED_COST_PER_1K_TOKENS=0.00014
+BUILDER_KNOWLEDGE_VERIFICATION_PROVIDER=kimi
+BUILDER_KNOWLEDGE_VERIFICATION_MODEL=
+BUILDER_KNOWLEDGE_VERIFICATION_MAX_TOKENS=65536
+BUILDER_KNOWLEDGE_VERIFICATION_PASSES=3
+
 DEEPSEEK_API_KEY=
 DEEPSEEK_MODEL=deepseek-v4-pro
 DEEPSEEK_BASE_URL=https://api.deepseek.com
-BUILDER_RESEARCH_PROVIDER=deepseek
-BUILDER_RESEARCH_MODEL=deepseek-v4-pro
-BUILDER_KNOWLEDGE_VERIFICATION_PROVIDER=kimi
-BUILDER_KNOWLEDGE_VERIFICATION_PASSES=3
+QWEN_API_KEY=
+QWEN_MODEL=qwen-plus
+QWEN_BASE_URL=https://dashscope-intl.aliyuncs.com/compatible-mode/v1
 KIMI_API_KEY=
 KIMI_MODEL=kimi-k2.6
-KIMI_MAX_TOKENS=65536
+GEMINI_API_KEY=
+GEMINI_TEXT_MODEL=gemini-3.5-flash
+
 VOYAGE_API_KEY=
 VOYAGE_EMBEDDING_MODEL=voyage-4-large
 VOYAGE_EMBEDDING_DIMENSIONS=1024
@@ -356,4 +399,5 @@ It launches:
 This is an early clean-core SDK and starter. The Fastify adapter is a placeholder
 until the next adapter pass wires tenant resolution, secrets, provider factories,
 media bridge factories, tools, prompts, and database adapters behind public
-ports.
+ports. The starter builder already uses the provider-agnostic LLM harness for
+planning, research, and verification.

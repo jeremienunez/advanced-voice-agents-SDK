@@ -16,6 +16,8 @@ import {
 
 const BUILDER_LLM_PROVIDERS = new Set([
   "deepseek",
+  "qwen",
+  "kimi",
   "openai",
   "gemini",
   "anthropic",
@@ -26,7 +28,7 @@ const MAX_TEXT_DOCUMENT_CHARS = 1_000_000;
 
 export function normalizeIdentity(
   body: unknown,
-  defaultModel: string,
+  defaults: { model: string; provider: AgentBuilderLlmProvider },
 ): AgentBuilderIdentity {
   const source = asRecord(body).identity
     ? asRecord(asRecord(body).identity)
@@ -54,12 +56,23 @@ export function normalizeIdentity(
     intent,
     mustDo: listFromUnknown(source.mustDo),
     mustNotDo: listFromUnknown(source.mustNotDo),
-    llmProvider: normalizeLlmProvider(readString(source, "llmProvider")),
-    llmModel: readString(source, "llmModel") || defaultModel,
+    llmProvider: normalizeLlmProvider(
+      readString(source, "llmProvider"),
+      defaults.provider,
+    ),
+    llmModel: readString(source, "llmModel") || defaults.model,
   };
 }
 
-export function normalizeResearchSettings(body: unknown): {
+export function normalizeResearchSettings(
+  body: unknown,
+  defaults: {
+    model: string;
+    provider: string;
+    verifierModel: string;
+    verifierProvider: string;
+  },
+): {
   provider: string;
   model: string;
   verifierProvider?: string;
@@ -68,10 +81,11 @@ export function normalizeResearchSettings(body: unknown): {
 } {
   const source = asRecord(asRecord(body).research ?? {});
   return {
-    provider: readString(source, "provider") || "deepseek",
-    model: readString(source, "model"),
-    verifierProvider: readString(source, "verifierProvider") || undefined,
-    verifierModel: readString(source, "verifierModel") || undefined,
+    provider: readString(source, "provider") || defaults.provider,
+    model: readString(source, "model") || defaults.model,
+    verifierProvider: readString(source, "verifierProvider") ||
+      defaults.verifierProvider,
+    verifierModel: readString(source, "verifierModel") || defaults.verifierModel,
     verificationPasses: readNumber(source, "verificationPasses"),
   };
 }
@@ -162,10 +176,13 @@ export function normalizeSelectedTools(
     .filter((item) => available.has(item));
 }
 
-function normalizeLlmProvider(value: string): AgentBuilderLlmProvider {
+function normalizeLlmProvider(
+  value: string,
+  fallback: AgentBuilderLlmProvider,
+): AgentBuilderLlmProvider {
   return BUILDER_LLM_PROVIDERS.has(value)
     ? (value as AgentBuilderLlmProvider)
-    : "deepseek";
+    : fallback;
 }
 
 function enforceContentLength(request: Request): void {

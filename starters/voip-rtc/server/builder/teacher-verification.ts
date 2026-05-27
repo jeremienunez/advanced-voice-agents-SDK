@@ -32,12 +32,22 @@ export interface TeacherVerificationResult {
 export async function runTeacherVerification(
   input: TeacherVerificationInput,
 ): Promise<TeacherVerificationResult> {
+  const verifierProvider = input.researchSettings.verifierProvider ??
+    input.deps.knowledgeVerificationProvider;
+  const verifierModel = input.researchSettings.verifierModel ??
+    input.deps.knowledgeVerificationModel;
   const verifier = input.deps.knowledgeVerifier;
-  if (!verifier || !(verifier.isConfigured?.() ?? true)) {
+  if (
+    !verifier ||
+    !(verifier.isConfigured?.({
+      model: verifierModel,
+      provider: verifierProvider,
+    }) ?? true)
+  ) {
     return {
       documents: input.documents,
       research: input.research,
-      steps: [{ name: "kimi-teacher", status: "blocked" }],
+      steps: [{ name: `${verifierProvider}-teacher`, status: "blocked" }],
       verdicts: [],
     };
   }
@@ -46,15 +56,6 @@ export async function runTeacherVerification(
   let research = input.research;
   const steps: TeacherVerificationResult["steps"] = [];
   const verdicts: KnowledgeVerificationVerdict[] = [];
-  const verifierProvider = input.researchSettings.verifierProvider ?? "kimi";
-  if (verifierProvider !== "kimi") {
-    return {
-      documents,
-      research,
-      steps: [{ name: "kimi-teacher", status: "blocked" }],
-      verdicts,
-    };
-  }
   const passCount = Math.min(
     Math.max(
       1,
@@ -70,14 +71,20 @@ export async function runTeacherVerification(
       documents,
       research,
       settings: {
-        model: input.researchSettings.verifierModel,
+        model: verifierModel,
         provider: verifierProvider,
       },
     });
     verdicts.push(verdict);
-    documents = appendTeacherDocument(documents, input.draft, verdict, pass);
+    documents = appendTeacherDocument(
+      documents,
+      input.draft,
+      verdict,
+      pass,
+      verifierProvider,
+    );
     steps.push({
-      name: `kimi-teacher-pass-${pass}`,
+      name: `${verifierProvider}-teacher-pass-${pass}`,
       status: verdict.status,
       detail: `${Math.round(verdict.confidence * 100)}% confidence`,
     });
@@ -85,6 +92,7 @@ export async function runTeacherVerification(
     if (verdict.status !== "needs_more_data") break;
     if (verdict.recommendedQueries.length === 0) break;
     if (!input.deps.research.isConfigured(input.researchSettings)) break;
+    const followUpProvider = input.researchSettings.provider;
 
     const followUp = await input.deps.research.growKnowledge({
       draft: input.draft,
@@ -92,7 +100,7 @@ export async function runTeacherVerification(
       budget: input.budget,
       settings: {
         ...input.researchSettings,
-        provider: "deepseek",
+        provider: followUpProvider,
         researchIntents: [{
           objective: `Kimi teacher follow-up pass ${pass}`,
           queries: verdict.recommendedQueries,
@@ -102,7 +110,7 @@ export async function runTeacherVerification(
     documents = [...documents, ...followUp.documents];
     research = mergeResearch(research, followUp);
     steps.push({
-      name: `deepseek-follow-up-${pass}`,
+      name: `${followUpProvider ?? "research"}-follow-up-${pass}`,
       status: followUp.status,
       detail: followUp.stopReason,
     });
@@ -116,20 +124,21 @@ function appendTeacherDocument(
   draft: AgentBuildDraft,
   verdict: KnowledgeVerificationVerdict,
   pass: number,
+  provider: string,
 ): KnowledgeDocument[] {
-  const text = renderTeacherMarkdown(verdict, pass);
+  const text = renderTeacherMarkdown(verdict, pass, provider);
   if (!text.trim()) return documents;
   return [
     ...documents,
     {
-      id: `doc_kimi_teacher_${crypto.randomUUID()}`,
-      name: `${draft.identity.publicAgentName} kimi teacher pass ${pass}.md`,
+      id: `doc_${safeId(provider)}_teacher_${crypto.randomUUID()}`,
+      name: `${draft.identity.publicAgentName} ${provider} teacher pass ${pass}.md`,
       kind: "md",
       mimeType: "text/markdown",
       status: "parsed",
       text,
       metadata: {
-        provider: "kimi-teacher",
+        provider: `${provider}-teacher`,
         pass,
         status: verdict.status,
         confidence: verdict.confidence,
@@ -143,9 +152,10 @@ function appendTeacherDocument(
 function renderTeacherMarkdown(
   verdict: KnowledgeVerificationVerdict,
   pass: number,
+  provider: string,
 ): string {
   return [
-    `# Kimi teacher verification pass ${pass}`,
+    `# ${provider} teacher verification pass ${pass}`,
     "",
     `Verdict: ${verdict.status}`,
     `Confidence: ${Math.round(verdict.confidence * 100)}%`,
@@ -205,6 +215,11 @@ function markdownTable(columns: string[], rows: string[][]): string {
 
 function cell(value: string): string {
   return String(value).replace(/\|/g, "\\|").replace(/\n/g, " ");
+}
+
+function safeId(value: string): string {
+  return value.replace(/[^a-zA-Z0-9]+/g, "_").replace(/^_+|_+$/g, "") ||
+    "verifier";
 }
 
 function mergeResearch(

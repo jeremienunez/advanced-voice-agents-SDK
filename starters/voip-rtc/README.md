@@ -14,6 +14,8 @@ projects:
 - Server-side sample-rate adaptation for provider contracts
   (Gemini 16 kHz input, browser/OpenAI 24 kHz).
 - Reusable SDK bridge through `BrowserVoiceService`.
+- Provider-agnostic builder LLM harness for prompt planning, autonomous
+  research, and teacher verification.
 
 ## Flow
 
@@ -31,12 +33,23 @@ flowchart LR
 ```mermaid
 flowchart TD
   Identity[Identity + Intent] --> PromptPlan[/builder/prompt-plan]
-  PromptPlan --> Draft[AgentBuildDraft]
+  PromptPlan --> LLM[Builder LLM harness]
+  LLM --> Draft[AgentBuildDraft]
   Draft --> Knowledge[Knowledge + Research]
+  Knowledge --> ResearchLLM[Research LLM task]
+  ResearchLLM --> Teacher[Verifier LLM task]
   Knowledge --> Database[Postgres/pgvector plan]
   Database --> Compile[CompiledAgentArtifact]
   Compile --> RTC[RTC Lab session agent id]
 ```
+
+The builder harness exposes model profiles by role:
+
+| Role | Purpose | Providers |
+| --- | --- | --- |
+| `builder.planner` | prompt, knowledge, database, and final prompt planning | DeepSeek, Qwen, Kimi, Gemini |
+| `builder.researcher` | autonomous budget-aware research briefs | DeepSeek, Qwen, Kimi |
+| `builder.verifier` | teacher checks and follow-up query generation | DeepSeek, Qwen, Kimi, Gemini |
 
 ## Run
 
@@ -89,10 +102,20 @@ Builder and knowledge env vars:
 - `VOICE_ALLOWED_ORIGINS`
 - `VOICE_DEV_AUTH_TOKEN`
 - `VITE_VOICE_DEV_AUTH_TOKEN`
-- `DEEPSEEK_API_KEY`
-- `DEEPSEEK_MODEL`
+- `BUILDER_PROMPT_PROVIDER`
 - `BUILDER_RESEARCH_PROVIDER`
 - `BUILDER_RESEARCH_MODEL`
+- `BUILDER_KNOWLEDGE_VERIFICATION_PROVIDER`
+- `BUILDER_KNOWLEDGE_VERIFICATION_MODEL`
+- `BUILDER_KNOWLEDGE_VERIFICATION_MAX_TOKENS`
+- `DEEPSEEK_API_KEY`
+- `DEEPSEEK_MODEL`
+- `QWEN_API_KEY` or `DASHSCOPE_API_KEY`
+- `QWEN_MODEL` or `DASHSCOPE_MODEL`
+- `KIMI_API_KEY` or `MOONSHOT_API_KEY`
+- `KIMI_MODEL`
+- `GEMINI_API_KEY`
+- `GEMINI_TEXT_MODEL`
 - `VOYAGE_API_KEY`
 - `VOYAGE_EMBEDDING_MODEL`
 - `VOYAGE_EMBEDDING_DIMENSIONS`

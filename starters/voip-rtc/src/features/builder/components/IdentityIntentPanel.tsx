@@ -33,8 +33,9 @@ export function IdentityIntentPanel({
       }))
     : [
         {
-          value: form.llmProvider || "deepseek",
-          label: "DeepSeek - waiting for builder config",
+          value: "",
+          label: "Waiting for builder config",
+          disabled: true,
         },
       ];
 
@@ -78,7 +79,7 @@ export function IdentityIntentPanel({
         <TextField
           label="Builder LLM"
           name="llmModel"
-          placeholder={config?.defaults.deepseekModel ?? "deepseek-v4-pro"}
+          placeholder={config?.defaults.promptModel ?? "model from /config"}
           value={form.llmModel}
           onValueChange={(value) => updateField("llmModel", value)}
         />

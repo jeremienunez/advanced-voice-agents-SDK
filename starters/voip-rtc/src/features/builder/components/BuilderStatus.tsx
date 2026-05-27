@@ -10,7 +10,10 @@ export function BuilderStatus({
   if (error) return <div className="status status-error">config error</div>;
   if (!config) return <div className="status">loading</div>;
 
-  const ready = config.availability.deepseek && config.availability.voyage;
+  const builderReady = config.providers.prompt.some((provider) => {
+    return provider.configured;
+  });
+  const ready = builderReady && config.availability.voyage;
 
   return (
     <div className={`status ${ready ? "status-listening" : "status-error"}`}>

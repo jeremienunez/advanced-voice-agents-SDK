@@ -38,6 +38,7 @@ export interface LlmTaskNeeds {
   tools?: LlmToolNeed;
   latency?: LlmLatencyNeed;
   cost?: LlmCostNeed;
+  maxOutputTokens?: number;
 }
 
 export type LlmMessageRole = "system" | "user" | "assistant" | "tool";

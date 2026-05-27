@@ -1,6 +1,6 @@
 # TODO - Agnostic Voice Agent SDK
 
-Future commit title: `refactor: carve agnostic voice agent sdk from copied runtime`
+Current commit title candidate: `feat: add provider agnostic builder llm harness`
 
 ## Current Verification - 2026-05-27
 
@@ -11,6 +11,7 @@ Future commit title: `refactor: carve agnostic voice agent sdk from copied runti
 - [x] `pnpm run audit:tool-contracts`
   - result: `tool-contracts: OK (1 compiled drafts checked, 11 legacy skipped)`
 - [x] `pnpm run audit:loc`
+- [x] `git diff --check`
 - [x] `pnpm run pack:dry-run`
 - [x] `pnpm audit --json`
   - result: 0 info, 0 low, 0 moderate, 0 high, 0 critical
@@ -23,6 +24,39 @@ Future commit title: `refactor: carve agnostic voice agent sdk from copied runti
 - [x] Reconcile historical TODO checkboxes against source files.
 - [ ] Run `pnpm install` before the next runtime demo if local
   `node_modules` predates the current lockfile.
+
+## Architecture Backlog - Builder LLM Harness
+
+- [x] Add SDK-level LLM task abstractions:
+  - provider id;
+  - task roles;
+  - output contracts;
+  - model profiles;
+  - resolver and runner ports.
+- [x] Add starter model catalog for DeepSeek, Qwen, Kimi, and Gemini.
+- [x] Route builder planning through `LlmPromptPlanner`.
+- [x] Route autonomous research through `LlmKnowledgeResearch`.
+- [x] Route teacher verification through `LlmKnowledgeVerifier`.
+- [x] Keep provider-specific request params behind adapter shapes:
+  - OpenAI-compatible chat completions;
+  - Gemini `generateContent`;
+  - JSON mode/schema mode;
+  - thinking controls;
+  - max output token fields;
+  - retries, usage, and tool-call normalization.
+- [x] Delete legacy direct provider adapters:
+  - `deepseek-chat`;
+  - `deepseek-planner`;
+  - `deepseek-research`;
+  - `kimi-knowledge-verifier`.
+- [x] Remove frontend/server defaults that forced DeepSeek/Kimi before
+  `/builder/config` loaded.
+- [x] Make builder prompt templates provider-agnostic.
+- [ ] Add focused tests with fake `LlmTaskRunnerPort` for:
+  - prompt planner JSON fallback;
+  - research document/checkpoint creation;
+  - verifier verdict normalization;
+  - resolver role selection and requested-provider fallback.
 
 ## Immediate Risk Backlog - 2026-05-27
 
