@@ -2,7 +2,7 @@
 
 Current goal: harden prompt and tool orchestration.
 
-Target commit title candidate: `test: lint compiled prompt invariants`
+Target commit title candidate: `test: enforce runtime tool authorization`
 
 ## Active Focus
 
@@ -14,7 +14,6 @@ uploaded documents, or request-supplied tool bindings.
 
 Next work:
 
-- [ ] Lint compiled prompts for required invariants.
 - [ ] Enforce tool authorization server-side, independent of model text.
 
 ### Current Gates
@@ -35,7 +34,6 @@ Optional security/network checks:
 
 ### Prompt And Tool Orchestration
 
-- [ ] Lint compiled prompts for required invariants.
 - [ ] Enforce tool authorization server-side, independent of model text.
 
 ### Logs And Debug Artifacts

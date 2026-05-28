@@ -1,5 +1,34 @@
 # Changelog
 
+## test: lint compiled prompt invariants
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Refuser les prompts compiles trop maigres ou dangereux avant qu'ils deviennent
+des artifacts RTC actifs.
+
+### Journal
+
+- `pnpm test:prompt-policy:bdd` couvre maintenant un prompt final trop court qui
+  doit etre rejete par lint.
+- Ajout de `prompt-invariants.ts` pour verifier le corps du prompt avant
+  sauvegarde de l'artifact.
+- Le lint exige l'identite de l'agent, les politiques conversation/knowledge/tool,
+  les criteres de succes, une regle de confirmation et une regle d'incertitude.
+- Les outils selectionnes doivent apparaitre dans le corps du prompt compile.
+- Le suffixe serveur reste valide separement via `assertServerOwnedPromptPolicy`.
+
+### Validation
+
+- `pnpm test:prompt-policy:bdd` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:loc` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: quote builder inputs in prompts
 
 Status: implemented locally

@@ -102,6 +102,8 @@ planner, research, and teacher/verifier work into typed `LlmTask` requests, then
 routes them through an adaptive resolver and provider adapters.
 Builder-controlled JSON and document excerpts are quoted as untrusted data
 blocks before they enter provider prompts.
+Compiled prompts are linted for required identity, policy, confirmation,
+uncertainty, success, and selected-tool invariants before activation.
 
 ```mermaid
 flowchart TD

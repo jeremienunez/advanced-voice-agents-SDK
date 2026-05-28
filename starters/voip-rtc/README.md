@@ -49,6 +49,8 @@ The builder harness exposes model profiles by role:
 
 Builder-controlled JSON, selected tools, and document excerpts are quoted as
 untrusted data blocks before they enter LLM prompts.
+Compiled final prompts are linted for required identity, safety, tool,
+confirmation, uncertainty, and success invariants before activation.
 
 | Role | Purpose | Providers |
 | --- | --- | --- |

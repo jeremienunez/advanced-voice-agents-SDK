@@ -1,4 +1,5 @@
 import { compileArtifact } from "./domain/prompt.js";
+import { assertCompiledPromptInvariants } from "./domain/prompt-invariants.js";
 import {
   appendServerOwnedPromptPolicy,
   assertServerOwnedPromptPolicy,
@@ -48,6 +49,7 @@ export async function compileAgentWithServerPolicy(
     selectedTools,
   );
   assertServerOwnedPromptPolicy(prompt);
+  assertCompiledPromptInvariants(prompt, draftWithTools, selectedTools);
   const artifact = compileArtifact(draftWithTools, selectedTools, prompt, toolPlan);
   const nextDraft = mutateDraft(draftWithTools)
     .finalPrompt(prompt)
