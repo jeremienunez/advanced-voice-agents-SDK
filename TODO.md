@@ -6,16 +6,40 @@ Target commit title candidate: `test: add db adapter registry`
 
 ## Active Focus
 
-### Agent Infra / DB Harness
+### DbAdapterRegistry
 
 Outcome:
 Runtime database/store adapters should resolve through a registry instead of
 serializable SDK definitions carrying implementation details.
 
-Next work:
+BDD target:
+
+- Add `pnpm test:db-adapter-registry:bdd`.
+- Prove that SDK database/store definitions carry adapter refs only.
+- Prove that runtime code resolves concrete adapters through an injected
+  registry.
+- Prove that a missing adapter ref fails closed before runtime execution.
+- Prove that `createSafeRepository` still enforces tenant scope, allowed
+  operations, filters, sorting, writable fields, and page bounds once the
+  adapter comes from the registry.
+
+Implementation target:
 
 - [ ] Add `DbAdapterRegistry` and keep adapters out of serializable SDK
   definitions.
+- [ ] Add a dev/in-memory registry fixture for BDD and local starter tests.
+- [ ] Wire `StoreDefinition` repository creation to `DbAdapterRegistry`.
+- [ ] Keep knowledge/vector-specific adapters behind existing
+  `KnowledgeStorePort` until the registry contract is proven for stores.
+- [ ] Document where product apps bind concrete SQL/document/vector adapters.
+
+Definition of done:
+
+- [ ] `pnpm test:db-adapter-registry:bdd` is red before implementation, then
+  green.
+- [ ] `pnpm audit:solid`
+- [ ] `git diff --check`
+- [ ] TODO, CHANGELOG, and README are updated before commit.
 
 ### Current Gates
 
@@ -42,7 +66,6 @@ Optional security/network checks:
 
 ## Architecture Backlog - Runtime Ports
 
-- [ ] Wire `StoreDefinition` to `DbAdapterRegistry`.
 - [ ] Add SQL/document/vector store adapters:
   - field and index mapping;
   - pagination/cursor;
