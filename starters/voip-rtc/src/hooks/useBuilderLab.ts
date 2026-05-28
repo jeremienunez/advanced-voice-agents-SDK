@@ -120,7 +120,14 @@ export function useBuilderLab({
   });
 
   async function compileAgent() {
-    if (!draft) return;
+    if (!draft) {
+      setMessage("Create a draft before compiling the agent.");
+      return;
+    }
+    if (draft.databasePlan?.status !== "applied") {
+      setMessage("Apply the database plan before compiling the agent.");
+      return;
+    }
     const startedAt = performance.now();
     setBusy("compile-agent");
     setMessage(null);

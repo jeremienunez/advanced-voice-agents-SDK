@@ -1,126 +1,142 @@
-/* StepRail Component Styles - Luminous Cloud */
-
 .wizard-rail {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
+  gap: 12px;
   position: relative;
-  margin-bottom: 40px;
-  padding: 16px 32px;
-  background: var(--bg-card);
-  border: 1px solid var(--slate-200);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  margin: 0;
+  padding: 8px 0;
 }
 
 .wizard-rail::before {
-  content: '';
+  content: "";
   position: absolute;
-  top: 50%;
-  left: 56px;
-  right: 56px;
-  height: 2px;
-  background: var(--slate-200);
-  transform: translateY(-50%);
+  top: 24px;
+  bottom: 24px;
+  left: 20px;
+  width: 2px;
+  background: rgba(226, 232, 240, 0.8);
   z-index: 1;
 }
 
 .wizard-rail-progress {
   position: absolute;
-  top: 50%;
-  left: 56px;
-  height: 2px;
-  background: var(--google-blue);
-  transform: translateY(-50%);
+  top: 24px;
+  left: 20px;
+  width: 2px;
+  background: linear-gradient(180deg, var(--studio-action, var(--google-blue)), var(--studio-action-hover, #1d4ed8));
   z-index: 2;
-  transition: width var(--transition-normal);
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.4);
+  transition: height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .wizard-node {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
   align-items: center;
+  gap: 16px;
   position: relative;
   z-index: 3;
-  height: auto;
-  min-width: 76px;
-  padding: 0;
-  border: none;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 12px;
   background: transparent;
   outline: none;
   color: inherit;
   cursor: pointer;
   box-shadow: none;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .wizard-circle {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-full);
-  background: var(--bg-card);
-  border: 2px solid var(--slate-300);
-  color: var(--slate-500);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--studio-surface);
+  border: 2px solid var(--studio-border);
+  color: var(--studio-muted);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 13px;
-  box-shadow: var(--shadow-sm);
-  transition: var(--transition-normal);
+  font-size: 12px;
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
 }
 
 .wizard-label {
-  margin-top: 10px;
-  font-size: 11px;
+  margin: 0;
+  font-size: 13px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: var(--slate-500);
-  transition: var(--transition-normal);
+  text-align: left;
+  text-transform: none;
+  letter-spacing: -0.01em;
+  color: var(--studio-muted);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.wizard-node:hover:not(.locked) {
+  background: rgba(37, 99, 235, 0.03);
+  border-color: rgba(37, 99, 235, 0.08);
 }
 
 .wizard-node:hover:not(.locked) .wizard-circle {
-  border-color: var(--google-blue);
-  color: var(--google-blue);
-  transform: scale(1.05);
+  border-color: var(--studio-accent, var(--google-blue));
+  color: var(--studio-accent, var(--google-blue));
+  transform: scale(1.08);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
+}
+
+.wizard-node:hover:not(.locked) .wizard-label {
+  color: var(--studio-text-strong);
 }
 
 .wizard-node:hover:not(:disabled) {
-  background: transparent;
+  background: rgba(37, 99, 235, 0.03);
   color: inherit;
 }
 
 /* Completed Steps */
 .wizard-node.completed .wizard-circle {
-  background: var(--google-green-light);
-  border-color: var(--google-green);
-  color: var(--google-green);
+  background: var(--studio-success-soft, var(--google-green-light));
+  border-color: var(--studio-success, var(--google-green));
+  color: var(--studio-success, var(--google-green));
 }
 
 .wizard-node.completed .wizard-label {
-  color: var(--slate-800);
+  color: var(--studio-text);
+  font-weight: 500;
 }
 
 .wizard-node.available .wizard-circle {
-  border-color: var(--google-blue);
-  color: var(--google-blue);
+  border-color: var(--studio-accent, var(--google-blue));
+  color: var(--studio-accent, var(--google-blue));
 }
 
 .wizard-node.available .wizard-label {
-  color: var(--slate-700);
+  color: var(--studio-text);
 }
 
 /* Active Step */
+.wizard-node.active {
+  background: rgba(37, 99, 235, 0.04);
+  border-color: rgba(37, 99, 235, 0.1);
+  box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.03);
+}
+
 .wizard-node.active .wizard-circle {
-  background: var(--google-blue);
-  border-color: var(--google-blue);
+  background: var(--studio-accent, var(--google-blue));
+  border-color: var(--studio-accent, var(--google-blue));
   color: #ffffff;
-  box-shadow: 0 0 16px rgba(26, 115, 232, 0.4);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15), 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 .wizard-node.active .wizard-label {
-  color: var(--slate-900);
+  color: var(--studio-text-strong);
   font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 /* Locked Steps */
@@ -131,7 +147,6 @@
 
 .wizard-node:disabled {
   background: transparent;
-  border: 0;
-  color: inherit;
+  border-color: transparent;
   box-shadow: none;
 }

@@ -3,8 +3,8 @@
 :root {
   color-scheme: light;
   font-family: var(--font-sans);
-  background: var(--bg-primary);
-  color: var(--slate-800);
+  background: var(--studio-bg);
+  color: var(--studio-text);
 }
 
 * {
@@ -14,11 +14,8 @@
 body {
   margin: 0;
   min-width: 320px;
-  background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.015) 1px, transparent 1px),
-    linear-gradient(rgba(0, 0, 0, 0.012) 1px, transparent 1px), var(--bg-primary);
-  background-size: 64px 64px;
-  color: var(--slate-800);
+  background: var(--studio-bg);
+  color: var(--studio-text);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -29,78 +26,22 @@ textarea {
   font: inherit;
 }
 
+button {
+  border-radius: var(--studio-radius);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--studio-action);
+  outline-offset: 2px;
+}
+
 .appFrame {
-  position: relative;
   min-height: 100vh;
-  overflow: hidden;
-  background: var(--bg-primary);
-}
-
-.appFrame::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 10% 10%, rgba(26, 115, 232, 0.025), transparent 45%),
-    radial-gradient(circle at 90% 90%, rgba(15, 157, 88, 0.018), transparent 50%);
-}
-
-.atmosphere {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  width: 100vw;
-  height: 100vh;
-  pointer-events: none;
-  opacity: 0.42;
-  mix-blend-mode: multiply;
-  filter: saturate(1.12);
-}
-
-.shell {
-  position: relative;
-  z-index: 1;
-  width: min(1280px, calc(100vw - 64px));
-  margin: 0 auto;
-  padding: 40px 0;
-}
-
-.modeTabs {
-  display: flex;
-  width: fit-content;
-  gap: 6px;
-  margin-bottom: 24px;
-  padding: 6px;
-  border: 1px solid var(--slate-200);
-  border-radius: var(--radius-md);
-  background: var(--bg-card);
-  box-shadow: var(--shadow-sm);
-}
-
-.modeTabs button {
-  height: 38px;
-  min-width: 116px;
-  background: transparent;
-  border: none;
-  border-radius: var(--radius-sm);
-  color: var(--slate-500);
-  font-weight: 600;
-  font-size: 13px;
-  cursor: pointer;
-  transition: var(--transition-fast);
-}
-
-.modeTabs button:hover {
-  color: var(--slate-900);
-  background: var(--slate-100);
-}
-
-.modeTabs button.active {
-  background: var(--google-blue);
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.2);
+  background: var(--studio-bg);
 }
 
 .topbar,

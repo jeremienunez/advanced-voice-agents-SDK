@@ -12,6 +12,7 @@ export function ToolRegistryPanel({
   toolRegistry,
   selectedTools,
   busy,
+  canCompile,
   setSelectedTools,
   compileAgent,
 }: {
@@ -19,6 +20,7 @@ export function ToolRegistryPanel({
   toolRegistry: ToolRegistryItem[];
   selectedTools: string[];
   busy: string | null;
+  canCompile: boolean;
   setSelectedTools: Dispatch<SetStateAction<string[]>>;
   compileAgent: () => Promise<void>;
 }) {
@@ -59,7 +61,7 @@ export function ToolRegistryPanel({
       <div className="actions">
         <Button
           onClick={() => void compileAgent()}
-          disabled={!draft?.promptPlan || Boolean(busy)}
+          disabled={!canCompile || !draft?.promptPlan || Boolean(busy)}
           variant="primary"
         >
           {busy === "compile-agent" ? "Compiling" : "Compile agent"}

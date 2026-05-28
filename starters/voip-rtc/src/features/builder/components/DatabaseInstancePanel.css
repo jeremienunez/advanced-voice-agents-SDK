@@ -150,3 +150,79 @@
   font-size: 12px;
   margin-top: 12px;
 }
+
+/* Expose Capabilities chip surfaces & pill styles */
+.backendHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.backendRole {
+  color: var(--slate-500);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.infraBackend {
+  display: flex !important;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+}
+
+.capabilityChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.capabilityChip {
+  font-size: 10px;
+  font-weight: 750;
+  background: var(--studio-bg);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-sm);
+  padding: 3px 8px;
+  color: var(--slate-600);
+  text-transform: lowercase;
+  letter-spacing: 0.2px;
+  transition: all var(--transition-fast);
+}
+
+.capabilityChip:hover {
+  background: var(--google-blue-light);
+  border-color: var(--google-blue);
+  color: var(--google-blue);
+}
+
+.pill {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  margin-left: auto;
+}
+
+.pill.ok {
+  background: var(--google-green-light);
+  color: var(--google-green);
+  border: 1px solid var(--studio-success-border);
+}
+
+.pill.warning {
+  background: var(--google-yellow-light);
+  color: var(--google-yellow);
+  border: 1px solid var(--studio-warning-border);
+}
+
+.pill.muted {
+  background: var(--studio-bg);
+  color: var(--slate-400);
+  border: 1px solid var(--slate-200);
+}

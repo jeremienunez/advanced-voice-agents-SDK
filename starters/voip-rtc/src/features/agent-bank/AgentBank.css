@@ -1,4 +1,29 @@
-/* AgentBank Component Styles - Luminous Cloud */
+/* AgentBank Component Styles - Precision Studio */
+
+.agentsPage {
+  display: grid;
+  gap: 24px;
+}
+
+.agentsHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: center;
+  padding: 24px 32px;
+  border: 1px solid var(--studio-border-soft);
+  border-radius: var(--studio-radius);
+  background: var(--studio-surface);
+  box-shadow: var(--studio-shadow-sm);
+}
+
+.agentsHeader h1 {
+  margin: 0;
+  color: var(--studio-text-strong);
+  font-size: 26px;
+  font-weight: 850;
+  letter-spacing: -0.5px;
+}
 
 .agentsTopbar {
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
@@ -7,6 +32,54 @@
 .bankStats {
   display: flex;
   gap: 16px;
+}
+
+.agentsToolbar {
+  display: grid;
+  grid-template-columns: 2fr 1.2fr 1.2fr auto;
+  gap: 16px;
+  align-items: end;
+  padding: 16px 24px;
+  border: 1px solid var(--studio-border-soft);
+  border-radius: 16px;
+  background: var(--studio-surface);
+  box-shadow: var(--studio-shadow-sm);
+}
+
+.agentsToolbar label {
+  display: grid;
+  gap: 6px;
+  color: var(--studio-muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.agentsToolbar input,
+.agentsToolbar select {
+  min-height: 38px;
+  height: 38px;
+  border: 1px solid var(--studio-border);
+  border-radius: var(--studio-radius);
+  background: var(--studio-surface);
+  color: var(--studio-text-strong);
+  font: inherit;
+  padding: 0 14px;
+  text-transform: none;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+.agentsToolbar input:focus,
+.agentsToolbar select:focus {
+  border-color: var(--studio-action);
+  box-shadow: 0 0 0 3px var(--google-blue-focus);
+  outline: none;
+}
+
+.agentsToolbar button {
+  letter-spacing: 0.5px;
 }
 
 .agentBankToolbar {
@@ -21,9 +94,378 @@
   box-shadow: var(--shadow-sm);
 }
 
+.agentsLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
+  gap: 24px;
+  align-items: start;
+}
+
+.agentCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 18px;
+}
+
 .agent-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
   gap: 28px;
   margin-top: 28px;
+}
+
+.agentDetailPanel {
+  position: sticky;
+  top: 20px;
+  display: grid;
+  gap: 20px;
+  padding: 24px;
+  border: 1px solid var(--studio-border-soft);
+  border-radius: var(--studio-radius);
+  background: var(--studio-surface);
+  box-shadow: var(--studio-shadow-sm);
+  transition: border-color var(--transition-fast);
+}
+
+.agentDetailPanel:hover {
+  border-color: var(--studio-border);
+}
+
+.agentDetailPanel.empty {
+  border-style: dashed;
+  border-color: var(--studio-border);
+  background: var(--studio-surface-muted);
+}
+
+.agentDetailPanel h2,
+.agentDetailPanel h3,
+.agentDetailPanel p {
+  margin: 0;
+}
+
+.agentDetailPanel h2 {
+  color: var(--studio-text-strong);
+  font-size: 20px;
+  font-weight: 850;
+  line-height: 1.2;
+}
+
+.agentDetailPanel header {
+  display: grid;
+  gap: 8px;
+}
+
+.agentDetailPanel header p:not(.studioEyebrow),
+.agentDetailSection p,
+.agentDetailSection small {
+  color: var(--studio-muted);
+  line-height: 1.5;
+  font-size: 13px;
+}
+
+.agentDetailStats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.agentDetailStats div,
+.agentDetailSection {
+  padding: 14px;
+  border: 1px solid var(--studio-border-soft);
+  border-radius: var(--studio-radius);
+  background: var(--studio-surface-muted);
+}
+
+.agentDetailStats dt {
+  color: var(--studio-muted);
+  font-size: 10px;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.agentDetailStats dd {
+  margin: 4px 0 0;
+  color: var(--studio-text-strong);
+  font-size: 14px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.agentDetailSection {
+  display: grid;
+  gap: 6px;
+}
+
+.agentDetailSection h3 {
+  color: var(--studio-text-strong);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.agentDetailActions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.agentDetailActions button {
+  min-width: 0;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 1024px) {
+  .agentsLayout {
+    grid-template-columns: 1fr;
+  }
+  .agentDetailPanel {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .agentsToolbar {
+    grid-template-columns: 1fr;
+  }
+  .agentsHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+  }
+  .bankStats {
+    width: 100%;
+  }
+}
+
+/* Layout Switcher (Carousel vs Grid Toggle) */
+.layoutToggleWrapper {
+  display: grid;
+  gap: 6px;
+  color: var(--studio-muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.layoutToggle {
+  display: flex;
+  background: rgba(241, 245, 249, 0.8);
+  border: 1px solid var(--studio-border-soft);
+  border-radius: 9999px;
+  padding: 4px;
+  min-height: 38px;
+}
+
+.toggleBtn {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: var(--studio-muted);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.toggleBtn:hover {
+  color: var(--studio-text-strong);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.toggleBtn.active {
+  background: #ffffff;
+  color: var(--studio-action);
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+}
+
+/* Agent Carousel Wrapper */
+.agentCarouselSection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 400px;
+}
+
+.agentCarouselWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  padding: 10px 0;
+}
+
+.agentCarouselViewport {
+  position: relative;
+  width: 100%;
+  max-width: 680px;
+  height: 340px;
+  perspective: 1200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.agentCarouselTrack {
+  position: relative;
+  width: 320px;
+  height: 100%;
+  transform-style: preserve-3d;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.agentCarouselSlide {
+  position: absolute;
+  width: 320px;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+
+/* 3D Inactive Slide Collapsing (Pure CSS Overlap Solution) */
+.agentCarouselSlide.prev .agentCard,
+.agentCarouselSlide.next .agentCard {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%) !important;
+  border-color: rgba(226, 232, 240, 0.8) !important;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04) !important;
+  max-height: 110px;
+  overflow: hidden;
+  padding: 16px 20px !important;
+  filter: blur(0.4px);
+  gap: 8px !important;
+}
+
+/* Hide heavy details inside background carousel slides */
+.agentCarouselSlide.prev .agent-metadata-grid,
+.agentCarouselSlide.next .agent-metadata-grid,
+.agentCarouselSlide.prev .agentActions,
+.agentCarouselSlide.next .agentActions,
+.agentCarouselSlide.prev .agentUpdatedAt,
+.agentCarouselSlide.next .agentUpdatedAt,
+.agentCarouselSlide.prev .agentIntent,
+.agentCarouselSlide.next .agentIntent {
+  display: none !important;
+}
+
+/* 3D Coverflow Angles & Offsets */
+.agentCarouselSlide.active {
+  transform: rotateY(0deg) translate3d(0, 0, 80px);
+  opacity: 1;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.agentCarouselSlide.prev {
+  transform: rotateY(25deg) translate3d(-190px, -40px, -80px);
+  opacity: 0.6;
+  z-index: 5;
+  pointer-events: auto;
+}
+
+.agentCarouselSlide.next {
+  transform: rotateY(-25deg) translate3d(190px, -40px, -80px);
+  opacity: 0.6;
+  z-index: 5;
+  pointer-events: auto;
+}
+
+.agentCarouselSlide.far-prev {
+  transform: rotateY(30deg) translate3d(-310px, -60px, -150px);
+  opacity: 0.15;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.agentCarouselSlide.far-next {
+  transform: rotateY(-30deg) translate3d(310px, -60px, -150px);
+  opacity: 0.15;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.agentCarouselSlide.hidden {
+  opacity: 0;
+  transform: translate3d(0, -60px, -300px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Carousel Control Elements */
+.carouselControls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--studio-border-soft);
+  border-radius: 9999px;
+  padding: 6px 16px;
+  box-shadow: 0 4px 15px rgba(15, 23, 42, 0.05);
+  backdrop-filter: blur(10px);
+}
+
+.carouselNavBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--studio-border-soft);
+  background: var(--studio-surface);
+  color: var(--studio-text-strong);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.carouselNavBtn:hover {
+  border-color: var(--studio-action-border);
+  background: var(--studio-action-soft);
+  color: var(--studio-action);
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+.carouselNavBtn:active {
+  transform: scale(0.95);
+}
+
+.carouselCounter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--studio-text-strong);
+  min-width: 50px;
+  justify-content: center;
+}
+
+.carouselCounter .current {
+  color: var(--studio-action);
+}
+
+.carouselCounter .separator {
+  color: var(--studio-subtle);
+  font-size: 11px;
+}
+
+.carouselCounter .total {
+  color: var(--studio-muted);
 }

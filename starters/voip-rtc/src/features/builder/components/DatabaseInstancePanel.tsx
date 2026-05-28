@@ -83,9 +83,20 @@ export function DatabaseInstancePanel({
               <div className="infraBackendList">
                 {draft.infraPlan.knowledgeBackends.map((backend) => (
                   <div key={backend.id} className="infraBackend">
-                    <strong>{backend.provider}</strong>
-                    <span>{backend.role}</span>
-                    <span>{backend.configured ? "configuré" : "à configurer"}</span>
+                    <div className="backendHeader">
+                      <strong>{backend.provider}</strong>
+                      <span className="backendRole">{backend.role}</span>
+                      <span className={`pill ${backend.configured ? "ok" : "warning"}`}>
+                        {backend.configured ? "configuré" : "à configurer"}
+                      </span>
+                    </div>
+                    {backend.capabilities && backend.capabilities.length > 0 && (
+                      <div className="capabilityChips">
+                        {backend.capabilities.map((cap) => (
+                          <span key={cap} className="capabilityChip">{cap}</span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -111,9 +122,20 @@ export function DatabaseInstancePanel({
                       draft.infraPlan.storePlan.vectorBackend,
                     ].filter(isLearningStore).map((store) => (
                       <div key={store.id} className="infraBackend">
-                        <strong>{store.provider}</strong>
-                        <span>{store.kind}</span>
-                        <span>{store.configured ? "configuré" : store.required ? "requis" : "optionnel"}</span>
+                        <div className="backendHeader">
+                          <strong>{store.provider}</strong>
+                          <span className="backendRole">{store.kind}</span>
+                          <span className={`pill ${store.configured ? "ok" : store.required ? "warning" : "muted"}`}>
+                            {store.configured ? "configuré" : store.required ? "requis" : "optionnel"}
+                          </span>
+                        </div>
+                        {store.capabilities && store.capabilities.length > 0 && (
+                          <div className="capabilityChips">
+                            {store.capabilities.map((cap) => (
+                              <span key={cap} className="capabilityChip">{cap}</span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

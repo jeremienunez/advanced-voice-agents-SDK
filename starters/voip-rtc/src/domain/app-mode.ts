@@ -1,1 +1,3 @@
-export type AppMode = "hub" | "builder" | "agents" | "rtc" | "onboarding";
+export type AppMode = "command" | "builder" | "agents" | "rtc" | "environment";
+
+export const defaultAppMode: AppMode = "command";

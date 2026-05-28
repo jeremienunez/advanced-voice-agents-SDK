@@ -2,11 +2,11 @@ import type { AppMode } from "../../domain/app-mode.js";
 import { ModeTabButton } from "./ModeTabButton.js";
 
 const APP_TABS: Array<{ label: string; mode: AppMode }> = [
-  { label: "Onboarding", mode: "onboarding" },
-  { label: "Launchpad", mode: "hub" },
+  { label: "Command Center", mode: "command" },
   { label: "Builder", mode: "builder" },
   { label: "Agent Bank", mode: "agents" },
   { label: "RTC Lab", mode: "rtc" },
+  { label: "Environment", mode: "environment" },
 ];
 
 export function AppModeTabs({

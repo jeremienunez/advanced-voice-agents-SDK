@@ -19,11 +19,13 @@ export function createProviderCatalog(): RuntimeProviderConfig[] {
         "GOOGLE_API_KEY",
         "GOOGLE_GENERATIVE_AI_API_KEY",
       ],
-      enabled: hasAnyEnv([
-        "GEMINI_API_KEY",
-        "GOOGLE_API_KEY",
-        "GOOGLE_GENERATIVE_AI_API_KEY",
-      ]) || e2eFakeProvider,
+      get enabled() {
+        return hasAnyEnv([
+          "GEMINI_API_KEY",
+          "GOOGLE_API_KEY",
+          "GOOGLE_GENERATIVE_AI_API_KEY",
+        ]) || e2eFakeProvider;
+      },
       models: [
         geminiModel,
         "gemini-3.1-flash-live-preview",
@@ -50,7 +52,9 @@ export function createProviderCatalog(): RuntimeProviderConfig[] {
       label: "OpenAI Realtime",
       kind: "openai-realtime",
       requiredEnv: ["OPENAI_API_KEY"],
-      enabled: hasAnyEnv(["OPENAI_API_KEY"]) || e2eFakeProvider,
+      get enabled() {
+        return hasAnyEnv(["OPENAI_API_KEY"]) || e2eFakeProvider;
+      },
       models: [openaiModel, "gpt-realtime-1.5", "gpt-realtime-2"],
       voices: [openaiVoice, "marin", "cedar", "verse", "alloy"],
       defaultModel: openaiModel,

@@ -1,17 +1,24 @@
 import { Button } from "../../components/ui/Button.js";
 import type { AgentBankItem } from "../../domain/builder.js";
 import { formatDateTime } from "../../domain/formatters.js";
+import { readinessLabel } from "./agent-bank-view-model.js";
 import "./AgentCard.css";
 
 export function AgentCard({
   agent,
+  active,
+  busy,
   busyDraftId,
+  onSelect,
   onLoadRtc,
   onResumeBuilder,
   onRollback,
 }: {
   agent: AgentBankItem;
+  active: boolean;
+  busy: boolean;
   busyDraftId: string | null;
+  onSelect: (draftId: string) => void;
   onLoadRtc: (agent: AgentBankItem) => Promise<void>;
   onResumeBuilder: (agent: AgentBankItem) => Promise<void>;
   onRollback: (agent: AgentBankItem) => Promise<void>;
@@ -19,58 +26,68 @@ export function AgentCard({
   const isCompiled = agent.status === "compiled" || agent.canRunRtc;
 
   return (
-    <article className="agent-profile-card">
+    <article className={active ? "agentCard active" : "agentCard"}>
+      <button
+        aria-pressed={active}
+        className="agentCardSelect"
+        type="button"
+        onClick={() => onSelect(agent.draftId)}
+      >
+        <span>{agent.publicAgentName}</span>
+        <small>{readinessLabel(agent)}</small>
+      </button>
+
       <div className="agent-header">
         <div>
           <span className={`agent-badge ${isCompiled ? "compiled" : "draft"}`}>
-            {isCompiled ? "Compilé" : "Brouillon"}
+            {isCompiled ? "Compiled" : "Draft"}
           </span>
           <h2 className="agent-title">
             {agent.publicAgentName}
           </h2>
         </div>
         {agent.active && (
-          <span className="agent-badge" style={{ background: 'var(--google-blue-light)', color: 'var(--google-blue)' }}>
-            Actif
+          <span className="agent-badge activeBadge">
+            Active
           </span>
         )}
       </div>
 
-      <p className="agentIntent" style={{ color: 'var(--slate-500)', fontSize: '13px', lineHeight: '1.5', margin: 0 }}>
+      <p className="agentIntent">
         {agent.intent}
       </p>
 
       <div className="agent-metadata-grid">
-        <span className="agent-meta-label">LLM / Modèle</span>
+        <span className="agent-meta-label">LLM / Model</span>
         <span className="agent-meta-value">{agent.kind}</span>
 
-        <span className="agent-meta-label">Connaissances RAG</span>
-        <span className="agent-meta-value" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {agent.knowledge?.strategy ? agent.knowledge.strategy : "Non planifié"}
+        <span className="agent-meta-label">RAG knowledge</span>
+        <span className="agent-meta-value truncate">
+          {agent.knowledge?.strategy ? agent.knowledge.strategy : "Unplanned"}
         </span>
 
         <span className="agent-meta-label">Documents</span>
-        <span className="agent-meta-value">{agent.knowledge?.documentCount ?? 0} fichiers</span>
+        <span className="agent-meta-value">{agent.knowledge?.documentCount ?? 0} files</span>
 
-        <span className="agent-meta-label">Prompt Système</span>
-        <span className="agent-meta-value">{agent.promptChars} caract.</span>
+        <span className="agent-meta-label">System prompt</span>
+        <span className="agent-meta-value">{agent.promptChars} chars</span>
 
-        <span className="agent-meta-label">Outils Activés</span>
-        <span className="agent-meta-value">{agent.selectedTools.length} outils</span>
+        <span className="agent-meta-label">Enabled tools</span>
+        <span className="agent-meta-value">{agent.selectedTools.length} tools</span>
 
-        <span className="agent-meta-label">Version Agent</span>
+        <span className="agent-meta-label">Agent version</span>
         <span className="agent-meta-value">v{agent.evolution?.version ?? (isCompiled ? 1 : 0)}</span>
 
-        <span className="agent-meta-label">Dernier Apprentissage</span>
+        <span className="agent-meta-label">Last learning</span>
         <span className="agent-meta-value">
           {agent.evolution?.lastLearningRun
             ? `${agent.evolution.lastLearningRun.status} · ${formatDateTime(agent.evolution.lastLearningRun.at)}`
-            : "Aucun"}
+            : "None"}
         </span>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--slate-500)' }}>
-        <span>Mis à jour le : {formatDateTime(agent.updatedAt)}</span>
+      <div className="agentUpdatedAt">
+        <span>Updated: {formatDateTime(agent.updatedAt)}</span>
       </div>
 
       <div className="agentActions">
@@ -78,26 +95,26 @@ export function AgentCard({
           <Button
             className="agentActionButton"
             onClick={() => void onLoadRtc(agent)}
-            disabled={busyDraftId === agent.draftId}
+            disabled={busy}
             variant="primary"
           >
-            {busyDraftId === agent.draftId ? "Chargement..." : "Lancer VoIP RTC"}
+            {busyDraftId === agent.draftId ? "Loading..." : "Run RTC"}
           </Button>
         )}
         <Button
           className="agentActionButton"
           onClick={() => void onResumeBuilder(agent)}
-          disabled={busyDraftId === agent.draftId}
+          disabled={busy}
         >
-          {busyDraftId === agent.draftId ? "Ouverture..." : "Ouvrir Éditeur"}
+          {busyDraftId === agent.draftId ? "Opening..." : "Resume Build"}
         </Button>
         {agent.evolution?.rollbackAvailable ? (
           <Button
             className="agentActionButton"
             onClick={() => void onRollback(agent)}
-            disabled={busyDraftId === agent.draftId}
+            disabled={busy}
           >
-            {busyDraftId === agent.draftId ? "Rollback..." : "Rollback Version"}
+            {busyDraftId === agent.draftId ? "Rolling back..." : "Rollback"}
           </Button>
         ) : null}
       </div>

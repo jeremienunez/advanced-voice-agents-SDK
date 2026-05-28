@@ -29,6 +29,7 @@ export function GuidedInfraPanel({
   target: string;
 }) {
   const devMode = driver === "dev-local" && target === "local";
+  const actionDisabled = Boolean(busy);
   const notOkCount = dependencies
     .filter((item) => requiredDependencyIds(driver).includes(item.id))
     .filter((item) => item.status !== "ok").length;
@@ -78,6 +79,7 @@ export function GuidedInfraPanel({
           detail={devMode
             ? "Generate local plan files without changing the machine."
             : "Preview the local K3s sandbox manifests before apply."}
+          disabled={actionDisabled}
           index="1"
           onClick={() => onRun("plan")}
           title="Preview what will happen"
@@ -85,7 +87,7 @@ export function GuidedInfraPanel({
         <GuideStep
           actionLabel={devMode ? "Apply dev plan" : "Create user sandbox"}
           busy={busy === "apply"}
-          disabled={!ready}
+          disabled={actionDisabled || !ready}
           detail={devMode
             ? "Record the local plan without Docker, kubectl, or K3s."
             : "Create or reuse the local Docker-backed K3s sandbox."}
@@ -100,6 +102,7 @@ export function GuidedInfraPanel({
           detail={devMode
             ? "Confirm the latest local plan without calling Kubernetes."
             : "Verify the namespace, config and network policy."}
+          disabled={actionDisabled}
           index="3"
           onClick={() => onRun("status")}
           title={devMode ? "Confirm local mode" : "Confirm sandbox"}

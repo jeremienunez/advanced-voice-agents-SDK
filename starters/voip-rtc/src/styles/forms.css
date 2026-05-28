@@ -1,24 +1,28 @@
 .controlPanel {
   display: grid;
   grid-template-columns: minmax(280px, 1.2fr) minmax(140px, 0.6fr) minmax(280px, 1fr) minmax(130px, 0.5fr);
-  gap: 12px 16px;
+  gap: 14px 18px;
   align-items: end;
-  padding: 16px 24px;
+  padding: 20px 24px;
   border-top: 0;
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  border-radius: 0 0 var(--studio-radius) var(--studio-radius);
+  background: var(--studio-surface);
+  border: 1px solid var(--studio-border-soft);
+  box-shadow: var(--studio-shadow-sm);
 }
 
 .field {
   display: grid;
-  gap: 4px;
+  gap: 6px;
   min-width: 0;
 }
 
 .field span,
 .inlineControl span {
-  color: var(--slate-500);
-  font-weight: 700;
-  letter-spacing: 0.5px;
+  color: var(--studio-muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
   text-transform: uppercase;
 }
 
@@ -29,11 +33,7 @@
 .inlineControl {
   display: grid;
   min-width: 140px;
-  gap: 4px;
-}
-
-.inlineControl span {
-  font-size: 10px;
+  gap: 6px;
 }
 
 input,
@@ -41,97 +41,140 @@ select,
 textarea {
   width: 100%;
   min-width: 0;
-  border: 1px solid var(--slate-300);
-  border-radius: var(--radius-sm);
-  background: var(--bg-card);
-  color: var(--slate-900);
+  border: 1px solid var(--studio-border);
+  border-radius: var(--studio-radius);
+  background: var(--studio-surface);
+  color: var(--studio-text-strong);
   outline: none;
-  padding: 0 12px;
-  transition: var(--transition-fast);
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.02);
 }
 
 input:focus,
 select:focus,
 textarea:focus {
-  border-color: var(--google-blue);
-  box-shadow: 0 0 0 3px var(--google-blue-light);
+  border-color: var(--studio-action);
+  box-shadow: 
+    0 0 0 3px var(--google-blue-focus),
+    inset 0 1px 2px rgba(15, 23, 42, 0.02);
+  background: var(--studio-surface);
 }
 
-input,
+input:hover:not(:disabled),
+select:hover:not(:disabled),
+textarea:hover:not(:disabled) {
+  border-color: var(--studio-subtle);
+}
+
+input {
+  height: 38px;
+}
+
 select {
-  height: 36px;
+  height: 38px;
+  cursor: pointer;
+  padding-right: 28px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
 }
 
 textarea {
   min-height: 120px;
   resize: vertical;
-  padding: 12px;
-  line-height: 1.5;
+  padding: 12px 14px;
+  line-height: 1.6;
 }
 
 input:disabled,
 select:disabled,
 textarea:disabled {
-  background: var(--slate-100);
-  color: var(--slate-400);
-  opacity: 0.7;
+  background: var(--studio-surface-muted);
+  color: var(--studio-subtle);
+  border-color: var(--studio-border-soft);
+  opacity: 0.75;
   cursor: not-allowed;
 }
 
 .actions {
   grid-column: 1 / -1;
   display: flex;
-  gap: 10px;
+  gap: 12px;
   justify-content: flex-end;
-  align-items: end;
-  margin-top: 4px;
+  align-items: center;
+  margin-top: 8px;
 }
 
 button {
-  height: 36px;
-  border: 1px solid var(--slate-300);
-  border-radius: var(--radius-sm);
-  background: #ffffff;
-  color: var(--slate-700);
-  padding: 0 16px;
-  font-size: 11px;
-  font-weight: 700;
+  height: 38px;
+  border: 1px solid var(--studio-border);
+  border-radius: var(--studio-radius);
+  background: var(--studio-surface);
+  color: var(--studio-text);
+  padding: 0 18px;
+  font-size: 12px;
+  font-weight: 750;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   cursor: pointer;
-  box-shadow: var(--shadow-sm);
-  transition: var(--transition-fast);
+  box-shadow: var(--studio-shadow-sm);
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 button:hover:not(:disabled) {
-  background: var(--slate-100);
-  border-color: var(--slate-400);
-  color: var(--slate-900);
+  background: var(--studio-surface-muted);
+  border-color: var(--studio-subtle);
+  color: var(--studio-text-strong);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0.5px);
+  box-shadow: var(--studio-shadow-sm);
 }
 
 button.primary {
-  background: var(--google-blue);
-  border-color: var(--google-blue);
+  background: var(--studio-action);
+  border-color: var(--studio-action);
   color: #ffffff;
-  font-weight: 700;
 }
 
 button.primary:hover:not(:disabled) {
-  background: var(--google-blue-hover);
-  border-color: var(--google-blue-hover);
+  background: var(--studio-action-hover);
+  border-color: var(--studio-action-hover);
   color: #ffffff;
-  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.25);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
 }
 
 button.ghost {
   background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--studio-muted);
+}
+
+button.ghost:hover:not(:disabled) {
+  background: var(--studio-surface-muted);
+  border-color: transparent;
+  color: var(--studio-text-strong);
   box-shadow: none;
 }
 
 button:disabled {
   cursor: not-allowed;
-  background: var(--slate-100);
-  border-color: var(--slate-200);
-  color: var(--slate-400);
+  background: var(--studio-surface-muted);
+  border-color: var(--studio-border-soft);
+  color: var(--studio-subtle);
   box-shadow: none;
+  transform: none !important;
 }

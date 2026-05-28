@@ -19,13 +19,19 @@ export function StepRail({
   unlocked: number;
   onStepClick?: (step: number) => void;
 }) {
-  const progressPercent = (unlocked / (BUILDER_STEPS.length - 1)) * 100;
+  const clampedUnlocked = Math.min(
+    Math.max(unlocked, 0),
+    BUILDER_STEPS.length - 1,
+  );
+  const progressHeight = `calc((100% - 44px) * ${clampedUnlocked} / ${
+    BUILDER_STEPS.length - 1
+  })`;
 
   return (
     <div className="wizard-rail" aria-label="Builder progress">
       <div
         className="wizard-rail-progress"
-        style={{ width: `${progressPercent}%` }}
+        style={{ height: progressHeight }}
       />
       {BUILDER_STEPS.map((step, index) => (
         <StepRailStep

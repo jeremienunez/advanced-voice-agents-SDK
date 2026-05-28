@@ -1,237 +1,119 @@
 /* ==========================================
-   RIGHT PANE: Editorial Form Pane (58vw)
+   BUILDER STUDIO: Guided Precision Layout
    ========================================== */
-.immersive-right-pane {
-  height: 100vh;
-  overflow-y: auto;
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  padding: 64px 80px 140px 80px; /* high bottom padding for fixed action bar */
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  scroll-behavior: smooth;
-}
-
-/* Layout modifications inside panel forms for extra-airy editorial space */
-.immersive-right-pane .panel {
-  border: none;
-  background: transparent;
-  box-shadow: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-}
-
-.immersive-right-pane .panel h2 {
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  color: var(--slate-900);
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border: none;
-}
-
-/* Transition between steps */
-.immersive-right-pane .fade-in {
-  animation: slideFadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  position: relative;
-  z-index: 1;
-}
-
-@keyframes slideFadeIn {
-  0% {
-    opacity: 0;
-    transform: translateX(18px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-/* Tactile inputs and halos */
-.immersive-right-pane input,
-.immersive-right-pane textarea,
-.immersive-right-pane select {
-  border: 1px solid var(--slate-200);
-  border-radius: var(--radius-md);
-  padding: 12px 16px;
-  background: #ffffff;
-  color: var(--slate-800);
-  transition: var(--transition-fast);
-}
-
-.immersive-right-pane input:focus,
-.immersive-right-pane textarea:focus,
-.immersive-right-pane select:focus {
-  border-color: var(--google-blue);
-  outline: none;
-  background: #ffffff;
-  box-shadow: 
-    0 0 0 4px rgba(26, 115, 232, 0.08), 
-    0 4px 12px rgba(26, 115, 232, 0.03);
-  transform: translateY(-1px);
-}
-
-.immersive-right-pane button.primary {
-  background: var(--google-blue);
-  color: #ffffff;
-  border-radius: var(--radius-md);
-  padding: 12px 24px;
-  font-weight: 600;
-  border: none;
-  box-shadow: var(--shadow-sm);
-  cursor: pointer;
-  transition: var(--transition-fast);
-}
-
-.immersive-right-pane button.primary:hover:not(:disabled) {
-  background: var(--google-blue-hover);
-  box-shadow: var(--shadow-md);
-}
-
-.immersive-right-pane button:active {
-  transform: scale(0.98);
-}
-
-/* Editorial margins for sub-components in RAG base */
-.immersive-right-pane .knowledge-intro {
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--slate-500);
-  margin-bottom: 24px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--slate-100);
-}
-
-.immersive-right-pane .knowledge-intro + * {
-  animation: slideFadeIn 0.5s ease-out forwards;
-}
-
-/* ==========================================
-   FIXED CONTROL BASE: Bottom Symmetrical Bar
-   ========================================== */
-.fixed-control-base {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 90px;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(226, 232, 240, 0.8);
+.builderStudio {
   display: grid;
-  grid-template-columns: 160px 1fr 160px;
-  align-items: center;
-  padding: 0 48px;
-  z-index: 1010;
-  box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.02);
+  grid-template-columns: 260px minmax(0, 1fr) 300px;
+  gap: 18px;
+  align-items: start;
 }
 
-/* Button overrides in base bar */
-.fixed-control-base button {
-  height: 44px;
-  border-radius: var(--radius-md);
-  font-weight: 600;
-  font-size: 13px;
-  cursor: pointer;
-  transition: var(--transition-fast);
+.builderPath,
+.builderStepPanel,
+.builderInspectorPanel {
+  border: 1px solid var(--studio-border);
+  border-radius: var(--studio-radius);
+  background: var(--studio-surface);
+  box-shadow: var(--studio-shadow-sm);
+}
+
+.builderPath,
+.builderInspector {
+  position: sticky;
+  top: 96px;
+}
+
+.builderPath {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+}
+
+.builderPath h2,
+.builderInspectorPanel h2 {
+  margin: 0;
+  color: var(--studio-text-strong);
+  font-size: 14px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.builderStepPanel {
+  min-width: 0;
+  padding: 18px;
+}
+
+.builderStepHeader {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
 }
 
-.fixed-control-base button:disabled {
-  opacity: 0.3;
+.builderStepHeader h1 {
+  margin: 0 0 8px;
+}
+
+.builderStepHeader p {
+  color: var(--studio-muted);
+}
+
+.builderStepActions {
+  display: flex;
+  gap: 10px;
+  align-items: start;
+}
+
+.builderStepContent {
+  display: grid;
+  gap: 16px;
+}
+
+.builderInspector {
+  display: grid;
+  gap: 14px;
+}
+
+.builderInspectorPanel {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+}
+
+.builderInspectorPanel button {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--studio-border);
+  background: var(--studio-surface);
+  text-align: left;
+}
+
+.builderInspectorPanel button:disabled {
   cursor: not-allowed;
-  pointer-events: none;
+  opacity: 0.5;
 }
 
-.fixed-control-base .back-btn {
-  background: #ffffff;
-  color: var(--slate-600);
-  border: 1px solid var(--slate-200);
+.builderPreviewList {
+  display: grid;
+  gap: 8px;
+  margin: 0;
 }
 
-.fixed-control-base .back-btn:hover {
-  background: var(--slate-50);
-  color: var(--slate-800);
-  border-color: var(--slate-300);
+.builderPreviewList div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px;
+  border-radius: var(--studio-radius);
+  background: var(--studio-surface-muted);
 }
 
-.fixed-control-base .next-btn {
-  background: var(--google-blue);
-  color: #ffffff;
-  border: none;
-  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.15);
+.builderPreviewList dt {
+  color: var(--studio-muted);
 }
 
-.fixed-control-base .next-btn:hover {
-  background: var(--google-blue-hover);
-  box-shadow: 0 6px 16px rgba(26, 115, 232, 0.25);
-}
-
-/* Symmetrical StepRail placement in base bar */
-.fixed-control-base .wizard-rail {
-  margin-bottom: 0;
-  border: none;
-  box-shadow: none;
-  background: transparent;
-  padding: 0 32px;
-}
-
-.fixed-control-base .wizard-rail::before,
-.fixed-control-base .wizard-rail-progress {
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-/* ==========================================
-   RESPONSIVE DESIGN (Screens < 1024px)
-   ========================================== */
-@media (max-width: 1024px) {
-  .immersive-wizard-container {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
-    height: auto;
-    overflow-y: auto;
-    position: relative;
-  }
-
-  .immersive-left-pane {
-    height: auto;
-    border-right: none;
-    border-bottom: 1px solid var(--slate-200);
-    padding: 32px 24px;
-  }
-
-  .dev-console-wrapper {
-    height: 320px;
-  }
-
-  .immersive-right-pane {
-    height: auto;
-    padding: 32px 24px 140px 24px;
-    overflow-y: visible;
-  }
-
-  .fixed-control-base {
-    grid-template-columns: 100px 1fr 100px;
-    padding: 0 20px;
-    height: 80px;
-  }
-
-  .fixed-control-base button {
-    height: 38px;
-    padding: 0 12px;
-  }
+.builderPreviewList dd {
+  margin: 0;
+  color: var(--studio-text-strong);
+  font-weight: 700;
 }

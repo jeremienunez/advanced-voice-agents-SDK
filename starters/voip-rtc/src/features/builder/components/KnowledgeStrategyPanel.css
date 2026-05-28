@@ -2,9 +2,9 @@
 
 .knowledge-intro {
   margin-bottom: 20px;
-  color: var(--slate-500);
+  color: var(--studio-muted);
   font-size: 13px;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .uploadRow {
@@ -21,18 +21,16 @@
   align-items: center;
   justify-content: center;
   min-height: 42px;
-  border: 1px solid var(--slate-300);
-  border-radius: var(--radius-sm);
-  background: #ffffff;
-  color: var(--slate-700);
+  border: 1px solid var(--studio-border);
+  border-radius: 12px;
+  background: var(--studio-surface);
+  color: var(--studio-text);
   padding: 0 20px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
-  box-shadow: var(--shadow-sm);
-  transition: var(--transition-fast);
+  box-shadow: var(--studio-shadow-sm);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .filePicker input {
@@ -43,20 +41,22 @@
 }
 
 .filePicker:hover {
-  background: var(--slate-100);
-  border-color: var(--slate-400);
+  background: var(--studio-surface-muted);
+  border-color: var(--studio-action-border);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
 }
 
 .filePickerPrimary {
-  background: var(--google-blue);
-  border-color: var(--google-blue);
+  background: var(--studio-action);
+  border-color: var(--studio-action);
   color: #ffffff;
-  font-weight: 700;
 }
 
 .filePickerPrimary:hover {
-  background: var(--google-blue-hover);
-  border-color: var(--google-blue-hover);
+  background: var(--studio-action-hover);
+  border-color: var(--studio-action-hover);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
 }
 
 .documentList {
@@ -71,57 +71,65 @@
 }
 
 .documentRow {
-  background: var(--slate-800);
-  border: 1px solid var(--slate-600);
-  padding: 12px 16px;
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(248, 250, 252, 0.8) 100%);
+  border: 1px solid var(--studio-border-soft);
+  padding: 14px 20px;
+  border-radius: 12px;
+  box-shadow: var(--studio-shadow-sm);
   display: grid;
   grid-template-columns: 1fr auto auto;
   gap: 16px;
   align-items: center;
-  transition: var(--transition-normal);
+  backdrop-filter: blur(10px);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .documentRow:hover {
-  border-color: var(--google-blue);
-  box-shadow: var(--shadow-md);
+  border-color: var(--studio-action-border);
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 0 0 1px var(--studio-action-soft);
+  transform: translateY(-2px);
 }
 
 .documentName {
   display: block;
-  color: #ffffff;
+  color: var(--studio-text-strong);
+  font-weight: 600;
   font-size: 13px;
 }
 
 .documentKind {
   display: inline-block;
-  margin-top: 2px;
-  color: var(--slate-400);
+  margin-top: 4px;
+  color: var(--studio-muted);
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .documentStatus {
   font-size: 10px;
+  font-weight: 700;
   padding: 4px 10px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .documentMeta {
-  color: var(--slate-400);
+  color: var(--studio-muted);
   font-size: 11px;
-  font-style: normal;
 }
 
 .knowledge-empty-state {
-  padding: 24px;
+  padding: 32px 24px;
   text-align: center;
-  background: rgba(0, 0, 0, 0.04);
-  border: 1px dashed var(--slate-600);
-  border-radius: var(--radius-md);
-  color: var(--slate-400);
+  background: rgba(248, 250, 252, 0.6);
+  border: 2px dashed var(--studio-border-soft);
+  border-radius: 12px;
+  color: var(--studio-muted);
   font-size: 13px;
+  backdrop-filter: blur(10px);
 }
 
 .knowledge-section {
@@ -130,30 +138,31 @@
 
 .knowledge-section-title {
   margin-bottom: 14px;
-  color: var(--slate-700);
-  font-size: 13px;
-  letter-spacing: 0.5px;
+  color: var(--studio-text-strong);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .budgetGrid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 20px;
+  gap: 16px;
   margin-bottom: 24px;
 }
 
 .researchProviderGrid {
   display: grid;
   grid-template-columns: repeat(5, minmax(140px, 1fr));
-  gap: 20px;
+  gap: 16px;
   margin-bottom: 24px;
 }
 
 .strategySummary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
+  gap: 16px;
   margin-top: 20px;
 }
 
@@ -161,16 +170,18 @@
 .rag-flow-container {
   margin-top: 24px;
   padding: 24px;
-  background: var(--bg-secondary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--slate-200);
+  background: linear-gradient(135deg, rgba(241, 245, 249, 0.4) 0%, rgba(248, 250, 252, 0.4) 100%);
+  border-radius: 16px;
+  border: 1px solid var(--studio-border-soft);
+  backdrop-filter: blur(10px);
 }
 
 .rag-flow-title {
   margin: 0;
-  color: var(--slate-500);
+  color: var(--studio-muted);
   font-size: 11px;
-  letter-spacing: 0.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -184,44 +195,47 @@
 }
 
 .rag-flow-node {
-  background: #ffffff;
-  border: 1px solid var(--slate-200);
-  border-radius: var(--radius-md);
+  background: var(--studio-surface);
+  border: 1px solid var(--studio-border-soft);
+  border-radius: 12px;
   padding: 14px 18px;
   flex: 1;
   min-width: 140px;
   text-align: center;
-  box-shadow: var(--shadow-sm);
-  transition: var(--transition-normal);
+  box-shadow: var(--studio-shadow-sm);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .rag-flow-node.highlight {
-  border-color: var(--google-blue);
-  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.1);
+  border-color: var(--studio-action);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.08), 0 0 0 1px var(--studio-action-soft);
 }
 
 .rag-flow-node:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
+  border-color: var(--studio-action-border);
+  box-shadow: 0 12px 24px -6px rgba(15, 23, 42, 0.06);
 }
 
 .rag-flow-node span {
-  color: var(--google-blue);
+  color: var(--studio-action);
   display: block;
   font-size: 9px;
   font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .rag-flow-node strong {
   display: block;
-  margin-top: 4px;
-  color: var(--slate-900);
+  margin-top: 6px;
+  color: var(--studio-text-strong);
   font-size: 12px;
+  font-weight: 600;
 }
 
 .rag-flow-arrow {
-  color: var(--slate-400);
+  color: var(--studio-subtle);
   font-weight: 700;
   font-size: 16px;
 }
@@ -229,21 +243,22 @@
 .warning {
   margin-bottom: 16px;
   padding: 12px 18px;
-  border-radius: var(--radius-sm);
+  border-radius: 12px;
   font-size: 12px;
   line-height: 1.5;
+  border: 1px solid transparent;
 }
 
 .warning-error {
-  background: var(--google-red-light);
-  border-left: 3px solid var(--google-red);
-  color: var(--google-red);
+  background: var(--studio-danger-soft);
+  border: 1px solid var(--studio-danger-border);
+  color: var(--studio-danger);
 }
 
 .warning-note {
-  background: var(--google-yellow-light);
-  border-left: 3px solid var(--google-yellow);
-  color: var(--google-yellow);
+  background: var(--studio-warning-soft);
+  border: 1px solid var(--studio-warning-border);
+  color: var(--studio-warning);
 }
 
 .knowledge-reasons {
@@ -251,15 +266,16 @@
 }
 
 .knowledge-reasons h3 {
-  color: var(--slate-500);
+  color: var(--studio-text-strong);
   font-size: 11px;
-  letter-spacing: 0.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .knowledge-reasons p {
   margin: 4px 0;
-  color: var(--slate-500);
+  color: var(--studio-muted);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -271,21 +287,28 @@
 }
 
 .research-checkpoints article {
-  border: 1px solid var(--slate-200);
-  border-radius: var(--radius-sm);
-  padding: 12px;
-  background: #ffffff;
+  border: 1px solid var(--studio-border-soft);
+  border-radius: 12px;
+  padding: 14px;
+  background: var(--studio-surface);
+  box-shadow: var(--studio-shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.research-checkpoints article:hover {
+  border-color: var(--studio-action-border);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
 }
 
 .research-checkpoints strong,
 .research-checkpoints span {
   display: block;
-  color: var(--slate-700);
+  color: var(--studio-text-strong);
   font-size: 12px;
   line-height: 1.4;
 }
 
 .research-checkpoints span {
   margin-top: 5px;
-  color: var(--slate-500);
+  color: var(--studio-muted);
 }

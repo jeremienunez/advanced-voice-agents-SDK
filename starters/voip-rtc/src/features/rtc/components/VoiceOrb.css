@@ -9,6 +9,10 @@
   position: relative;
   width: min(100%, 540px);
   z-index: 10;
+  box-shadow:
+    0 0 0 24px rgba(37, 99, 235, 0.08),
+    0 0 0 58px rgba(37, 99, 235, 0.04),
+    0 30px 80px rgba(37, 99, 235, 0.24);
 }
 
 .voice-orb-stage {

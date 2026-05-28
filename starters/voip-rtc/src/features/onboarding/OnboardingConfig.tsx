@@ -1,38 +1,36 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   fetchOnboardingState,
   runInfraAction,
   saveOnboardingEnv,
 } from "../../api/onboardingApi.js";
-import { Button } from "../../components/ui/Button.js";
-import { EnvDrawer } from "./EnvDrawer.js";
-import { GuidedInfraPanel } from "./GuidedInfraPanel.js";
 import type {
   InfraAction,
   InfraActionResult,
   OnboardingDependency,
-  OnboardingEnvGroup,
-  OnboardingRequirement,
   OnboardingState,
 } from "../../domain/onboarding.js";
-
-const groupOrder: OnboardingEnvGroup[] = [
-  "voice",
-  "builder",
-  "knowledge",
-  "infra",
-  "auth",
-];
+import { EnvironmentSlider } from "./EnvironmentSlider.js";
+import {
+  configuredEnvCount,
+  environmentSteps,
+  groupEnvFields,
+  requiredDependenciesReady,
+  requiredEnvReady,
+  type EnvironmentStepId,
+} from "./environment-view-model.js";
 
 type InfraProfile = "dev" | "user" | "custom";
 
 export function OnboardingConfig({ apiBase }: { apiBase: string }) {
   const [state, setState] = useState<OnboardingState | null>(null);
+  const [activeStep, setActiveStep] = useState<EnvironmentStepId>("requirements");
   const [values, setValues] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [infraResult, setInfraResult] = useState<InfraActionResult | null>(null);
+  const runInFlightRef = useRef(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -40,22 +38,11 @@ export function OnboardingConfig({ apiBase }: { apiBase: string }) {
     return () => controller.abort();
   }, [apiBase]);
 
-  const grouped = useMemo(() => {
-    const groups = new Map<OnboardingEnvGroup, OnboardingState["env"]["fields"]>();
-    for (const field of state?.env.fields ?? []) {
-      groups.set(field.group, [...(groups.get(field.group) ?? []), field]);
-    }
-    return groups;
-  }, [state]);
-
-  const requiredReady = Boolean(state?.dependencies
-    .filter((item) => item.required)
-    .every((item) => item.status === "ok"));
-  const envReady = Boolean(state?.env.requirements
-    .filter((item) => item.severity === "required")
-    .every((item) => item.satisfied));
+  const grouped = useMemo(() => groupEnvFields(state), [state]);
+  const requiredReady = requiredDependenciesReady(state?.dependencies ?? []);
+  const envReady = requiredEnvReady(state);
   const setupReady = requiredReady && envReady;
-  const configuredCount = state?.env.fields.filter((field) => field.configured).length ?? 0;
+  const configuredCount = configuredEnvCount(state);
   const infraProfile = profileFor(values);
   const infraReady = isInfraReady(values, state?.dependencies ?? []);
 
@@ -96,6 +83,8 @@ export function OnboardingConfig({ apiBase }: { apiBase: string }) {
   }
 
   async function run(action: InfraAction) {
+    if (runInFlightRef.current || busy) return;
+    runInFlightRef.current = true;
     setBusy(action);
     setError(null);
     setNotice(null);
@@ -111,6 +100,7 @@ export function OnboardingConfig({ apiBase }: { apiBase: string }) {
     } catch (err) {
       setError(messageFrom(err));
     } finally {
+      runInFlightRef.current = false;
       setBusy(null);
     }
   }
@@ -127,102 +117,72 @@ export function OnboardingConfig({ apiBase }: { apiBase: string }) {
   }
 
   return (
-    <div className="onboardingPage fade-in">
-      <header className="onboardingHero">
+    <div className="environmentPage fade-in">
+      <header className="environmentHero">
         <div>
-          <p className="eyebrow">Onboarding config</p>
-          <h1>Start safely</h1>
+          <p className="studioEyebrow">Environment</p>
+          <h1>Setup and runtime health</h1>
           <p>
-            This is the first stop before Builder or RTC. The starter checks
-            your machine, explains what is missing, and stores only approved
-            settings in the ignored `.env.local` file.
+            Follow the guided setup to verify local requirements, save approved
+            environment values, and preview infrastructure changes before
+            applying them.
           </p>
         </div>
-        <div className="onboardingStatus">
-          <span className={setupReady ? "ready" : "blocked"} />
+        <div className={setupReady ? "environmentStatus ready" : "environmentStatus blocked"}>
           {setupReady ? "Ready to build" : "Setup needed"}
         </div>
       </header>
 
-      <section className="onboardingSummary" aria-label="Onboarding summary">
+      <section className="environmentSummary" aria-label="Environment summary">
         <Metric title="Env store" value={state?.env.store.path ?? ".env.local"} />
         <Metric title="Configured keys" value={`${configuredCount}`} />
         <Metric title="Required setup" value={setupReady ? "OK" : "Needs attention"} />
         <Metric title="Infra driver" value={values.BUILDER_INFRA_APPLY_DRIVER || "dev-local"} />
       </section>
 
-      <RequirementWarnings requirements={state?.env.requirements ?? []} />
-
       {error && <p className="onboardingMessage error">{error}</p>}
       {notice && <p className="onboardingMessage">{notice}</p>}
 
-      <div className="onboardingGrid">
-        <GuidedInfraPanel
+      <div className="environmentGrid">
+        <EnvironmentSlider
+          activeStep={activeStep}
           busy={busy}
           dependencies={state?.dependencies ?? []}
+          groupedFields={grouped}
+          infraReady={infraReady}
           infraResult={infraResult}
-          driver={values.BUILDER_INFRA_APPLY_DRIVER || "dev-local"}
-          onRefresh={() => void refresh()}
-          onProfileChange={selectInfraProfile}
-          onRun={run}
           profile={infraProfile}
-          ready={infraReady}
-          target={values.BUILDER_INFRA_COMPUTE_TARGET || "local"}
+          requirements={state?.env.requirements ?? []}
+          state={state}
+          values={values}
+          onChangeField={(name, value) => setValues((current) => ({
+            ...current,
+            [name]: value,
+          }))}
+          onRefresh={() => void refresh()}
+          onRun={run}
+          onSaveEnv={saveEnv}
+          onSelectInfraProfile={selectInfraProfile}
+          onStepChange={setActiveStep}
         />
 
-        <section className="onboardingPanel envPanel">
-          <PanelHeader title="Environment store" detail={state?.env.store.format ?? "dotenv"} />
-          {state && groupOrder.map((group) => {
-            const fields = grouped.get(group) ?? [];
-            return (
-              <EnvDrawer
-                fields={fields}
-                group={group}
-                key={group}
-                requirements={state.env.requirements}
-                values={values}
-                onChange={(name, value) => setValues((current) => ({
-                  ...current,
-                  [name]: value,
-                }))}
-              />
-            );
-          })}
-          <div className="envActions">
-            <Button disabled={Boolean(busy)} onClick={saveEnv} variant="primary">
-              {busy === "save" ? "Saving" : "Save .env.local"}
-            </Button>
-          </div>
-        </section>
+        <aside className="environmentChecks" aria-label="Environment setup checklist">
+          {environmentSteps.map((step, index) => (
+            <button
+              aria-current={activeStep === step.id ? "step" : undefined}
+              className={activeStep === step.id ? "active" : ""}
+              key={step.id}
+              onClick={() => setActiveStep(step.id)}
+              type="button"
+            >
+              <span>{index + 1}</span>
+              <strong>{step.label}</strong>
+              <small>{step.detail}</small>
+            </button>
+          ))}
+        </aside>
       </div>
     </div>
-  );
-}
-
-function RequirementWarnings({
-  requirements,
-}: {
-  requirements: OnboardingRequirement[];
-}) {
-  if (requirements.length === 0) return null;
-  return (
-    <section className="requirementWarnings" aria-label="Required configuration">
-      {requirements.map((item) => (
-        <article
-          className={item.satisfied ? "requirementCard ok" : "requirementCard warning"}
-          key={item.id}
-        >
-          <div>
-            <strong>{item.label}</strong>
-            <p>{item.message}</p>
-            <span>{item.candidateKeys.join(item.mode === "all" ? " + " : " or ")}</span>
-          </div>
-          <a href={`#env-${item.candidateKeys[0]}`}>
-            {item.satisfied ? "Configured" : "Add key"}
-          </a>
-        </article>
-      ))}
-    </section>
   );
 }
 
@@ -231,15 +191,6 @@ function Metric({ title, value }: { title: string; value: string }) {
     <div className="onboardingMetric">
       <span>{title}</span>
       <strong>{value}</strong>
-    </div>
-  );
-}
-
-function PanelHeader({ title, detail }: { title: string; detail?: string }) {
-  return (
-    <div className="panelHeader">
-      <h2>{title}</h2>
-      {detail && <span>{detail}</span>}
     </div>
   );
 }

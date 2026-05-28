@@ -144,7 +144,7 @@ export function SelectSpace({
             <div className="spaces-grid">
               <div
                 className="space-card onboarding"
-                onClick={() => onEnterMode("onboarding")}
+                onClick={() => onEnterMode("environment")}
               >
                 <div className="space-icon-wrapper">00</div>
                 <div className="space-content">

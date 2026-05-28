@@ -1,62 +1,86 @@
-/* 💎 Luminous Cloud Global Design Tokens & Variables 💎 */
-
 :root {
-  /* Police de caractères principale */
-  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  
-  /* Palette de Couleurs "Luminous Cloud" */
-  --bg-primary: #f8fafc;          /* Fond de page frais et clair */
-  --bg-secondary: #f1f5f9;        /* Fond de carte inactif ou secondaire */
-  --bg-card: #ffffff;             /* Surface des cartes principale */
-  
-  /* Palette de Gris épurés */
-  --slate-900: #0f172a;           /* Titres principaux et textes foncés */
-  --slate-800: #1e293b;           /* Corps de texte par défaut */
+  --font-sans: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  --studio-bg: #f8fafc;
+  --studio-surface: #ffffff;
+  --studio-surface-muted: #f1f5f9;
+  --studio-surface-raised: #ffffff;
+  --studio-border: #d8dee6;
+  --studio-border-soft: #e5eaf0;
+
+  --studio-text-strong: #0f172a;
+  --studio-text: #1e293b;
+  --studio-muted: #64748b;
+  --studio-subtle: #94a3b8;
+
+  --studio-action: #2563eb;
+  --studio-action-hover: #1d4ed8;
+  --studio-action-soft: #eff6ff;
+  --studio-action-border: #bfdbfe;
+
+  --studio-success: #0f9f6e;
+  --studio-success-soft: #ecfdf5;
+  --studio-success-border: #a7f3d0;
+
+  --studio-warning: #b45309;
+  --studio-warning-soft: #fffbeb;
+  --studio-warning-border: #fde68a;
+
+  --studio-danger: #dc2626;
+  --studio-danger-soft: #fef2f2;
+  --studio-danger-border: #fecaca;
+
+  --studio-radius: 8px;
+  --studio-radius-sm: 6px;
+  --studio-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --studio-shadow-md: 0 12px 28px rgba(15, 23, 42, 0.08);
+
+  /* Backward-compatible aliases used by existing components during migration. */
+  --bg-primary: var(--studio-bg);
+  --bg-secondary: var(--studio-surface-muted);
+  --bg-card: var(--studio-surface);
+  --slate-900: var(--studio-text-strong);
+  --slate-800: var(--studio-text);
   --slate-700: #334155;
   --slate-600: #475569;
-  --slate-500: #64748b;           /* Légendes, icônes secondaires */
-  --slate-400: #94a3b8;           /* Placeholders, états inactifs */
-  --slate-300: #cbd5e1;           /* Séparateurs, bordures inactives */
-  --slate-200: #e2e8f0;           /* Bordures secondaires très légères */
-  --slate-100: #f1f5f9;
-
-  /* Couleurs de Marque Google */
-  --google-blue: #1a73e8;
-  --google-blue-hover: #1557b0;
-  --google-blue-light: rgba(26, 115, 232, 0.08);
-  --google-blue-focus: rgba(26, 115, 232, 0.16);
-  
-  --google-green: #0f9d58;
-  --google-green-light: rgba(15, 157, 88, 0.08);
-  
-  --google-yellow: #f4b400;
-  --google-yellow-light: rgba(244, 180, 0, 0.08);
-  
-  --google-red: #db4437;
-  --google-red-light: rgba(219, 68, 55, 0.08);
-
-  /* Ombres portées diffuses Stripe/Vercel style */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 10px 30px rgba(18, 38, 63, 0.03), 0 1px 3px rgba(18, 38, 63, 0.01);
-  --shadow-lg: 0 20px 40px rgba(18, 38, 63, 0.06), 0 1px 3px rgba(18, 38, 63, 0.02);
-  
-  /* Arrondis modernisés */
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
+  --slate-500: var(--studio-muted);
+  --slate-400: var(--studio-subtle);
+  --slate-300: #cbd5e1;
+  --slate-200: var(--studio-border-soft);
+  --slate-100: var(--studio-surface-muted);
+  --slate-50: var(--studio-bg);
+  --google-blue: var(--studio-action);
+  --google-blue-hover: var(--studio-action-hover);
+  --google-blue-light: var(--studio-action-soft);
+  --google-blue-focus: rgba(37, 99, 235, 0.16);
+  --google-green: var(--studio-success);
+  --google-green-light: var(--studio-success-soft);
+  --google-yellow: #f59e0b;
+  --google-yellow-light: var(--studio-warning-soft);
+  --google-red: var(--studio-danger);
+  --google-red-light: var(--studio-danger-soft);
+  --shadow-sm: var(--studio-shadow-sm);
+  --shadow-md: var(--studio-shadow-md);
+  --shadow-lg: var(--studio-shadow-md);
+  --radius-sm: var(--studio-radius-sm);
+  --radius-md: var(--studio-radius);
+  --radius-lg: var(--studio-radius);
   --radius-full: 9999px;
-
-  /* Transitions ultra-fluides */
-  --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-normal: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 150ms ease;
+  --transition-normal: 220ms ease;
 }
 
-/* Animations de transition globale */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .fade-in {
-  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: fadeIn 180ms ease forwards;
 }
