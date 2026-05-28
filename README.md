@@ -422,6 +422,7 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `pnpm harness:route-wines` | Run the route-wines builder harness. |
 | `pnpm test:knowledge-tool` | Check runtime knowledge tool wiring. |
 | `pnpm test:llm-harness` | Check provider-agnostic builder LLM planner, research, verifier, and resolver behavior. |
+| `pnpm test:prompt-policy:bdd` | Check compiled prompts end with immutable server-owned safety and tool policy. |
 | `pnpm test:builder-draft-ownership:bdd` | Check privileged builder workflows reload server-owned drafts by authenticated owner. |
 | `pnpm test:document-ingestion:bdd` | Check document upload bounds, type guards, xlsx caps, parser timeouts, and IP quotas. |
 | `pnpm test:database-provisioning` | Run the real starter database provisioner validation against the pgvector template and hostile SQL cases. |

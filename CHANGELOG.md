@@ -1,5 +1,39 @@
 # Changelog
 
+## test: enforce server-owned prompt policy
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Garantir que le prompt final compile ne puisse pas affaiblir les politiques
+serveur meme si le modele builder genere des instructions hostiles.
+
+### Journal
+
+- Ajout de `pnpm test:prompt-policy:bdd`.
+- Le BDD compile un agent avec un prompt final hostile qui tente d'autoriser un
+  outil non selectionne.
+- `compileAgent` append maintenant une section
+  `SERVER-OWNED SAFETY AND TOOL POLICY` en suffixe final du prompt compile.
+- La policy serveur declare que le suffixe override les conflits generes,
+  limite les appels aux outils selectionnes et traite inputs/documents/tool
+  output comme donnees.
+- Le lint compile-time refuse un prompt dont la policy serveur manque ou n'est
+  pas le suffixe final.
+- Le workflow `compileAgent` est extrait dans `workflow-agent-compile.ts` pour
+  garder `workflows.ts` sous la limite LOC.
+- `pnpm audit:solid` execute maintenant le BDD prompt-policy.
+
+### Validation
+
+- `pnpm test:prompt-policy:bdd` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:loc` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: add document ingestion quota seam
 
 Status: implemented locally

@@ -290,6 +290,7 @@ pnpm --filter @voiceagentsdk/starter-voip-rtc typecheck
 pnpm --filter @voiceagentsdk/starter-voip-rtc harness:route-wines
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:knowledge-tool
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-plan
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:prompt-policy:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:builder-draft-ownership:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:document-ingestion:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:database-provisioning
@@ -300,6 +301,9 @@ pnpm --filter @voiceagentsdk/starter-voip-rtc test:rtc-e2e
 
 `test:document-ingestion:bdd` covers upload bounds, type allowlists, xlsx caps,
 parser timeouts, and IP quotas before parsed content can feed knowledge.
+
+`test:prompt-policy:bdd` covers the immutable server-owned policy suffix added
+after generated final prompts, including tool authorization boundaries.
 
 ## Production Notes
 

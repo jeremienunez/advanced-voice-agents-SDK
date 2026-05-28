@@ -1,14 +1,10 @@
 import { createAgentBuildDraftBuilder, type DatabaseBuildPlan, type EmbeddingInput } from "@voiceagentsdk/core/sdk";
 import { chunkDocuments } from "./domain/knowledge.js";
-import { compileArtifact, promptPlanWithClarifications } from "./domain/prompt.js";
-import { toolInstructionsFromPlan } from "./domain/tooling/compile.js";
-import { createToolBuildPlan } from "./domain/tooling/contracts.js";
-import { validatedToolPlan, validateToolBuildPlan } from "./domain/tooling/validation.js";
+import { promptPlanWithClarifications } from "./domain/prompt.js";
 import { mutateDraft } from "./domain/drafts.js";
 import { normalizeIdentity } from "./request/identity.js";
 import { normalizeKnowledgeDocuments } from "./request/knowledge-documents.js";
 import { normalizeResearchSettings } from "./request/research-settings.js";
-import { normalizeSelectedTools } from "./request/selected-tools.js";
 import { normalizeResearchBudget } from "./domain/research.js";
 import { requireDraft, resolveDraft, saveDraft } from "./state/draft-store.js";
 import { ownerMetadata, resolveOwnedDraft } from "./state/draft-ownership.js";
@@ -16,6 +12,7 @@ import { setActiveDraft } from "./state/session-store.js";
 import type { BuilderRequestContext, BuilderWorkflowDependencies } from "./types.js";
 import { asRecord, readString } from "./utils/record-readers.js";
 import { buildEagerKnowledge } from "./eager-knowledge.js";
+import { compileAgentWithServerPolicy } from "./workflow-agent-compile.js";
 import { ingestDocumentWithGuards } from "./workflow-document-ingestion.js";
 import { createValidatedInfraPlan } from "./workflow-infra.js";
 
@@ -234,43 +231,7 @@ export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
     },
 
     async compileAgent(body: unknown) {
-      const draft = resolveDraft(body);
-      const selectedTools = normalizeSelectedTools(body, draft);
-      const plannedTools = createToolBuildPlan(draft, selectedTools);
-      const validation = validateToolBuildPlan(
-        draft,
-        plannedTools,
-        new Set(deps.availableSecretNames),
-      );
-      const toolPlan = validatedToolPlan(plannedTools, validation);
-      const toolPrompt = toolInstructionsFromPlan(toolPlan);
-      const draftWithTools = mutateDraft(draft)
-        .selectTools(selectedTools)
-        .toolBuildPlan(toolPlan)
-        .toolValidation(validation)
-        .toolPrompt(toolPrompt)
-        .build();
-
-      if (validation.status === "invalid") {
-        saveDraft(draftWithTools);
-        const errors = validation.issues
-          .filter((issue) => issue.severity === "error")
-          .map((issue) => `${issue.toolName ?? "tool"}: ${issue.message}`);
-        throw new Error(`Tool validation failed: ${errors.join("; ")}`);
-      }
-
-      const prompt = await deps.planner.composeFinalPrompt({
-        draft: draftWithTools,
-        selectedTools,
-      });
-      const artifact = compileArtifact(draftWithTools, selectedTools, prompt, toolPlan);
-      const nextDraft = mutateDraft(draftWithTools)
-        .finalPrompt(prompt)
-        .compiled(artifact)
-        .build();
-      saveDraft(nextDraft);
-      setActiveDraft(nextDraft.id);
-      return { draft: nextDraft, artifact };
+      return compileAgentWithServerPolicy(body, deps);
     },
   };
 }

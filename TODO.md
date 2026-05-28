@@ -2,7 +2,7 @@
 
 Current goal: harden prompt and tool orchestration.
 
-Target commit title candidate: `test: enforce server-owned prompt policy`
+Target commit title candidate: `test: quote builder inputs in prompts`
 
 ## Active Focus
 
@@ -14,8 +14,6 @@ uploaded documents, or request-supplied tool bindings.
 
 Next work:
 
-- [ ] Append immutable server-owned safety and tool policy after generated
-  prompts.
 - [ ] Quote builder input and document content as data.
 - [ ] Lint compiled prompts for required invariants.
 - [ ] Enforce tool authorization server-side, independent of model text.
@@ -38,8 +36,6 @@ Optional security/network checks:
 
 ### Prompt And Tool Orchestration
 
-- [ ] Append immutable server-owned safety and tool policy after generated
-  prompts.
 - [ ] Quote builder input and document content as data.
 - [ ] Lint compiled prompts for required invariants.
 - [ ] Enforce tool authorization server-side, independent of model text.
