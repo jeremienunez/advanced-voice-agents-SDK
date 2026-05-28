@@ -62,6 +62,7 @@
     "infra:destroy": "pnpm --filter @voiceagentsdk/starter-voip-rtc infra:destroy",
     "test:db": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:db",
     "test:database-provisioning": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:database-provisioning",
+    "test:debug-audio:bdd": "bun run scripts/test-debug-audio-dump-bdd.ts",
     "test:builder-draft-ownership:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:builder-draft-ownership:bdd",
     "test:document-ingestion:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:document-ingestion:bdd",
     "test:infra-plan": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-plan",
@@ -81,7 +82,7 @@
     "audit:architecture": "depcruise --config .dependency-cruiser.cjs --output-type err src starters/voip-rtc/src starters/voip-rtc/server starters/voip-rtc/scripts scripts examples",
     "audit:responsibility": "node scripts/audit-responsibility.mjs",
     "audit:loc": "bun scripts/audit-loc.mjs",
-    "audit:solid": "pnpm audit:architecture && pnpm audit:responsibility && pnpm audit:loc && pnpm audit:sdk-boundary && pnpm audit:imports && pnpm typecheck:sdk && pnpm typecheck:starters && pnpm test:solid-seams && pnpm test:llm-harness && pnpm test:log-redaction:bdd && pnpm test:prompt-policy:bdd && pnpm test:runtime-tool-authorization:bdd && pnpm test:builder-draft-ownership:bdd && pnpm test:document-ingestion:bdd && pnpm test:database-provisioning && pnpm test:rtc-e2e",
+    "audit:solid": "pnpm audit:architecture && pnpm audit:responsibility && pnpm audit:loc && pnpm audit:sdk-boundary && pnpm audit:imports && pnpm typecheck:sdk && pnpm typecheck:starters && pnpm test:solid-seams && pnpm test:llm-harness && pnpm test:log-redaction:bdd && pnpm test:debug-audio:bdd && pnpm test:prompt-policy:bdd && pnpm test:runtime-tool-authorization:bdd && pnpm test:builder-draft-ownership:bdd && pnpm test:document-ingestion:bdd && pnpm test:database-provisioning && pnpm test:rtc-e2e",
     "pack:dry-run": "pnpm pack --dry-run --json"
   },
   "dependencies": {

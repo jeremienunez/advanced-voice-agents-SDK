@@ -1,21 +1,21 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: gate debug audio artifacts.
+Current goal: verify local secret hygiene.
 
-Target commit title candidate: `test: gate debug audio dumps`
+Target commit title candidate: `chore: document secret rotation status`
 
 ## Active Focus
 
-### Logs And Debug Artifacts
+### Secret Hygiene
 
 Outcome:
-Debug audio artifacts cannot be written outside local-only debug mode, must use
-restrictive permissions, and must be easy to clean up.
+Ignored local env files do not contain live production credentials, and any
+exposed development keys are rotated outside the repo.
 
 Next work:
 
-- [ ] Gate audio dumps to local-only debug with restrictive permissions and
-  cleanup.
+- [ ] Rotate local API keys if the ignored `.env` contains live production
+  credentials.
 
 ### Current Gates
 
@@ -33,10 +33,7 @@ Optional security/network checks:
 
 ## Immediate Risk Backlog
 
-### Secret Hygiene
-
-- [ ] Rotate local API keys if the ignored `.env` contains live production
-  credentials.
+No immediate code hardening items remain in this section.
 
 ## Architecture Backlog - Agent Infra / DB Harness
 

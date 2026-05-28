@@ -424,6 +424,7 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `pnpm typecheck:starters` | Build SDK and typecheck the VOIP RTC starter. |
 | `pnpm dev:voip-rtc` | Run the reusable RTC voice starter. |
 | `pnpm harness:route-wines` | Run the route-wines builder harness. |
+| `pnpm test:debug-audio:bdd` | Check OpenAI debug audio dumps require local mode, restrictive permissions, and cleanup. |
 | `pnpm test:knowledge-tool` | Check runtime knowledge tool wiring. |
 | `pnpm test:llm-harness` | Check provider-agnostic builder LLM planner, research, verifier, and resolver behavior. |
 | `pnpm test:log-redaction:bdd` | Check recursive log redaction for prompts, messages, content, child bindings, and secrets. |
@@ -435,7 +436,7 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `pnpm test:solid-seams` | Run focused BDD seam tests for HTTP guards, voice factory/learning, builder summaries, and infra validation. |
 | `pnpm test:runtime-tool-call` | Check runtime tool call flow. |
 | `pnpm test:rtc-e2e` | Run the RTC WebSocket e2e script. |
-| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/prompt/runtime-tool/ownership/ingestion/DB provisioning tests, and RTC E2E. |
+| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/debug-audio/prompt/runtime-tool/ownership/ingestion/DB provisioning tests, and RTC E2E. |
 | `pnpm audit:architecture` | Enforce Dependency Cruiser SOA/SOLID import boundaries. |
 | `pnpm audit:responsibility` | Enforce SRP/LSP clean-code responsibility rules. |
 | `pnpm audit:sdk-boundary` | Verify core SDK boundary rules. |
@@ -499,7 +500,14 @@ GEMINI_REALTIME_VOICE=Puck
 OPENAI_API_KEY=
 OPENAI_REALTIME_MODEL=gpt-realtime-1.5
 OPENAI_REALTIME_VOICE=marin
+VOICE_DEBUG_AUDIO=
+VOICE_DEBUG_AUDIO_DIR=/tmp/voice-debug
 ```
+
+OpenAI realtime audio dumps only activate outside production with
+`VOICE_DEBUG_AUDIO=local`. `VOICE_DEBUG_AUDIO_DIR` must stay under the current
+working directory or system temp; dump directories use `0700`, files use `0600`,
+and the debug dump API exposes cleanup.
 
 Builder LLMs, research, embeddings, and knowledge store:
 

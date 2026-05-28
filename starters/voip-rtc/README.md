@@ -245,6 +245,8 @@ Useful env vars:
 - `OPENAI_API_KEY`
 - `OPENAI_REALTIME_MODEL`
 - `OPENAI_REALTIME_VOICE`
+- `VOICE_DEBUG_AUDIO` (`local` enables OpenAI audio dumps outside production)
+- `VOICE_DEBUG_AUDIO_DIR` (must stay under cwd or system temp)
 
 Builder and knowledge env vars:
 
@@ -304,6 +306,15 @@ pnpm --filter @voiceagentsdk/starter-voip-rtc test:learning
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:learning:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:rtc-e2e
 ```
+
+Root-level debug regression:
+
+```bash
+pnpm test:debug-audio:bdd
+```
+
+`test:debug-audio:bdd` covers OpenAI audio dump local-only gating, `0700`/`0600`
+permissions, WAV finalization, and cleanup.
 
 `test:document-ingestion:bdd` covers upload bounds, type allowlists, xlsx caps,
 parser timeouts, and IP quotas before parsed content can feed knowledge.

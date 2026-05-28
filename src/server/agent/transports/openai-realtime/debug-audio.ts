@@ -1,55 +1,125 @@
 import {
   appendFileSync,
+  chmodSync,
   mkdirSync,
   readFileSync,
+  rmSync,
   writeFileSync,
-} from "fs";
-import { join } from "path";
+} from "node:fs";
+import { tmpdir } from "node:os";
+import {
+  isAbsolute,
+  join,
+  relative,
+  resolve,
+} from "node:path";
 import type { AgentLogger } from "../../utils/index.js";
 
 export interface OpenAIDebugAudioDump {
+  directory: string;
+  inputPath: string;
+  outputPath: string;
+  inputWavPath: string;
+  outputWavPath: string;
   appendInput(chunk: Buffer): void;
   appendOutput(chunk: Buffer): void;
   finalize(): void;
+  cleanup(): void;
 }
+
+const localDebugMode = "local";
 
 export function createOpenAIDebugAudioDump(
   logger: AgentLogger,
 ): OpenAIDebugAudioDump | null {
   if (!process.env.VOICE_DEBUG_AUDIO) return null;
+
   if (process.env.NODE_ENV === "production") {
     logger.warn("VOICE_DEBUG_AUDIO ignored in production");
     return null;
   }
 
+  if (process.env.VOICE_DEBUG_AUDIO !== localDebugMode) {
+    logger.warn("VOICE_DEBUG_AUDIO ignored unless set to local");
+    return null;
+  }
+
+  const root = resolveDebugRoot();
+  if (!root) {
+    logger.warn("VOICE_DEBUG_AUDIO_DIR must be under cwd or system temp");
+    return null;
+  }
+
   const ts = new Date().toISOString().replace(/[:.]/g, "-");
-  const debugDir = join("/tmp/voice-debug", ts);
+  const debugDir = join(root, ts);
   mkdirSync(debugDir, { mode: 0o700, recursive: true });
+  chmodSync(debugDir, 0o700);
   const inputPath = join(debugDir, "input.pcm");
   const outputPath = join(debugDir, "output.pcm");
-  logger.info(`Audio debug dump -> ${debugDir}`);
+  const inputWavPath = join(debugDir, "input.wav");
+  const outputWavPath = join(debugDir, "output.wav");
+  logger.info("Audio debug dump enabled", { debugDirectory: debugDir });
 
   return {
-    appendInput: (chunk) => appendFileSync(inputPath, chunk, { mode: 0o600 }),
-    appendOutput: (chunk) => appendFileSync(outputPath, chunk, { mode: 0o600 }),
+    directory: debugDir,
+    inputPath,
+    outputPath,
+    inputWavPath,
+    outputWavPath,
+    appendInput: (chunk) => appendRestricted(inputPath, chunk),
+    appendOutput: (chunk) => appendRestricted(outputPath, chunk),
     finalize: () => {
-      for (const path of [inputPath, outputPath]) {
+      for (const [path, wavPath] of [
+        [inputPath, inputWavPath],
+        [outputPath, outputWavPath],
+      ]) {
         try {
           const pcm = readFileSync(path);
           if (pcm.length > 0) {
             const wav = pcmToWav(pcm, 24000);
-            const wavPath = path.replace(".pcm", ".wav");
-            writeFileSync(wavPath, wav, { mode: 0o600 });
-            logger.info(
-              `WAV written: ${wavPath} (${(wav.length / 1024).toFixed(0)}KB)`,
-            );
+            writeRestricted(wavPath, wav);
+            logger.info("Audio debug WAV written", {
+              debugFile: wavPath,
+              kilobytes: Math.round(wav.length / 1024),
+            });
           }
         } catch {
           /* ignore */
         }
       }
     },
+    cleanup: () => rmSync(debugDir, { recursive: true, force: true }),
   };
+}
+
+function resolveDebugRoot(): string | null {
+  const root = resolve(
+    process.env.VOICE_DEBUG_AUDIO_DIR ?? join(tmpdir(), "voice-debug"),
+  );
+  return isLocalPath(root) ? root : null;
+}
+
+function isLocalPath(path: string): boolean {
+  return isPathInside(path, tmpdir()) || isPathInside(path, process.cwd());
+}
+
+function isPathInside(path: string, parent: string): boolean {
+  const resolvedParent = resolve(parent);
+  const distance = relative(resolvedParent, path);
+  return (
+    distance === "" ||
+    Boolean(distance && !distance.startsWith("..") && !isAbsolute(distance))
+  );
+}
+
+function appendRestricted(path: string, chunk: Buffer): void {
+  appendFileSync(path, chunk, { mode: 0o600 });
+  chmodSync(path, 0o600);
+}
+
+function writeRestricted(path: string, value: Buffer): void {
+  writeFileSync(path, value, { mode: 0o600 });
+  chmodSync(path, 0o600);
 }
 
 function pcmToWav(pcm: Buffer, sampleRate: number): Buffer {

@@ -1,5 +1,35 @@
 # Changelog
 
+## test: gate debug audio dumps
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Limiter les dumps audio OpenAI au debug local explicite, avec permissions
+restrictives et nettoyage disponible.
+
+### Journal
+
+- Ajout de `pnpm test:debug-audio:bdd`.
+- Le BDD prouve que `VOICE_DEBUG_AUDIO=true` ne suffit plus: le mode doit etre
+  exactement `local`.
+- `VOICE_DEBUG_AUDIO_DIR` permet de choisir le repertoire local, mais seulement
+  sous le cwd ou le repertoire temporaire systeme.
+- Les repertoires de dump sont forces en `0700`; les fichiers PCM/WAV en `0600`.
+- Le dump expose les chemins utiles, finalise les WAV, et fournit `cleanup()`.
+- `.env.example`, README racine, README starter, TODO et `audit:solid` sont a
+  jour.
+
+### Validation
+
+- `pnpm test:debug-audio:bdd` OK
+- `pnpm typecheck:sdk` OK
+- `pnpm audit:loc` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: redact prompt previews from logs
 
 Status: implemented locally
