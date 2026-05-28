@@ -9,10 +9,10 @@ import {
   type VoiceSessionTool,
 } from "@voiceagentsdk/core/server";
 import {
-  requireEnv,
   resolveCatalogOption,
   runtimeProvider,
 } from "../providers/catalog.js";
+import { resolveRequiredSecret } from "../secrets/index.js";
 import {
   E2EFakeRealtimeProvider,
   isE2EFakeProviderEnabled,
@@ -53,7 +53,7 @@ export function createProvider(
 
   if (definition.kind === "openai-realtime") {
     return new OpenAIRealtimeTransport({
-      apiKey: requireEnv(runtime.requiredEnv),
+      apiKey: providerApiKey(definition, runtime.requiredEnv, options),
       model: model as never,
       voice: voice as never,
       inputFormat: "pcm16",
@@ -65,7 +65,7 @@ export function createProvider(
 
   if (definition.kind === "gemini-live") {
     return new GeminiRealtimeTransport({
-      apiKey: requireEnv(runtime.requiredEnv),
+      apiKey: providerApiKey(definition, runtime.requiredEnv, options),
       model: model as never,
       voice: voice as never,
       instructions,
@@ -78,4 +78,20 @@ export function createProvider(
 
 function providerTools(tools: VoiceSessionTool[]) {
   return tools.map(({ execute: _execute, ...tool }) => tool);
+}
+
+function providerApiKey(
+  definition: ProviderDefinition,
+  aliases: readonly string[],
+  options: StarterVoiceServiceOptions,
+): string {
+  return resolveRequiredSecret(options.secretResolver, {
+    ref: definition.apiKey ?? { name: aliases[0] ?? `${definition.id}.apiKey` },
+    aliases,
+    purpose: "realtime-provider-api-key",
+    metadata: {
+      providerId: definition.id,
+      providerKind: definition.kind,
+    },
+  });
 }

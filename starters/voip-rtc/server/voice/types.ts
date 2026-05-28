@@ -2,6 +2,7 @@ import type {
   CompiledVoiceAgentSdk,
   EmbeddingPort,
   KnowledgeSearchPort,
+  SecretResolverPort,
   TenantResolverPort,
 } from "@voiceagentsdk/core/sdk";
 import type { createBuilderService } from "../builder/index.js";
@@ -23,6 +24,7 @@ export interface StarterVoiceServiceOptions {
   providerCatalog: RuntimeProviderConfig[];
   runtimeKnowledge?: RuntimeKnowledge;
   learning?: StarterLearningService;
+  secretResolver: SecretResolverPort;
   tenantResolver: TenantResolverPort;
   sdk: StarterSdk;
 }

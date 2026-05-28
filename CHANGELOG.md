@@ -1,5 +1,36 @@
 # Changelog
 
+## test: add secret resolver port
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Faire passer les cles API runtime/builder par un port injectable au lieu de
+lectures directes d'env dans les factories provider, profils LLM builder et
+embeddings runtime.
+
+### Journal
+
+- Ajout de `SecretResolverPort` et `SecretResolveInput` cote SDK.
+- Ajout de l'adapter dev `createEnvSecretResolver`.
+- `createProvider` resout les cles realtime via `SecretResolverPort`.
+- Le catalogue LLM builder et les embeddings Voyage runtime consomment le meme
+  port.
+- Ajout de `pnpm test:secret-resolver:bdd` et integration dans `audit:solid`.
+- README, TODO et changelog sont a jour.
+
+### Validation
+
+- `pnpm test:secret-resolver:bdd` OK
+- `pnpm typecheck:sdk` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:architecture` OK
+- `pnpm test:solid-seams` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: add tenant resolver port
 
 Status: implemented locally

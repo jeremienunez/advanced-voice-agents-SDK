@@ -25,14 +25,15 @@ import type {
   LlmTaskRole,
 } from "@voiceagentsdk/core/sdk";
 import { runtimeToolHandlerRefs } from "../runtime/tools/handler-refs.js";
+import { createEnvSecretResolver } from "../secrets/index.js";
 import type { BuilderConfig, BuilderServiceComposition } from "./types.js";
 
 export function createBuilderServiceCompositionFromEnv(
   env: Record<string, string | undefined> = Bun.env,
 ): BuilderServiceComposition {
   const requestedResearchProvider = env.BUILDER_RESEARCH_PROVIDER;
-  const kimiApiKey = env.KIMI_API_KEY ?? env.MOONSHOT_API_KEY;
   const kimiModel = env.KIMI_MODEL ?? "kimi-k2.6";
+  const secretResolver = createEnvSecretResolver(env);
   const requestedKnowledgeVerificationProvider =
     env.BUILDER_KNOWLEDGE_VERIFICATION_PROVIDER ?? "kimi";
   const rawKnowledgeVerificationPasses = Number(
@@ -59,8 +60,12 @@ export function createBuilderServiceCompositionFromEnv(
   );
   const researchBudget = researchBudgetFromEnv(env);
   const promptLibrary = loadBuilderPromptLibrary();
-  const llmCatalog = createBuilderLlmCatalog(env);
-  const deepseekConfigured = Boolean(env.DEEPSEEK_API_KEY);
+  const llmCatalog = createBuilderLlmCatalog({ env, secretResolver });
+  const voyageApiKey = secretResolver.resolveSecret({
+    ref: { name: "VOYAGE_API_KEY" },
+    purpose: "builder-voyage-embeddings",
+  });
+  const deepseekConfigured = Boolean(llmCatalog.providerConfigs.deepseek?.apiKey);
   const promptProfile = resolveRoleProfile(
     llmCatalog.profiles,
     "builder.planner",
@@ -116,11 +121,10 @@ export function createBuilderServiceCompositionFromEnv(
     },
     availability: {
       deepseek: deepseekConfigured,
-      qwen: Boolean(env.QWEN_API_KEY ?? env.DASHSCOPE_API_KEY),
-      kimi: Boolean(kimiApiKey),
-      gemini: Boolean(env.GEMINI_API_KEY ?? env.GOOGLE_API_KEY ??
-        env.GOOGLE_GENERATIVE_AI_API_KEY),
-      voyage: Boolean(env.VOYAGE_API_KEY),
+      qwen: Boolean(llmCatalog.providerConfigs.qwen?.apiKey),
+      kimi: Boolean(llmCatalog.providerConfigs.kimi?.apiKey),
+      gemini: Boolean(llmCatalog.providerConfigs.gemini?.apiKey),
+      voyage: Boolean(voyageApiKey),
       knowledgeStore: Boolean(env.DATABASE_URL),
       databaseProvisioner: Boolean(env.DATABASE_URL),
       research: isRoleProviderConfigured(
@@ -157,7 +161,7 @@ export function createBuilderServiceCompositionFromEnv(
         prompts: promptLibrary,
       }),
       embeddings: new VoyageEmbeddingPort({
-        apiKey: env.VOYAGE_API_KEY,
+        apiKey: voyageApiKey,
         model: voyageModel,
         dimensions: voyageDimensions,
       }),
@@ -216,7 +220,7 @@ export function createBuilderServiceCompositionFromEnv(
       promptModel,
       researchProvider,
       researchModel,
-      voyageConfigured: Boolean(env.VOYAGE_API_KEY),
+      voyageConfigured: Boolean(voyageApiKey),
       toolRegistry: defaultToolRegistry,
       availableToolHandlerRefs: runtimeToolHandlerRefs(),
       availableSecretNames: configuredSecretNames(env),

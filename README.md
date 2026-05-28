@@ -73,6 +73,9 @@ Runtime voice scope is resolved through `TenantResolverPort`: the starter sends
 `{ channel, provider, from, to, callId, accountId }` and receives the tenant,
 provider, media bridge, plan, user, limits, prompt variables, and metadata used
 by media setup and session creation.
+Secret values are resolved through `SecretResolverPort`; the dev starter binds
+that port to env vars, while provider creation, builder LLM profiles, and
+runtime embeddings consume secret refs without reading env values directly.
 
 ## Builder Flow
 
@@ -467,6 +470,7 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `pnpm test:tool-contracts:bdd` | Check executable tool definitions stay separate from serializable tool manifests. |
 | `pnpm test:tool-registry-adapter:bdd` | Check runtime tool binding and builder handler validation go through `ToolRegistryAdapterPort`. |
 | `pnpm test:runtime-db-credentials:bdd` | Check runtime Postgres access resolves per-agent credential refs instead of shared DB URLs. |
+| `pnpm test:secret-resolver:bdd` | Check realtime providers, builder LLM profiles, and runtime embeddings resolve API keys through `SecretResolverPort`. |
 | `pnpm test:tenant-resolver:bdd` | Check voice media/session setup uses `TenantResolverPort` for tenant, provider, user, limits, and prompt variables. |
 | `pnpm test:builder-draft-ownership:bdd` | Check privileged builder workflows reload server-owned drafts by authenticated owner. |
 | `pnpm test:document-ingestion:bdd` | Check document upload bounds, type guards, xlsx caps, parser timeouts, and IP quotas. |
@@ -480,7 +484,7 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `pnpm test:solid-seams` | Run focused BDD seam tests for HTTP guards, voice factory/learning, builder summaries, and infra validation. |
 | `pnpm test:runtime-tool-call` | Check runtime tool call flow. |
 | `pnpm test:rtc-e2e` | Run the RTC WebSocket e2e script. |
-| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/debug-audio/prompt/runtime-tool/tool-contract/tool-registry/runtime-DB-credential/tenant-resolver/adapter-boundary/Temporal-worker/Redis-memory/Graph-memory/infra-evolution/ownership/ingestion/DB provisioning/infra-runner/secret-hygiene tests, and RTC E2E. |
+| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/debug-audio/prompt/runtime-tool/tool-contract/tool-registry/runtime-DB-credential/secret-resolver/tenant-resolver/adapter-boundary/Temporal-worker/Redis-memory/Graph-memory/infra-evolution/ownership/ingestion/DB provisioning/infra-runner/secret-hygiene tests, and RTC E2E. |
 | `pnpm audit:architecture` | Enforce Dependency Cruiser SOA/SOLID import boundaries. |
 | `pnpm audit:responsibility` | Enforce SRP/LSP clean-code responsibility rules. |
 | `pnpm audit:secrets` | Scan committed files for live-like secrets without printing secret values. |
@@ -656,7 +660,8 @@ It launches:
 ## Project Status
 
 This is an early clean-core SDK and starter. The Fastify adapter is a placeholder
-until the next adapter pass wires secrets, provider factories, media bridge
-factories, tools, prompts, and database adapters behind public ports. Tenant
-resolution already goes through `TenantResolverPort`; the starter builder uses
-the provider-agnostic LLM harness for planning, research, and verification.
+until the next adapter pass wires provider factories, media bridge factories,
+tools, prompts, and database adapters behind public ports. Tenant and secret
+resolution already go through `TenantResolverPort` and `SecretResolverPort`;
+the starter builder uses the provider-agnostic LLM harness for planning,
+research, and verification.

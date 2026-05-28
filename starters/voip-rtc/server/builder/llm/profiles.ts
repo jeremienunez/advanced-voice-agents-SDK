@@ -4,6 +4,7 @@ import type {
   LlmModelProfile,
   LlmProviderId,
   LlmTaskRole,
+  SecretResolverPort,
 } from "@voiceagentsdk/core/sdk";
 import { trimTrailingSlash } from "../utils/url-format.js";
 
@@ -41,9 +42,15 @@ export interface BuilderLlmCatalog {
   providerConfigs: Partial<Record<LlmProviderId, BuilderLlmProviderConfig>>;
 }
 
+export interface BuilderLlmCatalogInput {
+  env: Record<string, string | undefined>;
+  secretResolver?: SecretResolverPort;
+}
+
 export function createBuilderLlmCatalog(
-  env: Record<string, string | undefined>,
+  input: Record<string, string | undefined> | BuilderLlmCatalogInput,
 ): BuilderLlmCatalog {
+  const { env, secretResolver } = normalizeInput(input);
   const deepseekModel = env.DEEPSEEK_MODEL ?? "deepseek-v4-pro";
   const qwenModel = env.QWEN_MODEL ?? env.DASHSCOPE_MODEL ?? "qwen-plus";
   const kimiModel = env.KIMI_MODEL ?? env.MOONSHOT_MODEL ?? "kimi-k2.6";
@@ -63,11 +70,17 @@ export function createBuilderLlmCatalog(
   const geminiBaseUrl = trimTrailingSlash(
     env.GEMINI_API_BASE_URL ?? "https://generativelanguage.googleapis.com",
   );
-  const deepseekApiKey = env.DEEPSEEK_API_KEY;
-  const qwenApiKey = env.QWEN_API_KEY ?? env.DASHSCOPE_API_KEY;
-  const kimiApiKey = env.KIMI_API_KEY ?? env.MOONSHOT_API_KEY;
-  const geminiApiKey = env.GEMINI_API_KEY ?? env.GOOGLE_API_KEY ??
-    env.GOOGLE_GENERATIVE_AI_API_KEY;
+  const deepseekApiKey = resolveSecret(secretResolver, env, "DEEPSEEK_API_KEY");
+  const qwenApiKey = resolveSecret(secretResolver, env, "QWEN_API_KEY", [
+    "DASHSCOPE_API_KEY",
+  ]);
+  const kimiApiKey = resolveSecret(secretResolver, env, "KIMI_API_KEY", [
+    "MOONSHOT_API_KEY",
+  ]);
+  const geminiApiKey = resolveSecret(secretResolver, env, "GEMINI_API_KEY", [
+    "GOOGLE_API_KEY",
+    "GOOGLE_GENERATIVE_AI_API_KEY",
+  ]);
 
   const profiles: LlmModelProfile[] = [
     profile({
@@ -169,6 +182,39 @@ export function createBuilderLlmCatalog(
       },
     },
   };
+}
+
+function normalizeInput(
+  input: Record<string, string | undefined> | BuilderLlmCatalogInput,
+): BuilderLlmCatalogInput {
+  if (isCatalogInput(input)) return input;
+  return { env: input };
+}
+
+function isCatalogInput(
+  input: Record<string, string | undefined> | BuilderLlmCatalogInput,
+): input is BuilderLlmCatalogInput {
+  return typeof (input as BuilderLlmCatalogInput).env === "object";
+}
+
+function resolveSecret(
+  resolver: SecretResolverPort | undefined,
+  env: Record<string, string | undefined>,
+  name: string,
+  aliases: readonly string[] = [],
+): string | undefined {
+  if (resolver) {
+    return resolver.resolveSecret({
+      ref: { name },
+      aliases,
+      purpose: "builder-llm-api-key",
+    });
+  }
+  for (const candidate of [name, ...aliases]) {
+    const value = env[candidate];
+    if (value) return value;
+  }
+  return undefined;
 }
 
 function profile(input: {

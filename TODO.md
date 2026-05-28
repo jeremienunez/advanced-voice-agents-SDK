@@ -1,22 +1,21 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: add SecretResolverPort.
+Current goal: add ProviderFactoryPort.
 
-Target commit title candidate: `test: add secret resolver port`
+Target commit title candidate: `test: add provider factory port`
 
 ## Active Focus
 
 ### Agent Infra / DB Harness
 
 Outcome:
-Runtime secrets should resolve through a port instead of hardcoded
-`process.env` access in runtime code.
+Realtime provider creation should resolve through a port instead of starter
+voice orchestration instantiating concrete provider transports directly.
 
 Next work:
 
-- [ ] Add `SecretResolverPort` to resolve `SecretRef` values for realtime
-  providers and builder/runtime adapters without leaking secret values into SDK
-  definitions, logs, or compiled artifacts.
+- [ ] Add `ProviderFactoryPort` for OpenAI Realtime, Gemini Live, Grok
+  Realtime, and cascaded providers.
 
 ### Current Gates
 
@@ -43,8 +42,6 @@ Optional security/network checks:
 
 ## Architecture Backlog - Runtime Ports
 
-- [ ] Add `ProviderFactoryPort` for OpenAI Realtime, Gemini Live, Grok
-  Realtime, and cascaded providers.
 - [ ] Add `MediaBridgeFactoryPort` for start, stop, `sendAudio`,
   `clearOutput`, and `onAudioToLlm`.
 - [ ] Add `DbAdapterRegistry` and keep adapters out of serializable SDK

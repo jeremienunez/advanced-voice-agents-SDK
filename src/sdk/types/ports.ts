@@ -14,6 +14,7 @@ import type {
   AgentChannel,
   PlanId,
   ProviderId,
+  SecretRef,
   TenantId,
   ToolManifest,
   ToolName,
@@ -112,6 +113,17 @@ export interface ToolRegistryAdapterPort {
   availableHandlerRefs(): readonly string[];
   canExecute(tool: ToolManifest): boolean;
   execute(input: ToolRegistryExecutionInput): Promise<unknown>;
+}
+
+export interface SecretResolveInput {
+  ref: SecretRef;
+  aliases?: readonly string[];
+  purpose?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface SecretResolverPort {
+  resolveSecret(input: SecretResolveInput): string | undefined;
 }
 
 export interface TenantResolutionInput {

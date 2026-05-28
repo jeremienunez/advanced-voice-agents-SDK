@@ -47,6 +47,9 @@ export function voiceOptions(
     builderService: builderService(agentDraft("draft-solid")),
     browserSampleRate: 24_000,
     providerCatalog: [],
+    secretResolver: {
+      resolveSecret: () => "test-secret",
+    },
     tenantResolver: {
       resolveTenant: () => ({
         tenantId: "local",

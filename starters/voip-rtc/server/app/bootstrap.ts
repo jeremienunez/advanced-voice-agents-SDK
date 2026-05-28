@@ -5,6 +5,7 @@ import {
   createProviderCatalog,
   resolveDefaultProviderId,
 } from "../providers/catalog.js";
+import { createEnvSecretResolver } from "../secrets/index.js";
 import { createStarterVoiceService } from "../voice/service.js";
 import { createDevTenantResolver } from "../voice/dev-tenant-resolver.js";
 import { corsHeadersFor } from "../http/cors.js";
@@ -21,6 +22,7 @@ export function createStarterServerApp() {
     defaultProviderId,
     env.browserSampleRate,
   );
+  const secretResolver = createEnvSecretResolver();
   const builderService = createBuilderServiceFromEnv({
     port: env.port,
     corsHeaders: (request) => corsHeadersFor(env, request),
@@ -31,7 +33,8 @@ export function createStarterServerApp() {
     browserSampleRate: env.browserSampleRate,
     learning: learningService,
     providerCatalog,
-    runtimeKnowledge: createRuntimeKnowledgeFromEnv(),
+    runtimeKnowledge: createRuntimeKnowledgeFromEnv({ secretResolver }),
+    secretResolver,
     tenantResolver: createDevTenantResolver(sdk),
     sdk,
   });
