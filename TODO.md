@@ -1,23 +1,23 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: decide the tool-plan prompt path.
+Current goal: add TenantResolverPort.
 
-Target commit title candidate: `test: decide builder tool-plan prompt path`
+Target commit title candidate: `test: add tenant resolver port`
 
 ## Active Focus
 
 ### Agent Infra / DB Harness
 
 Outcome:
-The builder should either use the `tool-plan` prompt templates through a real
-planner method or delete them until the flow is no longer deterministic.
+Runtime tenant, provider, media bridge, user, plan and prompt variables should
+resolve through a port instead of request-local assumptions.
 
 Next work:
 
-- [ ] Decide the `tool-plan` prompt path:
-  - wire a real planner method that uses the templates; or
-  - delete the templates until the flow is no longer deterministic;
-  - keep deterministic validation and runtime binding audits intact.
+- [ ] Add `TenantResolverPort`:
+  - input: `{ channel, provider, from, to, callId, accountId }`;
+  - output: `{ tenantId, providerId, mediaBridgeId, planId, userId?, limits,
+    promptVariables, metadata }`.
 
 ### Current Gates
 
@@ -44,10 +44,6 @@ Optional security/network checks:
 
 ## Architecture Backlog - Runtime Ports
 
-- [ ] Add `TenantResolverPort`:
-  - input: `{ channel, provider, from, to, callId, accountId }`;
-  - output: `{ tenantId, providerId, mediaBridgeId, planId, userId?, limits,
-    promptVariables, metadata }`.
 - [ ] Add `SecretResolverPort` to resolve `SecretRef` without hardcoded
   `process.env` access in runtime code.
 - [ ] Add `ProviderFactoryPort` for OpenAI Realtime, Gemini Live, Grok

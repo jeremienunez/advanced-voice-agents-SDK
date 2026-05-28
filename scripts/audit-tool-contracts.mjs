@@ -50,6 +50,7 @@ function auditSourceInvariants() {
   const contracts = readSource("starters/voip-rtc/server/builder/domain/tooling/contracts.ts");
   const compile = readSource("starters/voip-rtc/server/builder/domain/tooling/compile.ts");
   const actionTools = readSource("starters/voip-rtc/server/runtime/tools/action-tools.ts");
+  const promptTemplates = readSource("starters/voip-rtc/server/builder/prompts/template.ts");
   const coreTypes = readSource("src/sdk/types/core.ts");
 
   if (/unknown\./.test(contracts)) {
@@ -70,10 +71,21 @@ function auditSourceInvariants() {
   if (!coreTypes.includes("tools: ToolManifest[]")) {
     issues.push("source: SDK definitions must store serializable ToolManifest[]");
   }
+  if (promptTemplates.includes("toolPlan") || toolPlanTemplateExists()) {
+    issues.push("source: deterministic tool planning must not ship unused tool-plan prompt templates");
+  }
 }
 
 function readSource(relativePath) {
   return readFileSync(join(process.cwd(), relativePath), "utf8");
+}
+
+function toolPlanTemplateExists() {
+  return existsSync(
+    join(process.cwd(), "starters/voip-rtc/server/builder/prompts/templates/tool-plan.system.md"),
+  ) || existsSync(
+    join(process.cwd(), "starters/voip-rtc/server/builder/prompts/templates/tool-plan.user.md"),
+  );
 }
 
 function auditCompiledDraft(draft) {

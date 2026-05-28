@@ -1,5 +1,30 @@
 # Changelog
 
+## test: decide builder tool-plan prompt path
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Clarifier le chemin `tool-plan`: le builder reste deterministe pour les tools,
+donc les templates prompt inutilises doivent disparaitre.
+
+### Journal
+
+- Suppression de `tool-plan.system.md` et `tool-plan.user.md`.
+- `BuilderPromptLibrary` ne charge plus de paire `toolPlan` morte.
+- `audit:tool-contracts` bloque le retour de templates `tool-plan` inutilises
+  tant que le planning tools reste deterministe.
+- README, TODO et changelog sont a jour.
+
+### Validation
+
+- `pnpm audit:tool-contracts` OK
+- `pnpm typecheck:starters` OK
+- `pnpm test:llm-harness` OK
+- `pnpm audit:solid` OK
+
 ## test: audit runtime tool binding invariants
 
 Status: implemented locally

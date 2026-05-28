@@ -391,8 +391,9 @@ const prompt = runtime.promptFor({ channel: "voice" });
 
 The builder keeps tool planning separate from the final voice prompt.
 
-- `tool-plan.system.md` and `tool-plan.user.md` describe builder-side tool
-  planning.
+- Tool planning is deterministic today: selected registry items become a
+  server-owned `ToolBuildPlan`, then validation checks schemas, side effects,
+  confirmation, secrets, knowledge requirements, and runtime handler refs.
 - `final-prompt.system.md` and `final-prompt.user.md` compose only the voice
   agent system prompt.
 - `ToolManifest` is the serializable SDK/artifact contract. `ToolDefinition`

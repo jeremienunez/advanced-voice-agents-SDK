@@ -44,7 +44,6 @@ export function prompts(): BuilderPromptLibrary {
   return {
     promptPlan: pair,
     knowledgePlan: pair,
-    toolPlan: pair,
     finalPrompt: pair,
     databasePlan: pair,
     research: pair,
