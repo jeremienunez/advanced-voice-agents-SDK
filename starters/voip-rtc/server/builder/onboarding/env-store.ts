@@ -81,6 +81,8 @@ export const envFieldDefinitions: EnvFieldDefinition[] = [
   field("GRAPH_DATABASE_URL", "infra", "Graph database URL", "Optional Neo4j/Memgraph compatible graph endpoint.", undefined, undefined, true),
   field("AGENT_LEARNING_ENABLED", "infra", "Session learning", "Enables post-session memory and agent version evolution.", ["true", "false"], "true"),
   field("AGENT_LEARNING_WORKFLOW_DRIVER", "infra", "Learning workflow driver", "Use local in-process learning in dev or dispatch to a Temporal worker.", ["local", "temporal"], "local"),
+  field("AGENT_LEARNING_MEMORY_DRIVER", "infra", "Learning memory driver", "Use local in-memory learning in dev or Redis temporal memory.", ["local", "redis"], "local"),
+  field("AGENT_LEARNING_MEMORY_NAMESPACE", "infra", "Learning memory namespace", "Redis key namespace for temporal learned memory.", undefined, "agent-learning"),
   field("REDIS_URL", "infra", "Redis URL", "Redis temporal memory for learned session facts and user preferences.", undefined, undefined, true),
   field("TEMPORAL_ADDRESS", "infra", "Temporal address", "Temporal workflow endpoint for post-session learning jobs.", undefined, "localhost:7233"),
   field("TEMPORAL_NAMESPACE", "infra", "Temporal namespace", "Temporal namespace used by the learning worker.", undefined, "default"),
@@ -207,6 +209,8 @@ function requirementStates(fields: EnvFieldState[]): EnvRequirementState[] {
       [
         "REDIS_URL",
         "AGENT_LEARNING_WORKFLOW_DRIVER",
+        "AGENT_LEARNING_MEMORY_DRIVER",
+        "AGENT_LEARNING_MEMORY_NAMESPACE",
         "TEMPORAL_ADDRESS",
         "TEMPORAL_TASK_QUEUE",
         "TEMPORAL_WORKFLOW_TYPE",

@@ -199,6 +199,8 @@ Infra env cheat sheet:
 | `REDIS_URL` | Marks cache and learning temporal-memory backends as configured. |
 | `AGENT_LEARNING_ENABLED` | Enables post-session learning store planning, default `true` in the starter. |
 | `AGENT_LEARNING_WORKFLOW_DRIVER` | `local` runs the dev in-process queue; `temporal` dispatches to a Temporal worker. |
+| `AGENT_LEARNING_MEMORY_DRIVER` | `local` keeps dev memory in-process; `redis` uses the production Redis memory adapter. |
+| `AGENT_LEARNING_MEMORY_NAMESPACE` | Redis key namespace for temporal learned memory, default `agent-learning`. |
 | `AGENT_LEARNING_MEMORY_TTL_SECONDS` | Redis TTL for learned temporal memory, default `2592000`. |
 | `TEMPORAL_ADDRESS` | Temporal workflow endpoint for post-session learning jobs. |
 | `TEMPORAL_NAMESPACE` | Temporal namespace used by the learning worker, default `default`. |
@@ -274,6 +276,7 @@ Learning test commands:
 pnpm test:learning
 pnpm test:learning:bdd
 pnpm test:temporal-worker:bdd
+pnpm test:redis-memory:bdd
 pnpm test:solid-seams
 pnpm test:rtc-e2e
 ```
@@ -447,11 +450,12 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `pnpm test:database-provisioning` | Run the real starter database provisioner validation against the pgvector template and hostile SQL cases. |
 | `pnpm test:adapter-boundaries:bdd` | Check Milvus/graph adapter ownership boundaries and promotion criteria. |
 | `pnpm test:temporal-worker:bdd` | Check the env-selected learning workflow driver dispatches to a Temporal worker asynchronously while local dev stays in-process. |
+| `pnpm test:redis-memory:bdd` | Check the Redis learning memory adapter against an ephemeral Redis container for TTL, scope, and cross-adapter persistence. |
 | `pnpm test:infra-runner:bdd` | Check external OpenTofu/cloud-init runner boundaries, env allowlisting, and apply routing. |
 | `pnpm test:solid-seams` | Run focused BDD seam tests for HTTP guards, voice factory/learning, builder summaries, and infra validation. |
 | `pnpm test:runtime-tool-call` | Check runtime tool call flow. |
 | `pnpm test:rtc-e2e` | Run the RTC WebSocket e2e script. |
-| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/debug-audio/prompt/runtime-tool/runtime-DB-credential/adapter-boundary/Temporal-worker/ownership/ingestion/DB provisioning/infra-runner/secret-hygiene tests, and RTC E2E. |
+| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/debug-audio/prompt/runtime-tool/runtime-DB-credential/adapter-boundary/Temporal-worker/Redis-memory/ownership/ingestion/DB provisioning/infra-runner/secret-hygiene tests, and RTC E2E. |
 | `pnpm audit:architecture` | Enforce Dependency Cruiser SOA/SOLID import boundaries. |
 | `pnpm audit:responsibility` | Enforce SRP/LSP clean-code responsibility rules. |
 | `pnpm audit:secrets` | Scan committed files for live-like secrets without printing secret values. |

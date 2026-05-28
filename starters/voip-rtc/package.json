@@ -28,6 +28,7 @@
     "test:runtime-tool-authorization:bdd": "bun run scripts/test-runtime-tool-authorization-bdd.ts",
     "test:runtime-db-credentials:bdd": "bun run scripts/test-runtime-db-credentials-bdd.ts",
     "test:temporal-worker:bdd": "bun run scripts/test-temporal-worker-bdd.ts",
+    "test:redis-memory:bdd": "bun run scripts/test-redis-memory-bdd.ts",
     "test:learning": "bun run scripts/test-learning.ts",
     "test:learning:bdd": "bun run scripts/test-learning-bdd.ts",
     "test:solid-seams": "bun run scripts/test-solid-seams.ts",
@@ -41,6 +42,7 @@
     "postgres": "^3.4.9",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
+    "redis": "^5.12.1",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {

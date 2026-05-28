@@ -8,7 +8,7 @@ import {
   LocalGraphMemoryStore,
   PostgresGraphMemoryStore,
 } from "./graph-store.js";
-import { LocalRedisTemporalMemoryStore } from "./memory-store.js";
+import { createTemporalMemoryStoreFromEnv } from "./memory-store.js";
 import {
   createLearningWorkflowPort,
   type TemporalWorkerClientPort,
@@ -33,7 +33,7 @@ export function createStarterLearningServiceFromEnv(
     env.AGENT_LEARNING_MEMORY_TTL_SECONDS,
     60 * 60 * 24 * 30,
   );
-  const memoryStore = new LocalRedisTemporalMemoryStore({
+  const memoryStore = createTemporalMemoryStoreFromEnv(env, {
     defaultTtlSeconds: memoryTtlSeconds,
   });
   const graphStore = env.DATABASE_URL

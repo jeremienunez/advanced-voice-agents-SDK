@@ -179,6 +179,8 @@ Required/optional learning env:
 | --- | --- |
 | `AGENT_LEARNING_ENABLED` | Enables post-session learning, default `true`. |
 | `AGENT_LEARNING_WORKFLOW_DRIVER` | `local` keeps dev learning in-process; `temporal` dispatches to a Temporal worker. |
+| `AGENT_LEARNING_MEMORY_DRIVER` | `local` keeps dev memory in-process; `redis` uses the production Redis memory adapter. |
+| `AGENT_LEARNING_MEMORY_NAMESPACE` | Redis key namespace for temporal learned memory, default `agent-learning`. |
 | `AGENT_LEARNING_MEMORY_TTL_SECONDS` | TTL for Redis temporal memory, default `2592000`. |
 | `REDIS_URL` | Required for temporal learned memory. |
 | `TEMPORAL_ADDRESS` | Required Temporal endpoint or local worker address. |
@@ -301,6 +303,8 @@ Builder and knowledge env vars:
 - `NEO4J_URI` or `GRAPH_DATABASE_URL`
 - `AGENT_LEARNING_ENABLED`
 - `AGENT_LEARNING_WORKFLOW_DRIVER`
+- `AGENT_LEARNING_MEMORY_DRIVER`
+- `AGENT_LEARNING_MEMORY_NAMESPACE`
 - `AGENT_LEARNING_MEMORY_TTL_SECONDS`
 - `REDIS_URL`
 - `TEMPORAL_ADDRESS`
@@ -319,6 +323,7 @@ pnpm --filter @voiceagentsdk/starter-voip-rtc test:knowledge-tool
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-plan
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:adapter-boundaries:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:temporal-worker:bdd
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:redis-memory:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-runner:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:prompt-policy:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:runtime-tool-authorization:bdd

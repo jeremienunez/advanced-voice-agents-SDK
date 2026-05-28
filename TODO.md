@@ -1,20 +1,20 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: add production Redis adapter tests against ephemeral Redis.
+Current goal: add Neo4j/Memgraph graph memory adapters.
 
-Target commit title candidate: `test: add ephemeral redis memory adapter tests`
+Target commit title candidate: `test: add graph memory adapter boundaries`
 
 ## Active Focus
 
 ### Agent Infra / DB Harness
 
 Outcome:
-Redis temporal memory has a production adapter contract validated against an
-ephemeral Redis instance, while the local in-memory/dev path remains available.
+Graph memory can use optional Neo4j/Memgraph adapters behind the existing
+GraphMemoryStorePort while Postgres graph remains the local default.
 
 Next work:
 
-- [ ] Add production Redis adapter tests against ephemeral Redis.
+- [ ] Add Neo4j/Memgraph graph adapters; keep Postgres graph as local default.
 
 ### Current Gates
 
@@ -41,7 +41,6 @@ Optional security/network checks:
 
 ## Architecture Backlog - Agent Self-Improving Stores
 
-- [ ] Add Neo4j/Memgraph graph adapters; keep Postgres graph as local default.
 - [ ] Add an approval/pending workflow for infra-plan evolution before applying
   cloud or destructive changes.
 

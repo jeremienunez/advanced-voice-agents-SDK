@@ -1,5 +1,36 @@
 # Changelog
 
+## test: add ephemeral redis memory adapter tests
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Valider un vrai adapter Redis pour la memoire temporelle de learning, avec un
+test BDD contre Redis ephemere et un chemin dev local conserve par env.
+
+### Journal
+
+- Ajout de `pnpm test:redis-memory:bdd`.
+- Ajout du driver `AGENT_LEARNING_MEMORY_DRIVER=local|redis`.
+- Ajout de `RedisTemporalMemoryStore` avec TTL Redis reel, namespace, scope
+  tenant/agent/user et persistance entre instances d'adapter.
+- Separation SOLID du memory store en barrel public, factory, local-store,
+  redis-store, scope et types.
+- Le service learning choisit maintenant son memory store via
+  `createTemporalMemoryStoreFromEnv`.
+- README, README starter, `.env.example`, onboarding env, TODO et
+  `audit:solid` sont a jour.
+
+### Validation
+
+- `pnpm test:redis-memory:bdd` OK
+- `pnpm test:learning:bdd` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:loc` OK
+- `pnpm audit:solid` OK
+
 ## test: add temporal worker adapter boundary
 
 Status: implemented locally
