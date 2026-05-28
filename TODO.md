@@ -1,21 +1,19 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: harden logs and debug artifacts.
+Current goal: gate debug audio artifacts.
 
-Target commit title candidate: `test: redact prompt previews from logs`
+Target commit title candidate: `test: gate debug audio dumps`
 
 ## Active Focus
 
 ### Logs And Debug Artifacts
 
 Outcome:
-Normal runtime and builder logs do not leak prompts, messages, nested secrets,
-or debug audio outside local-only paths.
+Debug audio artifacts cannot be written outside local-only debug mode, must use
+restrictive permissions, and must be easy to clean up.
 
 Next work:
 
-- [ ] Remove prompt/message previews from normal logs.
-- [ ] Add recursive redaction for nested secrets/content.
 - [ ] Gate audio dumps to local-only debug with restrictive permissions and
   cleanup.
 

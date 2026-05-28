@@ -1,5 +1,36 @@
 # Changelog
 
+## test: redact prompt previews from logs
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Empecher les logs runtime normaux d'exposer prompts, messages, contenus ou
+secrets imbriques, y compris via les bindings d'un logger enfant.
+
+### Journal
+
+- Ajout de `pnpm test:log-redaction:bdd`.
+- Le BDD capture le logger console en dev et un adapter Pino factice.
+- La redaction couvre recursivement `prompt`, `message`, `content`, `text`,
+  transcript/input/output et les previews associees.
+- Les champs secrets imbriques comme `authorization`, `token`, `apiKey`,
+  `cookie`, `credential` et `password` sont masques.
+- Extraction de `log-redaction.ts` pour separer la responsabilite de redaction
+  du logger.
+- `pnpm audit:solid` execute maintenant le BDD de redaction.
+- Le TODO passe a la prochaine tranche: dumps audio debug locaux.
+
+### Validation
+
+- `pnpm test:log-redaction:bdd` OK
+- `pnpm typecheck:sdk` OK
+- `pnpm audit:loc` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: enforce runtime tool authorization
 
 Status: implemented locally

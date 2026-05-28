@@ -1,8 +1,4 @@
-/**
- * Agent Logger - Simplified wrapper for structured logging
- * Delegates to Pino (production) or console (development).
- * Provides context binding for sessionId, userId, channel.
- */
+import { redactLogContext } from "./log-redaction.js";
 
 /**
  * Log context for agent operations
@@ -26,39 +22,6 @@ export interface AgentLogger {
 }
 
 /**
- * Fields to redact from logs
- */
-const REDACT_FIELDS = [
-  "password",
-  "token",
-  "secret",
-  "apiKey",
-  "authorization",
-  "pin",
-];
-
-/**
- * Redact sensitive fields from context
- */
-function redactContext(ctx: LogContext): LogContext {
-  const redacted: LogContext = {};
-  for (const [key, value] of Object.entries(ctx)) {
-    if (REDACT_FIELDS.some((f) => key.toLowerCase().includes(f))) {
-      redacted[key] = "[REDACTED]";
-    } else {
-      redacted[key] = redactValue(value);
-    }
-  }
-  return redacted;
-}
-
-function redactValue(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(redactValue);
-  if (!value || typeof value !== "object") return value;
-  return redactContext(value as LogContext);
-}
-
-/**
  * Check if in production environment
  */
 function isProd(): boolean {
@@ -72,7 +35,7 @@ class ConsoleAgentLogger implements AgentLogger {
   constructor(private readonly context: LogContext = {}) {}
 
   private log(level: string, msg: string, ctx?: LogContext): void {
-    const mergedCtx = redactContext({ ...this.context, ...ctx });
+    const mergedCtx = redactLogContext({ ...this.context, ...ctx });
     const hasContext = Object.keys(mergedCtx).length > 0;
 
     if (isProd()) {
@@ -118,7 +81,7 @@ class ConsoleAgentLogger implements AgentLogger {
   }
 
   child(ctx: LogContext): AgentLogger {
-    return new ConsoleAgentLogger({ ...this.context, ...ctx });
+    return new ConsoleAgentLogger(redactLogContext({ ...this.context, ...ctx }));
   }
 }
 
@@ -140,19 +103,19 @@ class PinoAgentLogger implements AgentLogger {
   ) {}
 
   debug(msg: string, ctx?: LogContext): void {
-    this.pino.debug(redactContext({ ...this.context, ...ctx }), msg);
+    this.pino.debug(redactLogContext({ ...this.context, ...ctx }), msg);
   }
 
   info(msg: string, ctx?: LogContext): void {
-    this.pino.info(redactContext({ ...this.context, ...ctx }), msg);
+    this.pino.info(redactLogContext({ ...this.context, ...ctx }), msg);
   }
 
   warn(msg: string, ctx?: LogContext): void {
-    this.pino.warn(redactContext({ ...this.context, ...ctx }), msg);
+    this.pino.warn(redactLogContext({ ...this.context, ...ctx }), msg);
   }
 
   error(msg: string, error?: Error | unknown, ctx?: LogContext): void {
-    const context = redactContext({ ...this.context, ...ctx });
+    const context = redactLogContext({ ...this.context, ...ctx });
     if (error instanceof Error) {
       this.pino.error({ ...context, err: error }, msg);
     } else {
@@ -161,10 +124,8 @@ class PinoAgentLogger implements AgentLogger {
   }
 
   child(ctx: LogContext): AgentLogger {
-    return new PinoAgentLogger(this.pino.child(ctx), {
-      ...this.context,
-      ...ctx,
-    });
+    const context = redactLogContext({ ...this.context, ...ctx });
+    return new PinoAgentLogger(this.pino.child(context), context);
   }
 }
 
