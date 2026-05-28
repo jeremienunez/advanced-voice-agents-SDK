@@ -50,31 +50,34 @@
 .rtcSidePanel,
 .rtcControlDock,
 .rtcDiagnostics {
-  border: 1px solid var(--studio-border);
+  border: 1px solid rgba(226, 232, 240, 0.95);
   border-radius: var(--studio-radius);
-  background: var(--studio-surface);
-  box-shadow: var(--studio-shadow-sm);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.82) 100%);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.03), 0 1px 4px rgba(15, 23, 42, 0.01);
 }
 
 .rtcSidePanel {
-  display: grid;
-  align-content: start;
-  gap: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
   min-height: 320px;
-  padding: 18px;
+  padding: 24px;
 }
 
 .rtcSidePanel h2 {
+  font-family: var(--font-display, var(--font-sans));
   margin: 0;
   color: var(--studio-text-strong);
   font-size: 14px;
   font-weight: 800;
-  letter-spacing: 0;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
 .rtcSidePanel dl {
   display: grid;
-  gap: 10px;
+  gap: 12px;
   margin: 0;
 }
 
@@ -83,15 +86,17 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--studio-border-soft);
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--studio-border-soft);
 }
 
 .rtcSidePanel dt {
   color: var(--studio-muted);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .rtcSidePanel dd {
@@ -109,33 +114,69 @@
   place-items: center;
   position: relative;
   overflow: hidden;
-  border: 1px solid var(--studio-border);
+  border: 1px solid rgba(15, 23, 42, 0.8);
   border-radius: var(--studio-radius);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(241, 245, 249, 0.64)),
-    radial-gradient(circle at 50% 42%, rgba(37, 99, 235, 0.12), transparent 48%);
-  box-shadow: var(--studio-shadow-sm);
+  background: 
+    radial-gradient(circle at 50% 50%, rgba(11, 87, 208, 0.15) 0%, transparent 65%),
+    linear-gradient(135deg, #020617 0%, #09090b 100%);
+  box-shadow: 
+    inset 0 0 50px rgba(0, 0, 0, 0.85),
+    0 12px 36px rgba(15, 23, 42, 0.12);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.rtcOrbStage.speaking {
+  border-color: rgba(11, 87, 208, 0.4);
+  box-shadow: 
+    inset 0 0 50px rgba(11, 87, 208, 0.18),
+    inset 0 0 20px rgba(11, 87, 208, 0.08),
+    0 12px 36px rgba(11, 87, 208, 0.06);
+}
+
+.rtcOrbStage.listening {
+  border-color: rgba(19, 115, 51, 0.4);
+  box-shadow: 
+    inset 0 0 50px rgba(19, 115, 51, 0.18),
+    inset 0 0 20px rgba(19, 115, 51, 0.08),
+    0 12px 36px rgba(19, 115, 51, 0.06);
+}
+
+.rtcOrbStage.muted {
+  border-color: rgba(197, 34, 31, 0.4);
+  box-shadow: 
+    inset 0 0 50px rgba(197, 34, 31, 0.18),
+    inset 0 0 20px rgba(197, 34, 31, 0.08),
+    0 12px 36px rgba(197, 34, 31, 0.06);
 }
 
 .rtcLiveTranscript {
-  display: grid;
-  gap: 8px;
-  padding: 14px;
-  border: 1px solid var(--studio-action-border);
-  border-radius: var(--studio-radius-sm);
-  background: var(--studio-action-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  border: 1px solid rgba(11, 87, 208, 0.15);
+  border-radius: 16px;
+  border-bottom-right-radius: 4px;
+  background: rgba(11, 87, 208, 0.05);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(11, 87, 208, 0.04);
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .rtcLiveTranscript.agent {
-  border-color: var(--studio-success-border);
-  background: var(--studio-success-soft);
+  border-color: rgba(19, 115, 51, 0.15);
+  border-radius: 16px;
+  border-bottom-left-radius: 4px;
+  background: rgba(19, 115, 51, 0.05);
+  box-shadow: 0 4px 12px rgba(19, 115, 51, 0.04);
 }
 
 .rtcLiveTranscript strong {
   color: var(--studio-action);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 850;
-  letter-spacing: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .rtcLiveTranscript.agent strong {
@@ -143,14 +184,14 @@
 }
 
 .rtcLiveTranscript span {
-  color: var(--studio-text);
-  font-size: 14px;
+  color: var(--studio-text-strong);
+  font-size: 13.5px;
   line-height: 1.5;
-  letter-spacing: 0;
+  font-weight: 500;
 }
 
 .rtcControlDock {
-  padding: 16px;
+  padding: 20px 24px;
 }
 
 .rtcControlDock > .controlPanel {
@@ -167,38 +208,40 @@
 .openDiagBtn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  height: 38px;
-  padding: 0 16px;
+  gap: 10px;
+  height: 44px;
+  padding: 0 20px;
   border: 1px solid var(--studio-border);
   background: var(--studio-surface);
-  border-radius: var(--studio-radius);
+  border-radius: 9999px;
   color: var(--studio-text-strong);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 750;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: var(--studio-shadow-sm);
 }
 
 .openDiagBtn:hover {
   border-color: var(--studio-action);
-  background: var(--studio-action-soft);
+  background: rgba(11, 87, 208, 0.04);
   color: var(--studio-action);
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 12px rgba(11, 87, 208, 0.08);
 }
 
 .diagBadge {
   display: inline-grid;
   place-items: center;
-  height: 18px;
-  min-width: 18px;
-  padding: 0 5px;
+  height: 20px;
+  min-width: 20px;
+  padding: 0 6px;
   background: var(--studio-action);
   color: #ffffff;
   border-radius: 9999px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 850;
-  transition: background var(--transition-fast);
+  transition: background 0.2s ease;
 }
 
 .openDiagBtn:hover .diagBadge {
@@ -209,13 +252,26 @@
 .rtcOrbStage::before {
   content: "";
   position: absolute;
-  width: 280px;
-  height: 280px;
-  background: radial-gradient(circle, rgba(37, 99, 235, 0.16), transparent 70%);
-  filter: blur(32px);
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(11, 87, 208, 0.45) 0%, rgba(19, 115, 51, 0.18) 50%, transparent 100%);
+  filter: blur(44px);
   z-index: 0;
   pointer-events: none;
   animation: orbSpotlightPulse 4s ease-in-out infinite alternate;
+  transition: background 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.rtcOrbStage.speaking::before {
+  background: radial-gradient(circle, rgba(11, 87, 208, 0.55) 0%, rgba(14, 165, 233, 0.22) 50%, transparent 100%);
+}
+
+.rtcOrbStage.listening::before {
+  background: radial-gradient(circle, rgba(19, 115, 51, 0.55) 0%, rgba(52, 168, 83, 0.22) 50%, transparent 100%);
+}
+
+.rtcOrbStage.muted::before {
+  background: radial-gradient(circle, rgba(197, 34, 31, 0.45) 0%, rgba(176, 96, 0, 0.18) 50%, transparent 100%);
 }
 
 @keyframes orbSpotlightPulse {
@@ -344,12 +400,14 @@
 }
 
 .rtcDrawerDeck,
-.rtcDrawerGrid {
+.rtcDrawerGrid,
+.rtcDiagnosticsGrid {
   display: grid;
-  gap: 12px;
+  gap: 16px;
 }
 
-.rtcDrawerGrid {
+.rtcDrawerGrid,
+.rtcDiagnosticsGrid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 

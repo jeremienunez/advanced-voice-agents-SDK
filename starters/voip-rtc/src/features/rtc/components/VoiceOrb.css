@@ -10,9 +10,31 @@
   width: min(100%, 540px);
   z-index: 10;
   box-shadow:
-    0 0 0 24px rgba(37, 99, 235, 0.08),
-    0 0 0 58px rgba(37, 99, 235, 0.04),
-    0 30px 80px rgba(37, 99, 235, 0.24);
+    0 0 0 24px rgba(11, 87, 208, 0.06),
+    0 0 0 58px rgba(11, 87, 208, 0.03),
+    0 30px 80px rgba(11, 87, 208, 0.22);
+  transition: box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.voice-orb.speaking {
+  box-shadow:
+    0 0 0 24px rgba(11, 87, 208, 0.12),
+    0 0 0 58px rgba(11, 87, 208, 0.06),
+    0 30px 80px rgba(11, 87, 208, 0.32);
+}
+
+.voice-orb.listening {
+  box-shadow:
+    0 0 0 24px rgba(19, 115, 51, 0.12),
+    0 0 0 58px rgba(19, 115, 51, 0.06),
+    0 30px 80px rgba(19, 115, 51, 0.32);
+}
+
+.voice-orb.muted {
+  box-shadow:
+    0 0 0 24px rgba(197, 34, 31, 0.08),
+    0 0 0 58px rgba(197, 34, 31, 0.04),
+    0 30px 80px rgba(197, 34, 31, 0.22);
 }
 
 .voice-orb-stage {
@@ -71,25 +93,36 @@
   aspect-ratio: 1;
   display: block;
   height: 100%;
-  mix-blend-mode: multiply;
+  mix-blend-mode: screen; /* Additive blend mode for premium dark backdrop glow */
   position: relative;
   width: 100%;
   z-index: 2;
 }
 
 .voice-orb-caption {
-  color: var(--slate-500);
-  font-size: 11px;
-  font-weight: 850;
+  color: #94a3b8; /* slate-400 for high-contrast on dark void */
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 800;
   height: 20px;
-  letter-spacing: 1.5px;
-  margin-top: 10px;
+  letter-spacing: 2px;
+  margin-top: 18px;
   text-transform: uppercase;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
-.voice-orb.speaking .voice-orb-caption { color: var(--google-blue); }
-.voice-orb.listening .voice-orb-caption { color: var(--google-green); }
-.voice-orb.muted .voice-orb-caption { color: var(--google-red); }
+.voice-orb.speaking .voice-orb-caption { 
+  color: #3b82f6; 
+  text-shadow: 0 0 10px rgba(59, 130, 246, 0.4); 
+}
+.voice-orb.listening .voice-orb-caption { 
+  color: #10b981; 
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.4); 
+}
+.voice-orb.muted .voice-orb-caption { 
+  color: #ef4444; 
+  text-shadow: 0 0 10px rgba(239, 68, 68, 0.4); 
+}
 
 .voice-orb.muted .voice-orb-canvas {
   opacity: 0.58;

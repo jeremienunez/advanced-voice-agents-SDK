@@ -12,28 +12,27 @@
 }
 
 .field {
-  display: grid;
-  gap: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   min-width: 0;
 }
 
 .field span,
 .inlineControl span {
   color: var(--studio-muted);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.6px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
-.field span {
-  font-size: 11px;
-}
-
 .inlineControl {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   min-width: 140px;
-  gap: 6px;
+  gap: 8px;
 }
 
 input,
@@ -41,16 +40,17 @@ select,
 textarea {
   width: 100%;
   min-width: 0;
-  border: 1px solid var(--studio-border);
-  border-radius: var(--studio-radius);
-  background: var(--studio-surface);
+  border: 1px solid rgba(216, 222, 230, 0.95);
+  border-radius: 10px; /* Modern sleek corners */
+  background: rgba(255, 255, 255, 0.9);
   color: var(--studio-text-strong);
+  font-family: var(--font-sans);
   outline: none;
-  padding: 0 14px;
-  font-size: 13px;
+  padding: 0 16px;
+  font-size: 13.5px;
   font-weight: 600;
-  transition: all var(--transition-fast);
-  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.02);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.01);
 }
 
 input:focus,
@@ -58,36 +58,36 @@ select:focus,
 textarea:focus {
   border-color: var(--studio-action);
   box-shadow: 
-    0 0 0 3px var(--google-blue-focus),
-    inset 0 1px 2px rgba(15, 23, 42, 0.02);
-  background: var(--studio-surface);
+    0 0 0 4px rgba(11, 87, 208, 0.12),
+    inset 0 1px 2px rgba(15, 23, 42, 0.01);
+  background: #ffffff;
 }
 
 input:hover:not(:disabled),
 select:hover:not(:disabled),
 textarea:hover:not(:disabled) {
-  border-color: var(--studio-subtle);
+  border-color: #a3b0c0;
 }
 
 input {
-  height: 38px;
+  height: 44px; /* Generous touch targets */
 }
 
 select {
-  height: 38px;
+  height: 44px;
   cursor: pointer;
-  padding-right: 28px;
+  padding-right: 32px;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%233f3f46' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 10px center;
+  background-position: right 14px center;
   background-size: 12px;
 }
 
 textarea {
   min-height: 120px;
   resize: vertical;
-  padding: 12px 14px;
+  padding: 14px 16px;
   line-height: 1.6;
 }
 
@@ -111,13 +111,14 @@ textarea:disabled {
 }
 
 button {
-  height: 38px;
+  height: 44px;
   border: 1px solid var(--studio-border);
-  border-radius: var(--studio-radius);
+  border-radius: 9999px; /* Google Material 3 fully rounded pills */
   background: var(--studio-surface);
   color: var(--studio-text);
-  padding: 0 18px;
-  font-size: 12px;
+  padding: 0 24px;
+  font-family: var(--font-sans);
+  font-size: 13px;
   font-weight: 750;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -134,8 +135,8 @@ button:hover:not(:disabled) {
   background: var(--studio-surface-muted);
   border-color: var(--studio-subtle);
   color: var(--studio-text-strong);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
 }
 
 button:active:not(:disabled) {
@@ -153,7 +154,7 @@ button.primary:hover:not(:disabled) {
   background: var(--studio-action-hover);
   border-color: var(--studio-action-hover);
   color: #ffffff;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 6px 18px rgba(11, 87, 208, 0.3);
 }
 
 button.ghost {

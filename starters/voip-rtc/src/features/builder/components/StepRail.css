@@ -22,9 +22,9 @@
   top: 24px;
   left: 20px;
   width: 2px;
-  background: linear-gradient(180deg, var(--studio-action, var(--google-blue)), var(--studio-action-hover, #1d4ed8));
+  background: linear-gradient(180deg, var(--studio-action), var(--studio-action-hover));
   z-index: 2;
-  box-shadow: 0 0 10px rgba(37, 99, 235, 0.4);
+  box-shadow: 0 0 10px rgba(11, 87, 208, 0.4);
   transition: height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -78,15 +78,15 @@
 }
 
 .wizard-node:hover:not(.locked) {
-  background: rgba(37, 99, 235, 0.03);
-  border-color: rgba(37, 99, 235, 0.08);
+  background: rgba(11, 87, 208, 0.03);
+  border-color: rgba(11, 87, 208, 0.08);
 }
 
 .wizard-node:hover:not(.locked) .wizard-circle {
-  border-color: var(--studio-accent, var(--google-blue));
-  color: var(--studio-accent, var(--google-blue));
+  border-color: var(--studio-action);
+  color: var(--studio-action);
   transform: scale(1.08);
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 4px 10px rgba(11, 87, 208, 0.15);
 }
 
 .wizard-node:hover:not(.locked) .wizard-label {
@@ -94,15 +94,15 @@
 }
 
 .wizard-node:hover:not(:disabled) {
-  background: rgba(37, 99, 235, 0.03);
+  background: rgba(11, 87, 208, 0.03);
   color: inherit;
 }
 
 /* Completed Steps */
 .wizard-node.completed .wizard-circle {
-  background: var(--studio-success-soft, var(--google-green-light));
-  border-color: var(--studio-success, var(--google-green));
-  color: var(--studio-success, var(--google-green));
+  background: var(--studio-success-soft);
+  border-color: var(--studio-success);
+  color: var(--studio-success);
 }
 
 .wizard-node.completed .wizard-label {
@@ -111,8 +111,8 @@
 }
 
 .wizard-node.available .wizard-circle {
-  border-color: var(--studio-accent, var(--google-blue));
-  color: var(--studio-accent, var(--google-blue));
+  border-color: var(--studio-action);
+  color: var(--studio-action);
 }
 
 .wizard-node.available .wizard-label {
@@ -121,16 +121,16 @@
 
 /* Active Step */
 .wizard-node.active {
-  background: rgba(37, 99, 235, 0.04);
-  border-color: rgba(37, 99, 235, 0.1);
+  background: rgba(11, 87, 208, 0.04);
+  border-color: rgba(11, 87, 208, 0.1);
   box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.03);
 }
 
 .wizard-node.active .wizard-circle {
-  background: var(--studio-accent, var(--google-blue));
-  border-color: var(--studio-accent, var(--google-blue));
+  background: var(--studio-action);
+  border-color: var(--studio-action);
   color: #ffffff;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15), 0 4px 12px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 0 0 3px rgba(11, 87, 208, 0.15), 0 4px 12px rgba(11, 87, 208, 0.3);
 }
 
 .wizard-node.active .wizard-label {

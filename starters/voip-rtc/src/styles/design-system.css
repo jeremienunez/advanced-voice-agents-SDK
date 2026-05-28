@@ -1,5 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap');
+
 :root {
-  --font-sans: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-sans: 'Plus Jakarta Sans', Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: 'Outfit', var(--font-sans);
 
   --studio-bg: #f8fafc;
   --studio-surface: #ffffff;
@@ -8,32 +11,32 @@
   --studio-border: #d8dee6;
   --studio-border-soft: #e5eaf0;
 
-  --studio-text-strong: #0f172a;
-  --studio-text: #1e293b;
-  --studio-muted: #64748b;
-  --studio-subtle: #94a3b8;
+  --studio-text-strong: #09090b; /* zinc-950: deep rich black */
+  --studio-text: #18181b;        /* zinc-900: high-contrast dark gray */
+  --studio-muted: #3f3f46;       /* zinc-700: extremely clear secondary text */
+  --studio-subtle: #71717a;      /* zinc-500: crisp gray for labels */
 
-  --studio-action: #2563eb;
-  --studio-action-hover: #1d4ed8;
-  --studio-action-soft: #eff6ff;
-  --studio-action-border: #bfdbfe;
+  --studio-action: #0b57d0;        /* Google Blue */
+  --studio-action-hover: #0a52c3;  /* Google Blue Hover */
+  --studio-action-soft: #e8f0fe;   /* Google Blue Soft */
+  --studio-action-border: #d2e3fc; /* Google Blue Border */
 
-  --studio-success: #0f9f6e;
-  --studio-success-soft: #ecfdf5;
-  --studio-success-border: #a7f3d0;
+  --studio-success: #137333;        /* Google Green */
+  --studio-success-soft: #e6f4ea;   /* Google Green Soft */
+  --studio-success-border: #ceead6; /* Google Green Border */
 
-  --studio-warning: #b45309;
-  --studio-warning-soft: #fffbeb;
-  --studio-warning-border: #fde68a;
+  --studio-warning: #b06000;        /* Google Yellow/Orange */
+  --studio-warning-soft: #fef7e0;   /* Google Yellow Soft */
+  --studio-warning-border: #feebc8; /* Google Yellow Border */
 
-  --studio-danger: #dc2626;
-  --studio-danger-soft: #fef2f2;
-  --studio-danger-border: #fecaca;
+  --studio-danger: #c5221f;        /* Google Red */
+  --studio-danger-soft: #fce8e6;   /* Google Red Soft */
+  --studio-danger-border: #fad2cf; /* Google Red Border */
 
-  --studio-radius: 8px;
-  --studio-radius-sm: 6px;
-  --studio-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
-  --studio-shadow-md: 0 12px 28px rgba(15, 23, 42, 0.08);
+  --studio-radius: 16px;
+  --studio-radius-sm: 8px;
+  --studio-shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.04);
+  --studio-shadow-md: 0 16px 40px rgba(15, 23, 42, 0.06);
 
   /* Backward-compatible aliases used by existing components during migration. */
   --bg-primary: var(--studio-bg);
@@ -41,21 +44,21 @@
   --bg-card: var(--studio-surface);
   --slate-900: var(--studio-text-strong);
   --slate-800: var(--studio-text);
-  --slate-700: #334155;
-  --slate-600: #475569;
+  --slate-700: #27272a; /* Zinc 800 */
+  --slate-600: #3f3f46; /* Zinc 700 */
   --slate-500: var(--studio-muted);
   --slate-400: var(--studio-subtle);
-  --slate-300: #cbd5e1;
+  --slate-300: #d4d4d8; /* Zinc 300 */
   --slate-200: var(--studio-border-soft);
   --slate-100: var(--studio-surface-muted);
   --slate-50: var(--studio-bg);
   --google-blue: var(--studio-action);
   --google-blue-hover: var(--studio-action-hover);
   --google-blue-light: var(--studio-action-soft);
-  --google-blue-focus: rgba(37, 99, 235, 0.16);
+  --google-blue-focus: rgba(11, 87, 208, 0.16);
   --google-green: var(--studio-success);
   --google-green-light: var(--studio-success-soft);
-  --google-yellow: #f59e0b;
+  --google-yellow: var(--studio-warning);
   --google-yellow-light: var(--studio-warning-soft);
   --google-red: var(--studio-danger);
   --google-red-light: var(--studio-danger-soft);

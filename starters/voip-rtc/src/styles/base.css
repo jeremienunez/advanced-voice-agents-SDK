@@ -79,20 +79,22 @@ p {
 }
 
 h1 {
+  font-family: var(--font-display, var(--font-sans));
   font-size: clamp(24px, 3.5vw, 32px);
   line-height: 1.2;
-  letter-spacing: -0.5px;
-  font-weight: 700;
-  color: var(--slate-900);
+  letter-spacing: -0.03em;
+  font-weight: 800;
+  color: var(--studio-text-strong);
 }
 
 h2 {
+  font-family: var(--font-display, var(--font-sans));
   margin-bottom: 20px;
   font-size: 13px;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--slate-700);
-  font-weight: 700;
+  color: var(--studio-text-strong);
+  font-weight: 750;
 }
 
 .status {
@@ -131,9 +133,11 @@ h2 {
 .panel {
   min-height: 180px;
   border-radius: var(--radius-lg);
-  padding: 20px 24px;
-  background: var(--bg-card);
-  border: 1px solid var(--slate-200);
+  padding: 24px 28px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.82) 100%);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.03), 0 1px 4px rgba(15, 23, 42, 0.01);
 }
 
 .builderTopbar {

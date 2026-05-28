@@ -43,29 +43,28 @@
 .chat-msg {
   display: flex;
   flex-direction: column;
-  max-width: 80%;
+  max-width: 85%;
   padding: 14px 18px;
-  border-radius: 14px;
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.02);
   animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   line-height: 1.5;
 }
 
 .chat-msg.agent {
   align-self: flex-start;
-  background: var(--studio-surface);
-  border: 1px solid var(--studio-border-soft);
-  border-left: 4px solid var(--studio-action);
+  background: rgba(19, 115, 51, 0.05);
+  border: 1px solid rgba(19, 115, 51, 0.15);
   border-bottom-left-radius: 4px;
   color: var(--studio-text-strong);
 }
 
 .chat-msg.user {
   align-self: flex-end;
-  background: rgba(37, 99, 235, 0.06);
-  border: 1px solid rgba(37, 99, 235, 0.12);
+  background: rgba(11, 87, 208, 0.05);
+  border: 1px solid rgba(11, 87, 208, 0.15);
   border-bottom-right-radius: 4px;
-  color: var(--studio-action-hover);
+  color: var(--studio-text-strong);
 }
 
 .chat-msg-sender {
@@ -75,6 +74,10 @@
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.chat-msg.agent .chat-msg-sender {
+  color: var(--studio-success);
 }
 
 .chat-msg.user .chat-msg-sender {
@@ -112,4 +115,67 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 13px;
+}
+
+/* Inline Learning Session Loader Box */
+.learning-loader-box {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  margin-top: 16px;
+  background: rgba(11, 87, 208, 0.05); /* Soft Google Blue backdrop */
+  border: 1px solid rgba(11, 87, 208, 0.15);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(11, 87, 208, 0.04);
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.learning-loader-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(11, 87, 208, 0.15);
+  border-top-color: var(--studio-action); /* Google Blue primary spinner color */
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+.learning-loader-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.learning-loader-content strong {
+  color: var(--studio-action);
+  font-size: 13px;
+  font-weight: 750;
+  text-align: left;
+}
+
+.pulse-text {
+  animation: pulseAlpha 1.8s ease-in-out infinite;
+}
+
+.learning-loader-detail {
+  color: var(--studio-muted);
+  font-size: 11.5px;
+  line-height: 1.4;
+  text-align: left;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulseAlpha {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
 }

@@ -18,11 +18,12 @@
 }
 
 .agentsHeader h1 {
+  font-family: var(--font-display, var(--font-sans));
   margin: 0;
   color: var(--studio-text-strong);
   font-size: 26px;
   font-weight: 850;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.03em;
 }
 
 .agentsTopbar {
@@ -44,6 +45,8 @@
   border-radius: 16px;
   background: var(--studio-surface);
   box-shadow: var(--studio-shadow-sm);
+  position: relative;
+  z-index: 10;
 }
 
 .agentsToolbar label {
@@ -117,7 +120,8 @@
 .agentDetailPanel {
   position: sticky;
   top: 20px;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 20px;
   padding: 24px;
   border: 1px solid var(--studio-border-soft);
@@ -125,6 +129,23 @@
   background: var(--studio-surface);
   box-shadow: var(--studio-shadow-sm);
   transition: border-color var(--transition-fast);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+}
+
+/* Premium micro-scrollbar */
+.agentDetailPanel::-webkit-scrollbar {
+  width: 5px;
+}
+.agentDetailPanel::-webkit-scrollbar-track {
+  background: transparent;
+}
+.agentDetailPanel::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 9999px;
+}
+.agentDetailPanel::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.18);
 }
 
 .agentDetailPanel:hover {
@@ -144,6 +165,7 @@
 }
 
 .agentDetailPanel h2 {
+  font-family: var(--font-display, var(--font-sans));
   color: var(--studio-text-strong);
   font-size: 20px;
   font-weight: 850;
@@ -151,7 +173,8 @@
 }
 
 .agentDetailPanel header {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
@@ -161,6 +184,8 @@
   color: var(--studio-muted);
   line-height: 1.5;
   font-size: 13px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .agentDetailStats {
@@ -200,19 +225,24 @@
 }
 
 .agentDetailSection h3 {
+  font-family: var(--font-display, var(--font-sans));
   color: var(--studio-text-strong);
   font-size: 14px;
   font-weight: 800;
 }
 
 .agentDetailActions {
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 12px;
+  width: 100%;
+  margin-top: auto;
 }
 
 .agentDetailActions button {
+  width: 100%;
   min-width: 0;
+  box-sizing: border-box;
   letter-spacing: 0.5px;
 }
 
@@ -294,17 +324,17 @@
   justify-content: center;
   align-items: center;
   width: 100%;
-  min-height: 400px;
+  min-height: 560px;
 }
 
 .agentCarouselWrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
+  gap: 28px;
   width: 100%;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   padding: 10px 0;
 }
 
@@ -312,7 +342,7 @@
   position: relative;
   width: 100%;
   max-width: 680px;
-  height: 340px;
+  height: 480px;
   perspective: 1200px;
   display: flex;
   justify-content: center;
@@ -350,15 +380,9 @@
   gap: 8px !important;
 }
 
-/* Hide heavy details inside background carousel slides */
-.agentCarouselSlide.prev .agent-metadata-grid,
-.agentCarouselSlide.next .agent-metadata-grid,
-.agentCarouselSlide.prev .agentActions,
-.agentCarouselSlide.next .agentActions,
-.agentCarouselSlide.prev .agentUpdatedAt,
-.agentCarouselSlide.next .agentUpdatedAt,
-.agentCarouselSlide.prev .agentIntent,
-.agentCarouselSlide.next .agentIntent {
+/* Hide all detailed contents inside background slides except the top title header button */
+.agentCarouselSlide.prev .agentCard > *:not(.agentCardSelect),
+.agentCarouselSlide.next .agentCard > *:not(.agentCardSelect) {
   display: none !important;
 }
 
@@ -371,28 +395,28 @@
 }
 
 .agentCarouselSlide.prev {
-  transform: rotateY(25deg) translate3d(-190px, -40px, -80px);
+  transform: rotateY(25deg) translate3d(-240px, 0, -100px);
   opacity: 0.6;
   z-index: 5;
   pointer-events: auto;
 }
 
 .agentCarouselSlide.next {
-  transform: rotateY(-25deg) translate3d(190px, -40px, -80px);
+  transform: rotateY(-25deg) translate3d(240px, 0, -100px);
   opacity: 0.6;
   z-index: 5;
   pointer-events: auto;
 }
 
 .agentCarouselSlide.far-prev {
-  transform: rotateY(30deg) translate3d(-310px, -60px, -150px);
+  transform: rotateY(30deg) translate3d(-380px, 0, -180px);
   opacity: 0.15;
   z-index: 1;
   pointer-events: none;
 }
 
 .agentCarouselSlide.far-next {
-  transform: rotateY(-30deg) translate3d(310px, -60px, -150px);
+  transform: rotateY(-30deg) translate3d(380px, 0, -180px);
   opacity: 0.15;
   z-index: 1;
   pointer-events: none;
@@ -400,7 +424,7 @@
 
 .agentCarouselSlide.hidden {
   opacity: 0;
-  transform: translate3d(0, -60px, -300px);
+  transform: translate3d(0, 0, -300px);
   pointer-events: none;
   z-index: 0;
 }

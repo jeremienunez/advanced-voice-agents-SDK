@@ -69,7 +69,7 @@ export function RtcLab({
           </dl>
         </aside>
 
-        <section className="rtcOrbStage" aria-label="Voice state">
+        <section className={`rtcOrbStage ${rtc.snapshot.state} ${rtc.snapshot.isMuted ? "muted" : ""}`} aria-label="Voice state">
           <VoiceOrb
             state={rtc.snapshot.state}
             isMuted={rtc.snapshot.isMuted}

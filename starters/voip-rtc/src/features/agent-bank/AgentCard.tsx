@@ -42,9 +42,6 @@ export function AgentCard({
           <span className={`agent-badge ${isCompiled ? "compiled" : "draft"}`}>
             {isCompiled ? "Compiled" : "Draft"}
           </span>
-          <h2 className="agent-title">
-            {agent.publicAgentName}
-          </h2>
         </div>
         {agent.active && (
           <span className="agent-badge activeBadge">
@@ -57,33 +54,19 @@ export function AgentCard({
         {agent.intent}
       </p>
 
-      <div className="agent-metadata-grid">
-        <span className="agent-meta-label">LLM / Model</span>
-        <span className="agent-meta-value">{agent.kind}</span>
-
-        <span className="agent-meta-label">RAG knowledge</span>
-        <span className="agent-meta-value truncate">
-          {agent.knowledge?.strategy ? agent.knowledge.strategy : "Unplanned"}
-        </span>
-
-        <span className="agent-meta-label">Documents</span>
-        <span className="agent-meta-value">{agent.knowledge?.documentCount ?? 0} files</span>
-
-        <span className="agent-meta-label">System prompt</span>
-        <span className="agent-meta-value">{agent.promptChars} chars</span>
-
-        <span className="agent-meta-label">Enabled tools</span>
-        <span className="agent-meta-value">{agent.selectedTools.length} tools</span>
-
-        <span className="agent-meta-label">Agent version</span>
-        <span className="agent-meta-value">v{agent.evolution?.version ?? (isCompiled ? 1 : 0)}</span>
-
-        <span className="agent-meta-label">Last learning</span>
-        <span className="agent-meta-value">
-          {agent.evolution?.lastLearningRun
-            ? `${agent.evolution.lastLearningRun.status} · ${formatDateTime(agent.evolution.lastLearningRun.at)}`
-            : "None"}
-        </span>
+      <div className="agent-meta-badges">
+        <div className="meta-badge">
+          <span className="meta-label">Model</span>
+          <span className="meta-value">{agent.kind}</span>
+        </div>
+        <div className="meta-badge">
+          <span className="meta-label">Version</span>
+          <span className="meta-value">v{agent.evolution?.version ?? (isCompiled ? 1 : 0)}</span>
+        </div>
+        <div className="meta-badge">
+          <span className="meta-label">Tools</span>
+          <span className="meta-value">{agent.selectedTools.length} tools</span>
+        </div>
       </div>
 
       <div className="agentUpdatedAt">

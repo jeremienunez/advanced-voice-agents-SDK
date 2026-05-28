@@ -26,7 +26,7 @@
 .builderPath {
   display: grid;
   gap: 16px;
-  padding: 16px;
+  padding: 24px;
 }
 
 .builderPath h2,
@@ -40,14 +40,16 @@
 
 .builderStepPanel {
   min-width: 0;
-  padding: 18px;
+  padding: 24px 28px;
 }
 
 .builderStepHeader {
   display: flex;
   justify-content: space-between;
   gap: 18px;
-  margin-bottom: 18px;
+  margin-bottom: 24px;
+  border-bottom: 1px dashed var(--studio-border-soft);
+  padding-bottom: 18px;
 }
 
 .builderStepHeader h1 {
@@ -77,20 +79,43 @@
 .builderInspectorPanel {
   display: grid;
   gap: 10px;
-  padding: 16px;
+  padding: 24px;
 }
 
 .builderInspectorPanel button {
   width: 100%;
-  padding: 10px 12px;
+  padding: 10px 16px;
   border: 1px solid var(--studio-border);
+  border-radius: 9999px; /* Material 3 capsule pills */
   background: var(--studio-surface);
-  text-align: left;
+  color: var(--studio-text);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: var(--studio-shadow-sm);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.builderInspectorPanel button:hover:not(:disabled) {
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 12px rgba(11, 87, 208, 0.06);
+  border-color: var(--studio-action);
+  color: var(--studio-action);
+  background: var(--studio-surface);
+}
+
+.builderInspectorPanel button:active:not(:disabled) {
+  transform: translateY(0.5px);
+  box-shadow: var(--studio-shadow-sm);
 }
 
 .builderInspectorPanel button:disabled {
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
 .builderPreviewList {

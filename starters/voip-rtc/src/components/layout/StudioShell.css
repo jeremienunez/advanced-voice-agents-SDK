@@ -2,7 +2,7 @@
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: 84px minmax(0, 1fr);
+  grid-template-columns: 100px minmax(0, 1fr);
   min-height: 100vh;
   background: var(--studio-bg, var(--bg-primary, #f8fafc));
   color: var(--studio-text, var(--slate-800, #1e293b));
@@ -16,8 +16,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 28px;
-  padding: 24px 12px;
+  gap: 32px;
+  padding: 28px 10px;
   border-right: 1px solid rgba(226, 232, 240, 0.8);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
   backdrop-filter: blur(20px);
@@ -30,13 +30,14 @@
   width: 44px;
   height: 44px;
   place-items: center;
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--studio-action, #2563eb) 0%, var(--studio-action-hover, #1d4ed8) 100%);
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--studio-action) 0%, var(--studio-action-hover) 100%);
   color: #ffffff;
-  font-size: 13px;
-  font-weight: 800;
+  font-family: var(--font-display, var(--font-sans));
+  font-size: 14px;
+  font-weight: 900;
   letter-spacing: -0.02em;
-  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 4px 16px rgba(11, 87, 208, 0.25);
   position: relative;
   overflow: hidden;
 }
@@ -52,43 +53,73 @@
 }
 
 .studioNav {
-  display: grid;
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   width: 100%;
 }
 
 .studioNavItem {
   min-width: 0;
-  height: 48px;
-  border: 1px solid transparent;
-  border-radius: 12px;
+  height: 62px;
+  border: 0;
   background: transparent;
-  color: var(--studio-muted, var(--slate-500, #64748b));
+  color: var(--studio-muted);
   cursor: pointer;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 2px;
+  gap: 6px;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 2px;
+  position: relative;
 }
 
-.studioNavItem:hover,
-.studioNavItem:focus-visible {
-  background: rgba(37, 99, 235, 0.04);
-  color: var(--studio-action, var(--blue-600, #2563eb));
+.navIconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 32px;
+  border-radius: 16px;
+  color: var(--studio-muted);
+  background: transparent;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.studioNavItem:hover .navIconContainer {
+  background: rgba(11, 87, 208, 0.05);
+  color: var(--studio-action);
   transform: translateY(-1px);
 }
 
-.studioNavItem.active {
-  border-color: rgba(37, 99, 235, 0.15);
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.06) 0%, rgba(37, 99, 235, 0.01) 100%);
-  color: var(--studio-action, var(--blue-600, #2563eb));
-  box-shadow: inset 3px 0 0 0 var(--studio-action, #2563eb), 0 4px 12px rgba(37, 99, 235, 0.04);
+.studioNavItem.active .navIconContainer {
+  background: var(--studio-action-soft);
+  color: var(--studio-action);
+  box-shadow: 0 2px 4px rgba(11, 87, 208, 0.05);
+}
+
+.studioNavItem span:not(.navIconContainer) {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1px;
+  color: var(--studio-muted);
+  transition: all 0.2s ease;
+}
+
+.studioNavItem.active span:not(.navIconContainer) {
+  color: var(--studio-action);
+  font-weight: 850;
+}
+
+.studioNavItem:focus-visible {
+  outline: none;
+}
+
+.studioNavItem:focus-visible .navIconContainer {
+  outline: 2px solid var(--studio-action);
+  outline-offset: 2px;
 }
 
 .studioMain {
@@ -110,11 +141,12 @@
 }
 
 .studioTitleBlock h1 {
+  font-family: var(--font-display, var(--font-sans));
   margin: 0;
   color: var(--studio-text-strong, var(--slate-950, #020617));
   font-size: 24px;
   font-weight: 800;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
   line-height: 1.2;
 }
 
@@ -271,13 +303,23 @@
   }
 
   .studioNavItem {
-    min-width: 64px;
-    height: 40px;
-    padding: 0 10px;
+    min-width: auto;
+    height: 48px;
+    flex-direction: row;
+    gap: 8px;
+    padding: 0 12px;
+    border-radius: 24px;
+  }
+
+  .navIconContainer {
+    width: 36px;
+    height: 28px;
+    border-radius: 14px;
   }
 
   .studioNavItem.active {
-    box-shadow: inset 0 -3px 0 0 var(--studio-action, #2563eb);
+    box-shadow: none;
+    background: rgba(11, 87, 208, 0.04);
   }
 
   .studioTopbar {

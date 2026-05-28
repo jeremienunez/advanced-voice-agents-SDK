@@ -37,7 +37,17 @@ export function SessionPanel({
       </div>
 
       {snapshot.error ? <p className="error-box">{snapshot.error}</p> : null}
-      {snapshot.learning ? (
+      {snapshot.learning && (snapshot.learning.status === "running" || snapshot.learning.status === "pending") ? (
+        <div className="learning-loader-box">
+          <div className="learning-loader-spinner"></div>
+          <div className="learning-loader-content">
+            <strong className="pulse-text">Session d'apprentissage en cours...</strong>
+            <span className="learning-loader-detail">
+              {snapshot.learning.message ?? "L'agent consolide ses connaissances RAG."}
+            </span>
+          </div>
+        </div>
+      ) : snapshot.learning ? (
         <p className={snapshot.learning.status === "failed" ? "error-box" : "warning"}>
           {snapshot.learning.message ?? snapshot.learning.runId}
         </p>

@@ -69,9 +69,10 @@
 }
 
 .agentCardSelect span {
+  font-family: var(--font-display, var(--font-sans));
   font-size: 16px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .agentCardSelect small {
@@ -156,37 +157,53 @@
   border-left: 2px solid rgba(148, 163, 184, 0.3);
   padding-left: 12px;
   font-style: italic;
-}
-
-.agent-metadata-grid {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  row-gap: 10px;
-  column-gap: 16px;
-  background: rgba(241, 245, 249, 0.4);
-  padding: 16px;
-  border-radius: 12px;
-  font-size: 12px;
-  border: 1px solid rgba(229, 234, 240, 0.5);
-}
-
-.agent-meta-label {
-  color: var(--studio-muted);
-  font-weight: 500;
-}
-
-.agent-meta-value {
-  min-width: 0;
-  color: var(--studio-text-strong);
-  font-weight: 600;
-  text-align: right;
-  overflow-wrap: anywhere;
-}
-
-.agent-meta-value.truncate {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  height: 62.4px; /* 3 lines * 1.6 line-height * 13px = 62.4px (perfectly uniform card heights!) */
+}
+
+.agent-meta-badges {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.meta-badge {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 6px;
+  background: rgba(241, 245, 249, 0.4);
+  border: 1px solid rgba(229, 234, 240, 0.6);
+  border-radius: var(--studio-radius-sm);
+  transition: all 0.2s ease;
+}
+
+.meta-badge:hover {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: var(--studio-action-border);
+}
+
+.meta-label {
+  color: var(--studio-subtle);
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
+.meta-value {
+  color: var(--studio-text-strong);
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
 }
 
 .agentUpdatedAt {
@@ -204,9 +221,9 @@
 
 .agentActionButton {
   flex: 1;
-  font-size: 12px !important;
+  font-size: 13px !important;
   padding: 8px 12px !important;
-  font-weight: 600 !important;
+  font-weight: 750 !important;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
