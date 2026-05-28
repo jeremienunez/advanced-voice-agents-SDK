@@ -17,6 +17,10 @@ import type { LearningStatusSink } from "./temporal-workflow.js";
 import { LearnFromSessionWorkflow } from "./workflow.js";
 
 export interface StarterLearningService {
+  approveInfraEvolution(
+    draftId: string,
+    pendingId: string,
+  ): Promise<AgentEvolutionResult>;
   enqueueSessionLearning(
     input: LearningSessionInput,
     onStatus?: LearningStatusSink,
@@ -45,6 +49,10 @@ export function createStarterLearningServiceFromEnv(
   const evolution = new StarterAgentEvolution();
 
   return {
+    approveInfraEvolution(draftId, pendingId) {
+      return evolution.approveInfraEvolution(draftId, pendingId);
+    },
+
     enqueueSessionLearning(input, onStatus) {
       const workflow = new LearnFromSessionWorkflow({
         memoryStore,

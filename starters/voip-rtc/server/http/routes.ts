@@ -2,7 +2,7 @@ import type { WsData } from "../adapters/bun/voice-socket-adapter.js";
 import { publicProviderConfig } from "../providers/catalog.js";
 import { resolveClientIp } from "./client-ip.js";
 import { corsHeadersFor } from "./cors.js";
-import { readDraftId } from "./draft-id.js";
+import { readBodyString, readDraftId } from "./draft-id.js";
 import { accessGuard, originGuard } from "./guards.js";
 import type { BuilderRequestContext } from "../builder/types.js";
 import type { StarterRouteContext } from "./types.js";
@@ -99,6 +99,14 @@ async function handleBuilderRoute(
     const draftId = readDraftId(await request.json());
     if (!draftId) return json({ error: "draftId is required" }, app, request);
     return json(await app.learningService.rollback(draftId), app, request);
+  }
+  if (url.pathname === "/builder/agents/approve-infra-evolution" && request.method === "POST") {
+    const body = await request.json();
+    const draftId = readDraftId(body);
+    const pendingId = readBodyString(body, "pendingId");
+    if (!draftId) return json({ error: "draftId is required" }, app, request);
+    if (!pendingId) return json({ error: "pendingId is required" }, app, request);
+    return json(await app.learningService.approveInfraEvolution(draftId, pendingId), app, request);
   }
   const { response } = await app.builderService.handle(request, url, context);
   return response ?? new Response("Not found", { status: 404 });

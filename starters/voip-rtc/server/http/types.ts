@@ -24,6 +24,7 @@ export interface StarterRouteContext {
   env: StarterServerEnv;
   authTicketVerifier: AuthTicketPort;
   learningService: {
+    approveInfraEvolution(draftId: string, pendingId: string): Promise<unknown>;
     rollback(draftId: string): Promise<unknown>;
   };
   providerCatalog: RuntimeProviderConfig[];

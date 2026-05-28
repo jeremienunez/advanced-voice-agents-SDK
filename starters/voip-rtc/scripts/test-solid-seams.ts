@@ -96,7 +96,10 @@ async function scenarioVoiceWsUsesVerifiedIdentity() {
     builderService: { handle: async () => ({ response: null }) },
     defaultProviderId: "gemini",
     env,
-    learningService: { rollback: async () => ({}) },
+    learningService: {
+      approveInfraEvolution: async () => ({}),
+      rollback: async () => ({}),
+    },
     providerCatalog: [],
     voiceService: { activeSessionCount: 0 },
   };
@@ -166,6 +169,14 @@ async function scenarioVoiceLearningHookSkipsAndEnqueuesSessionLearning() {
   const capture: { value?: LearningSessionInput } = {};
   const queuedStatuses: LearningJobStatus[] = [];
   const learning = {
+    async approveInfraEvolution() {
+      return {
+        status: "skipped" as const,
+        draftId: "draft-solid",
+        version: 1,
+        reason: "test",
+      };
+    },
     enqueueSessionLearning(input: LearningSessionInput, emit?: (status: LearningJobStatus) => void) {
       capture.value = input;
       const status = learningStatus("queued", input.draftId ?? "missing");

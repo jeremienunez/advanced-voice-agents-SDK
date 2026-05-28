@@ -25,3 +25,16 @@ export function rollbackAgentVersion(apiBase: string, draftId: string) {
     reason: string;
   }>(`${apiBase}/agents/rollback`, { draftId });
 }
+
+export function approveInfraEvolution(
+  apiBase: string,
+  draftId: string,
+  pendingId: string,
+) {
+  return postJson<{
+    status: string;
+    draftId: string;
+    version: number;
+    reason: string;
+  }>(`${apiBase}/agents/approve-infra-evolution`, { draftId, pendingId });
+}

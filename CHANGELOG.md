@@ -1,5 +1,36 @@
 # Changelog
 
+## test: add infra evolution approval workflow
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Empecher le learning automatique d'appliquer directement des evolutions infra
+cloud, externes, IaC ou marquees approval-required.
+
+### Journal
+
+- Ajout de `pnpm test:infra-evolution-approval:bdd`.
+- Les recommandations infra risquees deviennent `pendingInfraEvolution` dans
+  les metadata d'evolution et ne remplacent pas `draft.infraPlan`.
+- Les plans locaux non destructifs restent applicables automatiquement.
+- Ajout de `approveInfraEvolution` cote learning service et de la route
+  `/builder/agents/approve-infra-evolution`.
+- Les actions `pending_infra` et `approve_infra` sont auditees et l'approbation
+  ajoute une version append-only.
+- Agent Bank expose maintenant le resume de pending infra evolution.
+- README, README starter, TODO et `audit:solid` sont a jour.
+
+### Validation
+
+- `pnpm test:infra-evolution-approval:bdd` OK
+- `pnpm test:learning:bdd` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:loc` OK
+- `pnpm audit:solid` OK
+
 ## test: add graph memory adapter boundaries
 
 Status: implemented locally

@@ -7,6 +7,7 @@ import type {
   AgentEvolutionMetadata,
   EvolutionAudit,
   EvolutionVersion,
+  PendingInfraEvolution,
 } from "./evolution-types.js";
 
 export function currentEvolution(
@@ -39,6 +40,9 @@ export function currentEvolution(
     audits: Array.isArray(raw.audits)
       ? raw.audits.filter(isEvolutionAudit)
       : [],
+    pendingInfraEvolution: isPendingInfraEvolution(raw.pendingInfraEvolution)
+      ? raw.pendingInfraEvolution
+      : undefined,
     lastLearningRun: isLastLearningRun(raw.lastLearningRun)
       ? raw.lastLearningRun
       : undefined,
@@ -72,10 +76,30 @@ function isEvolutionAudit(value: unknown): value is EvolutionAudit {
   const record = asRecord(value);
   return (
     typeof record.id === "string" &&
-    (record.action === "apply" || record.action === "rollback") &&
+    (
+      record.action === "apply" ||
+      record.action === "approve_infra" ||
+      record.action === "pending_infra" ||
+      record.action === "rollback"
+    ) &&
     typeof record.toVersion === "number" &&
     typeof record.createdAt === "string" &&
     typeof record.reason === "string"
+  );
+}
+
+function isPendingInfraEvolution(value: unknown): value is PendingInfraEvolution {
+  const record = asRecord(value);
+  const proposedPlan = asRecord(record.proposedPlan);
+  return (
+    typeof record.id === "string" &&
+    typeof record.runId === "string" &&
+    typeof record.sourceSessionId === "string" &&
+    (record.status === "pending" || record.status === "approved") &&
+    typeof proposedPlan.id === "string" &&
+    typeof proposedPlan.draftId === "string" &&
+    Array.isArray(record.approvalReasons) &&
+    typeof record.createdAt === "string"
   );
 }
 

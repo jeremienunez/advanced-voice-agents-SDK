@@ -1,21 +1,24 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: add approval workflow for infra-plan evolution.
+Current goal: split public tool API contracts.
 
-Target commit title candidate: `test: add infra evolution approval workflow`
+Target commit title candidate: `test: split executable and serializable tool contracts`
 
 ## Active Focus
 
 ### Agent Infra / DB Harness
 
 Outcome:
-Automatic learning may propose infra-plan evolution, but cloud or destructive
-changes stay pending until an explicit approval path applies them.
+Executable runtime tools and serializable tool manifests have separate contracts,
+so downstream consumers no longer handle half-executable tool definitions.
 
 Next work:
 
-- [ ] Add an approval/pending workflow for infra-plan evolution before applying
-  cloud or destructive changes.
+- [ ] Split the public tool API cleanly:
+  - keep executable runtime tools with a required `execute` handler;
+  - keep serializable build/manifests separate from executable
+    `ToolDefinition`;
+  - avoid making downstream consumers handle half-executable tools.
 
 ### Current Gates
 
@@ -42,11 +45,6 @@ Optional security/network checks:
 
 ## Architecture Backlog - Tool Contracts
 
-- [ ] Split the public tool API cleanly:
-  - keep executable runtime tools with a required `execute` handler;
-  - keep serializable build/manifests separate from executable
-    `ToolDefinition`;
-  - avoid making downstream consumers handle half-executable tools.
 - [ ] Promote starter handler maps into `ToolRegistryAdapterPort` instead of
   hardcoded local `handlerRef` sets.
 - [ ] Decide the `tool-plan` prompt path:

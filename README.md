@@ -262,6 +262,8 @@ Guardrails stay active even though evolution is automatic:
 - Learned memory redacts secret-looking values.
 - Infra evolution creates pending/applicable plans; destructive migration is
   forbidden.
+- Cloud, external, IaC, or approval-required infra recommendations stay pending
+  until `/builder/agents/approve-infra-evolution` applies them explicitly.
 
 Runtime surfaces:
 
@@ -279,6 +281,7 @@ pnpm test:learning:bdd
 pnpm test:temporal-worker:bdd
 pnpm test:redis-memory:bdd
 pnpm test:graph-memory-adapters:bdd
+pnpm test:infra-evolution-approval:bdd
 pnpm test:solid-seams
 pnpm test:rtc-e2e
 ```
@@ -454,11 +457,12 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `pnpm test:temporal-worker:bdd` | Check the env-selected learning workflow driver dispatches to a Temporal worker asynchronously while local dev stays in-process. |
 | `pnpm test:redis-memory:bdd` | Check the Redis learning memory adapter against an ephemeral Redis container for TTL, scope, and cross-adapter persistence. |
 | `pnpm test:graph-memory-adapters:bdd` | Check Neo4j/Memgraph graph memory adapters use parameterized Bolt-compatible Cypher while local/Postgres defaults remain intact. |
+| `pnpm test:infra-evolution-approval:bdd` | Check learning infra-plan recommendations stay pending for cloud/destructive changes until explicit approval. |
 | `pnpm test:infra-runner:bdd` | Check external OpenTofu/cloud-init runner boundaries, env allowlisting, and apply routing. |
 | `pnpm test:solid-seams` | Run focused BDD seam tests for HTTP guards, voice factory/learning, builder summaries, and infra validation. |
 | `pnpm test:runtime-tool-call` | Check runtime tool call flow. |
 | `pnpm test:rtc-e2e` | Run the RTC WebSocket e2e script. |
-| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/debug-audio/prompt/runtime-tool/runtime-DB-credential/adapter-boundary/Temporal-worker/Redis-memory/Graph-memory/ownership/ingestion/DB provisioning/infra-runner/secret-hygiene tests, and RTC E2E. |
+| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/debug-audio/prompt/runtime-tool/runtime-DB-credential/adapter-boundary/Temporal-worker/Redis-memory/Graph-memory/infra-evolution/ownership/ingestion/DB provisioning/infra-runner/secret-hygiene tests, and RTC E2E. |
 | `pnpm audit:architecture` | Enforce Dependency Cruiser SOA/SOLID import boundaries. |
 | `pnpm audit:responsibility` | Enforce SRP/LSP clean-code responsibility rules. |
 | `pnpm audit:secrets` | Scan committed files for live-like secrets without printing secret values. |

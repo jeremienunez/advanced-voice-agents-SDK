@@ -15,6 +15,7 @@ export function summarizeEvolution(draft: AgentBuildDraft): Record<string, unkno
     version,
     currentArtifactId: readString(raw, "currentArtifactId") || null,
     rollbackAvailable: Boolean(raw.rollbackArtifact),
+    pendingInfraEvolution: pendingInfraSummary(raw.pendingInfraEvolution),
     lastLearningRun: lastRun.runId
       ? {
           runId: readString(lastRun, "runId"),
@@ -30,5 +31,22 @@ export function summarizeEvolution(draft: AgentBuildDraft): Record<string, unkno
             sourceSessionId: null,
           }
         : null,
+  };
+}
+
+function pendingInfraSummary(value: unknown): Record<string, unknown> | null {
+  const pending = asRecord(value);
+  const proposedPlan = asRecord(pending.proposedPlan);
+  if (!pending.id || pending.status !== "pending") return null;
+  return {
+    id: readString(pending, "id"),
+    status: readString(pending, "status"),
+    proposedPlanId: readString(proposedPlan, "id"),
+    computeTarget: readString(proposedPlan, "computeTarget"),
+    provisioningMode: readString(proposedPlan, "provisioningMode"),
+    approvalReasons: Array.isArray(pending.approvalReasons)
+      ? pending.approvalReasons.filter((item) => typeof item === "string")
+      : [],
+    createdAt: readString(pending, "createdAt"),
   };
 }

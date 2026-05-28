@@ -327,6 +327,7 @@ pnpm --filter @voiceagentsdk/starter-voip-rtc test:adapter-boundaries:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:temporal-worker:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:redis-memory:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:graph-memory-adapters:bdd
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-evolution-approval:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-runner:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:prompt-policy:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:runtime-tool-authorization:bdd

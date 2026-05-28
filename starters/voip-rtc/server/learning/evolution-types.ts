@@ -1,4 +1,13 @@
-import type { CompiledAgentArtifact } from "@voiceagentsdk/core/sdk";
+import type {
+  AgentInfraPlan,
+  CompiledAgentArtifact,
+} from "@voiceagentsdk/core/sdk";
+
+export type EvolutionAuditAction =
+  | "apply"
+  | "approve_infra"
+  | "pending_infra"
+  | "rollback";
 
 export interface EvolutionVersion {
   version: number;
@@ -12,11 +21,22 @@ export interface EvolutionVersion {
 export interface EvolutionAudit {
   id: string;
   runId?: string;
-  action: "apply" | "rollback";
+  action: EvolutionAuditAction;
   fromVersion?: number;
   toVersion: number;
   createdAt: string;
   reason: string;
+}
+
+export interface PendingInfraEvolution {
+  id: string;
+  runId: string;
+  sourceSessionId: string;
+  status: "pending" | "approved";
+  proposedPlan: AgentInfraPlan;
+  approvalReasons: string[];
+  createdAt: string;
+  approvedAt?: string;
 }
 
 export interface AgentEvolutionMetadata {
@@ -26,6 +46,7 @@ export interface AgentEvolutionMetadata {
   rollbackArtifact?: CompiledAgentArtifact;
   versions: EvolutionVersion[];
   audits: EvolutionAudit[];
+  pendingInfraEvolution?: PendingInfraEvolution;
   lastLearningRun?: {
     runId: string;
     status: string;

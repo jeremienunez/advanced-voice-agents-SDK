@@ -7,6 +7,7 @@ import type {
 import { mutateDraft } from "../builder/domain/drafts.js";
 import { requireDraft, saveDraft } from "../builder/state/draft-store.js";
 import { setActiveDraft } from "../builder/state/session-store.js";
+import { decideInfraEvolution } from "./evolution-infra.js";
 import { buildPromptVersion } from "./evolution-prompt.js";
 import {
   artifactIdFor,
@@ -35,6 +36,7 @@ export class StarterAgentEvolution implements AgentEvolutionPort {
     const previousArtifactId = current.currentArtifactId ||
       artifactIdFor(draft.id, current.version);
     const prompt = buildPromptVersion(draft.compiled.prompt, input);
+    const infraDecision = decideInfraEvolution(input, now);
     const nextArtifact: CompiledAgentArtifact = {
       ...draft.compiled,
       prompt,
@@ -67,15 +69,27 @@ export class StarterAgentEvolution implements AgentEvolutionPort {
           createdAt: now,
           reason: "Auto-applied validated learned memory.",
         },
+        ...(infraDecision.pending
+          ? [{
+              id: `audit_${crypto.randomUUID()}`,
+              runId: input.runId,
+              action: "pending_infra" as const,
+              fromVersion: current.version,
+              toVersion: nextVersion,
+              createdAt: now,
+              reason: "Infra plan evolution is pending approval.",
+            }]
+          : []),
       ],
+      pendingInfraEvolution: infraDecision.pending ?? current.pendingInfraEvolution,
       lastLearningRun: {
         runId: input.runId,
-        status: "applied",
+        status: infraDecision.pending ? "applied_pending_infra" : "applied",
         at: now,
         sourceSessionId: input.sourceSessionId,
       },
     };
-    const nextDraft = mutateDraft(draft)
+    const builder = mutateDraft(draft)
       .finalPrompt(prompt)
       .compiled(nextArtifact)
       .metadata({
@@ -87,8 +101,9 @@ export class StarterAgentEvolution implements AgentEvolutionPort {
           graphEdgeCount: input.graph.edges.length,
         },
         retrievalWeights: input.recommendations.retrievalWeights ?? {},
-      })
-      .build();
+      });
+    if (infraDecision.applicablePlan) builder.infraPlan(infraDecision.applicablePlan);
+    const nextDraft = builder.build();
 
     saveDraft(nextDraft);
     setActiveDraft(nextDraft.id);
@@ -100,7 +115,90 @@ export class StarterAgentEvolution implements AgentEvolutionPort {
       artifactId,
       rollbackArtifactId: previousArtifactId,
       auditId: nextEvolution.audits.at(-1)?.id,
-      reason: "Applied post-session learning.",
+      reason: infraDecision.pending
+        ? "Applied post-session learning; infra plan is pending approval."
+        : "Applied post-session learning.",
+    };
+  }
+
+  async approveInfraEvolution(
+    draftId: string,
+    pendingId: string,
+  ): Promise<AgentEvolutionResult> {
+    const draft = requireDraft(draftId);
+    const current = currentEvolution(draft);
+    const pending = current.pendingInfraEvolution;
+    if (!draft.compiled) {
+      return {
+        status: "skipped",
+        draftId,
+        version: current.version,
+        reason: "Draft is not compiled.",
+      };
+    }
+    if (!pending || pending.id !== pendingId || pending.status !== "pending") {
+      return {
+        status: "skipped",
+        draftId,
+        version: current.version,
+        reason: "No pending infra evolution is available.",
+      };
+    }
+
+    const now = new Date().toISOString();
+    const nextVersion = current.version + 1;
+    const artifactId = artifactIdFor(draft.id, nextVersion);
+    const approvedArtifact = { ...draft.compiled, createdAt: now };
+    const nextEvolution: AgentEvolutionMetadata = {
+      ...current,
+      version: nextVersion,
+      currentArtifactId: artifactId,
+      rollbackArtifactId: current.currentArtifactId,
+      rollbackArtifact: draft.compiled,
+      pendingInfraEvolution: {
+        ...pending,
+        status: "approved",
+        approvedAt: now,
+      },
+      versions: [
+        ...current.versions,
+        {
+          version: nextVersion,
+          artifactId,
+          createdAt: now,
+          reason: "Approved pending infra evolution.",
+        },
+      ],
+      audits: [
+        ...current.audits,
+        {
+          id: `audit_${crypto.randomUUID()}`,
+          runId: pending.runId,
+          action: "approve_infra",
+          fromVersion: current.version,
+          toVersion: nextVersion,
+          createdAt: now,
+          reason: "Approved pending infra plan evolution.",
+        },
+      ],
+    };
+    const nextDraft = mutateDraft(draft)
+      .infraPlan(pending.proposedPlan)
+      .compiled(approvedArtifact)
+      .metadata({ agentEvolution: nextEvolution })
+      .build();
+
+    saveDraft(nextDraft);
+    setActiveDraft(nextDraft.id);
+    return {
+      status: "applied",
+      draftId,
+      version: nextVersion,
+      previousVersion: current.version,
+      artifactId,
+      rollbackArtifactId: current.currentArtifactId,
+      auditId: nextEvolution.audits.at(-1)?.id,
+      reason: "Approved pending infra plan evolution.",
     };
   }
 
