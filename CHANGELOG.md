@@ -1,5 +1,40 @@
 # Changelog
 
+## test: add temporal worker adapter boundary
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Permettre au learning post-session de dispatch vers un vrai worker Temporal par
+env, sans casser le mode dev local in-process.
+
+### Journal
+
+- Ajout de `pnpm test:temporal-worker:bdd`.
+- Ajout de `TemporalWorkerClientPort` et du driver
+  `AGENT_LEARNING_WORKFLOW_DRIVER=local|temporal`.
+- Le driver `temporal` retourne `queued` immediatement puis publie
+  `running` ou `failed` de maniere asynchrone.
+- `DynamicTemporalWorkerClient` demarre le workflow via `@temporalio/client`
+  quand le driver temporal est configure.
+- `@temporalio/client` est installe dans le starter pour rendre le driver
+  temporal executable sans dependance manuelle.
+- L'adapter Temporal est separe en factory, client dynamique, port de dispatch
+  et types pour garder une responsabilite visible par fichier.
+- Le service learning passe par la factory de workflow et reste local par
+  defaut en dev.
+- README, README starter, `.env.example`, onboarding env et TODO sont a jour.
+
+### Validation
+
+- `pnpm test:temporal-worker:bdd` OK
+- `pnpm test:learning:bdd` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:loc` OK
+- `pnpm audit:solid` OK
+
 ## test: lock vector graph adapter boundaries
 
 Status: implemented locally

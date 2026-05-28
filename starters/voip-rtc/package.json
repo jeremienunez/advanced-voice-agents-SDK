@@ -27,6 +27,7 @@
     "test:prompt-policy:bdd": "bun run scripts/test-prompt-policy-bdd.ts",
     "test:runtime-tool-authorization:bdd": "bun run scripts/test-runtime-tool-authorization-bdd.ts",
     "test:runtime-db-credentials:bdd": "bun run scripts/test-runtime-db-credentials-bdd.ts",
+    "test:temporal-worker:bdd": "bun run scripts/test-temporal-worker-bdd.ts",
     "test:learning": "bun run scripts/test-learning.ts",
     "test:learning:bdd": "bun run scripts/test-learning-bdd.ts",
     "test:solid-seams": "bun run scripts/test-solid-seams.ts",
@@ -35,6 +36,7 @@
     "typecheck": "pnpm build:sdk && tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
+    "@temporalio/client": "^1.17.2",
     "@voiceagentsdk/core": "workspace:*",
     "postgres": "^3.4.9",
     "react": "^19.2.6",

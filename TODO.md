@@ -1,20 +1,20 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: add a real Temporal worker adapter.
+Current goal: add production Redis adapter tests against ephemeral Redis.
 
-Target commit title candidate: `test: add temporal worker adapter boundary`
+Target commit title candidate: `test: add ephemeral redis memory adapter tests`
 
 ## Active Focus
 
 ### Agent Infra / DB Harness
 
 Outcome:
-Post-session learning can use a real Temporal worker adapter beyond the local
-in-process queue, while keeping local dev mode available.
+Redis temporal memory has a production adapter contract validated against an
+ephemeral Redis instance, while the local in-memory/dev path remains available.
 
 Next work:
 
-- [ ] Add a real Temporal worker adapter beyond the local in-process queue.
+- [ ] Add production Redis adapter tests against ephemeral Redis.
 
 ### Current Gates
 
@@ -41,7 +41,6 @@ Optional security/network checks:
 
 ## Architecture Backlog - Agent Self-Improving Stores
 
-- [ ] Add production Redis adapter tests against ephemeral Redis.
 - [ ] Add Neo4j/Memgraph graph adapters; keep Postgres graph as local default.
 - [ ] Add an approval/pending workflow for infra-plan evolution before applying
   cloud or destructive changes.

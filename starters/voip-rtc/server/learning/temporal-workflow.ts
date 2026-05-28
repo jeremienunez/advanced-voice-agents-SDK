@@ -7,14 +7,14 @@ import {
   getLearningRun,
   saveLearningRun,
 } from "./run-state.js";
-import type { LearnFromSessionWorkflow } from "./workflow.js";
+import type { LearnFromSessionRunner } from "./workflow.js";
 
 export type LearningStatusSink = (status: LearningJobStatus) => void;
 
 export class LocalTemporalWorkflowPort implements TemporalWorkflowPort {
   constructor(
     private readonly options: {
-      workflow: LearnFromSessionWorkflow;
+      workflow: LearnFromSessionRunner;
       onStatus?: LearningStatusSink;
     },
   ) {}

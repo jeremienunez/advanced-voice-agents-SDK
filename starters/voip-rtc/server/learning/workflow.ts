@@ -16,7 +16,11 @@ export interface LearnFromSessionResult {
   evolution: AgentEvolutionResult;
 }
 
-export class LearnFromSessionWorkflow {
+export interface LearnFromSessionRunner {
+  learnFromSession(input: LearningSessionInput): Promise<LearnFromSessionResult>;
+}
+
+export class LearnFromSessionWorkflow implements LearnFromSessionRunner {
   constructor(
     private readonly deps: {
       memoryStore: TemporalMemoryStorePort;

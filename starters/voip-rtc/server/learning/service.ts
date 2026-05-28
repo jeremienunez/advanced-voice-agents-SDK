@@ -9,7 +9,11 @@ import {
   PostgresGraphMemoryStore,
 } from "./graph-store.js";
 import { LocalRedisTemporalMemoryStore } from "./memory-store.js";
-import { LocalTemporalWorkflowPort, type LearningStatusSink } from "./temporal-workflow.js";
+import {
+  createLearningWorkflowPort,
+  type TemporalWorkerClientPort,
+} from "./temporal-worker.js";
+import type { LearningStatusSink } from "./temporal-workflow.js";
 import { LearnFromSessionWorkflow } from "./workflow.js";
 
 export interface StarterLearningService {
@@ -23,6 +27,7 @@ export interface StarterLearningService {
 
 export function createStarterLearningServiceFromEnv(
   env: Record<string, string | undefined> = Bun.env,
+  options: { temporalClient?: TemporalWorkerClientPort } = {},
 ): StarterLearningService {
   const memoryTtlSeconds = positiveInteger(
     env.AGENT_LEARNING_MEMORY_TTL_SECONDS,
@@ -44,9 +49,11 @@ export function createStarterLearningServiceFromEnv(
         evolution,
         memoryTtlSeconds,
       });
-      const temporal = new LocalTemporalWorkflowPort({
+      const temporal = createLearningWorkflowPort({
+        env,
         workflow,
         onStatus,
+        temporalClient: options.temporalClient,
       });
       return temporal.enqueueLearningSession(input);
     },
@@ -58,7 +65,11 @@ export function createStarterLearningServiceFromEnv(
         evolution,
         memoryTtlSeconds,
       });
-      const temporal = new LocalTemporalWorkflowPort({ workflow });
+      const temporal = createLearningWorkflowPort({
+        env,
+        workflow,
+        temporalClient: options.temporalClient,
+      });
       return temporal.getLearningStatus(runId);
     },
 

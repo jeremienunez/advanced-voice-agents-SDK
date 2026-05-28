@@ -178,11 +178,13 @@ Required/optional learning env:
 | Env var | Purpose |
 | --- | --- |
 | `AGENT_LEARNING_ENABLED` | Enables post-session learning, default `true`. |
+| `AGENT_LEARNING_WORKFLOW_DRIVER` | `local` keeps dev learning in-process; `temporal` dispatches to a Temporal worker. |
 | `AGENT_LEARNING_MEMORY_TTL_SECONDS` | TTL for Redis temporal memory, default `2592000`. |
 | `REDIS_URL` | Required for temporal learned memory. |
 | `TEMPORAL_ADDRESS` | Required Temporal endpoint or local worker address. |
 | `TEMPORAL_NAMESPACE` | Temporal namespace, default `default`. |
 | `TEMPORAL_TASK_QUEUE` | Temporal task queue, default `agent-learning`. |
+| `TEMPORAL_WORKFLOW_TYPE` | Workflow type started by the Temporal worker adapter, default `learnFromSession`. |
 | `DATABASE_URL` | Required for audit/source store and default Postgres graph memory. |
 | `NEO4J_URI` / `GRAPH_DATABASE_URL` | Optional external graph backend. |
 
@@ -191,6 +193,7 @@ BDD and regression checks:
 ```bash
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:learning
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:learning:bdd
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:temporal-worker:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:rtc-e2e
 ```
 
@@ -297,11 +300,13 @@ Builder and knowledge env vars:
 - `MILVUS_URL` or `MILVUS_ADDRESS`
 - `NEO4J_URI` or `GRAPH_DATABASE_URL`
 - `AGENT_LEARNING_ENABLED`
+- `AGENT_LEARNING_WORKFLOW_DRIVER`
 - `AGENT_LEARNING_MEMORY_TTL_SECONDS`
 - `REDIS_URL`
 - `TEMPORAL_ADDRESS`
 - `TEMPORAL_NAMESPACE`
 - `TEMPORAL_TASK_QUEUE`
+- `TEMPORAL_WORKFLOW_TYPE`
 
 ## Commands
 
@@ -313,6 +318,7 @@ pnpm --filter @voiceagentsdk/starter-voip-rtc harness:route-wines
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:knowledge-tool
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-plan
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:adapter-boundaries:bdd
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:temporal-worker:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-runner:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:prompt-policy:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:runtime-tool-authorization:bdd
