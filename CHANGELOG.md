@@ -1,5 +1,41 @@
 # Changelog
 
+## test: add store adapter contracts
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Definir des contrats SQL/document/vector derriere `DbAdapterRegistry`, sans
+mettre de mapping physique, soft delete ou migrations dans les definitions SDK
+serialisables.
+
+### Journal
+
+- Ajout de `StoreAdapterContract` et des factories
+  `createSqlStoreAdapterContract`, `createDocumentStoreAdapterContract` et
+  `createVectorStoreAdapterContract`.
+- Ajout de `createStoreAdapterBinding` et resolution de bindings store enrichis
+  dans `DbAdapterRegistry`.
+- Validation des mappings de champs/index et du soft delete contre
+  `StoreDefinition` au moment de resoudre le binding.
+- Les migrations restent des plans explicites sur le contrat adapter; une
+  fonction `apply` dans le contrat est refusee.
+- Ajout de `pnpm test:store-adapter-contracts:bdd` et integration dans
+  `audit:solid`.
+- README, TODO et changelog sont a jour.
+
+### Validation
+
+- `pnpm test:store-adapter-contracts:bdd` OK
+- `pnpm test:db-adapter-registry:bdd` OK
+- `pnpm typecheck:sdk` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:loc` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: add db adapter registry
 
 Status: implemented locally

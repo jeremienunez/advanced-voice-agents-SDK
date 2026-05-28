@@ -1,38 +1,38 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: add SQL/document/vector store adapters.
+Current goal: add PromptCompilerPort.
 
-Target commit title candidate: `test: add store adapter contracts`
+Target commit title candidate: `test: add prompt compiler port`
 
 ## Active Focus
 
-### Store Adapter Contracts
+### PromptCompilerPort
 
 Outcome:
-Concrete SQL, document, and vector store adapters should sit behind
-`DbAdapterRegistry` without leaking implementation details into SDK
-definitions.
+Runtime prompt compilation should go through an injectable port instead of voice
+orchestration calling compiled artifact and SDK prompt helpers directly.
 
 BDD target:
 
-- Add focused BDD for SQL/document/vector adapter contracts.
-- Prove field and index mapping is adapter-owned.
-- Prove pagination/cursor bounds stay behind the safe repository contract.
-- Prove soft delete is adapter-owned and policy-driven.
-- Prove optional migrations are explicit and never run from serializable SDK
-  definitions.
+- Add `pnpm test:prompt-compiler-port:bdd`.
+- Prove voice session setup asks a prompt compiler for tenant/channel/plan/tools
+  instructions.
+- Prove compiled artifacts and fallback SDK prompts stay behind the compiler.
+- Prove runtime knowledge policy is applied by the compiler, not session
+  orchestration.
 
 Implementation target:
 
-- [ ] Add SQL/document/vector adapter contract tests.
-- [ ] Add adapter interfaces or fixtures only where they remove real ambiguity.
-- [ ] Keep migrations opt-in and explicit.
-- [ ] Keep `KnowledgeStorePort` separate unless a store adapter contract needs
-  to consume it.
+- [ ] Add `PromptCompilerPort` and runtime input types.
+- [ ] Add starter prompt compiler adapter around current compiled-artifact and
+  fallback prompt behavior.
+- [ ] Inject the compiler into voice session creation.
+- [ ] Remove direct prompt compilation responsibility from voice orchestration.
 
 Definition of done:
 
-- [ ] New BDD is red before implementation, then green.
+- [ ] `pnpm test:prompt-compiler-port:bdd` is red before implementation, then
+  green.
 - [ ] `pnpm audit:solid`
 - [ ] `git diff --check`
 - [ ] TODO, CHANGELOG, and README are updated before commit.
@@ -62,8 +62,6 @@ Optional security/network checks:
 
 ## Architecture Backlog - Runtime Ports
 
-- [ ] Add `PromptCompilerPort` to compile tenant/channel/plan/tools/prompt
-  sections/variables into runtime instructions.
 - [ ] Add `EventSink` / `LoggerPort` with console, noop, and custom sinks.
 - [ ] Add `MemoryStore` with in-memory default and optional Redis adapter.
 

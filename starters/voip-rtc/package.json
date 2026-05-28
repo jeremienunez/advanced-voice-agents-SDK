@@ -34,6 +34,7 @@
     "test:tool-registry-adapter:bdd": "bun run scripts/test-tool-registry-adapter-bdd.ts",
     "test:runtime-db-credentials:bdd": "bun run scripts/test-runtime-db-credentials-bdd.ts",
     "test:secret-resolver:bdd": "bun run scripts/test-secret-resolver-bdd.ts",
+    "test:store-adapter-contracts:bdd": "bun run scripts/test-store-adapter-contracts-bdd.ts",
     "test:tenant-resolver:bdd": "bun run scripts/test-tenant-resolver-bdd.ts",
     "test:temporal-worker:bdd": "bun run scripts/test-temporal-worker-bdd.ts",
     "test:redis-memory:bdd": "bun run scripts/test-redis-memory-bdd.ts",

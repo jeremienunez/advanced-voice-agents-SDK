@@ -86,6 +86,9 @@ default browser adapter wraps `BrowserMediaHandler` behind start/stop,
 Database and store adapters are resolved through `DbAdapterRegistry`; SDK
 definitions carry serializable `adapterRef` values, while concrete SQL,
 document, vector, or in-memory adapters are bound by the consuming app.
+Adapter-owned SQL/document/vector contracts carry physical field/index mappings,
+soft-delete behavior, pagination mode, and explicit migration plans outside the
+SDK definition.
 
 ## Builder Flow
 
@@ -440,6 +443,8 @@ serializable manifests.
 import {
   createDbAdapterRegistry,
   createSafeRepositoryFromRegistry,
+  createSqlStoreAdapterContract,
+  createStoreAdapterBinding,
   createStoreBuilder,
 } from "@voiceagentsdk/core/sdk";
 
@@ -458,7 +463,15 @@ const store = createStoreBuilder("crm")
   .build();
 
 const registry = createDbAdapterRegistry({
-  stores: { "postgres.crm": adapter },
+  stores: {
+    "postgres.crm": createStoreAdapterBinding(
+      adapter,
+      createSqlStoreAdapterContract({
+        fields: [{ entity: "contacts", field: "email", target: "contacts.email" }],
+        pagination: { mode: "cursor", cursorField: "id" },
+      }),
+    ),
+  },
 });
 const contacts = createSafeRepositoryFromRegistry(
   store,
@@ -470,6 +483,8 @@ const contacts = createSafeRepositoryFromRegistry(
 The safe repository injects scope and rejects undeclared operations, filters,
 sorts, writes, and oversized page requests before the registry-resolved adapter
 runs. Missing adapter refs fail before runtime execution.
+Physical mappings and migrations live on adapter contracts, not on
+`StoreDefinition`.
 
 ## Command Cheat Sheet
 
@@ -490,6 +505,7 @@ runs. Missing adapter refs fail before runtime execution.
 | `pnpm test:prompt-policy:bdd` | Check compiled prompts end with immutable server-owned safety and tool policy. |
 | `pnpm test:provider-factory:bdd` | Check voice session setup delegates realtime transport creation to `ProviderFactoryPort` and the starter factory builds supported providers. |
 | `pnpm test:runtime-tool-authorization:bdd` | Check runtime exposes only server-selected executable tools. |
+| `pnpm test:store-adapter-contracts:bdd` | Check SQL/document/vector store adapter mappings, pagination, soft delete, and migrations stay adapter-owned behind `DbAdapterRegistry`. |
 | `pnpm test:tool-contracts:bdd` | Check executable tool definitions stay separate from serializable tool manifests. |
 | `pnpm test:tool-registry-adapter:bdd` | Check runtime tool binding and builder handler validation go through `ToolRegistryAdapterPort`. |
 | `pnpm test:runtime-db-credentials:bdd` | Check runtime Postgres access resolves per-agent credential refs instead of shared DB URLs. |
@@ -507,7 +523,7 @@ runs. Missing adapter refs fail before runtime execution.
 | `pnpm test:solid-seams` | Run focused BDD seam tests for HTTP guards, voice factory/learning, builder summaries, and infra validation. |
 | `pnpm test:runtime-tool-call` | Check runtime tool call flow. |
 | `pnpm test:rtc-e2e` | Run the RTC WebSocket e2e script. |
-| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/debug-audio/prompt/runtime-tool/tool-contract/tool-registry/DB-adapter-registry/runtime-DB-credential/secret-resolver/tenant-resolver/adapter-boundary/Temporal-worker/Redis-memory/Graph-memory/infra-evolution/ownership/ingestion/DB provisioning/infra-runner/secret-hygiene tests, and RTC E2E. |
+| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/debug-audio/prompt/runtime-tool/tool-contract/tool-registry/DB-adapter-registry/store-adapter-contract/runtime-DB-credential/secret-resolver/tenant-resolver/adapter-boundary/Temporal-worker/Redis-memory/Graph-memory/infra-evolution/ownership/ingestion/DB provisioning/infra-runner/secret-hygiene tests, and RTC E2E. |
 | `pnpm audit:architecture` | Enforce Dependency Cruiser SOA/SOLID import boundaries. |
 | `pnpm audit:responsibility` | Enforce SRP/LSP clean-code responsibility rules. |
 | `pnpm audit:secrets` | Scan committed files for live-like secrets without printing secret values. |
@@ -683,8 +699,8 @@ It launches:
 ## Project Status
 
 This is an early clean-core SDK and starter. The Fastify adapter is a placeholder
-until the next adapter pass wires tools, prompts, and concrete store adapters
-behind public contracts. Tenant, secret, provider, browser media bridge, and
-database/store adapter resolution already go through public ports or registries;
-the starter builder uses the provider-agnostic LLM harness for planning,
-research, and verification.
+until the next adapter pass wires tools and prompts behind public contracts.
+Tenant, secret, provider, browser media bridge, database/store adapter
+resolution, and SQL/document/vector store adapter contracts already go through
+public ports or registries; the starter builder uses the provider-agnostic LLM
+harness for planning, research, and verification.
