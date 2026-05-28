@@ -1,5 +1,35 @@
 # Changelog
 
+## test: lock vector graph adapter boundaries
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Rendre explicite la propriete des integrations Milvus et graph: elles restent
+des adapters starter planifies tant qu'un package SDK reutilisable n'a pas ses
+contrats.
+
+### Journal
+
+- Ajout de `pnpm test:adapter-boundaries:bdd`.
+- Ajout de `AdapterOwnershipBoundary` cote SDK infra.
+- Milvus et graph portent `owner=starter`, `binding=planned_only`, et
+  `promotion=candidate_sdk_package`.
+- La validation infra refuse maintenant un backend Milvus/graph sans boundary.
+- Les variables OpenTofu exportent `adapter_boundary` pour les backends de
+  knowledge.
+- README, README starter et TODO sont a jour.
+
+### Validation
+
+- `pnpm test:adapter-boundaries:bdd` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:loc` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: add per-agent runtime db credential refs
 
 Status: implemented locally

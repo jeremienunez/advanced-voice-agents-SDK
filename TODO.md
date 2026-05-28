@@ -1,21 +1,20 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: decide Milvus/graph adapter ownership boundary.
+Current goal: add a real Temporal worker adapter.
 
-Target commit title candidate: `test: lock vector graph adapter boundaries`
+Target commit title candidate: `test: add temporal worker adapter boundary`
 
 ## Active Focus
 
 ### Agent Infra / DB Harness
 
 Outcome:
-Milvus and graph integrations have an explicit ownership boundary: starter
-adapter, reusable SDK adapter package, or documented promotion path.
+Post-session learning can use a real Temporal worker adapter beyond the local
+in-process queue, while keeping local dev mode available.
 
 Next work:
 
-- [ ] Decide whether Milvus/graph stay starter adapters or graduate into
-  reusable SDK adapter packages.
+- [ ] Add a real Temporal worker adapter beyond the local in-process queue.
 
 ### Current Gates
 
@@ -42,7 +41,6 @@ Optional security/network checks:
 
 ## Architecture Backlog - Agent Self-Improving Stores
 
-- [ ] Add a real Temporal worker adapter beyond the local in-process queue.
 - [ ] Add production Redis adapter tests against ephemeral Redis.
 - [ ] Add Neo4j/Memgraph graph adapters; keep Postgres graph as local default.
 - [ ] Add an approval/pending workflow for infra-plan evolution before applying

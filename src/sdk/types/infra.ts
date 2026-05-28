@@ -66,6 +66,23 @@ export type AgentLearningStoreCapability =
   | "source_archive"
   | "vector_search";
 
+export type AdapterBoundaryOwner = "sdk" | "starter";
+
+export type AdapterBindingMode = "runtime_adapter" | "planned_only";
+
+export type AdapterPromotionPath =
+  | "stay_starter"
+  | "candidate_sdk_package"
+  | "sdk_package";
+
+export interface AdapterOwnershipBoundary {
+  owner: AdapterBoundaryOwner;
+  binding: AdapterBindingMode;
+  promotion: AdapterPromotionPath;
+  reason: string;
+  promotionCriteria: string[];
+}
+
 export interface AgentLearningStoreBackendPlan {
   id: string;
   kind: AgentLearningStoreKind;
@@ -80,6 +97,7 @@ export interface AgentLearningStoreBackendPlan {
   reason: string;
   requiredEnv?: string[];
   resources?: InfraResourceRef[];
+  adapterBoundary?: AdapterOwnershipBoundary;
   ttlSeconds?: number;
 }
 
@@ -136,6 +154,7 @@ export interface DatabaseBackendPlan {
   reason: string;
   requiredEnv?: string[];
   resources?: InfraResourceRef[];
+  adapterBoundary?: AdapterOwnershipBoundary;
 }
 
 export interface KnowledgeBackendPlan {
@@ -151,6 +170,7 @@ export interface KnowledgeBackendPlan {
   reason: string;
   requiredEnv?: string[];
   resources?: InfraResourceRef[];
+  adapterBoundary?: AdapterOwnershipBoundary;
 }
 
 export interface InfraMigrationPolicy {

@@ -81,6 +81,8 @@ Intent routing rules are intentionally simple in this slice:
   the intent looks vector/scale heavy.
 - Graph appears when the knowledge plan enables KG, graph env is present, or
   the intent talks about entities/relationships.
+- Milvus and external graph backends are `starter` owned and `planned_only`
+  until promoted to reusable SDK adapter packages with contract tests.
 - Redis appears when `REDIS_URL` is set or the intent asks for cache/session
   state.
 - `BUILDER_INFRA_COMPUTE_TARGET`, `BUILDER_INFRA_ISOLATION`, and
@@ -310,6 +312,7 @@ pnpm --filter @voiceagentsdk/starter-voip-rtc typecheck
 pnpm --filter @voiceagentsdk/starter-voip-rtc harness:route-wines
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:knowledge-tool
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-plan
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:adapter-boundaries:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-runner:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:prompt-policy:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:runtime-tool-authorization:bdd

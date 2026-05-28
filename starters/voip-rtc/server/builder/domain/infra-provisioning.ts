@@ -3,6 +3,7 @@ import type {
   InfraProvisionValidation,
   KnowledgeBackendPlan,
 } from "@voiceagentsdk/core/sdk";
+import { requiresAdapterBoundary } from "./adapter-boundary.js";
 
 export function validateInfraProvisionInput(
   input: InfraProvisionInput,
@@ -81,5 +82,8 @@ function validateBackend(
     warnings.push(
       `Required backend "${backend.id}" is planned but not configured yet`,
     );
+  }
+  if (requiresAdapterBoundary(String(backend.provider)) && !backend.adapterBoundary) {
+    errors.push(`Backend "${backend.id}" must declare adapter ownership boundary`);
   }
 }

@@ -170,6 +170,7 @@ function tofuVariablesArtifact(
         namespace: backend.namespace,
         required: backend.required,
         capabilities: backend.capabilities,
+        adapter_boundary: backend.adapterBoundary,
       })),
     },
     "opentofu",

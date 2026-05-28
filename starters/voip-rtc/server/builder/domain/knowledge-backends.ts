@@ -1,5 +1,6 @@
 import type { KnowledgeBackendPlan } from "@voiceagentsdk/core/sdk";
 import type { BackendPlanInput } from "./infra-backend-input.js";
+import { plannedStarterAdapterBoundary } from "./adapter-boundary.js";
 
 export function createPostgresKnowledgeBackend(
   input: BackendPlanInput,
@@ -43,6 +44,7 @@ export function createMilvusBackend(
     isolation,
     reason: "Dedicated vector index for larger corpora or explicit Milvus routing.",
     requiredEnv: ["MILVUS_URL", "MILVUS_ADDRESS"],
+    adapterBoundary: plannedStarterAdapterBoundary("milvus"),
   };
 }
 
@@ -62,6 +64,7 @@ export function createGraphBackend(
     isolation,
     reason: "Optional graph index for entity and relationship traversal.",
     requiredEnv: ["NEO4J_URI", "GRAPH_DATABASE_URL"],
+    adapterBoundary: plannedStarterAdapterBoundary("graph"),
   };
 }
 

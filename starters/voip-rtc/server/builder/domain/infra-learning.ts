@@ -5,6 +5,7 @@ import type {
   InfraProvisioningMode,
   InfraResourceRef,
 } from "@voiceagentsdk/core/sdk";
+import { plannedStarterAdapterBoundary } from "./adapter-boundary.js";
 import {
   isMilvusRequested,
   type IntentInfraPlannerOptions,
@@ -94,6 +95,9 @@ export function createAgentStorePlan(
       capabilities: ["entity_graph", "relation_graph"],
       reason: "Upserts session entities and relations; Postgres is the local default.",
       requiredEnv: ["DATABASE_URL", "NEO4J_URI", "GRAPH_DATABASE_URL"],
+      adapterBoundary: options.graphUrl
+        ? plannedStarterAdapterBoundary("graph")
+        : undefined,
       resources: [{
         kind: "graph-memory-space",
         name: `${namespace}_graph`,
@@ -179,6 +183,7 @@ function createVectorLearningBackend(
     capabilities: ["vector_search"],
     reason: "Optional vector slot for long-horizon learned memory retrieval.",
     requiredEnv: ["MILVUS_URL", "MILVUS_ADDRESS"],
+    adapterBoundary: plannedStarterAdapterBoundary("milvus"),
   };
 }
 
