@@ -8,13 +8,14 @@ const results = [
 console.log(JSON.stringify({ status: "ok", results }, null, 2));
 
 function scenarioConsoleLoggerRedactsContentAndSecretsRecursively(): string {
+  const bearerSecret = ["Bearer sk", "secret", "log", "token"].join("-");
   const lines = captureConsole(() => {
     const logger = createAgentLogger().child({
       sessionId: "session_log_redaction",
       prompt: "SYSTEM PROMPT MUST NOT LEAK",
       nested: {
         message: "PRIVATE USER MESSAGE MUST NOT LEAK",
-        headers: { authorization: "Bearer sk-secret-log-token" },
+        headers: { authorization: bearerSecret },
       },
     });
 
@@ -34,7 +35,7 @@ function scenarioConsoleLoggerRedactsContentAndSecretsRecursively(): string {
     "SYSTEM PROMPT MUST NOT LEAK",
     "PRIVATE USER MESSAGE MUST NOT LEAK",
     "PRIVATE ASSISTANT CONTENT MUST NOT LEAK",
-    "sk-secret-log-token",
+    bearerSecret,
   ]);
   assert(output.includes("request-123"), "safe request id must remain logged");
   assert(output.includes("messageCount"), "safe message count metric must remain logged");

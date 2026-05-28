@@ -82,6 +82,7 @@ async function temporalScenario(): Promise<string[]> {
 }
 
 async function appliedLearningScenario(): Promise<string[]> {
+  const fakeSecret = ["sk", "test", "secret", "value"].join("-");
   const memoryStore = new LocalRedisTemporalMemoryStore();
   const graphStore = new LocalGraphMemoryStore();
   const evolution = new RecordingEvolution();
@@ -93,7 +94,7 @@ async function appliedLearningScenario(): Promise<string[]> {
   });
   const input = learningSession({
     transcriptText:
-      "I prefer concise answers. My project is Acme Routes. api_key=sk-test-secret-value",
+      `I prefer concise answers. My project is Acme Routes. api_key=${fakeSecret}`,
     toolStatus: "failed",
     toolError: "Unknown tool create_invoice",
   });
@@ -104,7 +105,7 @@ async function appliedLearningScenario(): Promise<string[]> {
     agentId: "draft-agent-a",
     userId: "user-a",
   });
-  assertAppliedLearning(first, scopedMemory, evolution);
+  assertAppliedLearning(first, scopedMemory, evolution, fakeSecret);
 
   const nodeCount = graphStore.nodeCount;
   const edgeCount = graphStore.edgeCount;
@@ -157,6 +158,7 @@ function assertAppliedLearning(
   result: Awaited<ReturnType<LearnFromSessionWorkflow["learnFromSession"]>>,
   scopedMemory: Awaited<ReturnType<LocalRedisTemporalMemoryStore["list"]>>,
   evolution: RecordingEvolution,
+  fakeSecret: string,
 ) {
   assert(result.status === "applied", "learning must apply for a draft session");
   assert(result.memoryCount >= 4, "learning must write summary, preference, failed intent and missing-tool memory");
@@ -165,7 +167,7 @@ function assertAppliedLearning(
   assert(result.evolution.version === 2, "first learning run must append version 2");
   assert(scopedMemory.length === result.memoryCount, "memory must be retrievable by scope");
   assert(scopedMemory.every((record) => record.expiresAt), "every temporal memory must carry TTL expiry");
-  assert(scopedMemory.every((record) => !record.text.includes("sk-test-secret-value")), "learned memory must redact secrets");
+  assert(scopedMemory.every((record) => !record.text.includes(fakeSecret)), "learned memory must redact secrets");
   assert(evolution.lastInput?.recommendations.tools?.includes("create_invoice"), "missing tool recommendation must be retained");
   assert(typeof evolution.lastInput?.recommendations.retrievalWeights?.temporal === "number", "retrieval weights must be generated");
 }

@@ -1,8 +1,8 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: verify local secret hygiene.
+Current goal: rotate flagged local env credentials.
 
-Target commit title candidate: `chore: document secret rotation status`
+Target commit title candidate: `chore: rotate local env credentials`
 
 ## Active Focus
 
@@ -14,8 +14,11 @@ exposed development keys are rotated outside the repo.
 
 Next work:
 
-- [ ] Rotate local API keys if the ignored `.env` contains live production
-  credentials.
+- [ ] Rotate `GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `VOYAGE_API_KEY`, and
+  `MOONSHOT_API_KEY` from the ignored root `.env`; `pnpm audit:local-secrets`
+  reported them on 2026-05-28 without printing values.
+- [ ] Rerun `pnpm audit:local-secrets` after rotation/removal and keep the
+  command output clean.
 
 ### Current Gates
 
@@ -26,6 +29,7 @@ Run before commit:
 
 Optional security/network checks:
 
+- [ ] `pnpm audit:local-secrets`
 - [ ] `pnpm audit --json`
 - [ ] `pnpm audit --dev --json`
 - [ ] `curl http://127.0.0.1:8787/config`

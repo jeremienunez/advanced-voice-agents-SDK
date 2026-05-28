@@ -1,5 +1,42 @@
 # Changelog
 
+## test: add secret hygiene audit
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Rendre la verification des secrets falsifiable sans jamais imprimer les valeurs
+detectees.
+
+### Journal
+
+- Ajout de `pnpm audit:secrets` pour scanner les fichiers commitables.
+- Ajout de `pnpm audit:local-secrets` pour scanner explicitement les `.env`
+  ignores.
+- Ajout de `pnpm test:secret-hygiene:bdd`.
+- Les findings contiennent fichier, ligne, cle eventuelle, type, et
+  `[redacted-secret]`, jamais la valeur brute.
+- Les fixtures de tests qui simulent des cles sont construites par fragments
+  pour eviter de stocker des patterns secrets bruts dans le repo.
+- `pnpm audit:solid` execute maintenant `audit:secrets` et le BDD secret
+  hygiene.
+- `pnpm audit:local-secrets` signale encore `GEMINI_API_KEY`,
+  `DEEPSEEK_API_KEY`, `VOYAGE_API_KEY` et `MOONSHOT_API_KEY` dans le `.env`
+  ignore; rotation externe requise.
+
+### Validation
+
+- `pnpm test:secret-hygiene:bdd` OK
+- `pnpm audit:secrets` OK
+- `pnpm audit:local-secrets` redacted findings only: `GEMINI_API_KEY`,
+  `DEEPSEEK_API_KEY`, `VOYAGE_API_KEY`, `MOONSHOT_API_KEY`
+- `pnpm test:log-redaction:bdd` OK
+- `pnpm test:learning:bdd` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: gate debug audio dumps
 
 Status: implemented locally

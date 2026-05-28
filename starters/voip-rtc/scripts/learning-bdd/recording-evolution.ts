@@ -13,6 +13,8 @@ export class RecordingEvolution implements AgentEvolutionPort {
   async validateAndApply(
     input: AgentEvolutionInput,
   ): Promise<AgentEvolutionResult> {
+    const fakeSecret = ["sk", "test", "secret", "value"].join("-");
+
     this.calls.push(input);
     this.lastInput = input;
 
@@ -20,7 +22,7 @@ export class RecordingEvolution implements AgentEvolutionPort {
     assert(input.graph.nodes.length > 0, "evolution requires graph nodes");
     assert(input.graph.edges.length > 0, "evolution requires graph edges");
     assert(
-      input.memories.every((memory) => !memory.text.includes("sk-test-secret-value")),
+      input.memories.every((memory) => !memory.text.includes(fakeSecret)),
       "evolution must never receive unredacted secret-looking memories",
     );
 

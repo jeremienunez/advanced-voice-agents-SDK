@@ -439,6 +439,9 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/debug-audio/prompt/runtime-tool/ownership/ingestion/DB provisioning tests, and RTC E2E. |
 | `pnpm audit:architecture` | Enforce Dependency Cruiser SOA/SOLID import boundaries. |
 | `pnpm audit:responsibility` | Enforce SRP/LSP clean-code responsibility rules. |
+| `pnpm audit:secrets` | Scan committed files for live-like secrets without printing secret values. |
+| `pnpm audit:local-secrets` | Opt-in scan of ignored local `.env` files; use after rotating local credentials. |
+| `pnpm test:secret-hygiene:bdd` | Check secret audit reporting is redacted and local env scanning is explicit opt-in. |
 | `pnpm audit:sdk-boundary` | Verify core SDK boundary rules. |
 | `pnpm audit:imports` | Audit core import boundaries. |
 | `pnpm audit:tool-contracts` | Verify compiled builder tools have runtime contracts. |
