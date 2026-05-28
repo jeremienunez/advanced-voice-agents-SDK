@@ -85,6 +85,7 @@ export interface StoreEntityDefinition {
 
 export interface StoreDefinition {
   id: string;
+  adapterRef?: string;
   displayName?: string;
   description?: string;
   entities: StoreEntityDefinition[];

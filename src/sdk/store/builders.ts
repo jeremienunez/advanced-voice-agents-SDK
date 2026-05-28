@@ -255,6 +255,11 @@ export class StoreBuilder {
     return this;
   }
 
+  adapterRef(ref: string): this {
+    this.definition.adapterRef = ref;
+    return this;
+  }
+
   describe(value: string): this {
     this.definition.description = value;
     return this;

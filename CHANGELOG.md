@@ -1,5 +1,40 @@
 # Changelog
 
+## test: add db adapter registry
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Faire passer la resolution des adapters database/store runtime par un registry
+injectable, avec des definitions SDK qui portent uniquement des refs
+serialisables.
+
+### Journal
+
+- Ajout de `adapterRef` sur `DatabaseDefinition` et `StoreDefinition`.
+- Ajout de `DatabaseBuilder.adapterRef()` et `StoreBuilder.adapterRef()`.
+- Suppression du stockage d'instance adapter dans `DatabaseBuilder`.
+- Ajout de `DbAdapterRegistry`, `createDbAdapterRegistry`,
+  `resolveDatabaseAdapterFromRegistry`, `resolveStoreAdapterFromRegistry` et
+  `createSafeRepositoryFromRegistry`.
+- `createSafeRepositoryFromRegistry` echoue ferme si le store, l'entite ou
+  l'adapter ref manque.
+- Ajout de `pnpm test:db-adapter-registry:bdd` et integration dans
+  `audit:solid`.
+- README, TODO et changelog sont a jour.
+
+### Validation
+
+- `pnpm test:db-adapter-registry:bdd` OK
+- `pnpm typecheck:sdk` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:loc` OK
+- `pnpm test:tool-contracts:bdd` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: add media bridge factory port
 
 Status: implemented locally

@@ -1,42 +1,38 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: add DbAdapterRegistry.
+Current goal: add SQL/document/vector store adapters.
 
-Target commit title candidate: `test: add db adapter registry`
+Target commit title candidate: `test: add store adapter contracts`
 
 ## Active Focus
 
-### DbAdapterRegistry
+### Store Adapter Contracts
 
 Outcome:
-Runtime database/store adapters should resolve through a registry instead of
-serializable SDK definitions carrying implementation details.
+Concrete SQL, document, and vector store adapters should sit behind
+`DbAdapterRegistry` without leaking implementation details into SDK
+definitions.
 
 BDD target:
 
-- Add `pnpm test:db-adapter-registry:bdd`.
-- Prove that SDK database/store definitions carry adapter refs only.
-- Prove that runtime code resolves concrete adapters through an injected
-  registry.
-- Prove that a missing adapter ref fails closed before runtime execution.
-- Prove that `createSafeRepository` still enforces tenant scope, allowed
-  operations, filters, sorting, writable fields, and page bounds once the
-  adapter comes from the registry.
+- Add focused BDD for SQL/document/vector adapter contracts.
+- Prove field and index mapping is adapter-owned.
+- Prove pagination/cursor bounds stay behind the safe repository contract.
+- Prove soft delete is adapter-owned and policy-driven.
+- Prove optional migrations are explicit and never run from serializable SDK
+  definitions.
 
 Implementation target:
 
-- [ ] Add `DbAdapterRegistry` and keep adapters out of serializable SDK
-  definitions.
-- [ ] Add a dev/in-memory registry fixture for BDD and local starter tests.
-- [ ] Wire `StoreDefinition` repository creation to `DbAdapterRegistry`.
-- [ ] Keep knowledge/vector-specific adapters behind existing
-  `KnowledgeStorePort` until the registry contract is proven for stores.
-- [ ] Document where product apps bind concrete SQL/document/vector adapters.
+- [ ] Add SQL/document/vector adapter contract tests.
+- [ ] Add adapter interfaces or fixtures only where they remove real ambiguity.
+- [ ] Keep migrations opt-in and explicit.
+- [ ] Keep `KnowledgeStorePort` separate unless a store adapter contract needs
+  to consume it.
 
 Definition of done:
 
-- [ ] `pnpm test:db-adapter-registry:bdd` is red before implementation, then
-  green.
+- [ ] New BDD is red before implementation, then green.
 - [ ] `pnpm audit:solid`
 - [ ] `git diff --check`
 - [ ] TODO, CHANGELOG, and README are updated before commit.
@@ -66,11 +62,6 @@ Optional security/network checks:
 
 ## Architecture Backlog - Runtime Ports
 
-- [ ] Add SQL/document/vector store adapters:
-  - field and index mapping;
-  - pagination/cursor;
-  - soft delete;
-  - optional migrations.
 - [ ] Add `PromptCompilerPort` to compile tenant/channel/plan/tools/prompt
   sections/variables into runtime instructions.
 - [ ] Add `EventSink` / `LoggerPort` with console, noop, and custom sinks.

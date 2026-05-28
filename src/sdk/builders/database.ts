@@ -4,13 +4,11 @@ import type {
   DatabaseResourceId,
   DatabaseTableDefinition,
   DatabaseVectorIndexDefinition,
-  DomainDataAdapter,
 } from "../types.js";
 import { assertUnique, copy } from "./builder-values.js";
 
 export class DatabaseBuilder {
   private readonly definition: DatabaseDefinition;
-  private adapterRef?: DomainDataAdapter;
 
   constructor(id: string) {
     this.definition = {
@@ -24,6 +22,11 @@ export class DatabaseBuilder {
 
   displayName(name: string): this {
     this.definition.displayName = name;
+    return this;
+  }
+
+  adapterRef(ref: string): this {
+    this.definition.adapterRef = ref;
     return this;
   }
 
@@ -45,15 +48,6 @@ export class DatabaseBuilder {
   kvNamespace(id: DatabaseResourceId): this {
     this.definition.kvNamespaces.push(id);
     return this;
-  }
-
-  adapter(adapter: DomainDataAdapter): this {
-    this.adapterRef = adapter;
-    return this;
-  }
-
-  get adapterInstance(): DomainDataAdapter | undefined {
-    return this.adapterRef;
   }
 
   build(): DatabaseDefinition {

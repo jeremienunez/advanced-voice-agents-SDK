@@ -154,6 +154,7 @@ export interface DatabaseVectorIndexDefinition {
 
 export interface DatabaseDefinition {
   id: string;
+  adapterRef?: string;
   displayName?: string;
   tables: DatabaseTableDefinition[];
   collections: DatabaseCollectionDefinition[];
