@@ -1,24 +1,21 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: rotate flagged local env credentials.
+Current goal: start agent infra runner hardening.
 
-Target commit title candidate: `chore: rotate local env credentials`
+Target commit title candidate: `test: harden infra runner boundaries`
 
 ## Active Focus
 
-### Secret Hygiene
+### Agent Infra / DB Harness
 
 Outcome:
-Ignored local env files do not contain live production credentials, and any
-exposed development keys are rotated outside the repo.
+Infra planning and apply flows remain server-owned, non-destructive, and ready
+for a real external runner without leaking credentials.
 
 Next work:
 
-- [ ] Rotate `GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `VOYAGE_API_KEY`, and
-  `MOONSHOT_API_KEY` from the ignored root `.env`; `pnpm audit:local-secrets`
-  reported them on 2026-05-28 without printing values.
-- [ ] Rerun `pnpm audit:local-secrets` after rotation/removal and keep the
-  command output clean.
+- [ ] Add real OpenTofu/cloud-init external runner integration beyond K3s
+  manifest apply.
 
 ### Current Gates
 
@@ -37,12 +34,14 @@ Optional security/network checks:
 
 ## Immediate Risk Backlog
 
-No immediate code hardening items remain in this section.
+### External Secret Rotation
+
+- [ ] Revoke/regenerate `GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `VOYAGE_API_KEY`,
+  and `MOONSHOT_API_KEY` in provider dashboards if the scrubbed ignored `.env`
+  values were live. Local `pnpm audit:local-secrets` is clean as of 2026-05-28.
 
 ## Architecture Backlog - Agent Infra / DB Harness
 
-- [ ] Add real OpenTofu/cloud-init external runner integration beyond K3s
-  manifest apply.
 - [ ] Add per-agent credential refs for runtime DB users.
 - [ ] Decide whether Milvus/graph stay starter adapters or graduate into
   reusable SDK adapter packages.

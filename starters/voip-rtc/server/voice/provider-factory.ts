@@ -10,6 +10,10 @@ import {
   resolveCatalogOption,
   runtimeProvider,
 } from "../providers/catalog.js";
+import {
+  E2EFakeRealtimeProvider,
+  isE2EFakeProviderEnabled,
+} from "./e2e-fake-provider.js";
 import { instructionsForRequest } from "./instructions.js";
 import type { StarterVoiceServiceOptions } from "./types.js";
 
@@ -37,6 +41,10 @@ export function createProvider(
     request.agent,
     options,
   );
+
+  if (isE2EFakeProviderEnabled()) {
+    return new E2EFakeRealtimeProvider();
+  }
 
   if (definition.kind === "openai-realtime") {
     return new OpenAIRealtimeTransport({

@@ -190,6 +190,7 @@ async function startManagedServer(): Promise<string> {
     stderr: "inherit",
     env: {
       ...env,
+      RTC_E2E_FAKE_PROVIDER: "1",
       VOICE_SERVER_PORT: String(port),
     },
   });

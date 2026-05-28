@@ -1,5 +1,34 @@
 # Changelog
 
+## chore: scrub ignored local env credentials
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Retirer les valeurs live-like du `.env` local ignore sans jamais les imprimer
+dans les logs ou dans Git.
+
+### Journal
+
+- Vidage local de `GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `VOYAGE_API_KEY` et
+  `MOONSHOT_API_KEY` dans le `.env` ignore.
+- `pnpm audit:local-secrets` est maintenant clean.
+- `pnpm test:rtc-e2e` ne depend plus de cles realtime locales: le script active
+  un faux provider E2E via `RTC_E2E_FAKE_PROVIDER=1`.
+- Le TODO conserve l'action externe: revoke/regenerate les cles cote provider
+  si les valeurs supprimees etaient actives.
+- La prochaine tranche code passe sur l'infra runner hardening.
+
+### Validation
+
+- `pnpm audit:local-secrets` OK
+- `pnpm audit:secrets` OK
+- `pnpm test:rtc-e2e` OK sans provider live
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: add secret hygiene audit
 
 Status: implemented locally

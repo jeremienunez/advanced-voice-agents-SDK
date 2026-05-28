@@ -2,6 +2,7 @@ import { hasAnyEnv } from "./env.js";
 import type { RuntimeProviderConfig } from "./types.js";
 
 export function createProviderCatalog(): RuntimeProviderConfig[] {
+  const e2eFakeProvider = Bun.env.RTC_E2E_FAKE_PROVIDER === "1";
   const openaiModel = Bun.env.OPENAI_REALTIME_MODEL ?? "gpt-realtime-1.5";
   const openaiVoice = Bun.env.OPENAI_REALTIME_VOICE ?? "marin";
   const geminiModel =
@@ -22,7 +23,7 @@ export function createProviderCatalog(): RuntimeProviderConfig[] {
         "GEMINI_API_KEY",
         "GOOGLE_API_KEY",
         "GOOGLE_GENERATIVE_AI_API_KEY",
-      ]),
+      ]) || e2eFakeProvider,
       models: [
         geminiModel,
         "gemini-3.1-flash-live-preview",
@@ -49,7 +50,7 @@ export function createProviderCatalog(): RuntimeProviderConfig[] {
       label: "OpenAI Realtime",
       kind: "openai-realtime",
       requiredEnv: ["OPENAI_API_KEY"],
-      enabled: hasAnyEnv(["OPENAI_API_KEY"]),
+      enabled: hasAnyEnv(["OPENAI_API_KEY"]) || e2eFakeProvider,
       models: [openaiModel, "gpt-realtime-1.5", "gpt-realtime-2"],
       voices: [openaiVoice, "marin", "cedar", "verse", "alloy"],
       defaultModel: openaiModel,
