@@ -1,35 +1,39 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: turn the wine investment pack into an executable pack.
+Current goal: add contractual tests for public SDK/runtime boundaries.
 
-Target commit title candidate: `test: make wine investment pack executable`
+Target commit title candidate: `test: add public boundary contracts`
 
 ## Active Focus
 
-### Wine Investment Pack
+### Public Boundary Contracts
 
 Outcome:
-The wine investment example should be runnable as a concrete pack instead of
-only typechecked sample code, while keeping pack code isolated from starter
-runtime internals.
+Public package boundaries should be covered by focused BDD contracts so SDK
+compilation, browser protocol messages, and exported package entrypoints cannot
+regress silently.
 
 BDD target:
 
-- Add `pnpm test:wine-investment-pack:bdd`.
-- Prove the pack compiles through the public SDK.
-- Prove the pack exposes runnable metadata/entrypoint for a host app.
-- Prove the pack does not import starter server/client internals.
+- Add `pnpm test:public-boundaries:bdd`.
+- Prove a minimal SDK definition compiles through the public `@voiceagentsdk/core`
+  and `@voiceagentsdk/core/sdk` exports.
+- Prove browser protocol message parsing keeps start/end/audio control contracts
+  stable.
+- Prove package export entrypoints resolve for sdk, server, browser, adapters,
+  and client browser surfaces.
 
 Implementation target:
 
-- [ ] Audit `examples/packs/wine-investment` responsibilities and exports.
-- [ ] Add an executable pack contract or runner using public SDK APIs only.
-- [ ] Add a BDD script for compile + runtime entrypoint behavior.
-- [ ] Keep pack files under 300 LOC and preserve package export boundaries.
+- [ ] Add a root BDD script for public boundary contracts.
+- [ ] Cover SDK compilation through public exports.
+- [ ] Cover browser protocol parsing/shape without importing private starter
+  modules.
+- [ ] Cover package export resolution for declared entrypoints.
 
 Definition of done:
 
-- [ ] `pnpm test:wine-investment-pack:bdd` is red before implementation, then
+- [ ] `pnpm test:public-boundaries:bdd` is red before implementation, then
   green.
 - [ ] `pnpm audit:solid`
 - [ ] `git diff --check`
@@ -60,7 +64,6 @@ Optional security/network checks:
 
 ## Architecture Backlog - Adapters And Demo
 
-- [ ] Transform `examples/packs/wine-investment` into an executable pack.
 - [ ] Add contractual tests for:
   - SDK compilation;
   - browser protocol;
