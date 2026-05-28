@@ -1,5 +1,37 @@
 # Changelog
 
+## test: wire fastify voice adapter
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Remplacer le placeholder Fastify par un adapter core qui expose le runtime voice
+via une boundary HTTP/WebSocket et reste decouple du starter.
+
+### Journal
+
+- `createFastifyVoiceAdapter` enregistre maintenant `/voice/health` et
+  `/voice/ws` avec prefix normalise.
+- Ajout du contrat `FastifyLike.get`, des types route/request et du port-like
+  `FastifyVoiceService`.
+- Le WebSocket Fastify est adapte vers `BrowserVoiceSocket`, puis delegue a
+  `BrowserVoiceService.handleBrowserStream`.
+- L'adapter accepte soit un `voiceService` explicite, soit une config
+  `BrowserVoiceServiceConfig` pour creer le service dans le core.
+- Le contexte user tenant/user/plan vient de la query par defaut ou d'un
+  resolver injecte.
+- Ajout de `pnpm test:fastify-voice-adapter:bdd` et integration dans
+  `audit:solid`.
+- README, TODO et changelog sont a jour.
+
+### Validation
+
+- `pnpm test:fastify-voice-adapter:bdd` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: add memory store port
 
 Status: implemented locally

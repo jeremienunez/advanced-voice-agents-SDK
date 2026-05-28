@@ -361,7 +361,7 @@ The starter server runs on `http://127.0.0.1:8787` by default.
 | `@voiceagentsdk/core/server/browser` | `BrowserVoiceService` WebSocket bridge. |
 | `@voiceagentsdk/core/server/providers` | Realtime provider transport facade. |
 | `@voiceagentsdk/core/server/media` | Media handlers and audio utilities. |
-| `@voiceagentsdk/core/server/adapters/fastify` | Placeholder adapter contract. |
+| `@voiceagentsdk/core/server/adapters/fastify` | Fastify-like health/WebSocket adapter for `BrowserVoiceService`. |
 | `@voiceagentsdk/core/client/browser` | Browser voice session client. |
 
 ## SDK Builder Example
@@ -512,6 +512,7 @@ Physical mappings and migrations live on adapter contracts, not on
 | `pnpm harness:route-wines` | Run the route-wines builder harness. |
 | `pnpm test:debug-audio:bdd` | Check OpenAI debug audio dumps require local mode, restrictive permissions, and cleanup. |
 | `pnpm test:event-sink-logger-port:bdd` | Check browser voice runtime events and logs go through injectable event sink and logger ports with redaction and noop adapters. |
+| `pnpm test:fastify-voice-adapter:bdd` | Check the Fastify-like adapter registers health/WebSocket routes, normalizes prefixes, and delegates to `BrowserVoiceService`. |
 | `pnpm test:knowledge-tool` | Check runtime knowledge tool wiring. |
 | `pnpm test:llm-harness` | Check provider-agnostic builder LLM planner, research, verifier, and resolver behavior. |
 | `pnpm test:log-redaction:bdd` | Check recursive log redaction for prompts, messages, content, child bindings, and secrets. |
@@ -539,7 +540,7 @@ Physical mappings and migrations live on adapter contracts, not on
 | `pnpm test:solid-seams` | Run focused BDD seam tests for HTTP guards, voice factory/learning, builder summaries, and infra validation. |
 | `pnpm test:runtime-tool-call` | Check runtime tool call flow. |
 | `pnpm test:rtc-e2e` | Run the RTC WebSocket e2e script. |
-| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/debug-audio/event-sink-logger/memory-store/prompt/prompt-compiler/runtime-tool/tool-contract/tool-registry/DB-adapter-registry/store-adapter-contract/runtime-DB-credential/secret-resolver/tenant-resolver/adapter-boundary/Temporal-worker/Redis-memory/Graph-memory/infra-evolution/ownership/ingestion/DB provisioning/infra-runner/secret-hygiene tests, and RTC E2E. |
+| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/debug-audio/event-sink-logger/fastify-adapter/memory-store/prompt/prompt-compiler/runtime-tool/tool-contract/tool-registry/DB-adapter-registry/store-adapter-contract/runtime-DB-credential/secret-resolver/tenant-resolver/adapter-boundary/Temporal-worker/Redis-memory/Graph-memory/infra-evolution/ownership/ingestion/DB provisioning/infra-runner/secret-hygiene tests, and RTC E2E. |
 | `pnpm audit:architecture` | Enforce Dependency Cruiser SOA/SOLID import boundaries. |
 | `pnpm audit:responsibility` | Enforce SRP/LSP clean-code responsibility rules. |
 | `pnpm audit:secrets` | Scan committed files for live-like secrets without printing secret values. |

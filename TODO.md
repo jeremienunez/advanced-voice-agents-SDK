@@ -1,38 +1,35 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: wire the Fastify voice adapter to the cleaned runtime.
+Current goal: turn the wine investment pack into an executable pack.
 
-Target commit title candidate: `test: wire fastify voice adapter`
+Target commit title candidate: `test: make wine investment pack executable`
 
 ## Active Focus
 
-### Fastify Voice Adapter
+### Wine Investment Pack
 
 Outcome:
-The Fastify adapter should expose the cleaned voice runtime through a narrow
-HTTP/WebSocket boundary, without depending on starter internals or placeholder
-errors.
+The wine investment example should be runnable as a concrete pack instead of
+only typechecked sample code, while keeping pack code isolated from starter
+runtime internals.
 
 BDD target:
 
-- Add `pnpm test:fastify-voice-adapter:bdd`.
-- Prove the adapter registers voice routes against a Fastify-like app.
-- Prove route prefixing is deterministic and does not leak starter paths.
-- Prove the adapter consumes explicit runtime ports/config instead of importing
-  app/bootstrap, HTTP routes, or starter voice composition.
+- Add `pnpm test:wine-investment-pack:bdd`.
+- Prove the pack compiles through the public SDK.
+- Prove the pack exposes runnable metadata/entrypoint for a host app.
+- Prove the pack does not import starter server/client internals.
 
 Implementation target:
 
-- [ ] Replace the placeholder `createFastifyVoiceAdapter` error path.
-- [ ] Define the minimal Fastify-like route registration contract.
-- [ ] Bridge WebSocket/session startup to the existing browser voice service
-  boundary without coupling to the starter server.
-- [ ] Keep adapter files under 300 LOC and preserve Dependency Cruiser
-  boundaries.
+- [ ] Audit `examples/packs/wine-investment` responsibilities and exports.
+- [ ] Add an executable pack contract or runner using public SDK APIs only.
+- [ ] Add a BDD script for compile + runtime entrypoint behavior.
+- [ ] Keep pack files under 300 LOC and preserve package export boundaries.
 
 Definition of done:
 
-- [ ] `pnpm test:fastify-voice-adapter:bdd` is red before implementation, then
+- [ ] `pnpm test:wine-investment-pack:bdd` is red before implementation, then
   green.
 - [ ] `pnpm audit:solid`
 - [ ] `git diff --check`
@@ -63,7 +60,6 @@ Optional security/network checks:
 
 ## Architecture Backlog - Adapters And Demo
 
-- [ ] Wire `src/server/adapters/fastify` to the cleaned runtime.
 - [ ] Transform `examples/packs/wine-investment` into an executable pack.
 - [ ] Add contractual tests for:
   - SDK compilation;
