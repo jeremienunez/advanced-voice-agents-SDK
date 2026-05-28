@@ -21,6 +21,7 @@
     "test:builder-draft-ownership:bdd": "bun run scripts/test-builder-draft-ownership-bdd.ts",
     "test:document-ingestion:bdd": "bun run scripts/test-document-ingestion-bdd.ts && bun run scripts/test-document-ingestion-quota-bdd.ts",
     "test:infra-plan": "bun run scripts/test-infra-plan.ts",
+    "test:infra-runner:bdd": "bun run scripts/test-infra-runner-bdd.ts",
     "test:llm-harness": "bun run scripts/test-llm-harness.ts",
     "test:prompt-policy:bdd": "bun run scripts/test-prompt-policy-bdd.ts",
     "test:runtime-tool-authorization:bdd": "bun run scripts/test-runtime-tool-authorization-bdd.ts",

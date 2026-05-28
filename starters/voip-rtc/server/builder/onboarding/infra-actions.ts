@@ -11,8 +11,8 @@ export interface OnboardingInfraRequest {
 
 const starterRoot = fileURLToPath(new URL("../../../", import.meta.url));
 const allowedActions = new Set(["plan", "apply", "status", "destroy"]);
-const allowedDrivers = new Set(["dev-local", "k3s-docker", "kubectl"]);
-const allowedTargets = new Set(["local", "k3s", "kubernetes", "vm"]);
+const allowedDrivers = new Set(["dev-local", "external", "k3s-docker", "kubectl"]);
+const allowedTargets = new Set(["local", "k3s", "kubernetes", "managed", "vm"]);
 
 export async function runOnboardingInfraAction(
   action: OnboardingInfraAction,

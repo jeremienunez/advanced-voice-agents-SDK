@@ -1,5 +1,36 @@
 # Changelog
 
+## test: harden infra runner boundaries
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Brancher le runner externe OpenTofu/cloud-init sans fuite d'env provider et sans
+fallback destructeur ou implicite vers le mode dev-local.
+
+### Journal
+
+- Ajout de `pnpm test:infra-runner:bdd`.
+- Le runner externe execute `tofu init/plan/apply` avec `TF_IN_AUTOMATION=1` et
+  une env allowlistee.
+- Les applies VM valident `cloud-init schema` avant `tofu apply -auto-approve`.
+- `destroy` est refuse pour le driver externe.
+- `external + local` est refuse par une policy CLI testable au lieu de retomber
+  en `dev-local`.
+- L'onboarding expose le driver `external`, la cible `managed`, et
+  `BUILDER_INFRA_TOFU_MODULE_DIR`.
+- README, README starter, `.env.example` et TODO sont a jour.
+
+### Validation
+
+- `pnpm test:infra-runner:bdd` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:loc` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## chore: scrub ignored local env credentials
 
 Status: implemented locally

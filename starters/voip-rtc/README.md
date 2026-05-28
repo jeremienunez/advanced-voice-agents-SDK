@@ -61,7 +61,8 @@ confirmation, uncertainty, and success invariants before activation.
 ## Builder Infra Plan
 
 Database planning now also creates `draft.infraPlan`. The onboarding script can
-turn that contract into real Kubernetes resources on a local K3s cluster.
+turn that contract into plan-only dev output, local K3s resources, kubectl
+applies, or an opt-in OpenTofu/cloud-init external runner.
 
 ```mermaid
 flowchart LR
@@ -103,9 +104,12 @@ When an infra plan is valid, the starter attaches an `iac` bundle to the draft:
 | `managed` | `agent-infra.plan.json`, `managed/agent.auto.tfvars.json` |
 
 These files contain secret names, not secret values. `pnpm run infra:apply`
-writes them under `.builder-state/iac`, creates or reuses a Docker-backed K3s
-cluster, applies the K3s manifests with `kubectl`, and verifies the resulting
-namespace, ConfigMap, and NetworkPolicy.
+writes them under `.builder-state/iac`. Depending on
+`BUILDER_INFRA_APPLY_DRIVER`, it stays in dev-local mode, creates or reuses a
+Docker-backed K3s cluster, applies Kubernetes manifests with `kubectl`, or runs
+the external OpenTofu/cloud-init runner. The external runner requires
+`BUILDER_INFRA_TOFU_MODULE_DIR`, forwards only allowlisted process env, validates
+VM cloud-init before `tofu apply`, and refuses local targets or destroy.
 
 The browser starter opens on `Onboarding` before Builder or RTC Lab. It checks
 Docker, kubectl, K3s readiness, Terraform/OpenTofu availability, writes
@@ -127,8 +131,12 @@ pnpm run infra:destroy
 Useful apply env vars:
 
 - `BUILDER_INFRA_APPLY_DRIVER=dev-local` keeps onboarding in plan-only dev mode.
+- `BUILDER_INFRA_APPLY_DRIVER=external` runs OpenTofu/cloud-init for non-local
+  targets.
 - `BUILDER_INFRA_APPLY_DRIVER=k3s-docker` creates local K3s through Docker.
 - `BUILDER_INFRA_APPLY_DRIVER=kubectl` applies to the active kubectl context.
+- `BUILDER_INFRA_TOFU_MODULE_DIR` points to the OpenTofu module directory for
+  the external runner.
 - `BUILDER_INFRA_K3S_IMAGE` defaults to `rancher/k3s:v1.31.5-k3s1`.
 - `BUILDER_INFRA_K3S_PORT` defaults to `16443`.
 
@@ -297,6 +305,7 @@ pnpm --filter @voiceagentsdk/starter-voip-rtc typecheck
 pnpm --filter @voiceagentsdk/starter-voip-rtc harness:route-wines
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:knowledge-tool
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-plan
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-runner:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:prompt-policy:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:runtime-tool-authorization:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:builder-draft-ownership:bdd

@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-export type InfraApplyDriver = "dev-local" | "k3s-docker" | "kubectl";
+export type InfraApplyDriver = "dev-local" | "external" | "k3s-docker" | "kubectl";
 
 export interface K3sDockerConfig {
   containerName: string;

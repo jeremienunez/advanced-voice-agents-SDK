@@ -165,14 +165,14 @@ Current behavior is deliberately conservative:
   create a per-agent no-login runtime role, and grant only schema `USAGE` plus
   table `SELECT`.
 - The plan carries compute target, isolation mode, provisioning mode, resource
-  refs, migration policy, and security notes so a future IaC runner can consume
+  refs, migration policy, and security notes so external IaC runners can consume
   it without changing agent code.
 - The starter also attaches an `InfraIacBundle` with actionable artifacts:
   portable JSON, OpenTofu variable files, VM cloud-init, and K3s/Kubernetes
   namespace/config/network manifests.
-- `pnpm run infra:apply` is the onboarding apply path: it creates or reuses a
-  local K3s cluster through Docker, applies the generated manifests with
-  `kubectl`, then verifies the namespace, ConfigMap, and NetworkPolicy.
+- `pnpm run infra:apply` is the onboarding apply path: it can stay plan-only,
+  create/reuse a local K3s cluster, apply Kubernetes manifests with `kubectl`,
+  or run the opt-in external OpenTofu/cloud-init runner.
 - The starter opens on a guided Onboarding Config UI first. It checks
   Docker/kubectl, writes allowlisted values to ignored `.env.local`, and runs
   safe plan/apply/status actions through the same infra script. Destructive
@@ -196,7 +196,8 @@ Infra env cheat sheet:
 | `TEMPORAL_ADDRESS` | Temporal workflow endpoint for post-session learning jobs. |
 | `TEMPORAL_NAMESPACE` | Temporal namespace used by the learning worker, default `default`. |
 | `TEMPORAL_TASK_QUEUE` | Temporal task queue consumed by the learning worker, default `agent-learning`. |
-| `BUILDER_INFRA_APPLY_DRIVER` | `dev-local` by default, `k3s-docker` for local K3s, or `kubectl` for an existing context. |
+| `BUILDER_INFRA_APPLY_DRIVER` | `dev-local` by default, `external` for OpenTofu/cloud-init, `k3s-docker` for local K3s, or `kubectl` for an existing context. |
+| `BUILDER_INFRA_TOFU_MODULE_DIR` | Required by the external runner; points to the OpenTofu module directory. |
 | `BUILDER_INFRA_K3S_IMAGE` | K3s Docker image used by `infra:apply`. |
 | `BUILDER_INFRA_K3S_PORT` | Local K3s API port, default `16443`. |
 
@@ -433,10 +434,11 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `pnpm test:builder-draft-ownership:bdd` | Check privileged builder workflows reload server-owned drafts by authenticated owner. |
 | `pnpm test:document-ingestion:bdd` | Check document upload bounds, type guards, xlsx caps, parser timeouts, and IP quotas. |
 | `pnpm test:database-provisioning` | Run the real starter database provisioner validation against the pgvector template and hostile SQL cases. |
+| `pnpm test:infra-runner:bdd` | Check external OpenTofu/cloud-init runner boundaries, env allowlisting, and apply routing. |
 | `pnpm test:solid-seams` | Run focused BDD seam tests for HTTP guards, voice factory/learning, builder summaries, and infra validation. |
 | `pnpm test:runtime-tool-call` | Check runtime tool call flow. |
 | `pnpm test:rtc-e2e` | Run the RTC WebSocket e2e script. |
-| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/debug-audio/prompt/runtime-tool/ownership/ingestion/DB provisioning tests, and RTC E2E. |
+| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/debug-audio/prompt/runtime-tool/ownership/ingestion/DB provisioning/infra-runner/secret-hygiene tests, and RTC E2E. |
 | `pnpm audit:architecture` | Enforce Dependency Cruiser SOA/SOLID import boundaries. |
 | `pnpm audit:responsibility` | Enforce SRP/LSP clean-code responsibility rules. |
 | `pnpm audit:secrets` | Scan committed files for live-like secrets without printing secret values. |

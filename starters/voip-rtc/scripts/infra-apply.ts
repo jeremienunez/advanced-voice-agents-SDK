@@ -1,12 +1,18 @@
-import type {
-  AgentBuildDraft,
-  DatabaseBuildPlan,
-} from "@voiceagentsdk/core/sdk";
 import { mkdirSync, writeFileSync, existsSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { PlannedInfraProvisioner } from "../server/builder/adapters/planned-infra-provisioner.js";
 import { IntentInfraPlanner } from "../server/builder/domain/infra.js";
 import { PlanOnlyInfraIacGenerator } from "../server/builder/domain/infra-iac.js";
+import { chooseInfraApplyPath } from "./infra-apply-policy.js";
+import {
+  externalApplyResultPath,
+  runExternalInfraRunner,
+} from "./infra-external-runner.js";
+import {
+  createDatabasePlan,
+  createOnboardingDraft,
+  safeToken,
+} from "./infra-onboarding-fixture.js";
 import {
   applyKubernetesArtifacts,
   destroyLocalK3s,
@@ -23,7 +29,7 @@ const action = (process.argv[2] ?? "plan") as Action;
 const env = await loadStarterEnv(import.meta.url);
 const starterRoot = resolve(new URL("../", import.meta.url).pathname);
 const stateRoot = join(starterRoot, ".builder-state", "iac");
-const driver = readOption("driver", env.BUILDER_INFRA_APPLY_DRIVER) ?? "dev-local";
+const driver = readDriver();
 const containerName = env.BUILDER_INFRA_K3S_CONTAINER ?? "voiceagentsdk-k3s";
 const k3sImage = env.BUILDER_INFRA_K3S_IMAGE ?? "rancher/k3s:v1.31.5-k3s1";
 const k3sPort = env.BUILDER_INFRA_K3S_PORT ?? "16443";
@@ -32,11 +38,11 @@ const k3sConfig = { containerName, image: k3sImage, port: k3sPort, stateRoot };
 if (!["plan", "apply", "status", "destroy"].includes(action)) {
   fail(`Unknown action "${action}". Use plan, apply, status, or destroy.`);
 }
-if (driver !== "dev-local" && driver !== "k3s-docker" && driver !== "kubectl") {
-  fail(`Unknown driver "${driver}". Use dev-local, k3s-docker, or kubectl.`);
-}
 
 if (action === "destroy") {
+  if (driver === "external") {
+    fail("External infra runner does not support destroy.");
+  }
   await destroyLocalK3s(k3sConfig);
   print({ status: "destroyed", containerName });
   process.exit(0);
@@ -46,7 +52,10 @@ if (action === "status") {
   process.exit(0);
 }
 
-const draft = createOnboardingDraft();
+const draft = createOnboardingDraft({
+  draftId: readOption("draft-id", env.BUILDER_INFRA_DRAFT_ID),
+  intent: env.BUILDER_INFRA_INTENT,
+});
 const databasePlan = createDatabasePlan(draft.id);
 const plan = new IntentInfraPlanner({
   computeTarget: readOption("target", env.BUILDER_INFRA_COMPUTE_TARGET) ?? "local",
@@ -80,10 +89,9 @@ if (action === "plan") {
   process.exit(0);
 }
 
-if (driver === "dev-local" || iac.target === "local") {
-  if (iac.target !== "local") {
-    fail(`dev-local can only apply local plans. Got "${iac.target}".`);
-  }
+const applyPath = readApplyPath();
+
+if (applyPath === "dev-local") {
   writeJson(join(output.dir, "apply-result.json"), {
     status: "dev-local",
     driver,
@@ -108,8 +116,32 @@ if (driver === "dev-local" || iac.target === "local") {
   process.exit(0);
 }
 
-if (iac.target !== "k3s" && iac.target !== "kubernetes") {
-  fail(`Apply needs a Kubernetes target. Got "${iac.target}".`);
+if (applyPath === "external") {
+  const result = await runExternalInfraRunner({
+    action,
+    bundle: iac,
+    outputDir: output.dir,
+    env,
+  });
+  writeJson(externalApplyResultPath(output.dir), {
+    ...result,
+    outputDir: output.dir,
+    artifacts: output.paths,
+    appliedAt: new Date().toISOString(),
+  });
+  writeJson(join(stateRoot, "latest.json"), {
+    driver,
+    target: iac.target,
+    outputDir: output.dir,
+  });
+  print({
+    status: result.status,
+    driver,
+    target: iac.target,
+    outputDir: output.dir,
+    commands: result.commands,
+  });
+  process.exit(0);
 }
 
 const kubeconfig = driver === "k3s-docker"
@@ -140,58 +172,6 @@ print({
   namespace: output.namespace,
   outputDir: output.dir,
 });
-
-function createOnboardingDraft(): AgentBuildDraft {
-  const id = readOption("draft-id", env.BUILDER_INFRA_DRAFT_ID) ?? "onboarding";
-  return {
-    id: `draft_${safeToken(id)}`,
-    status: "draft",
-    identity: {
-      builderFirstName: "Infra",
-      builderLastName: "Onboarding",
-      publicAgentName: "Voice Agent SDK Infra",
-      intent: env.BUILDER_INFRA_INTENT ??
-        "Provision onboarding infrastructure for a reusable voice agent runtime.",
-      mustDo: ["Keep generated artifacts actionable by the solution itself."],
-      mustNotDo: ["Do not embed secret values in IaC artifacts."],
-      llmProvider: "gemini",
-      llmModel: "infra-onboarding",
-    },
-    toolRegistry: [],
-    selectedTools: [],
-    promptParts: {},
-    createdAt: new Date(0).toISOString(),
-    updatedAt: new Date(0).toISOString(),
-  };
-}
-
-function createDatabasePlan(draftId: string): DatabaseBuildPlan {
-  const schemaName = `agent_${safeToken(draftId)}`.slice(0, 60);
-  return {
-    id: `db_${draftId}`,
-    status: "validated",
-    databaseProvider: "postgres-pgvector",
-    schemaName,
-    sqlMigration: "create extension if not exists vector;",
-    statements: [],
-    tables: [],
-    indexes: [],
-    vectorization: {
-      embeddingProvider: "voyage",
-      embeddingModel: "voyage-4-large",
-      dimensions: 1024,
-      sourceFields: ["knowledge_chunks.content"],
-      metadataFields: ["document_id"],
-      retrievalMode: "hybrid",
-      chunking: { method: "semantic", targetTokens: 420, overlapTokens: 72 },
-      index: { kind: "hnsw", metric: "cosine" },
-    },
-    kg: { enabled: false, entityTypes: [], relationTypes: [] },
-    repositories: { repositories: [], safetyRules: [] },
-    reasons: [],
-    risks: [],
-  };
-}
 
 function writeBundle(draftId: string, bundle: ReturnType<PlanOnlyInfraIacGenerator["createBundle"]>) {
   const dir = join(stateRoot, safeToken(draftId), bundle.generatedAt.replace(/[:.]/g, "-"));
@@ -230,6 +210,10 @@ async function status(): Promise<void> {
     print({ status: "dev-local", ...latest, applied: false });
     return;
   }
+  if (latest.driver === "external") {
+    print({ status: "ok", ...latest });
+    return;
+  }
   if (!latest.namespace) fail("Latest Kubernetes apply is missing namespace.");
   await verifyApply(latest.namespace, latest.kubeconfig);
   print({ status: "ok", ...latest });
@@ -247,13 +231,30 @@ function readOption(name: string, fallback?: string): string | undefined {
     fallback;
 }
 
+function readDriver(): InfraApplyDriver {
+  const value = readOption("driver", env.BUILDER_INFRA_APPLY_DRIVER) ?? "dev-local";
+  if (
+    value === "dev-local" ||
+    value === "external" ||
+    value === "k3s-docker" ||
+    value === "kubectl"
+  ) {
+    return value;
+  }
+  fail(`Unknown driver "${value}". Use dev-local, external, k3s-docker, or kubectl.`);
+}
+
+function readApplyPath() {
+  try {
+    return chooseInfraApplyPath({ driver, target: iac.target });
+  } catch (error) {
+    fail(error instanceof Error ? error.message : String(error));
+  }
+}
+
 function mergeWarnings(left?: string[], right?: string[]) {
   const warnings = Array.from(new Set([...(left ?? []), ...(right ?? [])]));
   return warnings.length ? warnings : undefined;
-}
-
-function safeToken(value: string): string {
-  return value.toLowerCase().replace(/[^a-z0-9_-]/g, "-").replace(/-+/g, "-");
 }
 
 function writeJson(path: string, value: unknown): void {

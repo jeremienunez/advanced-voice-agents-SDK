@@ -1,21 +1,20 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: start agent infra runner hardening.
+Current goal: add per-agent runtime DB credential refs.
 
-Target commit title candidate: `test: harden infra runner boundaries`
+Target commit title candidate: `test: add per-agent runtime db credential refs`
 
 ## Active Focus
 
 ### Agent Infra / DB Harness
 
 Outcome:
-Infra planning and apply flows remain server-owned, non-destructive, and ready
-for a real external runner without leaking credentials.
+Runtime database access uses per-agent credential references instead of shared
+process env URLs.
 
 Next work:
 
-- [ ] Add real OpenTofu/cloud-init external runner integration beyond K3s
-  manifest apply.
+- [ ] Add per-agent credential refs for runtime DB users.
 
 ### Current Gates
 
@@ -42,7 +41,6 @@ Optional security/network checks:
 
 ## Architecture Backlog - Agent Infra / DB Harness
 
-- [ ] Add per-agent credential refs for runtime DB users.
 - [ ] Decide whether Milvus/graph stay starter adapters or graduate into
   reusable SDK adapter packages.
 
