@@ -24,6 +24,7 @@ import type {
   LlmModelProfile,
   LlmTaskRole,
 } from "@voiceagentsdk/core/sdk";
+import { runtimeToolHandlerRefs } from "../runtime/tools/handler-refs.js";
 import type { BuilderConfig, BuilderServiceComposition } from "./types.js";
 
 export function createBuilderServiceCompositionFromEnv(
@@ -217,6 +218,7 @@ export function createBuilderServiceCompositionFromEnv(
       researchModel,
       voyageConfigured: Boolean(env.VOYAGE_API_KEY),
       toolRegistry: defaultToolRegistry,
+      availableToolHandlerRefs: runtimeToolHandlerRefs(),
       availableSecretNames: configuredSecretNames(env),
     },
   };

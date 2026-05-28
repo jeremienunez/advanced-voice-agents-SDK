@@ -1,5 +1,41 @@
 # Changelog
 
+## test: promote runtime tool registry adapter
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Sortir le binding executable des tools runtime d'une map locale hardcodee et le
+faire passer par un port SDK injectable.
+
+### Journal
+
+- Ajout de `ToolRegistryAdapterPort` et de `ToolRegistryExecutionInput` cote
+  SDK.
+- Ajout de l'adapter starter `actionToolRegistryAdapter`.
+- `runtimeActionTools` accepte maintenant un registry injectable et masque les
+  selected tools sans binding executable.
+- La validation builder consomme les handler refs disponibles depuis le
+  registry adapter au lieu d'un set local.
+- `runtimeToolHandlerRefs()` centralise les refs runtime disponibles, dont
+  `knowledge.search` et les actions.
+- Ajout de `pnpm test:tool-registry-adapter:bdd` et integration dans
+  `audit:solid`.
+- README, TODO et changelog sont a jour.
+
+### Validation
+
+- `pnpm test:tool-registry-adapter:bdd` OK
+- `pnpm test:prompt-policy:bdd` OK
+- `pnpm test:runtime-tool-authorization:bdd` OK
+- `pnpm typecheck:sdk` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:architecture` OK
+- `pnpm audit:responsibility` OK
+- `pnpm audit:loc` OK
+
 ## test: split executable and serializable tool contracts
 
 Status: implemented locally

@@ -6,18 +6,11 @@ import type {
   ToolValidationReport,
 } from "@voiceagentsdk/core/sdk";
 
-const runtimeHandlers = new Set([
-  "knowledge.search",
-  "summary.create",
-  "handoff.create",
-  "task.schedule",
-  "event.emit",
-]);
-
 export function validateToolBuildPlan(
   draft: AgentBuildDraft,
   plan: ToolBuildPlan,
   availableSecrets: Set<string>,
+  availableHandlerRefs: Set<string>,
 ): ToolValidationReport {
   const issues: ToolValidationIssue[] = [];
   const toolsByName = new Map(plan.tools.map((tool) => [tool.name, tool]));
@@ -28,7 +21,7 @@ export function validateToolBuildPlan(
       issues.push(error("unknown_tool", `Selected tool "${name}" is not planned.`, name));
       continue;
     }
-    validateSelectedTool(draft, tool, availableSecrets, issues);
+    validateSelectedTool(draft, tool, availableSecrets, availableHandlerRefs, issues);
   }
 
   return {
@@ -58,11 +51,12 @@ function validateSelectedTool(
   draft: AgentBuildDraft,
   tool: ToolBuildContract,
   secrets: Set<string>,
+  handlerRefs: Set<string>,
   issues: ToolValidationIssue[],
 ): void {
   if (!tool.runtimeBinding.handlerRef) {
     issues.push(error("missing_handler", "Tool is missing handlerRef.", tool.name));
-  } else if (!runtimeHandlers.has(tool.runtimeBinding.handlerRef)) {
+  } else if (!handlerRefs.has(tool.runtimeBinding.handlerRef)) {
     issues.push(error("unknown_handler", `Unknown handler "${tool.runtimeBinding.handlerRef}".`, tool.name));
   }
   if (!tool.parameters || tool.parameters.type !== "object") {

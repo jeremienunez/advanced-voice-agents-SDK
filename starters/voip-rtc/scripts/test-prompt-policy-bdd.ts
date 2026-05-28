@@ -5,6 +5,7 @@ import type {
   ToolName,
   ToolRegistryItem,
 } from "@voiceagentsdk/core/sdk";
+import { runtimeToolHandlerRefs } from "../server/runtime/tools/handler-refs.js";
 import { saveDraft } from "../server/builder/state/draft-store.js";
 import type { BuilderWorkflowDependencies } from "../server/builder/types.js";
 import { createBuilderWorkflows } from "../server/builder/workflows.js";
@@ -26,6 +27,7 @@ async function scenarioCompiledPromptEndsWithServerPolicy() {
 
   const workflows = createBuilderWorkflows({
     availableSecretNames: [],
+    availableToolHandlerRefs: runtimeToolHandlerRefs(),
     planner: hostilePlanner(),
   } as unknown as BuilderWorkflowDependencies);
 
@@ -67,6 +69,7 @@ async function scenarioRejectsPromptMissingCoreInvariants() {
 
   const workflows = createBuilderWorkflows({
     availableSecretNames: [],
+    availableToolHandlerRefs: runtimeToolHandlerRefs(),
     planner: promptPlanner("Short prompt."),
   } as unknown as BuilderWorkflowDependencies);
   const error = await captureError(() =>

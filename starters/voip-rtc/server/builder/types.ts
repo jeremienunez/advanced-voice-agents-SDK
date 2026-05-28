@@ -122,6 +122,7 @@ export interface BuilderWorkflowDependencies {
   researchModel: string;
   voyageConfigured: boolean;
   toolRegistry: ToolRegistryItem[];
+  availableToolHandlerRefs: string[];
   availableSecretNames: string[];
 }
 

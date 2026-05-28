@@ -1,23 +1,24 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: promote runtime tool registry adapter.
+Current goal: add source audits for runtime tool binding.
 
-Target commit title candidate: `test: promote runtime tool registry adapter`
+Target commit title candidate: `test: audit runtime tool binding invariants`
 
 ## Active Focus
 
 ### Agent Infra / DB Harness
 
 Outcome:
-Runtime tool binding should go through an SDK-facing adapter port instead of
-starter-local handler maps and allowlists.
+Source audits should make runtime tool binding failures visible before RTC
+startup.
 
 Next work:
 
-- [ ] Promote starter handler maps into `ToolRegistryAdapterPort`:
-  - define the runtime port contract in the SDK;
-  - adapt starter action handlers behind that port;
-  - keep selected-tool filtering and handler validation explicit.
+- [ ] Add source audits for:
+  - no `unknown.*` handler fallback in selected runtime tools;
+  - no selected tool without an executable runtime binding;
+  - no compiled runtime artifact that claims executable tools but only has
+    serializable manifests.
 
 ### Current Gates
 
@@ -47,11 +48,6 @@ Optional security/network checks:
 - [ ] Decide the `tool-plan` prompt path:
   - wire a real planner method that uses the templates; or
   - delete the templates until the flow is no longer deterministic.
-- [ ] Add source audits for:
-  - no `unknown.*` handler fallback in selected runtime tools;
-  - no selected tool without an executable runtime binding;
-  - no compiled runtime artifact that claims executable tools but only has
-    serializable manifests.
 
 ## Architecture Backlog - Runtime Ports
 
@@ -65,7 +61,6 @@ Optional security/network checks:
   Realtime, and cascaded providers.
 - [ ] Add `MediaBridgeFactoryPort` for start, stop, `sendAudio`,
   `clearOutput`, and `onAudioToLlm`.
-- [ ] Promote `ToolRegistryAdapterPort` into a real SDK-agnostic runtime port.
 - [ ] Add `DbAdapterRegistry` and keep adapters out of serializable SDK
   definitions.
 - [ ] Wire `StoreDefinition` to `DbAdapterRegistry`.

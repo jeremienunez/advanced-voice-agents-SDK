@@ -399,6 +399,9 @@ The builder keeps tool planning separate from the final voice prompt.
   is the executable contract and requires an `execute` handler.
 - `createAgentBuilder().tool(...)` stores a manifest copy, so executable
   builder helpers do not leak functions into SDK definitions.
+- `ToolRegistryAdapterPort` binds manifests to executable runtime handlers.
+  Builder validation consumes its available handler refs; runtime execution
+  calls the adapter instead of a local hardcoded allowlist.
 - `ToolBuildPlan` stores serializable tool contracts: selected tools, schemas,
   permissions, side effects, confirmation policy, and runtime binding.
 - `compile-agent` validates selected tools before composing the voice prompt.
@@ -454,6 +457,7 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `pnpm test:prompt-policy:bdd` | Check compiled prompts end with immutable server-owned safety and tool policy. |
 | `pnpm test:runtime-tool-authorization:bdd` | Check runtime exposes only server-selected executable tools. |
 | `pnpm test:tool-contracts:bdd` | Check executable tool definitions stay separate from serializable tool manifests. |
+| `pnpm test:tool-registry-adapter:bdd` | Check runtime tool binding and builder handler validation go through `ToolRegistryAdapterPort`. |
 | `pnpm test:runtime-db-credentials:bdd` | Check runtime Postgres access resolves per-agent credential refs instead of shared DB URLs. |
 | `pnpm test:builder-draft-ownership:bdd` | Check privileged builder workflows reload server-owned drafts by authenticated owner. |
 | `pnpm test:document-ingestion:bdd` | Check document upload bounds, type guards, xlsx caps, parser timeouts, and IP quotas. |
@@ -467,7 +471,7 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `pnpm test:solid-seams` | Run focused BDD seam tests for HTTP guards, voice factory/learning, builder summaries, and infra validation. |
 | `pnpm test:runtime-tool-call` | Check runtime tool call flow. |
 | `pnpm test:rtc-e2e` | Run the RTC WebSocket e2e script. |
-| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/debug-audio/prompt/runtime-tool/tool-contract/runtime-DB-credential/adapter-boundary/Temporal-worker/Redis-memory/Graph-memory/infra-evolution/ownership/ingestion/DB provisioning/infra-runner/secret-hygiene tests, and RTC E2E. |
+| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/debug-audio/prompt/runtime-tool/tool-contract/tool-registry/runtime-DB-credential/adapter-boundary/Temporal-worker/Redis-memory/Graph-memory/infra-evolution/ownership/ingestion/DB provisioning/infra-runner/secret-hygiene tests, and RTC E2E. |
 | `pnpm audit:architecture` | Enforce Dependency Cruiser SOA/SOLID import boundaries. |
 | `pnpm audit:responsibility` | Enforce SRP/LSP clean-code responsibility rules. |
 | `pnpm audit:secrets` | Scan committed files for live-like secrets without printing secret values. |

@@ -24,6 +24,7 @@ export async function compileAgentWithServerPolicy(
     draft,
     plannedTools,
     new Set(deps.availableSecretNames),
+    new Set(deps.availableToolHandlerRefs),
   );
   const toolPlan = validatedToolPlan(plannedTools, validation);
   const toolPrompt = toolInstructionsFromPlan(toolPlan);
