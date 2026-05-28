@@ -6,6 +6,9 @@ export {
   createBrowserMediaBridgeDefinition,
   createDefaultBrowserMediaBridgeFactory,
 } from "./voice-service/media-bridge.js";
+export {
+  parseBrowserVoiceClientMessage,
+} from "./voice-service/protocol.js";
 export type {
   BrowserVoiceMediaBridge,
   BrowserVoiceMediaBridgeFactory,

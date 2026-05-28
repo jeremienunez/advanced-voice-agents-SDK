@@ -1,6 +1,7 @@
 export {
   BrowserVoiceService,
   createBrowserVoiceService,
+  parseBrowserVoiceClientMessage,
   createBrowserMediaBridgeDefinition,
   createDefaultBrowserMediaBridgeFactory,
   type BrowserVoiceServiceConfig,

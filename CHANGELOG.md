@@ -1,5 +1,34 @@
 # Changelog
 
+## test: add public boundary contracts
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Ajouter des contrats BDD sur les exports publics SDK/runtime pour detecter les
+regressions de compilation SDK, protocole browser et package entrypoints.
+
+### Journal
+
+- Ajout de `pnpm test:public-boundaries:bdd` et integration dans
+  `audit:solid`.
+- Le test compile une definition minimale via `@voiceagentsdk/core` et
+  `@voiceagentsdk/core/sdk`.
+- Le test verifie la resolution des entrypoints declares `sdk`, `server`,
+  `server/browser`, `server/adapters/fastify`, `server/media`,
+  `server/providers` et `client/browser`.
+- Ajout de l'export public `parseBrowserVoiceClientMessage` sur
+  `@voiceagentsdk/core/server/browser`.
+- README, TODO et changelog sont a jour.
+
+### Validation
+
+- `pnpm test:public-boundaries:bdd` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: wire fastify voice adapter
 
 Status: implemented locally

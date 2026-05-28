@@ -1,39 +1,35 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: add contractual tests for public SDK/runtime boundaries.
+Current goal: add AGENTRX diagnostics contract tests.
 
-Target commit title candidate: `test: add public boundary contracts`
+Target commit title candidate: `test: add agentrx diagnostics contracts`
 
 ## Active Focus
 
-### Public Boundary Contracts
+### AGENTRX Diagnostics
 
 Outcome:
-Public package boundaries should be covered by focused BDD contracts so SDK
-compilation, browser protocol messages, and exported package entrypoints cannot
-regress silently.
+AGENTRX diagnostics should have focused BDD coverage for the expected local
+quality signals and report artifacts, so diagnostic regressions are visible
+without reading ad hoc command output.
 
 BDD target:
 
-- Add `pnpm test:public-boundaries:bdd`.
-- Prove a minimal SDK definition compiles through the public `@voiceagentsdk/core`
-  and `@voiceagentsdk/core/sdk` exports.
-- Prove browser protocol message parsing keeps start/end/audio control contracts
-  stable.
-- Prove package export entrypoints resolve for sdk, server, browser, adapters,
-  and client browser surfaces.
+- Add `pnpm test:agentrx-diagnostics:bdd`.
+- Prove diagnostics include SDK typecheck and starter typecheck signals.
+- Prove diagnostics include the route-wines harness signal.
+- Prove AGENTRX report artifacts are present and non-empty.
 
 Implementation target:
 
-- [ ] Add a root BDD script for public boundary contracts.
-- [ ] Cover SDK compilation through public exports.
-- [ ] Cover browser protocol parsing/shape without importing private starter
-  modules.
-- [ ] Cover package export resolution for declared entrypoints.
+- [ ] Audit existing AGENTRX report generation and artifact paths.
+- [ ] Add a BDD script for diagnostics/report assertions.
+- [ ] Add or tighten any missing diagnostics runner boundary.
+- [ ] Keep diagnostics scripts small and under the existing audit rules.
 
 Definition of done:
 
-- [ ] `pnpm test:public-boundaries:bdd` is red before implementation, then
+- [ ] `pnpm test:agentrx-diagnostics:bdd` is red before implementation, then
   green.
 - [ ] `pnpm audit:solid`
 - [ ] `git diff --check`
@@ -61,13 +57,6 @@ Optional security/network checks:
 - [ ] Revoke/regenerate `GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `VOYAGE_API_KEY`,
   and `MOONSHOT_API_KEY` in provider dashboards if the scrubbed ignored `.env`
   values were live. Local `pnpm audit:local-secrets` is clean as of 2026-05-28.
-
-## Architecture Backlog - Adapters And Demo
-
-- [ ] Add contractual tests for:
-  - SDK compilation;
-  - browser protocol;
-  - package exports.
 
 ## Architecture Backlog - AGENTRX Diagnostics
 

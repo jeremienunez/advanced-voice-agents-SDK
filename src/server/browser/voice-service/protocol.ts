@@ -1,5 +1,8 @@
 export { toBuffer } from "./buffer-conversion.js";
-export { parseClientMessage } from "./client-message-parser.js";
+export {
+  parseClientMessage,
+  parseClientMessage as parseBrowserVoiceClientMessage,
+} from "./client-message-parser.js";
 export {
   DEFAULT_BROWSER_SAMPLE_RATE,
   WS_OPEN,
