@@ -47,6 +47,9 @@ flowchart TD
 
 The builder harness exposes model profiles by role:
 
+Builder-controlled JSON, selected tools, and document excerpts are quoted as
+untrusted data blocks before they enter LLM prompts.
+
 | Role | Purpose | Providers |
 | --- | --- | --- |
 | `builder.planner` | prompt, knowledge, database, and final prompt planning | DeepSeek, Qwen, Kimi, Gemini |

@@ -2,7 +2,7 @@
 
 Current goal: harden prompt and tool orchestration.
 
-Target commit title candidate: `test: quote builder inputs in prompts`
+Target commit title candidate: `test: lint compiled prompt invariants`
 
 ## Active Focus
 
@@ -14,7 +14,6 @@ uploaded documents, or request-supplied tool bindings.
 
 Next work:
 
-- [ ] Quote builder input and document content as data.
 - [ ] Lint compiled prompts for required invariants.
 - [ ] Enforce tool authorization server-side, independent of model text.
 
@@ -36,7 +35,6 @@ Optional security/network checks:
 
 ### Prompt And Tool Orchestration
 
-- [ ] Quote builder input and document content as data.
 - [ ] Lint compiled prompts for required invariants.
 - [ ] Enforce tool authorization server-side, independent of model text.
 

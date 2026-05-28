@@ -1,5 +1,36 @@
 # Changelog
 
+## test: quote builder inputs in prompts
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Eviter que l'identite builder, les documents uploades/recherches ou les listes
+d'outils injectent des instructions dans les prompts LLM du builder.
+
+### Journal
+
+- Le harness `pnpm test:llm-harness` couvre maintenant un document hostile qui
+  tente d'ignorer les regles precedentes.
+- `renderPromptTemplate` route les valeurs sensibles via un helper
+  `prompt-data.ts`.
+- Les placeholders JSON/donnees builder sont rendus dans des blocs
+  `<builder_data name="...">`.
+- Chaque bloc declare explicitement que le contenu est une donnee non fiable,
+  pas une instruction.
+- La protection s'applique aux drafts, identities, documents, recherches,
+  outils selectionnes, handlers runtime, objectifs et intents agent.
+
+### Validation
+
+- `pnpm test:llm-harness` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:loc` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: enforce server-owned prompt policy
 
 Status: implemented locally

@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { renderPromptValue } from "./prompt-data.js";
 
 export interface PromptTemplatePair {
   system: string;
@@ -33,8 +34,7 @@ export function renderPromptTemplate(
   values: Record<string, unknown>,
 ): string {
   return template.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (_, key) => {
-    const value = values[String(key)];
-    return typeof value === "string" ? value : JSON.stringify(value);
+    return renderPromptValue(String(key), values[String(key)]);
   });
 }
 

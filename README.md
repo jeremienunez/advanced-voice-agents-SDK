@@ -100,6 +100,8 @@ separate `/set goal` command in core.
 Builder prompts are no longer tied to one model vendor. The starter turns
 planner, research, and teacher/verifier work into typed `LlmTask` requests, then
 routes them through an adaptive resolver and provider adapters.
+Builder-controlled JSON and document excerpts are quoted as untrusted data
+blocks before they enter provider prompts.
 
 ```mermaid
 flowchart TD
