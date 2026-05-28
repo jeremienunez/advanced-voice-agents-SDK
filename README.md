@@ -521,6 +521,7 @@ Physical mappings and migrations live on adapter contracts, not on
 | `pnpm test:prompt-policy:bdd` | Check compiled prompts end with immutable server-owned safety and tool policy. |
 | `pnpm test:provider-factory:bdd` | Check voice session setup delegates realtime transport creation to `ProviderFactoryPort` and the starter factory builds supported providers. |
 | `pnpm test:public-boundaries:bdd` | Check public SDK compilation, browser protocol parsing, and declared package export entrypoints. |
+| `pnpm test:agentrx-diagnostics:bdd` | Check AGENTRX local quality signals, SDK failure localization, validation logs, and route-wines report artifacts. |
 | `pnpm test:runtime-tool-authorization:bdd` | Check runtime exposes only server-selected executable tools. |
 | `pnpm test:store-adapter-contracts:bdd` | Check SQL/document/vector store adapter mappings, pagination, soft delete, and migrations stay adapter-owned behind `DbAdapterRegistry`. |
 | `pnpm test:tool-contracts:bdd` | Check executable tool definitions stay separate from serializable tool manifests. |
@@ -540,7 +541,7 @@ Physical mappings and migrations live on adapter contracts, not on
 | `pnpm test:solid-seams` | Run focused BDD seam tests for HTTP guards, voice factory/learning, builder summaries, and infra validation. |
 | `pnpm test:runtime-tool-call` | Check runtime tool call flow. |
 | `pnpm test:rtc-e2e` | Run the RTC WebSocket e2e script. |
-| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/debug-audio/event-sink-logger/fastify-adapter/memory-store/prompt/prompt-compiler/public-boundaries/runtime-tool/tool-contract/tool-registry/DB-adapter-registry/store-adapter-contract/runtime-DB-credential/secret-resolver/tenant-resolver/adapter-boundary/Temporal-worker/Redis-memory/Graph-memory/infra-evolution/ownership/ingestion/DB provisioning/infra-runner/secret-hygiene tests, and RTC E2E. |
+| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/debug-audio/event-sink-logger/fastify-adapter/memory-store/prompt/prompt-compiler/public-boundaries/AGENTRX/runtime-tool/tool-contract/tool-registry/DB-adapter-registry/store-adapter-contract/runtime-DB-credential/secret-resolver/tenant-resolver/adapter-boundary/Temporal-worker/Redis-memory/Graph-memory/infra-evolution/ownership/ingestion/DB provisioning/infra-runner/secret-hygiene tests, and RTC E2E. |
 | `pnpm audit:architecture` | Enforce Dependency Cruiser SOA/SOLID import boundaries. |
 | `pnpm audit:responsibility` | Enforce SRP/LSP clean-code responsibility rules. |
 | `pnpm audit:secrets` | Scan committed files for live-like secrets without printing secret values. |

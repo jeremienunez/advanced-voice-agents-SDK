@@ -1,5 +1,33 @@
 # Changelog
 
+## test: add agentrx diagnostics contracts
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Verifier que l'implementation AGENTRX est branchee sur des signaux locaux
+falsifiables: typecheck SDK, typecheck starter, harness route-wines, log de
+validation et artefacts de rapport.
+
+### Journal
+
+- Ajout de `pnpm test:agentrx-diagnostics:bdd` avec compilation stricte avant
+  execution Bun.
+- Ajout du manifeste AGENTRX des signaux de qualite et des artefacts attendus.
+- Le BDD couvre la localisation du premier echec critique, le log de
+  validation auditable et les artefacts `trajectory-ir`, `validation-log`,
+  `agentrx-report.json` et `agentrx-report.md`.
+- Integration du test AGENTRX dans `audit:solid`.
+- README et TODO sont alignes sur cette derniere passe.
+
+### Validation
+
+- `pnpm test:agentrx-diagnostics:bdd` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## fix: typecheck boundary bdd scripts
 
 Status: implemented locally
