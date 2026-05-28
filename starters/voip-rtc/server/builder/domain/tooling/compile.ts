@@ -1,12 +1,12 @@
 import type {
   ToolBuildPlan,
-  ToolDefinition,
+  ToolManifest,
 } from "@voiceagentsdk/core/sdk";
 
-export function compileToolDefinitions(plan: ToolBuildPlan): ToolDefinition[] {
+export function compileToolDefinitions(plan: ToolBuildPlan): ToolManifest[] {
   return plan.tools
     .filter((tool) => tool.selected && tool.readiness === "ready")
-    .map((tool): ToolDefinition => ({
+    .map((tool): ToolManifest => ({
       name: tool.name,
       description: tool.description,
       category: tool.category,

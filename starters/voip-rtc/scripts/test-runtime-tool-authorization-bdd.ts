@@ -1,4 +1,4 @@
-import type { ToolDefinition } from "@voiceagentsdk/core/sdk";
+import type { ToolManifest } from "@voiceagentsdk/core/sdk";
 import type { RuntimeCompiledAgent } from "../server/runtime/compiled-agent.js";
 import { runtimeActionTools } from "../server/runtime/tools/action-tools.js";
 import { assert } from "./shared/assertions.js";
@@ -33,7 +33,7 @@ async function scenarioRuntimeExposesOnlySelectedTools() {
 
 function runtimeAgent(input: {
   selectedTools: string[];
-  tools: ToolDefinition[];
+  tools: ToolManifest[];
 }): RuntimeCompiledAgent {
   return {
     selectedTools: input.selectedTools,
@@ -66,7 +66,7 @@ function runtimeAgent(input: {
   };
 }
 
-function tool(name: string, handlerRef: string): ToolDefinition {
+function tool(name: string, handlerRef: string): ToolManifest {
   return {
     name,
     description: `${name} description`,

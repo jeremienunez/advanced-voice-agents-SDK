@@ -7,7 +7,7 @@ import type {
   StoreDefinition,
   StoreEntityDefinition,
   TenantDefinition,
-  ToolDefinition,
+  ToolManifest,
   VoiceAgentSdkDefinition,
 } from "./types.js";
 
@@ -29,7 +29,7 @@ export interface CompiledVoiceAgentSdk {
   providerForTenant(tenantId: string): ProviderDefinition | undefined;
   mediaBridgeForTenant(tenantId: string): MediaBridgeDefinition | undefined;
   planIncludes(planId: string, requiredPlanId: string): boolean;
-  toolsForPlan(planId?: string): ToolDefinition[];
+  toolsForPlan(planId?: string): ToolManifest[];
   promptFor(input: PromptRenderInput): string;
 }
 

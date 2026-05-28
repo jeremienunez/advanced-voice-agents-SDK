@@ -107,7 +107,7 @@ export interface RuntimeEvent {
   timestamp?: number;
 }
 
-export interface ToolDefinition<TInput = unknown, TOutput = unknown> {
+export interface ToolManifest {
   name: ToolName;
   description: string;
   category?: string;
@@ -121,7 +121,11 @@ export interface ToolDefinition<TInput = unknown, TOutput = unknown> {
   executionMode?: "automatic" | "confirmation" | "explicit";
   voicePreamble?: string;
   maxCallsPerSession?: number;
-  execute?: (input: TInput, context: ToolRuntimeContext) => Promise<TOutput>;
+}
+
+export interface ToolDefinition<TInput = unknown, TOutput = unknown>
+  extends ToolManifest {
+  execute: (input: TInput, context: ToolRuntimeContext) => Promise<TOutput>;
   format?: (output: TOutput, channel: AgentChannel) => string;
   keyFacts?: (output: TOutput) => string[];
 }
@@ -171,7 +175,7 @@ export interface DomainPack {
   description?: string;
   onboarding?: OnboardingStep[];
   prompts?: PromptSection[];
-  tools?: ToolDefinition[];
+  tools?: ToolManifest[];
   database?: DatabaseDefinition;
   stores?: StoreDefinition[];
   plans?: PlanDefinition[];
@@ -184,7 +188,7 @@ export interface VoiceAgentSdkDefinition {
   mediaBridges: MediaBridgeDefinition[];
   plans: PlanDefinition[];
   prompts: PromptSection[];
-  tools: ToolDefinition[];
+  tools: ToolManifest[];
   databases: DatabaseDefinition[];
   stores: StoreDefinition[];
   onboarding: OnboardingStep[];

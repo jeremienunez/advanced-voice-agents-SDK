@@ -1,5 +1,33 @@
 # Changelog
 
+## test: split executable and serializable tool contracts
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Separer clairement les manifests tools serialisables des tools executables pour
+eviter les definitions a moitie runtime dans les artefacts SDK.
+
+### Journal
+
+- Ajout de `ToolManifest` pour les definitions serialisables SDK/artifact.
+- `ToolDefinition` garde le contrat executable et rend `execute` obligatoire.
+- `VoiceAgentSdkDefinition.tools`, le runtime compiler et les artifacts starter
+  consomment maintenant des manifests.
+- `createAgentBuilder().tool(...)` copie un manifest et retire les handlers
+  executables.
+- Ajout de `pnpm test:tool-contracts:bdd` et integration dans `audit:solid`.
+- README, TODO et changelog sont a jour.
+
+### Validation
+
+- `pnpm test:tool-contracts:bdd` OK
+- `pnpm typecheck:sdk` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:loc` OK
+
 ## test: add infra evolution approval workflow
 
 Status: implemented locally

@@ -8,10 +8,11 @@ import type {
   ProviderDefinition,
   StoreDefinition,
   TenantDefinition,
-  ToolDefinition,
+  ToolManifest,
   VoiceAgentSdkDefinition,
 } from "../types.js";
 import { assertUnique, copy } from "./builder-values.js";
+import { toToolManifest } from "./tool-manifest.js";
 
 export class AgentBuilder {
   private readonly tenants: TenantDefinition[] = [];
@@ -19,7 +20,7 @@ export class AgentBuilder {
   private readonly mediaBridges: MediaBridgeDefinition[] = [];
   private readonly plans: PlanDefinition[] = [];
   private readonly prompts: PromptSection[] = [];
-  private readonly tools: ToolDefinition[] = [];
+  private readonly tools: ToolManifest[] = [];
   private readonly databases: DatabaseDefinition[] = [];
   private readonly stores: StoreDefinition[] = [];
   private readonly onboarding: OnboardingStep[] = [];
@@ -50,8 +51,8 @@ export class AgentBuilder {
     return this;
   }
 
-  tool(definition: ToolDefinition): this {
-    this.tools.push(definition);
+  tool(definition: ToolManifest): this {
+    this.tools.push(toToolManifest(definition));
     return this;
   }
 

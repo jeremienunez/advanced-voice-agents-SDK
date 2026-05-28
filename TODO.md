@@ -1,24 +1,23 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: split public tool API contracts.
+Current goal: promote runtime tool registry adapter.
 
-Target commit title candidate: `test: split executable and serializable tool contracts`
+Target commit title candidate: `test: promote runtime tool registry adapter`
 
 ## Active Focus
 
 ### Agent Infra / DB Harness
 
 Outcome:
-Executable runtime tools and serializable tool manifests have separate contracts,
-so downstream consumers no longer handle half-executable tool definitions.
+Runtime tool binding should go through an SDK-facing adapter port instead of
+starter-local handler maps and allowlists.
 
 Next work:
 
-- [ ] Split the public tool API cleanly:
-  - keep executable runtime tools with a required `execute` handler;
-  - keep serializable build/manifests separate from executable
-    `ToolDefinition`;
-  - avoid making downstream consumers handle half-executable tools.
+- [ ] Promote starter handler maps into `ToolRegistryAdapterPort`:
+  - define the runtime port contract in the SDK;
+  - adapt starter action handlers behind that port;
+  - keep selected-tool filtering and handler validation explicit.
 
 ### Current Gates
 
@@ -45,8 +44,6 @@ Optional security/network checks:
 
 ## Architecture Backlog - Tool Contracts
 
-- [ ] Promote starter handler maps into `ToolRegistryAdapterPort` instead of
-  hardcoded local `handlerRef` sets.
 - [ ] Decide the `tool-plan` prompt path:
   - wire a real planner method that uses the templates; or
   - delete the templates until the flow is no longer deterministic.

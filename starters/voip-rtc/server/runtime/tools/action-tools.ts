@@ -1,10 +1,10 @@
-import type { ToolDefinition } from "@voiceagentsdk/core/sdk";
+import type { ToolManifest } from "@voiceagentsdk/core/sdk";
 import type { VoiceSessionTool } from "@voiceagentsdk/core/server";
 import type { RuntimeCompiledAgent } from "../compiled-agent.js";
 
 type ActionHandler = (
   args: Record<string, unknown>,
-  tool: ToolDefinition,
+  tool: ToolManifest,
 ) => Promise<Record<string, unknown>>;
 
 const handlers: Record<string, ActionHandler> = {
@@ -40,7 +40,7 @@ export function runtimeActionTools(agent: RuntimeCompiledAgent): VoiceSessionToo
     .map(toRuntimeTool);
 }
 
-function toRuntimeTool(tool: ToolDefinition): VoiceSessionTool {
+function toRuntimeTool(tool: ToolManifest): VoiceSessionTool {
   const handler = handlers[tool.handlerRef as string];
   return {
     type: "function",
