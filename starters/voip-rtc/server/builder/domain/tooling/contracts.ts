@@ -59,12 +59,26 @@ const contractFactories: Record<string, ContractFactory> = {
 };
 
 function fallbackContract(item: ToolRegistryItem, selected: boolean) {
-  return baseContract(item, selected, {
-    confirmation: true,
-    handlerRef: `unknown.${item.name}`,
+  return {
+    name: item.name,
+    title: item.title,
+    description: item.description,
+    category: item.category,
+    permissions: item.permissions,
     parameters: objectSchema({ note: { type: "string" } }, ["note"]),
     sideEffect: "external_action",
-  });
+    confirmation: {
+      required: true,
+      reason: "No runtime handler is bound for this tool.",
+    },
+    runtimeBinding: { handlerRef: "", timeoutMs: 10_000 },
+    requiresKnowledge: item.requiresKnowledge,
+    requiresGraph: item.requiresGraph,
+    requiredSecrets: item.requiredSecrets,
+    readiness: selected ? "blocked" : "needs_configuration",
+    selected,
+    reasons: selected ? ["Selected tool has no runtime handler binding."] : [],
+  };
 }
 
 function baseContract(

@@ -411,7 +411,10 @@ The builder keeps tool planning separate from the final voice prompt.
   follow-up scheduling, structured notes, and knowledge search.
 
 Use `pnpm audit:tool-contracts` to catch compiled agents that select tools
-without validated runtime contracts.
+without validated runtime contracts. The same audit also checks source-level
+tool binding invariants: no `unknown.*` handler fallbacks, runtime actions must
+execute through `ToolRegistryAdapterPort`, and compiled SDK tools must stay
+serializable manifests.
 
 ## Safe Store Cheat Sheet
 
@@ -479,7 +482,7 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `pnpm test:secret-hygiene:bdd` | Check secret audit reporting is redacted and local env scanning is explicit opt-in. |
 | `pnpm audit:sdk-boundary` | Verify core SDK boundary rules. |
 | `pnpm audit:imports` | Audit core import boundaries. |
-| `pnpm audit:tool-contracts` | Verify compiled builder tools have runtime contracts. |
+| `pnpm audit:tool-contracts` | Verify compiled builder tools and source-level runtime binding invariants. |
 | `pnpm audit:loc` | Enforce the handwritten file LOC ceiling. |
 | `pnpm pack:dry-run` | Inspect package contents. |
 

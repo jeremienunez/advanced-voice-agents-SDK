@@ -1,5 +1,31 @@
 # Changelog
 
+## test: audit runtime tool binding invariants
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Rendre les echecs de binding runtime visibles par audit source, avant le
+demarrage RTC ou la compilation d'un agent.
+
+### Journal
+
+- `audit:tool-contracts` verifie maintenant aussi les sources critiques:
+  compilation en `ToolManifest`, absence de `execute` dans les manifests,
+  binding runtime via `ToolRegistryAdapterPort`, et stockage SDK en
+  `ToolManifest[]`.
+- Le fallback builder ne genere plus de handler `unknown.*`; un outil inconnu
+  devient non bindable et bloque s'il est selectionne.
+- README, TODO et changelog sont a jour.
+
+### Validation
+
+- `pnpm audit:tool-contracts` OK
+- `pnpm test:tool-registry-adapter:bdd` OK
+- `pnpm test:prompt-policy:bdd` OK
+
 ## test: promote runtime tool registry adapter
 
 Status: implemented locally

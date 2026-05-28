@@ -18,6 +18,8 @@ const issues = [];
 let checked = 0;
 let skippedLegacy = 0;
 
+auditSourceInvariants();
+
 if (existsSync(statePath)) {
   for (const draft of readDrafts(statePath)) {
     if (!draft.compiled) continue;
@@ -42,6 +44,36 @@ console.log(
 function readDrafts(path) {
   const payload = JSON.parse(readFileSync(path, "utf8"));
   return Array.isArray(payload) ? payload : [];
+}
+
+function auditSourceInvariants() {
+  const contracts = readSource("starters/voip-rtc/server/builder/domain/tooling/contracts.ts");
+  const compile = readSource("starters/voip-rtc/server/builder/domain/tooling/compile.ts");
+  const actionTools = readSource("starters/voip-rtc/server/runtime/tools/action-tools.ts");
+  const coreTypes = readSource("src/sdk/types/core.ts");
+
+  if (/unknown\./.test(contracts)) {
+    issues.push("source: builder tool contracts must not create unknown.* handler fallbacks");
+  }
+  if (!compile.includes("ToolManifest") || /\bToolDefinition\b/.test(compile)) {
+    issues.push("source: compileToolDefinitions must emit ToolManifest, not ToolDefinition");
+  }
+  if (/\bexecute\s*:/.test(compile)) {
+    issues.push("source: compiled tool manifests must not contain execute handlers");
+  }
+  if (!actionTools.includes("registry.canExecute(tool)")) {
+    issues.push("source: runtime action tools must filter through ToolRegistryAdapterPort.canExecute");
+  }
+  if (!actionTools.includes("registry.execute({ tool, args, context })")) {
+    issues.push("source: runtime action tools must execute through ToolRegistryAdapterPort.execute");
+  }
+  if (!coreTypes.includes("tools: ToolManifest[]")) {
+    issues.push("source: SDK definitions must store serializable ToolManifest[]");
+  }
+}
+
+function readSource(relativePath) {
+  return readFileSync(join(process.cwd(), relativePath), "utf8");
 }
 
 function auditCompiledDraft(draft) {

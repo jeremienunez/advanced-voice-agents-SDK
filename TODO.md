@@ -1,24 +1,23 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: add source audits for runtime tool binding.
+Current goal: decide the tool-plan prompt path.
 
-Target commit title candidate: `test: audit runtime tool binding invariants`
+Target commit title candidate: `test: decide builder tool-plan prompt path`
 
 ## Active Focus
 
 ### Agent Infra / DB Harness
 
 Outcome:
-Source audits should make runtime tool binding failures visible before RTC
-startup.
+The builder should either use the `tool-plan` prompt templates through a real
+planner method or delete them until the flow is no longer deterministic.
 
 Next work:
 
-- [ ] Add source audits for:
-  - no `unknown.*` handler fallback in selected runtime tools;
-  - no selected tool without an executable runtime binding;
-  - no compiled runtime artifact that claims executable tools but only has
-    serializable manifests.
+- [ ] Decide the `tool-plan` prompt path:
+  - wire a real planner method that uses the templates; or
+  - delete the templates until the flow is no longer deterministic;
+  - keep deterministic validation and runtime binding audits intact.
 
 ### Current Gates
 
@@ -42,12 +41,6 @@ Optional security/network checks:
 - [ ] Revoke/regenerate `GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `VOYAGE_API_KEY`,
   and `MOONSHOT_API_KEY` in provider dashboards if the scrubbed ignored `.env`
   values were live. Local `pnpm audit:local-secrets` is clean as of 2026-05-28.
-
-## Architecture Backlog - Tool Contracts
-
-- [ ] Decide the `tool-plan` prompt path:
-  - wire a real planner method that uses the templates; or
-  - delete the templates until the flow is no longer deterministic.
 
 ## Architecture Backlog - Runtime Ports
 
