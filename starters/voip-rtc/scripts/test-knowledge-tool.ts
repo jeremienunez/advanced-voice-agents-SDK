@@ -1,6 +1,7 @@
 import type { KnowledgeSearchResult } from "@voiceagentsdk/core/sdk";
 import { PostgresKnowledgeSearch } from "../server/adapters/postgres/knowledge-search.js";
 import { VoyageEmbeddingPort } from "../server/builder/adapters/voyage-embeddings.js";
+import { EnvDatabaseCredentialResolver } from "../server/app/env-database-credentials.js";
 import { activeCompiledDraft } from "../server/builder/state/active-draft.js";
 import { runtimeAgentFromDraft } from "../server/runtime/compiled-agent.js";
 import { runtimeKnowledgeTools } from "../server/runtime/knowledge-tools.js";
@@ -17,7 +18,10 @@ const tools = runtimeKnowledgeTools(draft.id, {
     dimensions: Number(env.VOYAGE_EMBEDDING_DIMENSIONS ?? 1024),
   }),
   embeddingAvailable: Boolean(env.VOYAGE_API_KEY),
-  search: new PostgresKnowledgeSearch({ databaseUrl: env.DATABASE_URL }),
+  search: new PostgresKnowledgeSearch({
+    databaseUrl: env.DATABASE_URL,
+    credentialResolver: new EnvDatabaseCredentialResolver(env),
+  }),
   getAgent: () => runtimeAgentFromDraft(draft),
 });
 

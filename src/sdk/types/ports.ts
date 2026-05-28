@@ -20,6 +20,7 @@ import type {
   AgentInfraPlan,
   DatabaseBackendPlan,
   KnowledgeBackendPlan,
+  RuntimeDatabaseCredentialRef,
 } from "./infra.js";
 import type { ToolBuildPlan, ToolValidationReport } from "./tooling.js";
 import type {
@@ -181,6 +182,7 @@ export interface KnowledgeSearchScope {
   draftId: string;
   schemaName?: string;
   storeId?: string;
+  databaseCredentialRef?: RuntimeDatabaseCredentialRef;
 }
 
 export interface KnowledgeSearchInput {
@@ -214,6 +216,12 @@ export interface KnowledgeSearchResult {
 export interface KnowledgeSearchPort {
   isConfigured(): boolean;
   search(input: KnowledgeSearchInput): Promise<KnowledgeSearchResult>;
+}
+
+export interface DatabaseCredentialResolverPort {
+  resolveDatabaseUrl(
+    ref: RuntimeDatabaseCredentialRef,
+  ): Promise<string | undefined> | string | undefined;
 }
 
 export interface KnowledgeStorePort {

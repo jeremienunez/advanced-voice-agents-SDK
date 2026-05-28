@@ -22,6 +22,7 @@ export function runtimeAgentFromDraft(
       draftId: draft.id,
       schemaName: appliedAgentSchema(draft.databasePlan),
       storeId: draft.compiled.knowledge?.storeId,
+      databaseCredentialRef: draft.infraPlan?.database.runtimeCredentialRef,
     },
   };
 }

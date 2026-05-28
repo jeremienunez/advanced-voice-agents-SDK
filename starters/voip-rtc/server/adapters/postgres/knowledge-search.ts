@@ -4,28 +4,40 @@ import type {
   KnowledgeSearchResult,
   KnowledgeSearchResultItem,
   KnowledgeSearchPort,
+  DatabaseCredentialResolverPort,
 } from "@voiceagentsdk/core/sdk";
 import postgres from "postgres";
 import {
   quoteIdentifier,
   vectorLiteral,
 } from "../../infra/postgres/sql.js";
+import { resolvePostgresKnowledgeDatabaseUrl } from "./knowledge-credentials.js";
 
 type SearchRow = Record<string, unknown>;
 
+export interface PostgresKnowledgeSearchConfig {
+  databaseUrl?: string;
+  credentialResolver?: DatabaseCredentialResolverPort;
+}
+
 export class PostgresKnowledgeSearch implements KnowledgeSearchPort {
-  constructor(private readonly config: { databaseUrl?: string }) {}
+  constructor(private readonly config: PostgresKnowledgeSearchConfig) {}
 
   isConfigured(): boolean {
-    return Boolean(this.config.databaseUrl);
+    return Boolean(this.config.databaseUrl || this.config.credentialResolver);
   }
 
   async search(input: KnowledgeSearchInput): Promise<KnowledgeSearchResult> {
     const mode = normalizeMode(input.mode, input.embedding);
     const limit = normalizeLimit(input.limit);
-    if (!this.config.databaseUrl) return empty(input.query, mode, "not-configured");
+    const databaseUrl = await resolvePostgresKnowledgeDatabaseUrl({
+      scope: input.scope,
+      fallbackDatabaseUrl: this.config.databaseUrl,
+      credentialResolver: this.config.credentialResolver,
+    });
+    if (!databaseUrl) return empty(input.query, mode, "not-configured");
 
-    const sql = postgres(this.config.databaseUrl, { max: 1 });
+    const sql = postgres(databaseUrl, { max: 1 });
     try {
       const rows = await queryKnowledge(sql, input.scope, input.query, mode, limit, input.embedding);
       return {

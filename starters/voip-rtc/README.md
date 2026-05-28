@@ -92,6 +92,9 @@ Intent routing rules are intentionally simple in this slice:
 - Server-owned Postgres templates set a provisioning `statement_timeout`,
   create a per-agent no-login runtime role, set its runtime timeout, and grant
   only schema `USAGE` plus table `SELECT`.
+- Runtime knowledge search resolves a per-agent DB credential ref such as
+  `AGENT_DB_RUNTIME_URL_<SCHEMA>` from env in dev mode. If that ref exists on the
+  compiled agent, the runtime does not fall back to shared `DATABASE_URL`.
 
 When an infra plan is valid, the starter attaches an `iac` bundle to the draft:
 
@@ -139,6 +142,8 @@ Useful apply env vars:
   the external runner.
 - `BUILDER_INFRA_K3S_IMAGE` defaults to `rancher/k3s:v1.31.5-k3s1`.
 - `BUILDER_INFRA_K3S_PORT` defaults to `16443`.
+- `AGENT_DB_RUNTIME_URL_<SCHEMA>` provides the per-agent runtime Postgres URL in
+  dev mode; the infra plan emits the exact env name for each schema.
 
 ## Post-Session Learning
 
@@ -308,6 +313,7 @@ pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-plan
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-runner:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:prompt-policy:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:runtime-tool-authorization:bdd
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:runtime-db-credentials:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:builder-draft-ownership:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:document-ingestion:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:database-provisioning

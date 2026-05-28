@@ -1,6 +1,7 @@
 import { VoyageEmbeddingPort } from "../builder/adapters/voyage-embeddings.js";
 import { PostgresKnowledgeSearch } from "../adapters/postgres/knowledge-search.js";
 import type { RuntimeKnowledge } from "../voice/types.js";
+import { EnvDatabaseCredentialResolver } from "./env-database-credentials.js";
 
 export function createRuntimeKnowledgeFromEnv(): RuntimeKnowledge {
   return {
@@ -12,6 +13,7 @@ export function createRuntimeKnowledgeFromEnv(): RuntimeKnowledge {
     embeddingAvailable: Boolean(Bun.env.VOYAGE_API_KEY),
     search: new PostgresKnowledgeSearch({
       databaseUrl: Bun.env.DATABASE_URL,
+      credentialResolver: new EnvDatabaseCredentialResolver(Bun.env),
     }),
   };
 }

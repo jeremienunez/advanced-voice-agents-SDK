@@ -1,5 +1,35 @@
 # Changelog
 
+## test: add per-agent runtime db credential refs
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Faire passer l'acces Postgres runtime par une reference de credential propre a
+l'agent, sans reutiliser silencieusement le `DATABASE_URL` de provisioning.
+
+### Journal
+
+- Ajout de `pnpm test:runtime-db-credentials:bdd`.
+- `AgentInfraPlan.database.runtimeCredentialRef` decrit le provider, le schema,
+  le role runtime et l'env dev `AGENT_DB_RUNTIME_URL_<SCHEMA>`.
+- Le plan de securite declare cette env par-agent dans `secretRefs`.
+- Le scope runtime compile transporte la ref jusqu'a `search_knowledge`.
+- `PostgresKnowledgeSearch` resout la ref via un resolver de credentials et ne
+  retombe pas sur le `DATABASE_URL` partage quand une ref agent existe.
+- Les bundles IaC transportent la ref, pas l'URL de provisioning.
+- README, README starter, `.env.example` et TODO sont a jour.
+
+### Validation
+
+- `pnpm test:runtime-db-credentials:bdd` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:loc` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: harden infra runner boundaries
 
 Status: implemented locally

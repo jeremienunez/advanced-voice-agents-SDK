@@ -1,20 +1,21 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: add per-agent runtime DB credential refs.
+Current goal: decide Milvus/graph adapter ownership boundary.
 
-Target commit title candidate: `test: add per-agent runtime db credential refs`
+Target commit title candidate: `test: lock vector graph adapter boundaries`
 
 ## Active Focus
 
 ### Agent Infra / DB Harness
 
 Outcome:
-Runtime database access uses per-agent credential references instead of shared
-process env URLs.
+Milvus and graph integrations have an explicit ownership boundary: starter
+adapter, reusable SDK adapter package, or documented promotion path.
 
 Next work:
 
-- [ ] Add per-agent credential refs for runtime DB users.
+- [ ] Decide whether Milvus/graph stay starter adapters or graduate into
+  reusable SDK adapter packages.
 
 ### Current Gates
 
@@ -38,11 +39,6 @@ Optional security/network checks:
 - [ ] Revoke/regenerate `GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `VOYAGE_API_KEY`,
   and `MOONSHOT_API_KEY` in provider dashboards if the scrubbed ignored `.env`
   values were live. Local `pnpm audit:local-secrets` is clean as of 2026-05-28.
-
-## Architecture Backlog - Agent Infra / DB Harness
-
-- [ ] Decide whether Milvus/graph stay starter adapters or graduate into
-  reusable SDK adapter packages.
 
 ## Architecture Backlog - Agent Self-Improving Stores
 

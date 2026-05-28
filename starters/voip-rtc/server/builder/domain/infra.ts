@@ -157,8 +157,9 @@ export class IntentInfraPlanner implements InfraPlannerPort {
     const secretRefs = uniqueList(
       [
         ...knowledgeBackends.flatMap((backend) => backend.requiredEnv ?? []),
+        database.runtimeCredentialRef?.envName,
         ...(storePlan ? storePlanEnvRefs(storePlan) : []),
-      ],
+      ].filter((ref): ref is string => Boolean(ref)),
     );
 
     return {
@@ -190,6 +191,7 @@ export class IntentInfraPlanner implements InfraPlannerPort {
         networkPolicy: computeTarget === "local" ? "local_only" : "private_network",
         notes: [
           "Server-owned Postgres templates create a no-login per-agent runtime role.",
+          "Runtime database URLs are resolved through per-agent credential refs, not shared process env URLs.",
           "Runtime role grants stay read-only and carry a statement_timeout.",
           "Application auth must still protect builder and voice control-plane routes.",
         ],

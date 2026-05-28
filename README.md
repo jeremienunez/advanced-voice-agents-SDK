@@ -164,6 +164,9 @@ Current behavior is deliberately conservative:
 - Server-owned Postgres templates bound provisioning with `statement_timeout`,
   create a per-agent no-login runtime role, and grant only schema `USAGE` plus
   table `SELECT`.
+- Runtime Postgres access is addressed through a per-agent credential ref such
+  as `AGENT_DB_RUNTIME_URL_<SCHEMA>`, so compiled agents do not reuse the shared
+  provisioning `DATABASE_URL`.
 - The plan carries compute target, isolation mode, provisioning mode, resource
   refs, migration policy, and security notes so external IaC runners can consume
   it without changing agent code.
@@ -202,7 +205,8 @@ Infra env cheat sheet:
 | `BUILDER_INFRA_K3S_PORT` | Local K3s API port, default `16443`. |
 
 Generated IaC artifacts never include secret values. They reference secret/env
-names such as `DATABASE_URL`, `MILVUS_URL`, `NEO4J_URI`, and `REDIS_URL`.
+names such as `DATABASE_URL`, per-agent `AGENT_DB_RUNTIME_URL_<SCHEMA>`,
+`MILVUS_URL`, `NEO4J_URI`, and `REDIS_URL`.
 
 Onboarding commands:
 
@@ -431,6 +435,7 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `pnpm test:log-redaction:bdd` | Check recursive log redaction for prompts, messages, content, child bindings, and secrets. |
 | `pnpm test:prompt-policy:bdd` | Check compiled prompts end with immutable server-owned safety and tool policy. |
 | `pnpm test:runtime-tool-authorization:bdd` | Check runtime exposes only server-selected executable tools. |
+| `pnpm test:runtime-db-credentials:bdd` | Check runtime Postgres access resolves per-agent credential refs instead of shared DB URLs. |
 | `pnpm test:builder-draft-ownership:bdd` | Check privileged builder workflows reload server-owned drafts by authenticated owner. |
 | `pnpm test:document-ingestion:bdd` | Check document upload bounds, type guards, xlsx caps, parser timeouts, and IP quotas. |
 | `pnpm test:database-provisioning` | Run the real starter database provisioner validation against the pgvector template and hostile SQL cases. |
@@ -438,7 +443,7 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `pnpm test:solid-seams` | Run focused BDD seam tests for HTTP guards, voice factory/learning, builder summaries, and infra validation. |
 | `pnpm test:runtime-tool-call` | Check runtime tool call flow. |
 | `pnpm test:rtc-e2e` | Run the RTC WebSocket e2e script. |
-| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/debug-audio/prompt/runtime-tool/ownership/ingestion/DB provisioning/infra-runner/secret-hygiene tests, and RTC E2E. |
+| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/debug-audio/prompt/runtime-tool/runtime-DB-credential/ownership/ingestion/DB provisioning/infra-runner/secret-hygiene tests, and RTC E2E. |
 | `pnpm audit:architecture` | Enforce Dependency Cruiser SOA/SOLID import boundaries. |
 | `pnpm audit:responsibility` | Enforce SRP/LSP clean-code responsibility rules. |
 | `pnpm audit:secrets` | Scan committed files for live-like secrets without printing secret values. |

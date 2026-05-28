@@ -159,6 +159,7 @@ function tofuVariablesArtifact(
       isolation: plan.isolation,
       provisioning_mode: plan.provisioningMode,
       default_backend_id: plan.defaultBackendId,
+      runtime_database_credential_ref: plan.database.runtimeCredentialRef,
       network_policy: plan.security.networkPolicy,
       required_secret_names: plan.security.secretRefs,
       resources: plan.resources,

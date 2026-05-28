@@ -114,6 +114,15 @@ export interface InfraResourceRef {
   metadata?: JsonObject;
 }
 
+export interface RuntimeDatabaseCredentialRef {
+  name: string;
+  provider: string;
+  scope: "agent";
+  schemaName: string;
+  roleName: string;
+  envName: string;
+}
+
 export interface DatabaseBackendPlan {
   id: string;
   provider: KnowledgeBackendProvider | string;
@@ -121,6 +130,7 @@ export interface DatabaseBackendPlan {
   namespace: string;
   databaseName?: string;
   schemaName?: string;
+  runtimeCredentialRef?: RuntimeDatabaseCredentialRef;
   provisioningMode: InfraProvisioningMode;
   isolation: InfraIsolationMode;
   reason: string;
