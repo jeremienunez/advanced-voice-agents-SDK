@@ -1,6 +1,6 @@
 import type { ProviderDefinition } from "@voiceagentsdk/core/sdk";
 
-export type StarterProviderId = "openai" | "gemini";
+export type StarterProviderId = "openai" | "gemini" | "grok" | "cascaded";
 
 export interface RuntimeProviderConfig {
   id: StarterProviderId;

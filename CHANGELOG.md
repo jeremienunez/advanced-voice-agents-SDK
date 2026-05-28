@@ -1,5 +1,40 @@
 # Changelog
 
+## test: add provider factory port
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Faire passer la creation des transports realtime par un port injectable au lieu
+de laisser la session voix instancier directement les providers concrets.
+
+### Journal
+
+- Ajout de `ProviderFactoryPort` et `ProviderFactoryInput` cote SDK.
+- Extraction des ports runtime (`SecretResolver`, `TenantResolver`,
+  `ProviderFactory`) dans `runtime-ports.ts` pour garder `ports.ts` focalise.
+- Deplacement de la factory provider starter et du fake E2E dans
+  `server/providers`.
+- `session-factory` compile les instructions et delegue la creation provider au
+  port injecte.
+- La factory starter couvre OpenAI Realtime, Gemini Live, Grok Realtime et
+  cascaded providers, avec resolution de secret via `SecretResolverPort`.
+- Ajout de `pnpm test:provider-factory:bdd` et integration dans `audit:solid`.
+- README, TODO et changelog sont a jour.
+
+### Validation
+
+- `pnpm test:provider-factory:bdd` OK
+- `pnpm test:secret-resolver:bdd` OK
+- `pnpm test:solid-seams` OK
+- `pnpm typecheck:sdk` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:loc` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: add secret resolver port
 
 Status: implemented locally

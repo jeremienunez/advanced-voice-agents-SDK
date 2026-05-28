@@ -10,15 +10,7 @@ import type {
   PromptBuildPlan,
 } from "./builder.js";
 import type { DatabaseBuildPlan } from "./database.js";
-import type {
-  AgentChannel,
-  PlanId,
-  ProviderId,
-  SecretRef,
-  TenantId,
-  ToolManifest,
-  ToolName,
-} from "./core.js";
+import type { ToolManifest, ToolName } from "./core.js";
 import type {
   LlmResolvedModel,
   LlmTask,
@@ -34,6 +26,8 @@ import type { ToolBuildPlan, ToolValidationReport } from "./tooling.js";
 import type {
   AgentBuildDraft,
 } from "./draft.js";
+
+export * from "./runtime-ports.js";
 
 export interface PromptBuildRequest {
   draft: AgentBuildDraft;
@@ -113,41 +107,6 @@ export interface ToolRegistryAdapterPort {
   availableHandlerRefs(): readonly string[];
   canExecute(tool: ToolManifest): boolean;
   execute(input: ToolRegistryExecutionInput): Promise<unknown>;
-}
-
-export interface SecretResolveInput {
-  ref: SecretRef;
-  aliases?: readonly string[];
-  purpose?: string;
-  metadata?: Record<string, unknown>;
-}
-
-export interface SecretResolverPort {
-  resolveSecret(input: SecretResolveInput): string | undefined;
-}
-
-export interface TenantResolutionInput {
-  channel: AgentChannel;
-  provider?: string;
-  from?: string;
-  to?: string;
-  callId?: string;
-  accountId?: string;
-}
-
-export interface TenantResolutionResult {
-  tenantId: TenantId;
-  providerId: ProviderId;
-  mediaBridgeId: string;
-  planId: PlanId;
-  userId?: string;
-  limits?: Record<string, number>;
-  promptVariables?: Record<string, string | number | boolean | null | undefined>;
-  metadata?: Record<string, unknown>;
-}
-
-export interface TenantResolverPort {
-  resolveTenant(input: TenantResolutionInput): TenantResolutionResult;
 }
 
 export interface PromptPlannerPort {

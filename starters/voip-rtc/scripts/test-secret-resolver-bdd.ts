@@ -8,9 +8,9 @@ import {
 } from "../server/secrets/index.js";
 import { createRuntimeKnowledgeFromEnv } from "../server/app/runtime-knowledge.js";
 import { createBuilderLlmCatalog } from "../server/builder/llm/profiles.js";
-import { createProvider } from "../server/voice/provider-factory.js";
+import { createStarterProviderFactory } from "../server/providers/realtime-provider-factory.js";
 import { assert } from "./shared/assertions.js";
-import { runtimeProvider, voiceOptions } from "./solid-seams/fixtures.js";
+import { runtimeProvider } from "./solid-seams/fixtures.js";
 
 const observedInput: { value?: SecretResolveInput } = {};
 
@@ -122,20 +122,19 @@ function scenarioProviderFactoryUsesSecretResolverInsteadOfEnv(): string {
   delete Bun.env[envName];
 
   try {
-    const provider = createProvider(
-      providerDefinition(envName),
-      {},
-      [],
-      voiceOptions({
-        providerCatalog: [runtimeProvider(envName)],
-        secretResolver: {
-          resolveSecret: (input: SecretResolveInput) => {
-            observedInput.value = input;
-            return "resolved-provider-key";
-          },
+    const provider = createStarterProviderFactory({
+      providerCatalog: [runtimeProvider(envName)],
+      secretResolver: {
+        resolveSecret: (input: SecretResolveInput) => {
+          observedInput.value = input;
+          return "resolved-provider-key";
         },
-      }),
-    );
+      },
+    }).createProvider({
+      definition: providerDefinition(envName),
+      instructions: "test instructions",
+      tools: [],
+    });
     const config = provider as unknown as { config?: { apiKey?: string } };
 
     assert(

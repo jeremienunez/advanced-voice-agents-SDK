@@ -5,6 +5,7 @@ import {
   createProviderCatalog,
   resolveDefaultProviderId,
 } from "../providers/catalog.js";
+import { createStarterProviderFactory } from "../providers/realtime-provider-factory.js";
 import { createEnvSecretResolver } from "../secrets/index.js";
 import { createStarterVoiceService } from "../voice/service.js";
 import { createDevTenantResolver } from "../voice/dev-tenant-resolver.js";
@@ -33,6 +34,10 @@ export function createStarterServerApp() {
     browserSampleRate: env.browserSampleRate,
     learning: learningService,
     providerCatalog,
+    providerFactory: createStarterProviderFactory({
+      providerCatalog,
+      secretResolver,
+    }),
     runtimeKnowledge: createRuntimeKnowledgeFromEnv({ secretResolver }),
     secretResolver,
     tenantResolver: createDevTenantResolver(sdk),

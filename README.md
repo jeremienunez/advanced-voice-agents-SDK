@@ -76,6 +76,10 @@ by media setup and session creation.
 Secret values are resolved through `SecretResolverPort`; the dev starter binds
 that port to env vars, while provider creation, builder LLM profiles, and
 runtime embeddings consume secret refs without reading env values directly.
+Realtime provider creation is resolved through `ProviderFactoryPort`; the
+starter binds that port to OpenAI Realtime, Gemini Live, Grok Realtime, and
+cascaded provider adapters so voice orchestration does not instantiate concrete
+transports directly.
 
 ## Builder Flow
 
@@ -466,6 +470,7 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `pnpm test:llm-harness` | Check provider-agnostic builder LLM planner, research, verifier, and resolver behavior. |
 | `pnpm test:log-redaction:bdd` | Check recursive log redaction for prompts, messages, content, child bindings, and secrets. |
 | `pnpm test:prompt-policy:bdd` | Check compiled prompts end with immutable server-owned safety and tool policy. |
+| `pnpm test:provider-factory:bdd` | Check voice session setup delegates realtime transport creation to `ProviderFactoryPort` and the starter factory builds supported providers. |
 | `pnpm test:runtime-tool-authorization:bdd` | Check runtime exposes only server-selected executable tools. |
 | `pnpm test:tool-contracts:bdd` | Check executable tool definitions stay separate from serializable tool manifests. |
 | `pnpm test:tool-registry-adapter:bdd` | Check runtime tool binding and builder handler validation go through `ToolRegistryAdapterPort`. |

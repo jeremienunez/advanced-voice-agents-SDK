@@ -1,21 +1,21 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: add ProviderFactoryPort.
+Current goal: add MediaBridgeFactoryPort.
 
-Target commit title candidate: `test: add provider factory port`
+Target commit title candidate: `test: add media bridge factory port`
 
 ## Active Focus
 
 ### Agent Infra / DB Harness
 
 Outcome:
-Realtime provider creation should resolve through a port instead of starter
-voice orchestration instantiating concrete provider transports directly.
+Browser media bridge creation and control should resolve through a port instead
+of voice orchestration binding directly to concrete media handlers.
 
 Next work:
 
-- [ ] Add `ProviderFactoryPort` for OpenAI Realtime, Gemini Live, Grok
-  Realtime, and cascaded providers.
+- [ ] Add `MediaBridgeFactoryPort` for start, stop, `sendAudio`,
+  `clearOutput`, and `onAudioToLlm`.
 
 ### Current Gates
 
@@ -42,8 +42,6 @@ Optional security/network checks:
 
 ## Architecture Backlog - Runtime Ports
 
-- [ ] Add `MediaBridgeFactoryPort` for start, stop, `sendAudio`,
-  `clearOutput`, and `onAudioToLlm`.
 - [ ] Add `DbAdapterRegistry` and keep adapters out of serializable SDK
   definitions.
 - [ ] Wire `StoreDefinition` to `DbAdapterRegistry`.
@@ -63,7 +61,6 @@ Optional security/network checks:
 - [ ] Transform `examples/packs/wine-investment` into an executable pack.
 - [ ] Add contractual tests for:
   - SDK compilation;
-  - provider factory;
   - media bridge;
   - browser protocol;
   - package exports.

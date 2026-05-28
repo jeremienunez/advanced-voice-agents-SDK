@@ -39,13 +39,11 @@ export class E2EFakeRealtimeProvider implements IRealtimeProvider {
     _contentIndex: number,
     _audioEndMs: number,
   ): Promise<void> {}
-
   async submitFunctionResult(
     _callId: string,
     _result: unknown,
     _triggerResponse?: boolean,
   ): Promise<void> {}
-
   onFunctionCall(_handler: (call: ProviderFunctionCall) => void): void {}
   onSpeechStarted(_handler: () => void): void {}
   onSpeechStopped(_handler: (audioEndMs?: number) => void): void {}

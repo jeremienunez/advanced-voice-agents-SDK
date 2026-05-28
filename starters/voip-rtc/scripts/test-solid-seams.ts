@@ -12,8 +12,8 @@ import { summarizeDraftForSession } from "../server/builder/state/session-draft-
 import { accessGuard, originGuard } from "../server/http/guards.js";
 import { createFetchHandler } from "../server/http/routes.js";
 import type { StarterRouteContext } from "../server/http/types.js";
+import { createStarterProviderFactory } from "../server/providers/realtime-provider-factory.js";
 import { createSessionEndedLearningHook } from "../server/voice/learning-hook.js";
-import { createProvider } from "../server/voice/provider-factory.js";
 import { assert, assertThrows } from "./shared/assertions.js";
 import {
   agentDraft,
@@ -124,38 +124,33 @@ async function scenarioVoiceWsUsesVerifiedIdentity() {
 
 async function scenarioVoiceProviderFactoryRejectsUnsupportedCatalogChoices() {
   const envName = "SOLID_SEAMS_PROVIDER_KEY";
-  const previous = Bun.env[envName];
-  Bun.env[envName] = "test-key";
+  const definition: ProviderDefinition = {
+    id: "gemini",
+    kind: "gemini-live",
+    model: "gemini-test",
+    voice: "Puck",
+  };
+  const factory = createStarterProviderFactory({
+    providerCatalog: [runtimeProvider(envName)],
+    secretResolver: { resolveSecret: () => "test-key" },
+  });
+  const provider = factory.createProvider({
+    definition,
+    instructions: "test instructions",
+    tools: [],
+  });
 
-  try {
-    const definition: ProviderDefinition = {
-      id: "gemini",
-      kind: "gemini-live",
-      model: "gemini-test",
-      voice: "Puck",
-    };
-    const provider = createProvider(
+  assert(typeof provider.connect === "function", "provider must expose connect");
+  assert(typeof provider.sendAudio === "function", "provider must expose sendAudio");
+  assertThrows(
+    () => factory.createProvider({
       definition,
-      {},
-      [],
-      voiceOptions({ providerCatalog: [runtimeProvider(envName)] }),
-    );
-
-    assert(typeof provider.connect === "function", "provider must expose connect");
-    assert(typeof provider.sendAudio === "function", "provider must expose sendAudio");
-    assertThrows(
-      () => createProvider(
-        definition,
-        { model: "unsupported-model" },
-        [],
-        voiceOptions({ providerCatalog: [runtimeProvider(envName)] }),
-      ),
-      "Unsupported model",
-    );
-  } finally {
-    if (previous === undefined) delete Bun.env[envName];
-    else Bun.env[envName] = previous;
-  }
+      requestedModel: "unsupported-model",
+      instructions: "test instructions",
+      tools: [],
+    }),
+    "Unsupported model",
+  );
 
   return "voice-provider-factory";
 }

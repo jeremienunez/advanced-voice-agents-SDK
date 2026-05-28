@@ -6,6 +6,7 @@ import type {
 } from "@voiceagentsdk/core/sdk";
 import type { StarterServerEnv } from "../../server/http/types.js";
 import type { RuntimeProviderConfig } from "../../server/providers/catalog.js";
+import { E2EFakeRealtimeProvider } from "../../server/providers/e2e-fake-provider.js";
 import type { StarterVoiceServiceOptions } from "../../server/voice/types.js";
 
 export type SessionEndedInput = Parameters<
@@ -47,6 +48,9 @@ export function voiceOptions(
     builderService: builderService(agentDraft("draft-solid")),
     browserSampleRate: 24_000,
     providerCatalog: [],
+    providerFactory: {
+      createProvider: () => new E2EFakeRealtimeProvider(),
+    },
     secretResolver: {
       resolveSecret: () => "test-secret",
     },

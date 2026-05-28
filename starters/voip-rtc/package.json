@@ -26,6 +26,7 @@
     "test:infra-runner:bdd": "bun run scripts/test-infra-runner-bdd.ts",
     "test:llm-harness": "bun run scripts/test-llm-harness.ts",
     "test:prompt-policy:bdd": "bun run scripts/test-prompt-policy-bdd.ts",
+    "test:provider-factory:bdd": "bun run scripts/test-provider-factory-bdd.ts",
     "test:runtime-tool-authorization:bdd": "bun run scripts/test-runtime-tool-authorization-bdd.ts",
     "test:tool-contracts:bdd": "bun run scripts/test-tool-contracts-bdd.ts",
     "test:tool-registry-adapter:bdd": "bun run scripts/test-tool-registry-adapter-bdd.ts",
