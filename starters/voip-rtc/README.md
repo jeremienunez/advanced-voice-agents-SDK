@@ -188,7 +188,8 @@ Required/optional learning env:
 | `TEMPORAL_TASK_QUEUE` | Temporal task queue, default `agent-learning`. |
 | `TEMPORAL_WORKFLOW_TYPE` | Workflow type started by the Temporal worker adapter, default `learnFromSession`. |
 | `DATABASE_URL` | Required for audit/source store and default Postgres graph memory. |
-| `NEO4J_URI` / `GRAPH_DATABASE_URL` | Optional external graph backend. |
+| `AGENT_LEARNING_GRAPH_DRIVER` | `local`, `postgres`, `neo4j`, or `memgraph`; unset keeps Postgres when `DATABASE_URL` exists. |
+| `NEO4J_URI` / `MEMGRAPH_URI` / `GRAPH_DATABASE_URL` | Optional external graph backend. |
 
 BDD and regression checks:
 
@@ -300,7 +301,8 @@ Builder and knowledge env vars:
 - `BUILDER_INFRA_PROVISIONING_MODE`
 - `BUILDER_VECTOR_BACKEND`
 - `MILVUS_URL` or `MILVUS_ADDRESS`
-- `NEO4J_URI` or `GRAPH_DATABASE_URL`
+- `NEO4J_URI`, `MEMGRAPH_URI`, or `GRAPH_DATABASE_URL`
+- `AGENT_LEARNING_GRAPH_DRIVER`
 - `AGENT_LEARNING_ENABLED`
 - `AGENT_LEARNING_WORKFLOW_DRIVER`
 - `AGENT_LEARNING_MEMORY_DRIVER`
@@ -324,6 +326,7 @@ pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-plan
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:adapter-boundaries:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:temporal-worker:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:redis-memory:bdd
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:graph-memory-adapters:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-runner:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:prompt-policy:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:runtime-tool-authorization:bdd

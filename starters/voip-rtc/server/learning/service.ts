@@ -5,8 +5,8 @@ import type {
 } from "@voiceagentsdk/core/sdk";
 import { StarterAgentEvolution } from "./evolution.js";
 import {
-  LocalGraphMemoryStore,
-  PostgresGraphMemoryStore,
+  createGraphMemoryStoreFromEnv,
+  type CypherGraphClientPort,
 } from "./graph-store.js";
 import { createTemporalMemoryStoreFromEnv } from "./memory-store.js";
 import {
@@ -27,7 +27,10 @@ export interface StarterLearningService {
 
 export function createStarterLearningServiceFromEnv(
   env: Record<string, string | undefined> = Bun.env,
-  options: { temporalClient?: TemporalWorkerClientPort } = {},
+  options: {
+    graphClient?: CypherGraphClientPort;
+    temporalClient?: TemporalWorkerClientPort;
+  } = {},
 ): StarterLearningService {
   const memoryTtlSeconds = positiveInteger(
     env.AGENT_LEARNING_MEMORY_TTL_SECONDS,
@@ -36,9 +39,9 @@ export function createStarterLearningServiceFromEnv(
   const memoryStore = createTemporalMemoryStoreFromEnv(env, {
     defaultTtlSeconds: memoryTtlSeconds,
   });
-  const graphStore = env.DATABASE_URL
-    ? new PostgresGraphMemoryStore({ databaseUrl: env.DATABASE_URL })
-    : new LocalGraphMemoryStore();
+  const graphStore = createGraphMemoryStoreFromEnv(env, {
+    cypherClient: options.graphClient,
+  });
   const evolution = new StarterAgentEvolution();
 
   return {

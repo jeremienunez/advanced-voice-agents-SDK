@@ -1,5 +1,39 @@
 # Changelog
 
+## test: add graph memory adapter boundaries
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Ajouter les adapters Neo4j/Memgraph derriere `GraphMemoryStorePort` sans casser
+les defaults locaux: local in-memory sans DB et Postgres quand `DATABASE_URL`
+existe.
+
+### Journal
+
+- Ajout de `pnpm test:graph-memory-adapters:bdd`.
+- Ajout du driver `AGENT_LEARNING_GRAPH_DRIVER=local|postgres|neo4j|memgraph`.
+- Ajout de `Neo4jGraphMemoryStore` et `MemgraphGraphMemoryStore` via un port
+  `CypherGraphClientPort` injectable.
+- Les writes graph utilisent des requetes Cypher `MERGE` parametrees pour les
+  nodes et edges.
+- `neo4j-driver` est installe dans le starter pour les connexions Bolt
+  Neo4j/Memgraph.
+- Separation SOLID du graph store en barrel public, factory, local-store,
+  postgres-store, cypher-client, cypher-store et types.
+- README, README starter, `.env.example`, onboarding env, TODO et
+  `audit:solid` sont a jour.
+
+### Validation
+
+- `pnpm test:graph-memory-adapters:bdd` OK
+- `pnpm test:learning:bdd` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:loc` OK
+- `pnpm audit:solid` OK
+
 ## test: add ephemeral redis memory adapter tests
 
 Status: implemented locally

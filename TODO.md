@@ -1,20 +1,21 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: add Neo4j/Memgraph graph memory adapters.
+Current goal: add approval workflow for infra-plan evolution.
 
-Target commit title candidate: `test: add graph memory adapter boundaries`
+Target commit title candidate: `test: add infra evolution approval workflow`
 
 ## Active Focus
 
 ### Agent Infra / DB Harness
 
 Outcome:
-Graph memory can use optional Neo4j/Memgraph adapters behind the existing
-GraphMemoryStorePort while Postgres graph remains the local default.
+Automatic learning may propose infra-plan evolution, but cloud or destructive
+changes stay pending until an explicit approval path applies them.
 
 Next work:
 
-- [ ] Add Neo4j/Memgraph graph adapters; keep Postgres graph as local default.
+- [ ] Add an approval/pending workflow for infra-plan evolution before applying
+  cloud or destructive changes.
 
 ### Current Gates
 
@@ -38,11 +39,6 @@ Optional security/network checks:
 - [ ] Revoke/regenerate `GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `VOYAGE_API_KEY`,
   and `MOONSHOT_API_KEY` in provider dashboards if the scrubbed ignored `.env`
   values were live. Local `pnpm audit:local-secrets` is clean as of 2026-05-28.
-
-## Architecture Backlog - Agent Self-Improving Stores
-
-- [ ] Add an approval/pending workflow for infra-plan evolution before applying
-  cloud or destructive changes.
 
 ## Architecture Backlog - Tool Contracts
 

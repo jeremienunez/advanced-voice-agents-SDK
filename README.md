@@ -195,13 +195,14 @@ Infra env cheat sheet:
 | `BUILDER_INFRA_PROVISIONING_MODE` | `server_template`, `iac_plan`, `manual`, or `external`. |
 | `BUILDER_VECTOR_BACKEND` | Set `milvus` to force Milvus as the vector backend. |
 | `MILVUS_URL` / `MILVUS_ADDRESS` | Marks the Milvus backend as configured. |
-| `NEO4J_URI` / `GRAPH_DATABASE_URL` | Marks the graph backend as configured. |
+| `NEO4J_URI` / `MEMGRAPH_URI` / `GRAPH_DATABASE_URL` | Marks the graph backend as configured. |
 | `REDIS_URL` | Marks cache and learning temporal-memory backends as configured. |
 | `AGENT_LEARNING_ENABLED` | Enables post-session learning store planning, default `true` in the starter. |
 | `AGENT_LEARNING_WORKFLOW_DRIVER` | `local` runs the dev in-process queue; `temporal` dispatches to a Temporal worker. |
 | `AGENT_LEARNING_MEMORY_DRIVER` | `local` keeps dev memory in-process; `redis` uses the production Redis memory adapter. |
 | `AGENT_LEARNING_MEMORY_NAMESPACE` | Redis key namespace for temporal learned memory, default `agent-learning`. |
 | `AGENT_LEARNING_MEMORY_TTL_SECONDS` | Redis TTL for learned temporal memory, default `2592000`. |
+| `AGENT_LEARNING_GRAPH_DRIVER` | `local`, `postgres`, `neo4j`, or `memgraph`; unset keeps Postgres when `DATABASE_URL` exists. |
 | `TEMPORAL_ADDRESS` | Temporal workflow endpoint for post-session learning jobs. |
 | `TEMPORAL_NAMESPACE` | Temporal namespace used by the learning worker, default `default`. |
 | `TEMPORAL_TASK_QUEUE` | Temporal task queue consumed by the learning worker, default `agent-learning`. |
@@ -213,7 +214,7 @@ Infra env cheat sheet:
 
 Generated IaC artifacts never include secret values. They reference secret/env
 names such as `DATABASE_URL`, per-agent `AGENT_DB_RUNTIME_URL_<SCHEMA>`,
-`MILVUS_URL`, `NEO4J_URI`, and `REDIS_URL`.
+`MILVUS_URL`, `NEO4J_URI`, `MEMGRAPH_URI`, and `REDIS_URL`.
 
 Onboarding commands:
 
@@ -277,6 +278,7 @@ pnpm test:learning
 pnpm test:learning:bdd
 pnpm test:temporal-worker:bdd
 pnpm test:redis-memory:bdd
+pnpm test:graph-memory-adapters:bdd
 pnpm test:solid-seams
 pnpm test:rtc-e2e
 ```
@@ -451,11 +453,12 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `pnpm test:adapter-boundaries:bdd` | Check Milvus/graph adapter ownership boundaries and promotion criteria. |
 | `pnpm test:temporal-worker:bdd` | Check the env-selected learning workflow driver dispatches to a Temporal worker asynchronously while local dev stays in-process. |
 | `pnpm test:redis-memory:bdd` | Check the Redis learning memory adapter against an ephemeral Redis container for TTL, scope, and cross-adapter persistence. |
+| `pnpm test:graph-memory-adapters:bdd` | Check Neo4j/Memgraph graph memory adapters use parameterized Bolt-compatible Cypher while local/Postgres defaults remain intact. |
 | `pnpm test:infra-runner:bdd` | Check external OpenTofu/cloud-init runner boundaries, env allowlisting, and apply routing. |
 | `pnpm test:solid-seams` | Run focused BDD seam tests for HTTP guards, voice factory/learning, builder summaries, and infra validation. |
 | `pnpm test:runtime-tool-call` | Check runtime tool call flow. |
 | `pnpm test:rtc-e2e` | Run the RTC WebSocket e2e script. |
-| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/debug-audio/prompt/runtime-tool/runtime-DB-credential/adapter-boundary/Temporal-worker/Redis-memory/ownership/ingestion/DB provisioning/infra-runner/secret-hygiene tests, and RTC E2E. |
+| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/debug-audio/prompt/runtime-tool/runtime-DB-credential/adapter-boundary/Temporal-worker/Redis-memory/Graph-memory/ownership/ingestion/DB provisioning/infra-runner/secret-hygiene tests, and RTC E2E. |
 | `pnpm audit:architecture` | Enforce Dependency Cruiser SOA/SOLID import boundaries. |
 | `pnpm audit:responsibility` | Enforce SRP/LSP clean-code responsibility rules. |
 | `pnpm audit:secrets` | Scan committed files for live-like secrets without printing secret values. |
