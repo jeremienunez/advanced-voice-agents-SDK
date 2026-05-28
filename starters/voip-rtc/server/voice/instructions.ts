@@ -1,3 +1,4 @@
+import type { TenantResolutionResult } from "@voiceagentsdk/core/sdk";
 import { withRuntimeKnowledgePolicy } from "../runtime/knowledge-policy.js";
 import type { BuilderService, StarterSdk } from "./types.js";
 
@@ -8,6 +9,7 @@ export function instructionsForRequest(
     builderService: BuilderService;
     sdk: StarterSdk;
   },
+  tenant?: TenantResolutionResult,
 ): string {
   const compiled = options.builderService.getCompiledArtifact(agentId);
   if (compiled?.prompt) {
@@ -16,8 +18,11 @@ export function instructionsForRequest(
   return options.sdk.promptFor({
     channel: "voice",
     variables: {
-      tenantId: "local",
+      ...tenant?.promptVariables,
       providerId,
+      tenantId: tenant?.tenantId ?? "local",
+      planId: tenant?.planId,
+      userId: tenant?.userId,
     },
   });
 }

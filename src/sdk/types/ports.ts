@@ -10,7 +10,14 @@ import type {
   PromptBuildPlan,
 } from "./builder.js";
 import type { DatabaseBuildPlan } from "./database.js";
-import type { ToolManifest, ToolName } from "./core.js";
+import type {
+  AgentChannel,
+  PlanId,
+  ProviderId,
+  TenantId,
+  ToolManifest,
+  ToolName,
+} from "./core.js";
 import type {
   LlmResolvedModel,
   LlmTask,
@@ -105,6 +112,30 @@ export interface ToolRegistryAdapterPort {
   availableHandlerRefs(): readonly string[];
   canExecute(tool: ToolManifest): boolean;
   execute(input: ToolRegistryExecutionInput): Promise<unknown>;
+}
+
+export interface TenantResolutionInput {
+  channel: AgentChannel;
+  provider?: string;
+  from?: string;
+  to?: string;
+  callId?: string;
+  accountId?: string;
+}
+
+export interface TenantResolutionResult {
+  tenantId: TenantId;
+  providerId: ProviderId;
+  mediaBridgeId: string;
+  planId: PlanId;
+  userId?: string;
+  limits?: Record<string, number>;
+  promptVariables?: Record<string, string | number | boolean | null | undefined>;
+  metadata?: Record<string, unknown>;
+}
+
+export interface TenantResolverPort {
+  resolveTenant(input: TenantResolutionInput): TenantResolutionResult;
 }
 
 export interface PromptPlannerPort {

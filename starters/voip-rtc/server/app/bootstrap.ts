@@ -6,6 +6,7 @@ import {
   resolveDefaultProviderId,
 } from "../providers/catalog.js";
 import { createStarterVoiceService } from "../voice/service.js";
+import { createDevTenantResolver } from "../voice/dev-tenant-resolver.js";
 import { corsHeadersFor } from "../http/cors.js";
 import { loadStarterServerEnv } from "./env.js";
 import { createRuntimeKnowledgeFromEnv } from "./runtime-knowledge.js";
@@ -31,6 +32,7 @@ export function createStarterServerApp() {
     learning: learningService,
     providerCatalog,
     runtimeKnowledge: createRuntimeKnowledgeFromEnv(),
+    tenantResolver: createDevTenantResolver(sdk),
     sdk,
   });
 

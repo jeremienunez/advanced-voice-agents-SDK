@@ -47,6 +47,15 @@ export function voiceOptions(
     builderService: builderService(agentDraft("draft-solid")),
     browserSampleRate: 24_000,
     providerCatalog: [],
+    tenantResolver: {
+      resolveTenant: () => ({
+        tenantId: "local",
+        providerId: "gemini",
+        mediaBridgeId: "browser",
+        planId: "dev",
+        userId: "demo",
+      }),
+    },
     sdk: { promptFor: () => "test prompt" },
     ...overrides,
   } as unknown as StarterVoiceServiceOptions;

@@ -2,7 +2,7 @@ import type { BrowserVoiceServiceConfig } from "@voiceagentsdk/core/server/brows
 import { createRealtimeVoiceSession } from "@voiceagentsdk/core/server";
 import { runtimeProvider } from "../providers/catalog.js";
 import { createProvider } from "./provider-factory.js";
-import { resolveProviderDefinition } from "./provider-resolution.js";
+import { tenantResolutionInputFromRequest } from "./tenant-resolution-input.js";
 import { toolsForRequest } from "./toolset.js";
 import type { StarterVoiceServiceOptions } from "./types.js";
 
@@ -10,14 +10,19 @@ export function createVoiceSessionFactory(
   options: StarterVoiceServiceOptions,
 ): BrowserVoiceServiceConfig["createSession"] {
   return async (request, callbacks) => {
-    const tenantId = request.user.tenantId ?? "local";
-    const providerDefinition = resolveProviderDefinition(
-      options.sdk,
-      request.provider,
-      tenantId,
+    const tenant = options.tenantResolver.resolveTenant(
+      tenantResolutionInputFromRequest(request),
     );
+    const providerDefinition = options.sdk.getProvider(tenant.providerId);
     if (!providerDefinition) {
-      throw new Error(`No realtime provider configured for tenant "${tenantId}"`);
+      throw new Error(
+        `No realtime provider configured for tenant "${tenant.tenantId}"`,
+      );
+    }
+    if (!options.sdk.getMediaBridge(tenant.mediaBridgeId)) {
+      throw new Error(
+        `No media bridge configured for tenant "${tenant.tenantId}"`,
+      );
     }
 
     const providerRuntime = runtimeProvider(
@@ -25,17 +30,23 @@ export function createVoiceSessionFactory(
       providerDefinition.id,
     );
     const tools = toolsForRequest(request.agent, options);
-    const provider = createProvider(providerDefinition, request, tools, options);
+    const provider = createProvider(
+      providerDefinition,
+      request,
+      tools,
+      options,
+      tenant,
+    );
     return createRealtimeVoiceSession(
       {
         sessionId: request.sessionId,
-        tenantId,
-        userId: request.user.userId,
+        tenantId: tenant.tenantId,
+        userId: tenant.userId,
         channel: "voice",
         providerId: providerDefinition.id,
         inputFormat: "pcm16",
         sampleRate: providerRuntime.inputSampleRate,
-        maxDurationMs: 15 * 60 * 1000,
+        maxDurationMs: tenant.limits?.maxDurationMs ?? 15 * 60 * 1000,
       },
       { provider, tools },
       callbacks,

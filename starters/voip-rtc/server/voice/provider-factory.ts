@@ -1,4 +1,7 @@
-import type { ProviderDefinition } from "@voiceagentsdk/core/sdk";
+import type {
+  ProviderDefinition,
+  TenantResolutionResult,
+} from "@voiceagentsdk/core/sdk";
 import {
   GeminiRealtimeTransport,
   type IRealtimeProvider,
@@ -22,6 +25,7 @@ export function createProvider(
   request: { agent?: string; model?: string; voice?: string },
   tools: VoiceSessionTool[],
   options: StarterVoiceServiceOptions,
+  tenant?: TenantResolutionResult,
 ): IRealtimeProvider {
   const runtime = runtimeProvider(options.providerCatalog, definition.id);
   const model = resolveCatalogOption(
@@ -40,6 +44,7 @@ export function createProvider(
     definition.id,
     request.agent,
     options,
+    tenant,
   );
 
   if (isE2EFakeProviderEnabled()) {

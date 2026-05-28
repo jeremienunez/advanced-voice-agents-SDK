@@ -1,23 +1,22 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: add TenantResolverPort.
+Current goal: add SecretResolverPort.
 
-Target commit title candidate: `test: add tenant resolver port`
+Target commit title candidate: `test: add secret resolver port`
 
 ## Active Focus
 
 ### Agent Infra / DB Harness
 
 Outcome:
-Runtime tenant, provider, media bridge, user, plan and prompt variables should
-resolve through a port instead of request-local assumptions.
+Runtime secrets should resolve through a port instead of hardcoded
+`process.env` access in runtime code.
 
 Next work:
 
-- [ ] Add `TenantResolverPort`:
-  - input: `{ channel, provider, from, to, callId, accountId }`;
-  - output: `{ tenantId, providerId, mediaBridgeId, planId, userId?, limits,
-    promptVariables, metadata }`.
+- [ ] Add `SecretResolverPort` to resolve `SecretRef` values for realtime
+  providers and builder/runtime adapters without leaking secret values into SDK
+  definitions, logs, or compiled artifacts.
 
 ### Current Gates
 
@@ -44,8 +43,6 @@ Optional security/network checks:
 
 ## Architecture Backlog - Runtime Ports
 
-- [ ] Add `SecretResolverPort` to resolve `SecretRef` without hardcoded
-  `process.env` access in runtime code.
 - [ ] Add `ProviderFactoryPort` for OpenAI Realtime, Gemini Live, Grok
   Realtime, and cascaded providers.
 - [ ] Add `MediaBridgeFactoryPort` for start, stop, `sendAudio`,

@@ -1,5 +1,34 @@
 # Changelog
 
+## test: add tenant resolver port
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Faire passer la resolution runtime tenant/provider/media bridge/user/plan par
+un port injectable au lieu de fallbacks locaux dans la session voix.
+
+### Journal
+
+- Ajout de `TenantResolverPort`, `TenantResolutionInput` et
+  `TenantResolutionResult` cote SDK.
+- Ajout de l'adapter dev `createDevTenantResolver`.
+- `session-factory`, `media-config` et le prompt fallback voix consomment la
+  resolution tenant.
+- Ajout de `pnpm test:tenant-resolver:bdd` et integration dans `audit:solid`.
+- README, TODO et changelog sont a jour.
+
+### Validation
+
+- `pnpm test:tenant-resolver:bdd` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:architecture` OK
+- `pnpm test:solid-seams` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: decide builder tool-plan prompt path
 
 Status: implemented locally

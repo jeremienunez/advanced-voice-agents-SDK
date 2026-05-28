@@ -1,6 +1,6 @@
 import type { BrowserVoiceServiceConfig } from "@voiceagentsdk/core/server/browser";
 import { runtimeProvider } from "../providers/catalog.js";
-import { resolveProviderDefinition } from "./provider-resolution.js";
+import { tenantResolutionInputFromRequest } from "./tenant-resolution-input.js";
 import type { StarterVoiceServiceOptions } from "./types.js";
 
 export function createVoiceMediaConfig(
@@ -12,11 +12,10 @@ export function createVoiceMediaConfig(
     enableRnnoise: false,
     browserSampleRate: options.browserSampleRate,
     llmInputSampleRate: (request) => {
-      const providerDefinition = resolveProviderDefinition(
-        options.sdk,
-        request.provider,
-        request.user.tenantId ?? "local",
+      const tenant = options.tenantResolver.resolveTenant(
+        tenantResolutionInputFromRequest(request),
       );
+      const providerDefinition = options.sdk.getProvider(tenant.providerId);
       return providerDefinition
         ? runtimeProvider(options.providerCatalog, providerDefinition.id)
           .inputSampleRate
