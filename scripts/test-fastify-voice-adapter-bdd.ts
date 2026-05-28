@@ -9,7 +9,9 @@ import type {
   BrowserVoiceSocket,
   BrowserVoiceUserContext,
 } from "../src/server/browser/index.js";
-import type { VoiceSessionCallbacks } from "../src/server/index.js";
+import type {
+  VoiceSessionConfig,
+} from "../src/server/index.js";
 
 const results = [
   await scenarioRegistersHealthAndWebSocketRoutes(),
@@ -126,6 +128,7 @@ class RecordingFastify implements FastifyLike {
       options: typeof optionsOrHandler === "function" ? {} : optionsOrHandler,
       path,
     });
+    return undefined;
   }
 
   get paths(): string[] {
@@ -160,8 +163,18 @@ class RecordingSocket implements BrowserVoiceSocket {
 
   send(_data: string | Buffer): void {}
 
-  on(event: "message" | "close" | "error", handler: (...args: unknown[]) => unknown): this {
-    this.handlers.set(event, handler);
+  on(
+    event: "message",
+    handler: (data: unknown, isBinary?: boolean) => void | Promise<void>,
+  ): this;
+  on(event: "close", handler: () => void | Promise<void>): this;
+  on(event: "error", handler: (error: unknown) => void | Promise<void>): this;
+  on(
+    event: "message" | "close" | "error",
+    handler: (...args: never[]) => void | Promise<void>,
+  ): this {
+    const stored = handler as (...args: unknown[]) => unknown;
+    this.handlers.set(event, stored);
     return this;
   }
 }
@@ -172,13 +185,21 @@ function request(query: Record<string, string>): FastifyRequestLike {
 
 function voiceConfig(): BrowserVoiceServiceConfig {
   return {
-    createSession: async (sessionRequest, callbacks) => ({
-      sessionId: sessionRequest.sessionId,
-      async start() {},
-      async end() {},
-      async handleAudio(_chunk: Buffer) {},
-      callbacks: callbacks as VoiceSessionCallbacks,
-    }),
+    createSession: async (sessionRequest) => {
+      const config: VoiceSessionConfig = {
+        channel: "voice",
+        sessionId: sessionRequest.sessionId,
+      };
+      return {
+        config,
+        handleAudio(_chunk: Buffer): void {},
+        async end(): Promise<void> {},
+        interrupt(): void {},
+        sessionId: sessionRequest.sessionId,
+        async start(): Promise<void> {},
+        state: "initializing",
+      };
+    },
   };
 }
 

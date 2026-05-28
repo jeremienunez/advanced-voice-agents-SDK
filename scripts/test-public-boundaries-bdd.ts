@@ -131,7 +131,7 @@ function runtimeFunction(
 ): (...args: unknown[]) => unknown {
   const value = module[name];
   assert(typeof value === "function", `missing public function ${name}`);
-  return value;
+  return value as (...args: unknown[]) => unknown;
 }
 
 function assert(condition: unknown, message: string): asserts condition {

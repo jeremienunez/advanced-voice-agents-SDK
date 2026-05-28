@@ -1,5 +1,33 @@
 # Changelog
 
+## fix: typecheck boundary bdd scripts
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Corriger les erreurs TypeScript cachees dans les BDD root et supprimer les
+references de packaging/typecheck au pack Wine Investment abandonne.
+
+### Journal
+
+- Les scripts `test:fastify-voice-adapter:bdd` et
+  `test:public-boundaries:bdd` lancent maintenant un `tsc --strict` avant Bun.
+- Correction des types stricts dans les BDD Fastify et public-boundaries.
+- `typecheck:examples` devient un no-op explicite tant qu'aucun exemple
+  standalone n'est maintenu.
+- Suppression du pack `examples/packs/wine-investment` des fichiers publies.
+- README aligne la carte repo et la commande `typecheck:examples`.
+
+### Validation
+
+- `pnpm test:fastify-voice-adapter:bdd` OK
+- `pnpm test:public-boundaries:bdd` OK
+- `pnpm typecheck:examples` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: add public boundary contracts
 
 Status: implemented locally

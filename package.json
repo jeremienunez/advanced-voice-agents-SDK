@@ -10,8 +10,7 @@
     "dist",
     "README.md",
     "CHANGELOG.md",
-    "TODO.md",
-    "examples/packs/wine-investment"
+    "TODO.md"
   ],
   "exports": {
     ".": {
@@ -52,7 +51,7 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "typecheck:sdk": "tsc --noEmit -p tsconfig.json",
-    "typecheck:examples": "tsc --noEmit --target ES2023 --module NodeNext --moduleResolution NodeNext --lib ES2023,DOM --strict --skipLibCheck examples/packs/wine-investment/index.ts",
+    "typecheck:examples": "echo \"No standalone examples to typecheck\"",
     "typecheck:starters": "pnpm --filter @voiceagentsdk/starter-voip-rtc typecheck",
     "dev:voip-rtc": "pnpm --filter @voiceagentsdk/starter-voip-rtc dev",
     "harness:route-wines": "pnpm --filter @voiceagentsdk/starter-voip-rtc harness:route-wines",
@@ -70,7 +69,7 @@
     "test:builder-draft-ownership:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:builder-draft-ownership:bdd",
     "test:document-ingestion:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:document-ingestion:bdd",
     "test:event-sink-logger-port:bdd": "pnpm build && pnpm --filter @voiceagentsdk/starter-voip-rtc test:event-sink-logger-port:bdd",
-    "test:fastify-voice-adapter:bdd": "pnpm build && bun run scripts/test-fastify-voice-adapter-bdd.ts",
+    "test:fastify-voice-adapter:bdd": "pnpm build && pnpm exec tsc --noEmit --target ES2023 --module NodeNext --moduleResolution NodeNext --lib ES2023,DOM --strict --skipLibCheck scripts/test-fastify-voice-adapter-bdd.ts && bun run scripts/test-fastify-voice-adapter-bdd.ts",
     "test:infra-evolution-approval:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-evolution-approval:bdd",
     "test:infra-plan": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-plan",
     "test:infra-runner:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-runner:bdd",
@@ -81,7 +80,7 @@
     "test:prompt-policy:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:prompt-policy:bdd",
     "test:prompt-compiler-port:bdd": "pnpm build && pnpm --filter @voiceagentsdk/starter-voip-rtc test:prompt-compiler-port:bdd",
     "test:provider-factory:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:provider-factory:bdd",
-    "test:public-boundaries:bdd": "pnpm build && bun run scripts/test-public-boundaries-bdd.ts",
+    "test:public-boundaries:bdd": "pnpm build && pnpm exec tsc --noEmit --target ES2023 --module NodeNext --moduleResolution NodeNext --lib ES2023,DOM --strict --skipLibCheck scripts/test-public-boundaries-bdd.ts && bun run scripts/test-public-boundaries-bdd.ts",
     "test:runtime-tool-authorization:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:runtime-tool-authorization:bdd",
     "test:tool-contracts:bdd": "tsc --noEmit --target ES2023 --module NodeNext --moduleResolution NodeNext --lib ES2023,DOM --strict --skipLibCheck scripts/type-tests/tool-contracts.ts && pnpm --filter @voiceagentsdk/starter-voip-rtc test:tool-contracts:bdd",
     "test:tool-registry-adapter:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:tool-registry-adapter:bdd",

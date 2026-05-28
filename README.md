@@ -53,7 +53,6 @@ flowchart TD
 | `src/server` | Server runtime: sessions, transports, media handlers, providers. |
 | `src/client/browser` | Browser WebSocket and audio session client. |
 | `starters/voip-rtc` | Reusable Bun + React/Vite starter for RTC voice projects. |
-| `examples/packs/wine-investment` | Example domain pack outside core SDK. |
 | `scripts` | Audits, harnesses, and runtime tool call checks. |
 
 ## Mental Model
@@ -505,7 +504,7 @@ Physical mappings and migrations live on adapter contracts, not on
 | --- | --- |
 | `pnpm build` | Compile the SDK to `dist`. |
 | `pnpm typecheck:sdk` | Typecheck core SDK and runtime. |
-| `pnpm typecheck:examples` | Typecheck example domain packs. |
+| `pnpm typecheck:examples` | Reserved no-op until standalone examples are reintroduced. |
 | `pnpm typecheck:starters` | Build SDK and typecheck the VOIP RTC starter. |
 | `pnpm dev:voip-rtc` | Run the reusable RTC voice starter. |
 | `pnpm test:db-adapter-registry:bdd` | Check database/store definitions carry adapter refs only and runtime adapters resolve through `DbAdapterRegistry`. |
