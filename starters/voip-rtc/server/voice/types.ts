@@ -2,6 +2,7 @@ import type {
   CompiledVoiceAgentSdk,
   EmbeddingPort,
   KnowledgeSearchPort,
+  PromptCompilerPort,
   ProviderFactoryPort,
   SecretResolverPort,
   TenantResolverPort,
@@ -30,6 +31,7 @@ export interface StarterVoiceServiceOptions {
   mediaBridgeFactory?: BrowserVoiceMediaBridgeFactory;
   providerCatalog: RuntimeProviderConfig[];
   providerFactory: ProviderFactoryPort<IRealtimeProvider, VoiceSessionTool>;
+  promptCompiler: PromptCompilerPort;
   runtimeKnowledge?: RuntimeKnowledge;
   learning?: StarterLearningService;
   secretResolver: SecretResolverPort;

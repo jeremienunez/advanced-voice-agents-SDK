@@ -1,37 +1,36 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: add PromptCompilerPort.
+Current goal: add EventSink / LoggerPort.
 
-Target commit title candidate: `test: add prompt compiler port`
+Target commit title candidate: `test: add event sink logger port`
 
 ## Active Focus
 
-### PromptCompilerPort
+### EventSink / LoggerPort
 
 Outcome:
-Runtime prompt compilation should go through an injectable port instead of voice
-orchestration calling compiled artifact and SDK prompt helpers directly.
+Runtime logs and events should go through injectable ports instead of concrete
+console calls or ad hoc callback shapes inside orchestration code.
 
 BDD target:
 
-- Add `pnpm test:prompt-compiler-port:bdd`.
-- Prove voice session setup asks a prompt compiler for tenant/channel/plan/tools
-  instructions.
-- Prove compiled artifacts and fallback SDK prompts stay behind the compiler.
-- Prove runtime knowledge policy is applied by the compiler, not session
-  orchestration.
+- Add `pnpm test:event-sink-logger-port:bdd`.
+- Prove voice/session runtime emits state, error, learning, and tool events
+  through `EventSink`.
+- Prove logger calls go through `LoggerPort` with redaction preserved.
+- Prove noop, console, and custom sinks are substitutable.
 
 Implementation target:
 
-- [ ] Add `PromptCompilerPort` and runtime input types.
-- [ ] Add starter prompt compiler adapter around current compiled-artifact and
-  fallback prompt behavior.
-- [ ] Inject the compiler into voice session creation.
-- [ ] Remove direct prompt compilation responsibility from voice orchestration.
+- [ ] Add `EventSink` and `LoggerPort` SDK runtime port types.
+- [ ] Add noop and console adapters with existing redaction behavior.
+- [ ] Inject ports into voice/session runtime boundaries.
+- [ ] Replace direct console/runtime event writes where the orchestration owns
+  behavior.
 
 Definition of done:
 
-- [ ] `pnpm test:prompt-compiler-port:bdd` is red before implementation, then
+- [ ] `pnpm test:event-sink-logger-port:bdd` is red before implementation, then
   green.
 - [ ] `pnpm audit:solid`
 - [ ] `git diff --check`
@@ -62,7 +61,6 @@ Optional security/network checks:
 
 ## Architecture Backlog - Runtime Ports
 
-- [ ] Add `EventSink` / `LoggerPort` with console, noop, and custom sinks.
 - [ ] Add `MemoryStore` with in-memory default and optional Redis adapter.
 
 ## Architecture Backlog - Adapters And Demo

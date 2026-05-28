@@ -51,6 +51,9 @@ export function voiceOptions(
     providerFactory: {
       createProvider: () => new E2EFakeRealtimeProvider(),
     },
+    promptCompiler: {
+      compilePrompt: () => "test prompt",
+    },
     secretResolver: {
       resolveSecret: () => "test-secret",
     },

@@ -329,6 +329,7 @@ pnpm --filter @voiceagentsdk/starter-voip-rtc test:redis-memory:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:graph-memory-adapters:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-evolution-approval:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-runner:bdd
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:prompt-compiler-port:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:prompt-policy:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:runtime-tool-authorization:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:runtime-db-credentials:bdd
@@ -354,6 +355,10 @@ parser timeouts, and IP quotas before parsed content can feed knowledge.
 
 `test:prompt-policy:bdd` covers the immutable server-owned policy suffix added
 after generated final prompts, including tool authorization boundaries.
+
+`test:prompt-compiler-port:bdd` covers runtime instruction compilation through
+`PromptCompilerPort`, including compiled artifacts, fallback SDK prompts, runtime
+tool names, and knowledge policy.
 
 `test:runtime-tool-authorization:bdd` covers runtime filtering of executable
 tools against the compiled server-selected tool list.

@@ -13,6 +13,7 @@ import { corsHeadersFor } from "../http/cors.js";
 import { loadStarterServerEnv } from "./env.js";
 import { createRuntimeKnowledgeFromEnv } from "./runtime-knowledge.js";
 import { createStarterSdk } from "./starter-sdk.js";
+import { createStarterPromptCompiler } from "../runtime/prompt-compiler.js";
 
 export function createStarterServerApp() {
   const env = loadStarterServerEnv();
@@ -38,6 +39,7 @@ export function createStarterServerApp() {
       providerCatalog,
       secretResolver,
     }),
+    promptCompiler: createStarterPromptCompiler({ builderService, sdk }),
     runtimeKnowledge: createRuntimeKnowledgeFromEnv({ secretResolver }),
     secretResolver,
     tenantResolver: createDevTenantResolver(sdk),

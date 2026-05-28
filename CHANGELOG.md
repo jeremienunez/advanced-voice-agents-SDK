@@ -1,5 +1,41 @@
 # Changelog
 
+## test: add prompt compiler port
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Faire passer la compilation des instructions runtime par un port injectable au
+lieu de laisser l'orchestration voice lire les artifacts compiles et rendre les
+prompts SDK directement.
+
+### Journal
+
+- Ajout de `PromptCompilerPort` et `RuntimePromptCompileInput` dans les ports
+  runtime SDK.
+- Ajout de `createStarterPromptCompiler`, adapter starter qui encapsule artifact
+  compile, fallback `sdk.promptFor`, variables tenant et policy knowledge.
+- `createVoiceSessionFactory` injecte maintenant le compiler et lui transmet
+  channel, provider, agent id, tenant et noms des tools runtime.
+- Suppression de l'ancien helper `voice/instructions.ts`; la session voice ne
+  compile plus ses instructions directement.
+- Ajout de `pnpm test:prompt-compiler-port:bdd` et integration dans
+  `audit:solid`.
+- README, TODO et changelog sont a jour.
+
+### Validation
+
+- `pnpm test:prompt-compiler-port:bdd` OK
+- `pnpm test:tenant-resolver:bdd` OK
+- `pnpm test:provider-factory:bdd` OK
+- `pnpm typecheck:sdk` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:loc` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: add store adapter contracts
 
 Status: implemented locally

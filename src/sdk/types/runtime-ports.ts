@@ -6,6 +6,7 @@ import type {
   ProviderId,
   SecretRef,
   TenantId,
+  ToolName,
 } from "./core.js";
 
 export interface SecretResolveInput {
@@ -30,6 +31,20 @@ export interface ProviderFactoryInput<TTool = unknown> {
 
 export interface ProviderFactoryPort<TProvider = unknown, TTool = unknown> {
   createProvider(input: ProviderFactoryInput<TTool>): TProvider;
+}
+
+export interface RuntimePromptCompileInput {
+  channel: AgentChannel;
+  providerId: ProviderId;
+  agentId?: string;
+  tenant: TenantResolutionResult;
+  toolNames: readonly ToolName[];
+}
+
+export interface PromptCompilerPort {
+  compilePrompt(
+    input: RuntimePromptCompileInput,
+  ): string | Promise<string>;
 }
 
 export interface MediaBridgeFactoryInput<TOptions = unknown> {

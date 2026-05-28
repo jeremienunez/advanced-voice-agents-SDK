@@ -9,15 +9,15 @@ import type {
 import type { VoiceSessionConfig } from "@voiceagentsdk/core/server";
 import { createVoiceMediaConfig } from "../server/voice/media-config.js";
 import { createVoiceSessionFactory } from "../server/voice/session-factory.js";
+import { createStarterPromptCompiler } from "../server/runtime/prompt-compiler.js";
 import type { RuntimeProviderConfig } from "../server/providers/catalog.js";
 import type { StarterVoiceServiceOptions } from "../server/voice/types.js";
-import { instructionsForRequest } from "../server/voice/instructions.js";
 import { assert } from "./shared/assertions.js";
 import { voiceOptions } from "./solid-seams/fixtures.js";
 
 const results = [
   scenarioMediaSampleRateUsesTenantResolverProvider(),
-  scenarioFallbackPromptUsesResolverVariables(),
+  await scenarioFallbackPromptUsesResolverVariables(),
   await scenarioSessionFactoryUsesTenantResolverScope(),
   await scenarioSessionFactoryRejectsUnknownMediaBridge(),
 ];
@@ -40,7 +40,7 @@ function scenarioMediaSampleRateUsesTenantResolverProvider(): string {
   return "media-sample-rate-uses-tenant-resolver-provider";
 }
 
-function scenarioFallbackPromptUsesResolverVariables(): string {
+async function scenarioFallbackPromptUsesResolverVariables(): Promise<string> {
   const options = optionsWithoutCompiledPrompt({
     promptVariables: {
       segment: "vip",
@@ -48,7 +48,16 @@ function scenarioFallbackPromptUsesResolverVariables(): string {
     },
   });
   const tenant = options.tenantResolver.resolveTenant({ channel: "voice" });
-  const prompt = instructionsForRequest("openai", undefined, options, tenant);
+  const compiler = createStarterPromptCompiler({
+    builderService: options.builderService,
+    sdk: options.sdk,
+  });
+  const prompt = await compiler.compilePrompt({
+    channel: "voice",
+    providerId: "openai",
+    tenant,
+    toolNames: [],
+  });
 
   assert(
     prompt.includes(

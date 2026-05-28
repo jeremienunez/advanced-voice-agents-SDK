@@ -39,6 +39,7 @@ async function scenarioSessionFactoryDelegatesProviderCreationToPort() {
     voiceOptions({
       providerCatalog: [runtimeProvider()],
       providerFactory,
+      promptCompiler: { compilePrompt: () => "compiled prompt" },
       sdk: sdk(),
     }),
   );

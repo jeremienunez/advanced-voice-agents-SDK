@@ -80,6 +80,9 @@ Realtime provider creation is resolved through `ProviderFactoryPort`; the
 starter binds that port to OpenAI Realtime, Gemini Live, Grok Realtime, and
 cascaded provider adapters so voice orchestration does not instantiate concrete
 transports directly.
+Runtime prompt compilation is resolved through `PromptCompilerPort`; the starter
+adapter owns compiled artifact lookup, fallback SDK prompt rendering, tenant
+variables, runtime tool names, and knowledge retrieval policy.
 Browser media bridge creation is resolved through `MediaBridgeFactoryPort`; the
 default browser adapter wraps `BrowserMediaHandler` behind start/stop,
 `ingestAudio`, `sendAudio`, `clearOutput`, and `onAudioToLlm`.
@@ -109,7 +112,8 @@ sequenceDiagram
   UI->>API: compile knowledge / compile agent
   API->>Planner: composeFinalPrompt()
   API->>Store: save compiled artifact
-  Runtime->>Store: load compiled prompt by agent id
+  Runtime->>PromptCompiler: compile runtime instructions
+  PromptCompiler->>Store: load compiled prompt by agent id
 ```
 
 The user-facing "goal" is represented as `identity.intent`. There is no
@@ -502,6 +506,7 @@ Physical mappings and migrations live on adapter contracts, not on
 | `pnpm test:llm-harness` | Check provider-agnostic builder LLM planner, research, verifier, and resolver behavior. |
 | `pnpm test:log-redaction:bdd` | Check recursive log redaction for prompts, messages, content, child bindings, and secrets. |
 | `pnpm test:media-bridge-factory:bdd` | Check browser voice media creation and control go through `MediaBridgeFactoryPort`. |
+| `pnpm test:prompt-compiler-port:bdd` | Check voice runtime instructions go through `PromptCompilerPort`, including compiled artifacts, fallback SDK prompts, runtime tool names, and knowledge policy. |
 | `pnpm test:prompt-policy:bdd` | Check compiled prompts end with immutable server-owned safety and tool policy. |
 | `pnpm test:provider-factory:bdd` | Check voice session setup delegates realtime transport creation to `ProviderFactoryPort` and the starter factory builds supported providers. |
 | `pnpm test:runtime-tool-authorization:bdd` | Check runtime exposes only server-selected executable tools. |
@@ -523,7 +528,7 @@ Physical mappings and migrations live on adapter contracts, not on
 | `pnpm test:solid-seams` | Run focused BDD seam tests for HTTP guards, voice factory/learning, builder summaries, and infra validation. |
 | `pnpm test:runtime-tool-call` | Check runtime tool call flow. |
 | `pnpm test:rtc-e2e` | Run the RTC WebSocket e2e script. |
-| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/debug-audio/prompt/runtime-tool/tool-contract/tool-registry/DB-adapter-registry/store-adapter-contract/runtime-DB-credential/secret-resolver/tenant-resolver/adapter-boundary/Temporal-worker/Redis-memory/Graph-memory/infra-evolution/ownership/ingestion/DB provisioning/infra-runner/secret-hygiene tests, and RTC E2E. |
+| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/debug-audio/prompt/prompt-compiler/runtime-tool/tool-contract/tool-registry/DB-adapter-registry/store-adapter-contract/runtime-DB-credential/secret-resolver/tenant-resolver/adapter-boundary/Temporal-worker/Redis-memory/Graph-memory/infra-evolution/ownership/ingestion/DB provisioning/infra-runner/secret-hygiene tests, and RTC E2E. |
 | `pnpm audit:architecture` | Enforce Dependency Cruiser SOA/SOLID import boundaries. |
 | `pnpm audit:responsibility` | Enforce SRP/LSP clean-code responsibility rules. |
 | `pnpm audit:secrets` | Scan committed files for live-like secrets without printing secret values. |
@@ -699,8 +704,8 @@ It launches:
 ## Project Status
 
 This is an early clean-core SDK and starter. The Fastify adapter is a placeholder
-until the next adapter pass wires tools and prompts behind public contracts.
-Tenant, secret, provider, browser media bridge, database/store adapter
+until the next adapter pass wires tools behind public contracts. Tenant, secret,
+provider, prompt compiler, browser media bridge, database/store adapter
 resolution, and SQL/document/vector store adapter contracts already go through
 public ports or registries; the starter builder uses the provider-agnostic LLM
 harness for planning, research, and verification.

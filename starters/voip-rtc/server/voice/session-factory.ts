@@ -1,7 +1,6 @@
 import type { BrowserVoiceServiceConfig } from "@voiceagentsdk/core/server/browser";
 import { createRealtimeVoiceSession } from "@voiceagentsdk/core/server";
 import { runtimeProvider } from "../providers/catalog.js";
-import { instructionsForRequest } from "./instructions.js";
 import { tenantResolutionInputFromRequest } from "./tenant-resolution-input.js";
 import { toolsForRequest } from "./toolset.js";
 import type { StarterVoiceServiceOptions } from "./types.js";
@@ -30,12 +29,13 @@ export function createVoiceSessionFactory(
       providerDefinition.id,
     );
     const tools = toolsForRequest(request.agent, options);
-    const instructions = instructionsForRequest(
-      providerDefinition.id,
-      request.agent,
-      options,
+    const instructions = await options.promptCompiler.compilePrompt({
+      channel: "voice",
+      providerId: providerDefinition.id,
+      agentId: request.agent,
       tenant,
-    );
+      toolNames: tools.map((tool) => tool.name),
+    });
     const provider = options.providerFactory.createProvider({
       definition: providerDefinition,
       requestedModel: request.model,
