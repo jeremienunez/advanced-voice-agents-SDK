@@ -296,6 +296,7 @@ pnpm --filter @voiceagentsdk/starter-voip-rtc harness:route-wines
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:knowledge-tool
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-plan
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:prompt-policy:bdd
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:runtime-tool-authorization:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:builder-draft-ownership:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:document-ingestion:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:database-provisioning
@@ -309,6 +310,9 @@ parser timeouts, and IP quotas before parsed content can feed knowledge.
 
 `test:prompt-policy:bdd` covers the immutable server-owned policy suffix added
 after generated final prompts, including tool authorization boundaries.
+
+`test:runtime-tool-authorization:bdd` covers runtime filtering of executable
+tools against the compiled server-selected tool list.
 
 ## Production Notes
 

@@ -67,6 +67,7 @@
     "test:infra-plan": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-plan",
     "test:llm-harness": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:llm-harness",
     "test:prompt-policy:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:prompt-policy:bdd",
+    "test:runtime-tool-authorization:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:runtime-tool-authorization:bdd",
     "test:learning": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:learning",
     "test:learning:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:learning:bdd",
     "test:solid-seams": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:solid-seams",
@@ -79,7 +80,7 @@
     "audit:architecture": "depcruise --config .dependency-cruiser.cjs --output-type err src starters/voip-rtc/src starters/voip-rtc/server starters/voip-rtc/scripts scripts examples",
     "audit:responsibility": "node scripts/audit-responsibility.mjs",
     "audit:loc": "bun scripts/audit-loc.mjs",
-    "audit:solid": "pnpm audit:architecture && pnpm audit:responsibility && pnpm audit:loc && pnpm audit:sdk-boundary && pnpm audit:imports && pnpm typecheck:sdk && pnpm typecheck:starters && pnpm test:solid-seams && pnpm test:llm-harness && pnpm test:prompt-policy:bdd && pnpm test:builder-draft-ownership:bdd && pnpm test:document-ingestion:bdd && pnpm test:database-provisioning && pnpm test:rtc-e2e",
+    "audit:solid": "pnpm audit:architecture && pnpm audit:responsibility && pnpm audit:loc && pnpm audit:sdk-boundary && pnpm audit:imports && pnpm typecheck:sdk && pnpm typecheck:starters && pnpm test:solid-seams && pnpm test:llm-harness && pnpm test:prompt-policy:bdd && pnpm test:runtime-tool-authorization:bdd && pnpm test:builder-draft-ownership:bdd && pnpm test:document-ingestion:bdd && pnpm test:database-provisioning && pnpm test:rtc-e2e",
     "pack:dry-run": "pnpm pack --dry-run --json"
   },
   "dependencies": {

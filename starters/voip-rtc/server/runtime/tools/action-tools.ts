@@ -32,7 +32,10 @@ const handlers: Record<string, ActionHandler> = {
 };
 
 export function runtimeActionTools(agent: RuntimeCompiledAgent): VoiceSessionTool[] {
+  const selectedTools = new Set(agent.selectedTools);
+
   return agent.artifact.sdkDefinition.tools
+    .filter((tool) => selectedTools.has(tool.name))
     .filter((tool) => tool.handlerRef && handlers[tool.handlerRef])
     .map(toRuntimeTool);
 }

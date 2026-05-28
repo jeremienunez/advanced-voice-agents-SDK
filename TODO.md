@@ -1,20 +1,23 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: harden prompt and tool orchestration.
+Current goal: harden logs and debug artifacts.
 
-Target commit title candidate: `test: enforce runtime tool authorization`
+Target commit title candidate: `test: redact prompt previews from logs`
 
 ## Active Focus
 
-### Prompt And Tool Orchestration
+### Logs And Debug Artifacts
 
 Outcome:
-Compiled prompts and selected tools cannot be weakened by generated model text,
-uploaded documents, or request-supplied tool bindings.
+Normal runtime and builder logs do not leak prompts, messages, nested secrets,
+or debug audio outside local-only paths.
 
 Next work:
 
-- [ ] Enforce tool authorization server-side, independent of model text.
+- [ ] Remove prompt/message previews from normal logs.
+- [ ] Add recursive redaction for nested secrets/content.
+- [ ] Gate audio dumps to local-only debug with restrictive permissions and
+  cleanup.
 
 ### Current Gates
 
@@ -31,17 +34,6 @@ Optional security/network checks:
 - [ ] `curl http://127.0.0.1:8787/builder/config`
 
 ## Immediate Risk Backlog
-
-### Prompt And Tool Orchestration
-
-- [ ] Enforce tool authorization server-side, independent of model text.
-
-### Logs And Debug Artifacts
-
-- [ ] Remove prompt/message previews from normal logs.
-- [ ] Add recursive redaction for nested secrets/content.
-- [ ] Gate audio dumps to local-only debug with restrictive permissions and
-  cleanup.
 
 ### Secret Hygiene
 

@@ -1,5 +1,34 @@
 # Changelog
 
+## test: enforce runtime tool authorization
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Garantir que le runtime n'expose jamais un outil executable qui n'est pas dans
+la liste serveur des outils selectionnes, meme si l'artifact compile contient
+des definitions supplementaires.
+
+### Journal
+
+- Ajout de `pnpm test:runtime-tool-authorization:bdd`.
+- Le BDD construit un agent dont l'artifact contient un outil selectionne et un
+  outil non selectionne avec handler valide.
+- `runtimeActionTools` filtre maintenant par `agent.selectedTools` avant de
+  publier les handlers executables.
+- `pnpm audit:solid` execute maintenant ce BDD pour verrouiller le comportement.
+- Le TODO passe a la prochaine tranche: logs et artefacts debug.
+
+### Validation
+
+- `pnpm test:runtime-tool-authorization:bdd` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:loc` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: lint compiled prompt invariants
 
 Status: implemented locally

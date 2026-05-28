@@ -23,6 +23,7 @@
     "test:infra-plan": "bun run scripts/test-infra-plan.ts",
     "test:llm-harness": "bun run scripts/test-llm-harness.ts",
     "test:prompt-policy:bdd": "bun run scripts/test-prompt-policy-bdd.ts",
+    "test:runtime-tool-authorization:bdd": "bun run scripts/test-runtime-tool-authorization-bdd.ts",
     "test:learning": "bun run scripts/test-learning.ts",
     "test:learning:bdd": "bun run scripts/test-learning-bdd.ts",
     "test:solid-seams": "bun run scripts/test-solid-seams.ts",
