@@ -86,6 +86,9 @@ variables, runtime tool names, and knowledge retrieval policy.
 Runtime observability is resolved through `EventSinkPort` and `LoggerPort`;
 browser voice session, state, tool, error, and learning messages can be mirrored
 to custom sinks while console/noop adapters preserve redaction.
+Runtime memory is resolved through `MemoryStorePort`; voice orchestration reads
+tenant/user/agent memories before prompt compilation and writes session-scoped
+records through in-memory or Redis adapters selected by the app.
 Browser media bridge creation is resolved through `MediaBridgeFactoryPort`; the
 default browser adapter wraps `BrowserMediaHandler` behind start/stop,
 `ingestAudio`, `sendAudio`, `clearOutput`, and `onAudioToLlm`.
@@ -223,7 +226,10 @@ Infra env cheat sheet:
 | `BUILDER_VECTOR_BACKEND` | Set `milvus` to force Milvus as the vector backend. |
 | `MILVUS_URL` / `MILVUS_ADDRESS` | Marks the Milvus backend as configured. |
 | `NEO4J_URI` / `MEMGRAPH_URI` / `GRAPH_DATABASE_URL` | Marks the graph backend as configured. |
-| `REDIS_URL` | Marks cache and learning temporal-memory backends as configured. |
+| `REDIS_URL` | Marks cache, runtime Redis memory, and learning temporal-memory backends as configured. |
+| `AGENT_RUNTIME_MEMORY_DRIVER` | `local` keeps runtime memory in-process; `redis` uses the starter Redis runtime memory adapter. |
+| `AGENT_RUNTIME_MEMORY_NAMESPACE` | Redis key namespace for runtime memory, default `agent-runtime`. |
+| `AGENT_RUNTIME_MEMORY_TTL_SECONDS` | TTL for runtime memory records, default `86400`. |
 | `AGENT_LEARNING_ENABLED` | Enables post-session learning store planning, default `true` in the starter. |
 | `AGENT_LEARNING_WORKFLOW_DRIVER` | `local` runs the dev in-process queue; `temporal` dispatches to a Temporal worker. |
 | `AGENT_LEARNING_MEMORY_DRIVER` | `local` keeps dev memory in-process; `redis` uses the production Redis memory adapter. |
@@ -351,7 +357,7 @@ The starter server runs on `http://127.0.0.1:8787` by default.
 | --- | --- |
 | `@voiceagentsdk/core` | Main SDK export. |
 | `@voiceagentsdk/core/sdk` | Builders, SDK types, runtime compiler, stores, ports. |
-| `@voiceagentsdk/core/server` | Sessions, transports, handlers, provider/runtime types. |
+| `@voiceagentsdk/core/server` | Sessions, transports, handlers, provider/runtime types, and the in-memory memory adapter. |
 | `@voiceagentsdk/core/server/browser` | `BrowserVoiceService` WebSocket bridge. |
 | `@voiceagentsdk/core/server/providers` | Realtime provider transport facade. |
 | `@voiceagentsdk/core/server/media` | Media handlers and audio utilities. |
@@ -510,6 +516,7 @@ Physical mappings and migrations live on adapter contracts, not on
 | `pnpm test:llm-harness` | Check provider-agnostic builder LLM planner, research, verifier, and resolver behavior. |
 | `pnpm test:log-redaction:bdd` | Check recursive log redaction for prompts, messages, content, child bindings, and secrets. |
 | `pnpm test:media-bridge-factory:bdd` | Check browser voice media creation and control go through `MediaBridgeFactoryPort`. |
+| `pnpm test:memory-store-port:bdd` | Check runtime memories go through `MemoryStorePort`, with scoped in-memory storage, voice injection, and env-selected Redis. |
 | `pnpm test:prompt-compiler-port:bdd` | Check voice runtime instructions go through `PromptCompilerPort`, including compiled artifacts, fallback SDK prompts, runtime tool names, and knowledge policy. |
 | `pnpm test:prompt-policy:bdd` | Check compiled prompts end with immutable server-owned safety and tool policy. |
 | `pnpm test:provider-factory:bdd` | Check voice session setup delegates realtime transport creation to `ProviderFactoryPort` and the starter factory builds supported providers. |
@@ -532,7 +539,7 @@ Physical mappings and migrations live on adapter contracts, not on
 | `pnpm test:solid-seams` | Run focused BDD seam tests for HTTP guards, voice factory/learning, builder summaries, and infra validation. |
 | `pnpm test:runtime-tool-call` | Check runtime tool call flow. |
 | `pnpm test:rtc-e2e` | Run the RTC WebSocket e2e script. |
-| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/debug-audio/event-sink-logger/prompt/prompt-compiler/runtime-tool/tool-contract/tool-registry/DB-adapter-registry/store-adapter-contract/runtime-DB-credential/secret-resolver/tenant-resolver/adapter-boundary/Temporal-worker/Redis-memory/Graph-memory/infra-evolution/ownership/ingestion/DB provisioning/infra-runner/secret-hygiene tests, and RTC E2E. |
+| `pnpm audit:solid` | Run the full SOLID gate: architecture, responsibility, LOC, boundaries, typechecks, seam/LLM/log-redaction/debug-audio/event-sink-logger/memory-store/prompt/prompt-compiler/runtime-tool/tool-contract/tool-registry/DB-adapter-registry/store-adapter-contract/runtime-DB-credential/secret-resolver/tenant-resolver/adapter-boundary/Temporal-worker/Redis-memory/Graph-memory/infra-evolution/ownership/ingestion/DB provisioning/infra-runner/secret-hygiene tests, and RTC E2E. |
 | `pnpm audit:architecture` | Enforce Dependency Cruiser SOA/SOLID import boundaries. |
 | `pnpm audit:responsibility` | Enforce SRP/LSP clean-code responsibility rules. |
 | `pnpm audit:secrets` | Scan committed files for live-like secrets without printing secret values. |

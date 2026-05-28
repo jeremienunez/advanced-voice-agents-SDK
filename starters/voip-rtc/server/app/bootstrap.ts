@@ -14,6 +14,7 @@ import { loadStarterServerEnv } from "./env.js";
 import { createRuntimeKnowledgeFromEnv } from "./runtime-knowledge.js";
 import { createStarterSdk } from "./starter-sdk.js";
 import { createStarterPromptCompiler } from "../runtime/prompt-compiler.js";
+import { createRuntimeMemoryStoreFromEnv } from "../runtime/memory-store.js";
 
 export function createStarterServerApp() {
   const env = loadStarterServerEnv();
@@ -34,6 +35,7 @@ export function createStarterServerApp() {
     builderService,
     browserSampleRate: env.browserSampleRate,
     learning: learningService,
+    memoryStore: createRuntimeMemoryStoreFromEnv(),
     providerCatalog,
     providerFactory: createStarterProviderFactory({
       providerCatalog,

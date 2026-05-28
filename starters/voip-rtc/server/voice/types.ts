@@ -2,6 +2,7 @@ import type {
   CompiledVoiceAgentSdk,
   EmbeddingPort,
   KnowledgeSearchPort,
+  MemoryStorePort,
   PromptCompilerPort,
   ProviderFactoryPort,
   SecretResolverPort,
@@ -34,6 +35,7 @@ export interface StarterVoiceServiceOptions {
   promptCompiler: PromptCompilerPort;
   runtimeKnowledge?: RuntimeKnowledge;
   learning?: StarterLearningService;
+  memoryStore?: MemoryStorePort;
   secretResolver: SecretResolverPort;
   tenantResolver: TenantResolverPort;
   sdk: StarterSdk;

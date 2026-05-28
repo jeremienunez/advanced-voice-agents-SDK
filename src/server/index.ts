@@ -6,3 +6,4 @@ export * from "./browser/index.js";
 export * from "./providers/index.js";
 export * from "./media/index.js";
 export * from "./observability/index.js";
+export * from "./memory/index.js";

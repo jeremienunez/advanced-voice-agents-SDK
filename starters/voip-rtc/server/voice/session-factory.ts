@@ -1,5 +1,10 @@
 import type { BrowserVoiceServiceConfig } from "@voiceagentsdk/core/server/browser";
 import { createRealtimeVoiceSession } from "@voiceagentsdk/core/server";
+import type {
+  MemoryRecord,
+  MemoryScope,
+  TenantResolutionResult,
+} from "@voiceagentsdk/core/sdk";
 import { runtimeProvider } from "../providers/catalog.js";
 import { tenantResolutionInputFromRequest } from "./tenant-resolution-input.js";
 import { toolsForRequest } from "./toolset.js";
@@ -29,12 +34,24 @@ export function createVoiceSessionFactory(
       providerDefinition.id,
     );
     const tools = toolsForRequest(request.agent, options);
+    const memories = await runtimeMemories(options, tenant, request);
     const instructions = await options.promptCompiler.compilePrompt({
       channel: "voice",
       providerId: providerDefinition.id,
       agentId: request.agent,
       tenant,
       toolNames: tools.map((tool) => tool.name),
+      memories,
+    });
+    await options.memoryStore?.write({
+      scope: sessionMemoryScope(tenant, request),
+      kind: "session.started",
+      value: {
+        providerId: providerDefinition.id,
+        model: request.model,
+        voice: request.voice,
+        toolNames: tools.map((tool) => tool.name),
+      },
     });
     const provider = options.providerFactory.createProvider({
       definition: providerDefinition,
@@ -62,5 +79,37 @@ export function createVoiceSessionFactory(
       { provider, tools },
       callbacks,
     );
+  };
+}
+
+async function runtimeMemories(
+  options: StarterVoiceServiceOptions,
+  tenant: TenantResolutionResult,
+  request: Parameters<BrowserVoiceServiceConfig["createSession"]>[0],
+): Promise<readonly MemoryRecord[]> {
+  return options.memoryStore?.list({
+    scope: runtimeMemoryScope(tenant, request),
+    limit: 12,
+  }) ?? [];
+}
+
+function runtimeMemoryScope(
+  tenant: TenantResolutionResult,
+  request: Parameters<BrowserVoiceServiceConfig["createSession"]>[0],
+): MemoryScope {
+  return {
+    tenantId: tenant.tenantId,
+    userId: tenant.userId,
+    agentId: request.agent,
+  };
+}
+
+function sessionMemoryScope(
+  tenant: TenantResolutionResult,
+  request: Parameters<BrowserVoiceServiceConfig["createSession"]>[0],
+): MemoryScope {
+  return {
+    ...runtimeMemoryScope(tenant, request),
+    sessionId: request.sessionId,
   };
 }

@@ -1,5 +1,39 @@
 # Changelog
 
+## test: add memory store port
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Faire passer la memoire runtime par un port injectable avec un adapter
+in-memory deterministe par defaut et un adapter Redis selectionne par env cote
+starter.
+
+### Journal
+
+- Ajout de `MemoryStorePort`, `MemoryScope`, `MemoryRecord` et des inputs
+  write/list/delete dans les ports runtime SDK.
+- `RuntimePromptCompileInput` peut recevoir des memories scoppes avant la
+  compilation des instructions.
+- Ajout de `createInMemoryMemoryStore` dans `@voiceagentsdk/core/server`.
+- Ajout du factory starter `createRuntimeMemoryStoreFromEnv` avec
+  `AGENT_RUNTIME_MEMORY_DRIVER`, namespace, TTL et `REDIS_URL`.
+- Ajout de `RedisRuntimeMemoryStore` comme adapter Redis optionnel.
+- `createVoiceSessionFactory` lit les memories tenant/user/agent avant le
+  prompt compiler et ecrit un record `session.started` via `MemoryStorePort`.
+- Ajout de `pnpm test:memory-store-port:bdd` et integration dans
+  `audit:solid`.
+- README, TODO et changelog sont a jour.
+
+### Validation
+
+- `pnpm test:memory-store-port:bdd` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: add event sink logger port
 
 Status: implemented locally

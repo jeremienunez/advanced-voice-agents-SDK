@@ -1,36 +1,39 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: add MemoryStore runtime port.
+Current goal: wire the Fastify voice adapter to the cleaned runtime.
 
-Target commit title candidate: `test: add memory store port`
+Target commit title candidate: `test: wire fastify voice adapter`
 
 ## Active Focus
 
-### MemoryStore
+### Fastify Voice Adapter
 
 Outcome:
-Runtime memory should go through an injectable port with an in-memory default
-and an optional Redis adapter, without coupling orchestration to concrete
-storage clients.
+The Fastify adapter should expose the cleaned voice runtime through a narrow
+HTTP/WebSocket boundary, without depending on starter internals or placeholder
+errors.
 
 BDD target:
 
-- Add `pnpm test:memory-store-port:bdd`.
-- Prove runtime memory reads and writes go through `MemoryStorePort`.
-- Prove in-memory default is scoped by tenant/user/session.
-- Prove Redis adapter is optional and env-selected without breaking local dev.
+- Add `pnpm test:fastify-voice-adapter:bdd`.
+- Prove the adapter registers voice routes against a Fastify-like app.
+- Prove route prefixing is deterministic and does not leak starter paths.
+- Prove the adapter consumes explicit runtime ports/config instead of importing
+  app/bootstrap, HTTP routes, or starter voice composition.
 
 Implementation target:
 
-- [ ] Add SDK `MemoryStorePort` and record/scope types.
-- [ ] Add in-memory adapter with deterministic tests.
-- [ ] Add starter Redis adapter or factory reusing existing learning Redis
-  boundaries where it fits.
-- [ ] Inject the memory port at runtime boundaries that need session/user memory.
+- [ ] Replace the placeholder `createFastifyVoiceAdapter` error path.
+- [ ] Define the minimal Fastify-like route registration contract.
+- [ ] Bridge WebSocket/session startup to the existing browser voice service
+  boundary without coupling to the starter server.
+- [ ] Keep adapter files under 300 LOC and preserve Dependency Cruiser
+  boundaries.
 
 Definition of done:
 
-- [ ] `pnpm test:memory-store-port:bdd` is red before implementation, then green.
+- [ ] `pnpm test:fastify-voice-adapter:bdd` is red before implementation, then
+  green.
 - [ ] `pnpm audit:solid`
 - [ ] `git diff --check`
 - [ ] TODO, CHANGELOG, and README are updated before commit.
@@ -57,8 +60,6 @@ Optional security/network checks:
 - [ ] Revoke/regenerate `GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `VOYAGE_API_KEY`,
   and `MOONSHOT_API_KEY` in provider dashboards if the scrubbed ignored `.env`
   values were live. Local `pnpm audit:local-secrets` is clean as of 2026-05-28.
-
-## Architecture Backlog - Runtime Ports
 
 ## Architecture Backlog - Adapters And Demo
 

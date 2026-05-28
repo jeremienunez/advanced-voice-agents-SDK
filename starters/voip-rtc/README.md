@@ -179,6 +179,9 @@ Required/optional learning env:
 | --- | --- |
 | `AGENT_LEARNING_ENABLED` | Enables post-session learning, default `true`. |
 | `AGENT_LEARNING_WORKFLOW_DRIVER` | `local` keeps dev learning in-process; `temporal` dispatches to a Temporal worker. |
+| `AGENT_RUNTIME_MEMORY_DRIVER` | `local` keeps runtime memory in-process; `redis` uses the Redis runtime memory adapter. |
+| `AGENT_RUNTIME_MEMORY_NAMESPACE` | Redis key namespace for runtime memory, default `agent-runtime`. |
+| `AGENT_RUNTIME_MEMORY_TTL_SECONDS` | TTL for runtime memory records, default `86400`. |
 | `AGENT_LEARNING_MEMORY_DRIVER` | `local` keeps dev memory in-process; `redis` uses the production Redis memory adapter. |
 | `AGENT_LEARNING_MEMORY_NAMESPACE` | Redis key namespace for temporal learned memory, default `agent-learning`. |
 | `AGENT_LEARNING_MEMORY_TTL_SECONDS` | TTL for Redis temporal memory, default `2592000`. |
@@ -305,6 +308,9 @@ Builder and knowledge env vars:
 - `AGENT_LEARNING_GRAPH_DRIVER`
 - `AGENT_LEARNING_ENABLED`
 - `AGENT_LEARNING_WORKFLOW_DRIVER`
+- `AGENT_RUNTIME_MEMORY_DRIVER`
+- `AGENT_RUNTIME_MEMORY_NAMESPACE`
+- `AGENT_RUNTIME_MEMORY_TTL_SECONDS`
 - `AGENT_LEARNING_MEMORY_DRIVER`
 - `AGENT_LEARNING_MEMORY_NAMESPACE`
 - `AGENT_LEARNING_MEMORY_TTL_SECONDS`
@@ -330,6 +336,7 @@ pnpm --filter @voiceagentsdk/starter-voip-rtc test:graph-memory-adapters:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-evolution-approval:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-runner:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:event-sink-logger-port:bdd
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:memory-store-port:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:prompt-compiler-port:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:prompt-policy:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:runtime-tool-authorization:bdd
@@ -364,6 +371,10 @@ tool names, and knowledge policy.
 `test:event-sink-logger-port:bdd` covers browser voice session/state/tool/error
 and learning events through `EventSinkPort`, plus redacted console and noop
 logger adapters.
+
+`test:memory-store-port:bdd` covers runtime memory reads/writes through
+`MemoryStorePort`, scoped in-memory storage, voice session injection, and
+env-selected Redis.
 
 `test:runtime-tool-authorization:bdd` covers runtime filtering of executable
 tools against the compiled server-selected tool list.
