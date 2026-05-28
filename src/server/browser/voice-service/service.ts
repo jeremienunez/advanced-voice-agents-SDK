@@ -1,11 +1,14 @@
 import type {
   ClientVoiceMessage,
-  ServerVoiceMessage,
 } from "../../../sdk/types/browser-voice.js";
 import type { IVoiceSession, SessionEndReason } from "../../agent/types/session.types.js";
-import { createAgentLogger } from "../../agent/utils/index.js";
+import { createConsoleLoggerPort } from "../../observability/index.js";
 import { adaptPcm16SampleRate, resolveSampleRate } from "./audio.js";
 import { createBrowserSessionCallbacks } from "./callbacks.js";
+import {
+  createBrowserControlEmitter,
+  type BrowserControlEmitter,
+} from "./control-emitter.js";
 import {
   createBrowserMediaBridgeDefinition,
   createDefaultBrowserMediaBridgeFactory,
@@ -13,27 +16,35 @@ import {
 import {
   DEFAULT_BROWSER_SAMPLE_RATE,
   parseClientMessage,
-  randomSessionId,
   toBuffer,
   WS_OPEN,
 } from "./protocol.js";
+import { createBrowserSessionRequest } from "./session-request.js";
 import type {
   ActiveBrowserSession,
   BrowserVoiceServiceConfig,
   BrowserVoiceSessionEndedInput,
-  BrowserVoiceSessionRequest,
   BrowserVoiceSocket,
   BrowserVoiceUserContext,
 } from "./types.js";
 
 export class BrowserVoiceService {
-  private readonly logger = createAgentLogger("BrowserVoiceService");
+  private readonly controlEmitter: BrowserControlEmitter;
+  private readonly logger;
   private readonly activeSessions = new Map<
     BrowserVoiceSocket,
     ActiveBrowserSession
   >();
 
-  constructor(private readonly config: BrowserVoiceServiceConfig) {}
+  constructor(private readonly config: BrowserVoiceServiceConfig) {
+    this.logger = config.logger ?? createConsoleLoggerPort({
+      component: "BrowserVoiceService",
+    });
+    this.controlEmitter = createBrowserControlEmitter({
+      eventSink: config.eventSink,
+      logger: this.logger,
+    });
+  }
 
   get activeSessionCount(): number {
     return this.activeSessions.size;
@@ -66,7 +77,7 @@ export class BrowserVoiceService {
         }
       } catch (error) {
         this.logger.error("Browser voice message failed", { error });
-        this.sendControl(socket, {
+        this.controlEmitter.emit(socket, {
           type: "session.error",
           error: {
             code: "processing_error",
@@ -109,7 +120,7 @@ export class BrowserVoiceService {
     message: Extract<ClientVoiceMessage, { type: "session.start" }>,
   ): Promise<void> {
     if (this.activeSessions.has(socket)) {
-      this.sendControl(socket, {
+      this.controlEmitter.emit(socket, {
         type: "session.error",
         error: {
           code: "already_active",
@@ -119,7 +130,7 @@ export class BrowserVoiceService {
       return;
     }
 
-    const request = this.createSessionRequest(user, message);
+    const request = createBrowserSessionRequest(this.config, user, message);
     const browserSampleRate =
       this.config.media?.browserSampleRate ?? DEFAULT_BROWSER_SAMPLE_RATE;
     const llmInputSampleRate = resolveSampleRate(
@@ -163,8 +174,8 @@ export class BrowserVoiceService {
       mediaBridge,
       browserSampleRate,
       getActiveSession: (activeSocket) => this.activeSessions.get(activeSocket),
-      sendControl: (activeSocket, control) =>
-        this.sendControl(activeSocket, control),
+      emitControl: (activeSocket, control) =>
+        this.controlEmitter.emit(activeSocket, control),
     });
 
     try {
@@ -186,7 +197,7 @@ export class BrowserVoiceService {
       await session.start();
       await mediaBridge.start();
 
-      this.sendControl(socket, {
+      this.controlEmitter.emit(socket, {
         type: "session.started",
         sessionId: session.sessionId,
       });
@@ -194,7 +205,7 @@ export class BrowserVoiceService {
       await mediaBridge.stop();
       this.activeSessions.delete(socket);
       this.logger.error("Failed to start browser voice session", { error });
-      this.sendControl(socket, {
+      this.controlEmitter.emit(socket, {
         type: "session.error",
         error: {
           code: "session_start_failed",
@@ -205,22 +216,6 @@ export class BrowserVoiceService {
         },
       });
     }
-  }
-
-  private createSessionRequest(
-    user: BrowserVoiceUserContext,
-    message: Extract<ClientVoiceMessage, { type: "session.start" }>,
-  ): BrowserVoiceSessionRequest {
-    return {
-      sessionId: this.config.createSessionId?.() ?? randomSessionId(),
-      provider: message.provider,
-      agent: message.agent,
-      model: message.model,
-      voice: message.voice,
-      providerOptions: message.providerOptions,
-      conversationId: message.conversationId,
-      user,
-    };
   }
 
   private async endSession(
@@ -253,7 +248,7 @@ export class BrowserVoiceService {
         transcript: [...activeSession.transcript],
         toolCalls: activeSession.toolCalls.map((call) => ({ ...call })),
       };
-      this.sendControl(socket, {
+      this.controlEmitter.emit(socket, {
         type: "session.ended",
         summary: {
           sessionId: activeSession.sessionId,
@@ -271,7 +266,7 @@ export class BrowserVoiceService {
     if (endedInput && this.config.onSessionEnded) {
       void (async () => {
         await this.config.onSessionEnded?.(endedInput, (status) => {
-          this.sendControl(socket, {
+          this.controlEmitter.emit(socket, {
             type: "learning.status",
             learning: status,
           });
@@ -282,13 +277,6 @@ export class BrowserVoiceService {
     }
   }
 
-  private sendControl(
-    socket: BrowserVoiceSocket,
-    message: ServerVoiceMessage,
-  ): void {
-    if (socket.readyState !== WS_OPEN) return;
-    socket.send(JSON.stringify(message));
-  }
 }
 
 export function createBrowserVoiceService(

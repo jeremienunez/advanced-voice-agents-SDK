@@ -10,4 +10,5 @@ export {
   type BrowserVoiceMediaBridge,
   type BrowserVoiceMediaBridgeFactory,
   type BrowserVoiceMediaBridgeOptions,
+  type ServerVoiceMessage,
 } from "./voice-service.js";

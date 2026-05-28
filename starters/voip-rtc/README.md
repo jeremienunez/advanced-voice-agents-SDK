@@ -329,6 +329,7 @@ pnpm --filter @voiceagentsdk/starter-voip-rtc test:redis-memory:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:graph-memory-adapters:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-evolution-approval:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-runner:bdd
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:event-sink-logger-port:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:prompt-compiler-port:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:prompt-policy:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:runtime-tool-authorization:bdd
@@ -359,6 +360,10 @@ after generated final prompts, including tool authorization boundaries.
 `test:prompt-compiler-port:bdd` covers runtime instruction compilation through
 `PromptCompilerPort`, including compiled artifacts, fallback SDK prompts, runtime
 tool names, and knowledge policy.
+
+`test:event-sink-logger-port:bdd` covers browser voice session/state/tool/error
+and learning events through `EventSinkPort`, plus redacted console and noop
+logger adapters.
 
 `test:runtime-tool-authorization:bdd` covers runtime filtering of executable
 tools against the compiled server-selected tool list.

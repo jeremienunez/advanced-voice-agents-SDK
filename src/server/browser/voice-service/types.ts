@@ -1,7 +1,12 @@
 import type {
+  ServerVoiceMessage,
   VoiceProvider,
 } from "../../../sdk/types/browser-voice.js";
-import type { MediaBridgeDefinition } from "../../../sdk/types.js";
+import type {
+  EventSinkPort,
+  LoggerPort,
+  MediaBridgeDefinition,
+} from "../../../sdk/types.js";
 import type {
   LearningJobStatus,
   LearningToolCallRecord,
@@ -57,6 +62,8 @@ export interface BrowserVoiceServiceConfig {
     callbacks: VoiceSessionCallbacks,
   ) => Promise<IVoiceSession>;
   createSessionId?: () => string;
+  eventSink?: EventSinkPort<ServerVoiceMessage>;
+  logger?: LoggerPort;
   onSessionEnded?: (
     input: BrowserVoiceSessionEndedInput,
     emitStatus: (status: LearningJobStatus) => void,

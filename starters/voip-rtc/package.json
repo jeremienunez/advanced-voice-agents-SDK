@@ -22,6 +22,7 @@
     "test:adapter-boundaries:bdd": "bun run scripts/test-adapter-boundaries-bdd.ts",
     "test:builder-draft-ownership:bdd": "bun run scripts/test-builder-draft-ownership-bdd.ts",
     "test:document-ingestion:bdd": "bun run scripts/test-document-ingestion-bdd.ts && bun run scripts/test-document-ingestion-quota-bdd.ts",
+    "test:event-sink-logger-port:bdd": "bun run scripts/test-event-sink-logger-port-bdd.ts",
     "test:infra-evolution-approval:bdd": "bun run scripts/test-infra-evolution-approval-bdd.ts",
     "test:infra-plan": "bun run scripts/test-infra-plan.ts",
     "test:infra-runner:bdd": "bun run scripts/test-infra-runner-bdd.ts",

@@ -14,7 +14,7 @@ export interface BrowserSessionCallbackDeps {
   mediaBridge: BrowserVoiceMediaBridge;
   browserSampleRate: number;
   getActiveSession: (socket: BrowserVoiceSocket) => ActiveBrowserSession | undefined;
-  sendControl: (socket: BrowserVoiceSocket, message: ServerVoiceMessage) => void;
+  emitControl: (socket: BrowserVoiceSocket, message: ServerVoiceMessage) => void;
 }
 
 export function createBrowserSessionCallbacks(
@@ -36,7 +36,7 @@ export function createBrowserSessionCallbacks(
     onStateChange: (state) => {
       const mapped = mapSessionState(state);
       if (mapped) {
-        deps.sendControl(deps.socket, { type: "state.change", state: mapped });
+        deps.emitControl(deps.socket, { type: "state.change", state: mapped });
       }
     },
     onTranscript: (text, isFinal) => {
@@ -50,7 +50,7 @@ export function createBrowserSessionCallbacks(
         });
         if (isFinal) activeSession.messageCount++;
       }
-      deps.sendControl(deps.socket, {
+      deps.emitControl(deps.socket, {
         type: "transcript",
         text,
         isFinal,
@@ -59,7 +59,7 @@ export function createBrowserSessionCallbacks(
     },
     onInterrupted: () => {
       void deps.mediaBridge.clearOutput();
-      deps.sendControl(deps.socket, {
+      deps.emitControl(deps.socket, {
         type: "state.change",
         state: "interrupted",
       });
@@ -88,7 +88,7 @@ export function createBrowserSessionCallbacks(
       }
 
       if (call.status === "executing" || call.status === "pending") {
-        deps.sendControl(deps.socket, {
+        deps.emitControl(deps.socket, {
           type: "tool.call",
           tool: {
             name: call.toolName,
@@ -98,7 +98,7 @@ export function createBrowserSessionCallbacks(
         return;
       }
 
-      deps.sendControl(deps.socket, {
+      deps.emitControl(deps.socket, {
         type: "tool.result",
         tool: {
           name: call.toolName,
@@ -108,7 +108,7 @@ export function createBrowserSessionCallbacks(
       if (activeSession) activeSession.toolCallCount++;
     },
     onError: (error) => {
-      deps.sendControl(deps.socket, {
+      deps.emitControl(deps.socket, {
         type: "session.error",
         error: {
           code: error.code,

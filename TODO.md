@@ -1,37 +1,36 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: add EventSink / LoggerPort.
+Current goal: add MemoryStore runtime port.
 
-Target commit title candidate: `test: add event sink logger port`
+Target commit title candidate: `test: add memory store port`
 
 ## Active Focus
 
-### EventSink / LoggerPort
+### MemoryStore
 
 Outcome:
-Runtime logs and events should go through injectable ports instead of concrete
-console calls or ad hoc callback shapes inside orchestration code.
+Runtime memory should go through an injectable port with an in-memory default
+and an optional Redis adapter, without coupling orchestration to concrete
+storage clients.
 
 BDD target:
 
-- Add `pnpm test:event-sink-logger-port:bdd`.
-- Prove voice/session runtime emits state, error, learning, and tool events
-  through `EventSink`.
-- Prove logger calls go through `LoggerPort` with redaction preserved.
-- Prove noop, console, and custom sinks are substitutable.
+- Add `pnpm test:memory-store-port:bdd`.
+- Prove runtime memory reads and writes go through `MemoryStorePort`.
+- Prove in-memory default is scoped by tenant/user/session.
+- Prove Redis adapter is optional and env-selected without breaking local dev.
 
 Implementation target:
 
-- [ ] Add `EventSink` and `LoggerPort` SDK runtime port types.
-- [ ] Add noop and console adapters with existing redaction behavior.
-- [ ] Inject ports into voice/session runtime boundaries.
-- [ ] Replace direct console/runtime event writes where the orchestration owns
-  behavior.
+- [ ] Add SDK `MemoryStorePort` and record/scope types.
+- [ ] Add in-memory adapter with deterministic tests.
+- [ ] Add starter Redis adapter or factory reusing existing learning Redis
+  boundaries where it fits.
+- [ ] Inject the memory port at runtime boundaries that need session/user memory.
 
 Definition of done:
 
-- [ ] `pnpm test:event-sink-logger-port:bdd` is red before implementation, then
-  green.
+- [ ] `pnpm test:memory-store-port:bdd` is red before implementation, then green.
 - [ ] `pnpm audit:solid`
 - [ ] `git diff --check`
 - [ ] TODO, CHANGELOG, and README are updated before commit.
@@ -60,8 +59,6 @@ Optional security/network checks:
   values were live. Local `pnpm audit:local-secrets` is clean as of 2026-05-28.
 
 ## Architecture Backlog - Runtime Ports
-
-- [ ] Add `MemoryStore` with in-memory default and optional Redis adapter.
 
 ## Architecture Backlog - Adapters And Demo
 

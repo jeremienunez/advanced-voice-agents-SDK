@@ -18,3 +18,4 @@ export type {
   BrowserVoiceSocket,
   BrowserVoiceUserContext,
 } from "./voice-service/types.js";
+export type { ServerVoiceMessage } from "../../sdk/types/browser-voice.js";

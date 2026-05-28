@@ -5,3 +5,4 @@ export * from "./agent/sessions/index.js";
 export * from "./browser/index.js";
 export * from "./providers/index.js";
 export * from "./media/index.js";
+export * from "./observability/index.js";

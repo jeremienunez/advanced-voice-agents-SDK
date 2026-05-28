@@ -1,5 +1,42 @@
 # Changelog
 
+## test: add event sink logger port
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Faire passer les events runtime browser voice et les logs d'orchestration par
+des ports injectables au lieu de les coupler a des callbacks ou loggers
+concrets.
+
+### Journal
+
+- Ajout de `EventSinkPort`, `LoggerPort`, `RuntimeEventRecord` et
+  `RuntimeLogContext` dans les ports runtime SDK.
+- Ajout des adapters serveur `noopEventSink`, `createConsoleEventSink`,
+  `noopLogger` et `createConsoleLoggerPort`.
+- `BrowserVoiceService` accepte maintenant `eventSink` et `logger` injectes.
+- Les messages session/state/tool/error/learning passent par un
+  `BrowserControlEmitter` avant d'etre envoyes au WebSocket.
+- Extraction de la creation de request browser voice pour garder le service sous
+  la limite LOC.
+- Ajout de `pnpm test:event-sink-logger-port:bdd` et integration dans
+  `audit:solid`.
+- README, TODO et changelog sont a jour.
+
+### Validation
+
+- `pnpm test:event-sink-logger-port:bdd` OK
+- `pnpm test:media-bridge-factory:bdd` OK
+- `pnpm test:solid-seams` OK
+- `pnpm typecheck:sdk` OK
+- `pnpm typecheck:starters` OK
+- `pnpm audit:loc` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: add prompt compiler port
 
 Status: implemented locally
