@@ -1,8 +1,8 @@
 import type { ServerVoiceMessage } from "../../../sdk/types/browser-voice.js";
-import type { BrowserMediaHandler } from "../../agent/handlers/index.js";
 import type { VoiceSessionCallbacks } from "../../agent/types/session.types.js";
 import type { AudioChunk } from "../../agent/types/transport.types.js";
 import { adaptPcm16SampleRate } from "./audio.js";
+import type { BrowserVoiceMediaBridge } from "./media-bridge.js";
 import { mapSessionState } from "./protocol.js";
 import type {
   ActiveBrowserSession,
@@ -11,7 +11,7 @@ import type {
 
 export interface BrowserSessionCallbackDeps {
   socket: BrowserVoiceSocket;
-  mediaHandler: BrowserMediaHandler;
+  mediaBridge: BrowserVoiceMediaBridge;
   browserSampleRate: number;
   getActiveSession: (socket: BrowserVoiceSocket) => ActiveBrowserSession | undefined;
   sendControl: (socket: BrowserVoiceSocket, message: ServerVoiceMessage) => void;
@@ -23,7 +23,7 @@ export function createBrowserSessionCallbacks(
   return {
     onAudioOutput: (chunk: AudioChunk) => {
       const sampleRate = chunk.sampleRate || deps.browserSampleRate;
-      deps.mediaHandler.handleLLMAudio({
+      void deps.mediaBridge.sendAudio({
         ...chunk,
         payload: adaptPcm16SampleRate(
           chunk.payload,
@@ -58,6 +58,7 @@ export function createBrowserSessionCallbacks(
       });
     },
     onInterrupted: () => {
+      void deps.mediaBridge.clearOutput();
       deps.sendControl(deps.socket, {
         type: "state.change",
         state: "interrupted",

@@ -25,6 +25,7 @@
     "test:infra-plan": "bun run scripts/test-infra-plan.ts",
     "test:infra-runner:bdd": "bun run scripts/test-infra-runner-bdd.ts",
     "test:llm-harness": "bun run scripts/test-llm-harness.ts",
+    "test:media-bridge-factory:bdd": "bun run scripts/test-media-bridge-factory-bdd.ts",
     "test:prompt-policy:bdd": "bun run scripts/test-prompt-policy-bdd.ts",
     "test:provider-factory:bdd": "bun run scripts/test-provider-factory-bdd.ts",
     "test:runtime-tool-authorization:bdd": "bun run scripts/test-runtime-tool-authorization-bdd.ts",

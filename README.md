@@ -80,6 +80,9 @@ Realtime provider creation is resolved through `ProviderFactoryPort`; the
 starter binds that port to OpenAI Realtime, Gemini Live, Grok Realtime, and
 cascaded provider adapters so voice orchestration does not instantiate concrete
 transports directly.
+Browser media bridge creation is resolved through `MediaBridgeFactoryPort`; the
+default browser adapter wraps `BrowserMediaHandler` behind start/stop,
+`ingestAudio`, `sendAudio`, `clearOutput`, and `onAudioToLlm`.
 
 ## Builder Flow
 
@@ -469,6 +472,7 @@ sorts, writes, and oversized page requests before your database adapter runs.
 | `pnpm test:knowledge-tool` | Check runtime knowledge tool wiring. |
 | `pnpm test:llm-harness` | Check provider-agnostic builder LLM planner, research, verifier, and resolver behavior. |
 | `pnpm test:log-redaction:bdd` | Check recursive log redaction for prompts, messages, content, child bindings, and secrets. |
+| `pnpm test:media-bridge-factory:bdd` | Check browser voice media creation and control go through `MediaBridgeFactoryPort`. |
 | `pnpm test:prompt-policy:bdd` | Check compiled prompts end with immutable server-owned safety and tool policy. |
 | `pnpm test:provider-factory:bdd` | Check voice session setup delegates realtime transport creation to `ProviderFactoryPort` and the starter factory builds supported providers. |
 | `pnpm test:runtime-tool-authorization:bdd` | Check runtime exposes only server-selected executable tools. |
@@ -665,8 +669,7 @@ It launches:
 ## Project Status
 
 This is an early clean-core SDK and starter. The Fastify adapter is a placeholder
-until the next adapter pass wires provider factories, media bridge factories,
-tools, prompts, and database adapters behind public ports. Tenant and secret
-resolution already go through `TenantResolverPort` and `SecretResolverPort`;
-the starter builder uses the provider-agnostic LLM harness for planning,
-research, and verification.
+until the next adapter pass wires tools, prompts, and database adapters behind
+public ports. Tenant, secret, provider, and browser media bridge resolution
+already go through public ports; the starter builder uses the provider-agnostic
+LLM harness for planning, research, and verification.

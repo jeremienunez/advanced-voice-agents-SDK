@@ -1,21 +1,21 @@
 # TODO - Agnostic Voice Agent SDK
 
-Current goal: add MediaBridgeFactoryPort.
+Current goal: add DbAdapterRegistry.
 
-Target commit title candidate: `test: add media bridge factory port`
+Target commit title candidate: `test: add db adapter registry`
 
 ## Active Focus
 
 ### Agent Infra / DB Harness
 
 Outcome:
-Browser media bridge creation and control should resolve through a port instead
-of voice orchestration binding directly to concrete media handlers.
+Runtime database/store adapters should resolve through a registry instead of
+serializable SDK definitions carrying implementation details.
 
 Next work:
 
-- [ ] Add `MediaBridgeFactoryPort` for start, stop, `sendAudio`,
-  `clearOutput`, and `onAudioToLlm`.
+- [ ] Add `DbAdapterRegistry` and keep adapters out of serializable SDK
+  definitions.
 
 ### Current Gates
 
@@ -42,8 +42,6 @@ Optional security/network checks:
 
 ## Architecture Backlog - Runtime Ports
 
-- [ ] Add `DbAdapterRegistry` and keep adapters out of serializable SDK
-  definitions.
 - [ ] Wire `StoreDefinition` to `DbAdapterRegistry`.
 - [ ] Add SQL/document/vector store adapters:
   - field and index mapping;
@@ -61,7 +59,6 @@ Optional security/network checks:
 - [ ] Transform `examples/packs/wine-investment` into an executable pack.
 - [ ] Add contractual tests for:
   - SDK compilation;
-  - media bridge;
   - browser protocol;
   - package exports.
 

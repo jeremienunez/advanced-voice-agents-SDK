@@ -2,13 +2,14 @@ import type {
   ClientVoiceMessage,
   ServerVoiceMessage,
 } from "../../../sdk/types/browser-voice.js";
-import {
-  createBrowserMediaHandler,
-} from "../../agent/handlers/index.js";
 import type { IVoiceSession, SessionEndReason } from "../../agent/types/session.types.js";
 import { createAgentLogger } from "../../agent/utils/index.js";
 import { adaptPcm16SampleRate, resolveSampleRate } from "./audio.js";
 import { createBrowserSessionCallbacks } from "./callbacks.js";
+import {
+  createBrowserMediaBridgeDefinition,
+  createDefaultBrowserMediaBridgeFactory,
+} from "./media-bridge.js";
 import {
   DEFAULT_BROWSER_SAMPLE_RATE,
   parseClientMessage,
@@ -99,7 +100,7 @@ export class BrowserVoiceService {
 
     const buffer = toBuffer(data);
     if (!buffer || buffer.length === 0) return;
-    activeSession.mediaHandler.handleBrowserAudio(buffer);
+    void activeSession.mediaBridge.ingestAudio(buffer);
   }
 
   private async startSession(
@@ -128,31 +129,38 @@ export class BrowserVoiceService {
     );
 
     let session: IVoiceSession | null = null;
-    const mediaHandler = createBrowserMediaHandler(
-      {
-        enableAgc: this.config.media?.enableAgc ?? true,
-        enableRnnoise: this.config.media?.enableRnnoise ?? false,
-        enableNoiseGate: this.config.media?.enableNoiseGate ?? true,
-      },
-      {
-        onAudioToBrowser: (buffer) => {
-          if (socket.readyState === WS_OPEN) socket.send(buffer);
+    const mediaBridge = (this.config.media?.bridgeFactory ??
+      createDefaultBrowserMediaBridgeFactory()).createMediaBridge({
+        definition:
+          this.config.media?.bridgeDefinition ??
+          createBrowserMediaBridgeDefinition(browserSampleRate),
+        browserSampleRate,
+        llmInputSampleRate,
+        options: {
+          config: {
+            enableAgc: this.config.media?.enableAgc ?? true,
+            enableRnnoise: this.config.media?.enableRnnoise ?? false,
+            enableNoiseGate: this.config.media?.enableNoiseGate ?? true,
+          },
+          onAudioToBrowser: (buffer) => {
+            if (socket.readyState === WS_OPEN) socket.send(buffer);
+          },
         },
-        onAudioToLLM: (chunk) => {
-          session?.handleAudio(
-            adaptPcm16SampleRate(
-              chunk.payload,
-              browserSampleRate,
-              llmInputSampleRate,
-            ),
-          );
-        },
-      },
-    );
+        metadata: { sessionId: request.sessionId, provider: request.provider },
+      });
+    mediaBridge.onAudioToLlm((chunk) => {
+      session?.handleAudio(
+        adaptPcm16SampleRate(
+          chunk.payload,
+          chunk.sampleRate || browserSampleRate,
+          llmInputSampleRate,
+        ),
+      );
+    });
 
     const callbacks = createBrowserSessionCallbacks({
       socket,
-      mediaHandler,
+      mediaBridge,
       browserSampleRate,
       getActiveSession: (activeSocket) => this.activeSessions.get(activeSocket),
       sendControl: (activeSocket, control) =>
@@ -161,13 +169,13 @@ export class BrowserVoiceService {
 
     try {
       session = await this.config.createSession(request, callbacks);
-      await mediaHandler.initRnnoise();
+      await mediaBridge.init?.();
 
       this.activeSessions.set(socket, {
         sessionId: session.sessionId,
         request,
         session,
-        mediaHandler,
+        mediaBridge,
         startedAt: Date.now(),
         messageCount: 0,
         toolCallCount: 0,
@@ -176,14 +184,14 @@ export class BrowserVoiceService {
       });
 
       await session.start();
-      mediaHandler.start();
+      await mediaBridge.start();
 
       this.sendControl(socket, {
         type: "session.started",
         sessionId: session.sessionId,
       });
     } catch (error) {
-      mediaHandler.stop();
+      await mediaBridge.stop();
       this.activeSessions.delete(socket);
       this.logger.error("Failed to start browser voice session", { error });
       this.sendControl(socket, {
@@ -224,7 +232,7 @@ export class BrowserVoiceService {
     let endedInput: BrowserVoiceSessionEndedInput | null = null;
 
     try {
-      activeSession.mediaHandler.stop();
+      await activeSession.mediaBridge.stop();
       await activeSession.session.end(reason);
       const endedAt = Date.now();
       const summary = {

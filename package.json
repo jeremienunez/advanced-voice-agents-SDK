@@ -72,6 +72,7 @@
     "test:infra-runner:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:infra-runner:bdd",
     "test:llm-harness": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:llm-harness",
     "test:log-redaction:bdd": "bun run scripts/test-log-redaction-bdd.ts",
+    "test:media-bridge-factory:bdd": "pnpm build && pnpm --filter @voiceagentsdk/starter-voip-rtc test:media-bridge-factory:bdd",
     "test:prompt-policy:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:prompt-policy:bdd",
     "test:provider-factory:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:provider-factory:bdd",
     "test:runtime-tool-authorization:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:runtime-tool-authorization:bdd",
@@ -97,7 +98,7 @@
     "audit:secrets": "bun run scripts/audit-secret-hygiene.ts",
     "audit:local-secrets": "AUDIT_LOCAL_ENV_SECRETS=1 bun run scripts/audit-secret-hygiene.ts",
     "audit:loc": "bun scripts/audit-loc.mjs",
-    "audit:solid": "pnpm audit:architecture && pnpm audit:responsibility && pnpm audit:loc && pnpm audit:secrets && pnpm audit:sdk-boundary && pnpm audit:imports && pnpm audit:tool-contracts && pnpm typecheck:sdk && pnpm typecheck:starters && pnpm test:solid-seams && pnpm test:llm-harness && pnpm test:infra-runner:bdd && pnpm test:infra-evolution-approval:bdd && pnpm test:runtime-db-credentials:bdd && pnpm test:secret-resolver:bdd && pnpm test:tenant-resolver:bdd && pnpm test:adapter-boundaries:bdd && pnpm test:temporal-worker:bdd && pnpm test:redis-memory:bdd && pnpm test:graph-memory-adapters:bdd && pnpm test:tool-contracts:bdd && pnpm test:tool-registry-adapter:bdd && pnpm test:secret-hygiene:bdd && pnpm test:log-redaction:bdd && pnpm test:debug-audio:bdd && pnpm test:prompt-policy:bdd && pnpm test:provider-factory:bdd && pnpm test:runtime-tool-authorization:bdd && pnpm test:builder-draft-ownership:bdd && pnpm test:document-ingestion:bdd && pnpm test:database-provisioning && pnpm test:rtc-e2e",
+    "audit:solid": "pnpm audit:architecture && pnpm audit:responsibility && pnpm audit:loc && pnpm audit:secrets && pnpm audit:sdk-boundary && pnpm audit:imports && pnpm audit:tool-contracts && pnpm typecheck:sdk && pnpm typecheck:starters && pnpm test:solid-seams && pnpm test:llm-harness && pnpm test:infra-runner:bdd && pnpm test:infra-evolution-approval:bdd && pnpm test:runtime-db-credentials:bdd && pnpm test:secret-resolver:bdd && pnpm test:tenant-resolver:bdd && pnpm test:adapter-boundaries:bdd && pnpm test:temporal-worker:bdd && pnpm test:redis-memory:bdd && pnpm test:graph-memory-adapters:bdd && pnpm test:tool-contracts:bdd && pnpm test:tool-registry-adapter:bdd && pnpm test:secret-hygiene:bdd && pnpm test:log-redaction:bdd && pnpm test:debug-audio:bdd && pnpm test:prompt-policy:bdd && pnpm test:provider-factory:bdd && pnpm test:media-bridge-factory:bdd && pnpm test:runtime-tool-authorization:bdd && pnpm test:builder-draft-ownership:bdd && pnpm test:document-ingestion:bdd && pnpm test:database-provisioning && pnpm test:rtc-e2e",
     "pack:dry-run": "pnpm pack --dry-run --json"
   },
   "dependencies": {

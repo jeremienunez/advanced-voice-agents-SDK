@@ -1,5 +1,41 @@
 # Changelog
 
+## test: add media bridge factory port
+
+Status: implemented locally
+Date: 2026-05-28
+
+### Intent
+
+Faire passer la creation et le controle du media bridge browser par un port
+injectable au lieu de laisser `BrowserVoiceService` instancier et piloter
+directement `BrowserMediaHandler`.
+
+### Journal
+
+- Ajout de `MediaBridgeFactoryPort`, `MediaBridgeFactoryInput` et
+  `MediaBridgePort` cote SDK.
+- Ajout de l'adapter core `createDefaultBrowserMediaBridgeFactory`, qui enveloppe
+  `BrowserMediaHandler` derriere le port.
+- `BrowserVoiceService` utilise maintenant le port pour `start`, `stop`,
+  `ingestAudio`, `sendAudio`, `clearOutput` et `onAudioToLlm`.
+- Les interruptions appellent `clearOutput` avant de publier l'etat interrupted.
+- Le starter transmet la definition SDK `browser-websocket` et accepte une
+  `mediaBridgeFactory` injectable.
+- Ajout de `pnpm test:media-bridge-factory:bdd` et integration dans
+  `audit:solid`.
+- README, TODO et changelog sont a jour.
+
+### Validation
+
+- `pnpm test:media-bridge-factory:bdd` OK
+- `pnpm typecheck:sdk` OK
+- `pnpm typecheck:starters` OK
+- `pnpm test:tenant-resolver:bdd` OK
+- `pnpm test:solid-seams` OK
+- `pnpm audit:solid` OK
+- `git diff --check` OK
+
 ## test: add provider factory port
 
 Status: implemented locally

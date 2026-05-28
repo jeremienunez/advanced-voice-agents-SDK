@@ -1,19 +1,21 @@
 import type {
   VoiceProvider,
 } from "../../../sdk/types/browser-voice.js";
+import type { MediaBridgeDefinition } from "../../../sdk/types.js";
 import type {
   LearningJobStatus,
   LearningToolCallRecord,
   LearningTranscriptEntry,
 } from "../../../sdk/types.js";
 import type {
-  BrowserMediaHandler,
-} from "../../agent/handlers/index.js";
-import type {
   IVoiceSession,
   SessionSummary,
   VoiceSessionCallbacks,
 } from "../../agent/types/session.types.js";
+import type {
+  BrowserVoiceMediaBridge,
+  BrowserVoiceMediaBridgeFactory,
+} from "./media-bridge.js";
 
 export interface BrowserVoiceSocket {
   readonly readyState: number;
@@ -60,6 +62,8 @@ export interface BrowserVoiceServiceConfig {
     emitStatus: (status: LearningJobStatus) => void,
   ) => Promise<void> | void;
   media?: {
+    bridgeDefinition?: MediaBridgeDefinition;
+    bridgeFactory?: BrowserVoiceMediaBridgeFactory;
     enableAgc?: boolean;
     enableRnnoise?: boolean;
     enableNoiseGate?: boolean;
@@ -80,7 +84,7 @@ export interface ActiveBrowserSession {
   sessionId: string;
   request: BrowserVoiceSessionRequest;
   session: IVoiceSession;
-  mediaHandler: BrowserMediaHandler;
+  mediaBridge: BrowserVoiceMediaBridge;
   startedAt: number;
   messageCount: number;
   toolCallCount: number;

@@ -7,6 +7,10 @@ export function createVoiceMediaConfig(
   options: StarterVoiceServiceOptions,
 ): BrowserVoiceServiceConfig["media"] {
   return {
+    bridgeDefinition: options.sdk.definition.mediaBridges.find((bridge) =>
+      bridge.kind === "browser-websocket"
+    ),
+    bridgeFactory: options.mediaBridgeFactory,
     enableAgc: true,
     enableNoiseGate: true,
     enableRnnoise: false,
