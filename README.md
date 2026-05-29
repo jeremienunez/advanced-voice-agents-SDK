@@ -26,6 +26,32 @@ pnpm dev:voip-rtc
 
 ---
 
+## Voice Agent Studio
+
+The VOIP RTC starter includes an advanced, visual web-based management suite to run, build, and audit your voice agents from a single console.
+
+### Command Center
+The central operational dashboard to launch quick voice tests, monitor environment health, and track recent agent compilation and learning histories.
+![Command Center](docs/screenshots/command_center.png)
+
+### Guided Agent Builder
+A step-by-step compiler interface that walks you through defining agent identity, compiling system prompts, structuring pgvector database tables, and hooking executable tools.
+![Agent Builder](docs/screenshots/agent_builder.png)
+
+### Agent Library
+Browse, search, and manage your compiled agents or active drafts. Supports one-click rollbacks to previous versions and displays detailed system logs.
+![Agent Library](docs/screenshots/agent_library.png)
+
+### Realtime RTC Lab
+An interactive testing playground. Connect to your local voice server, check your microphone levels, and inspect duplex transcripts and tool executions in real time.
+![RTC Lab](docs/screenshots/rtc_lab.png)
+
+### Onboarding & Environment Health
+Guided configuration tool to verify local CLI engines (Docker, Kubernetes, Terraform) and securely save LLM keys and vector credentials.
+![Onboarding & Environment Setup](docs/screenshots/onboarding_environment.png)
+
+---
+
 ## Core Capabilities
 
 *   **Declarative Agent SDK**: Define agents, prompt priority stacks, tool specifications, model providers, and vector store adapters via a typed fluent API.
