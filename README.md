@@ -1,45 +1,47 @@
-# 🎙️ Voice Agent SDK
+# Voice Agent SDK
 
-> **Provider-pluggable SDK** for building production-ready, realtime conversational voice agents. Armed with declarative prompts, tools, knowledge bases, safe repositories, browser audio bridges, and advanced post-session learning orchestration.
+> **Provider-pluggable SDK** for building production-ready, low-latency conversational voice agents. Engineered with declarative prompts, secure tool execution, pgvector-backed knowledge bases, safe repository patterns, and background learning orchestration.
 
-In plain English: This SDK turns **"make me an AI that talks"** into a structured, production-grade voice agent. It grounds your model with custom tools, retrieval, safety guardrails, and persistent memory, preventing it from confidently hallucinating its way into production.
+In plain English: This framework turns **"make me an AI that talks"** into a structured, production-grade agent. By declaring explicit intent, boundaries, tools, and vector retrieval upfront, it prevents models from confidently hallucinating their way into your production systems.
 
 ---
 
-## ⚡ Quick Start (Démarrage Rapide)
+## Quick Start
 
-Get your voice agent up and running in **under 30 seconds**:
+Get the local development starter up and running in **under 30 seconds**:
 
 ```bash
-# 1. Install dependencies
+# 1. Install workspace dependencies
 pnpm install
 
-# 2. Setup your local environment
+# 2. Configure your local environment
 cp starters/voip-rtc/.env.example starters/voip-rtc/.env
 
-# 3. Spin up the VOIP RTC local starter
+# 3. Spin up the Bun server and Vite/React frontend
 pnpm dev:voip-rtc
 ```
 
-🚀 **Open your browser at**: [http://127.0.0.1:5177](http://127.0.0.1:5177) (or `http://localhost:5177`)
-*Note: The backend voice server runs on `http://127.0.0.1:8787` by default.*
+*   **Application UI**: [http://127.0.0.1:5177](http://127.0.0.1:5177) (or `http://localhost:5177`)
+*   **Voice Backend**: Runs on `http://127.0.0.1:8787` by default.
 
 ---
 
-## 💎 What You Get (Fonctionnalités)
+## Core Capabilities
 
-*   **Declarative Agent SDK**: Define agents, prompt priorities, tools, providers, media bridges, stores, plans, and domain packs cleanly.
-*   **Realtime Voice Orchestrator**: High-performance server runtime managing provider connections, live PCM16 audio streams, state machines, and active browser WebSocket sessions.
-*   **Browser Audio Client**: Lightweight client for microphone capture, playback, WebSocket control events, live mute states, transcripts, and audio level meters.
-*   **VOIP RTC Starter**: A full Bun + React/Vite project featuring Gemini Live, OpenAI Realtime, pgvector knowledge bases, and visual builder tools.
-*   **Post-Session Learning Loop**: Queue async jobs after RTC shutdown to safely persist memories (Redis TTL / Graph), write audits, and compile optimized agent drafts.
-*   **Safe Repositories**: Data safety layers enforcing tenant/user scopes, allowed operations, filter/sort rules, and strict paging limits before query execution.
+*   **Declarative Agent SDK**: Define agents, prompt priority stacks, tool specifications, model providers, and vector store adapters via a typed fluent API.
+*   **Low-Latency Voice Orchestrator**: A high-performance server runtime managing provider connections (WebSockets/WebRTC), raw duplex PCM16 audio streams, tool executions, and client websocket sessions.
+*   **Browser Audio Client**: Lightweight client SDK that abstracts microphone capture, speaker playback queues, live volume meter calculations, and websocket connection lifecycles.
+*   **Post-Session Learning Loop**: Safe, decoupled background task queue that triggers upon call completion to extract user facts, update graphs, and compile versioned drafts.
+*   **Safe Repositories**: A strict data access layer that enforces tenant isolation, allowed operations, filterable fields, and paging limits before queries reach physical databases.
+*   **SOLID Quality Gates**: Strict architectural validation scripts that enforce clean import boundaries, single responsibility rules, and code ceilings at compile time.
 
 ---
 
-## 🏗️ Architecture & Conceptual Flow
+## Architecture and Conceptual Flow
 
 ### Global Data Flow
+
+The SDK separates frontend capture, server-side orchestration, LLM provider communication, and knowledge retrieval into clear decoupled layers:
 
 ```mermaid
 flowchart TD
@@ -60,7 +62,9 @@ flowchart TD
   KnowledgeTool --> KnowledgeStore[Postgres FTS + pgvector]
 ```
 
-### Mental Model
+### Architectural Pillars
+
+The SDK operates under a strict port-and-adapter architecture (Hexagonal Architecture):
 
 ```mermaid
 flowchart LR
@@ -72,25 +76,27 @@ flowchart LR
 ```
 
 > [!NOTE]
-> The core SDK defines contracts. Your consuming application binds real adapters via ports: authentication, secret management, persistence engines, and external observability.
+> The core SDK defines compile-time contracts. Consuming applications bind physical adapters to abstract ports—such as authentication, secret resolvers, database drivers, and metrics telemetry—during initialization.
 
 ---
 
-## 🗺️ Repository Map
+## Repository Map
 
-| Path | Role / Content |
+| Workspace Directory | Architectural Role |
 | :--- | :--- |
-| **`src/sdk`** | Declarative SDK types, builders, compiler, ports, store, diagnostics. |
-| **`src/server`** | Server runtime: live sessions, transports, media handlers, providers. |
-| **`src/client/browser`** | Browser WebSocket and audio session client SDK. |
-| **`starters/voip-rtc`** | Reusable Bun + React/Vite starter for RTC voice projects. |
-| **`scripts`** | Quality gates, local testing harnesses, and runtime tool checks. |
+| **`src/sdk`** | Declarative contract builders, schemas, validation compilers, and public ports. |
+| **`src/server`** | Duplex audio orchestrator, model provider adapters, and session lifecycles. |
+| **`src/client/browser`** | Web-native client wrapper for microphone streams, speaker queues, and websocket events. |
+| **`starters/voip-rtc`** | A fully wired React + Vite + Bun template showcasing gemini-live, open-realtime, and pgvector RAG. |
+| **`scripts`** | BDD test runners, static analysis checkers, and architectural quality audits. |
 
 ---
 
-## 🔄 Core Lifecycles
+## Core Lifecycles
 
-### 1. Agent Builder Flow
+### 1. Agent Builder Workflow
+
+Agents are created, planned, and compiled through a secure pipeline. Identity intent and raw documents are parsed, structured, and compiled into non-executable static schemas.
 
 ```mermaid
 sequenceDiagram
@@ -114,9 +120,11 @@ sequenceDiagram
 ```
 
 > [!TIP]
-> **No Magic Commands**: The user-facing "goal" is cleanly modeled as `identity.intent`. There is no ad-hoc `/set goal` command in the core runtime.
+> **No Magic Prompts**: The user's ultimate goal is modeled directly as `identity.intent`. The runtime does not use fragile prompt injections or arbitrary goals; every constraint is structured.
 
-### 2. Runtime Voice Session Flow
+### 2. Runtime Duplex Streaming
+
+Duplex PCM16 audio is captured, chunked, and streamed through the server runtime. The server handles tool execution interrupts, buffers audio, and submits execution results back to the model seamlessly.
 
 ```mermaid
 sequenceDiagram
@@ -157,162 +165,214 @@ sequenceDiagram
 
 ---
 
-## 🎛️ Reference & Cheat Sheets (Expandable)
+## Advanced Cognitive Systems
+
+This repository contains sophisticated systems that orchestrate model training (teaching), autonomous research, vector database provisioning, and post-session long-term memory synthesis.
+
+### 1. Adaptive LLM Harness & Multi-Agent Teaching
+
+Building reliable agent personalities requires cross-vendor model coordination. Rather than locking prompt engineering into a single LLM vendor, the starter delegates agent creation tasks (planning, researching, and teaching) to a role-aware catalog:
+
+```mermaid
+flowchart TD
+  Routes[Builder routes] --> Task[LlmTask]
+  Task --> Resolver[AdaptiveLlmModelResolver]
+  Resolver --> Catalog[Role-aware model catalog]
+  Catalog --> Runner[BuilderLlmTaskRunner]
+  Runner --> OpenAICompat[OpenAI-compatible providers]
+  Runner --> Gemini[Gemini generateContent]
+  OpenAICompat --> DeepSeek[DeepSeek]
+  OpenAICompat --> Qwen[Qwen]
+  OpenAICompat --> Kimi[Kimi]
+```
+
+*   **Builder Planner**: Formulates prompt structures, database plans, and final system prompts using reasoning models (DeepSeek/Qwen/Gemini).
+*   **Autonomous Researcher**: Synthesizes background data from untrusted documents or web queries within strict token budgets.
+*   **Verifier (Teacher Pass)**: Reviews generated schemas, checks safety constraints, tests tool execution paths, and runs follow-up corrections to ensure zero prompt drift.
+
+### 2. Multi-Tier Long-Term Memory (Temporal & Redis)
+
+Post-session evolution occurs in the background via a structured two-tier memory architecture managed by **Temporal** workflow engines and **Redis** caches:
+
+*   **Global Agent Memory**: Aggregates persistent facts, corrected intent models, and baseline schemas across all sessions.
+*   **User-Scoped Personalization**: Keeps track of ephemeral facts, preferences, and session context. This tier leverages Redis TTL layers for instant access, falling back to Neo4j/Memgraph adapters for complex relational memory graph storage.
+
+```
++---------------------------------------------------------------------------------+
+|                         Post-Session Learning Pipeline                          |
++---------------------------------------------------------------------------------+
+|  1. Capture Call       2. Trigger temporal    3. Update Redis     4. Evolve     |
+|     Transcript  ---->     Workflow Engine  ->    TTL & Cypher  ->    Agent      |
+|     & Metrics             (Queue Async Job)      Graph memory        Definitions|
++---------------------------------------------------------------------------------+
+```
+
+### 3. Intent-Driven RAG & Infrastructure Planning
+
+When a user provides a raw text goal (`identity.intent`) and associated documents, the builder dynamically analyzes the computational requirements to compile a custom **Agent Infrastructure Plan** next to database indexing models:
+
+*   **Source of Truth**: Postgres and `pgvector` store indexed documents, chunks, and handle standard semantic RAG queries.
+*   **Optional Engine Provisioning**: Based on isolated environments or intent complexity, the plan provisions Neo4j/Memgraph graph connections or external Milvus vector databases.
+*   **Infrastructure-as-Code (IaC)**: The engine compiles actionableIaC bundles (portable JSON configurations, OpenTofu schemas, local K3s/Kubernetes manifests) allowing automated provisioning without locking agent logic into specific cloud providers.
+
+---
+
+## Technical Reference and Cheat Sheets
 
 To keep this guide concise, the comprehensive technical tables are grouped below. Click on any section to expand details.
 
 <br>
 
 <details>
-<summary><b>🛠️ Full Command Cheat Sheet (Audits, Tests, & Tasks)</b></summary>
+<summary><b>Command Cheat Sheet (Audits, Tests, & Tasks)</b></summary>
 <br>
 
-### Build & Dev
-| Command | Purpose |
-| --- | --- |
-| `pnpm build` | Compile the SDK to `dist`. |
-| `pnpm typecheck:sdk` | Typecheck core SDK and runtime. |
+### Build and Development
+| Command | Target Action |
+| :--- | :--- |
+| `pnpm build` | Compiles the TypeScript SDK codebase into the `dist` directory. |
+| `pnpm typecheck:sdk` | Typechecks the core SDK and core runtime libraries. |
 | `pnpm typecheck:examples` | Reserved no-op until standalone examples are reintroduced. |
-| `pnpm typecheck:starters` | Build SDK and typecheck the VOIP RTC starter. |
-| `pnpm dev:voip-rtc` | Run the reusable RTC voice starter. |
-| `pnpm pack:dry-run` | Inspect package contents. |
+| `pnpm typecheck:starters` | Compiles the core SDK and typechecks the React/Vite VOIP starter. |
+| `pnpm dev:voip-rtc` | Launches the local development starter (Bun WebSocket server + React frontend). |
+| `pnpm pack:dry-run` | Audits the exported package contents prior to distribution. |
 
 ### SOLID Quality Gates & Audits
-| Command | Purpose |
-| --- | --- |
-| `pnpm audit:solid` | **The Ultimate Gate**: Runs all architecture, responsibility, LOC, boundary, and BDD/E2E test suites together. |
-| `pnpm audit:architecture` | Enforces Dependency Cruiser SOA/SOLID import boundaries (detects cycles, leaks). |
-| `pnpm audit:responsibility` | Enforces SRP/LSP clean-code responsibility rules (max 5 exports per file, 1 JSX component per file, pure model/view domains, barrel-only rules for `index.ts` files). |
-| `pnpm audit:secrets` | Scans committed files for leaked keys/tokens safely. |
-| `pnpm audit:local-secrets` | Opt-in scan of ignored local `.env` files. |
-| `pnpm audit:sdk-boundary` | Verifies core SDK boundary rules. |
-| `pnpm audit:imports` | Audits core import boundaries. |
-| `pnpm audit:tool-contracts` | Verifies compiled builder tools and source-level runtime binding invariants. |
-| `pnpm audit:loc` | Enforces the strict handwritten file LOC ceiling. |
+| Command | Target Action |
+| :--- | :--- |
+| `pnpm audit:solid` | **The Master Gate**: Executes all static cruiser rules, SRP checks, and full BDD test suites. |
+| `pnpm audit:architecture` | Uses Dependency Cruiser to prevent import cycles, boundary leaks, or package coupling. |
+| `pnpm audit:responsibility` | Verifies Single Responsibility Rules (max 5 exports per file, 1 component per TSX leaf). |
+| `pnpm audit:secrets` | Scans workspace source files for accidentally hardcoded credentials or API keys. |
+| `pnpm audit:local-secrets` | Scans local ignored `.env` config templates for rotating security parameters. |
+| `pnpm audit:sdk-boundary` | Enforces structural separation between compiler interfaces and server orchestrators. |
+| `pnpm audit:imports` | Verifies import paths across SDK layers. |
+| `pnpm audit:tool-contracts` | Catches compiled agents using tools without verified runtime handler mappings. |
+| `pnpm audit:loc` | Enforces the strict hand-written source code Line-of-Code limits. |
 
-### Core Port & Contract BDD Tests
-| Command | Purpose |
-| --- | --- |
-| `pnpm test:solid-seams` | Runs BDD seam tests for HTTP guards, voice factory, learning, and infra validations. |
-| `pnpm test:secret-hygiene:bdd` | Checks secret audit reporting is redacted and local env scanning is explicit. |
-| `pnpm test:db-adapter-registry:bdd` | Verifies stores carry adapter references and resolve correctly through the registry. |
-| `pnpm test:store-adapter-contracts:bdd` | Checks SQL/document/vector store adapter mappings, pagination, and soft deletes. |
-| `pnpm test:runtime-db-credentials:bdd` | Checks Postgres access resolves per-agent credential refs instead of shared DB URLs. |
-| `pnpm test:secret-resolver:bdd` | Checks realtime providers, builder LLM profiles, and runtime embeddings resolve API keys through `SecretResolverPort`. |
-| `pnpm test:tenant-resolver:bdd` | Checks voice media/session setup uses `TenantResolverPort` for variables and scopes. |
-| `pnpm test:prompt-compiler-port:bdd` | Checks compiled prompt lookup, render fallbacks, and knowledge retrieval settings. |
-| `pnpm test:prompt-policy:bdd` | Verifies compiled prompts end with immutable server-owned safety rules. |
-| `pnpm test:memory-store-port:bdd` | Checks memory flows (local/Redis) resolved via `MemoryStorePort`. |
-| `pnpm test:media-bridge-factory:bdd` | Checks browser voice media setup and controls. |
-| `pnpm test:event-sink-logger-port:bdd` | Verifies live telemetry streams through redacting injectable ports. |
-| `pnpm test:fastify-voice-adapter:bdd` | Checks that Fastify-like adapters mount health, status, and WS paths correctly. |
+### Port, Adapter & Integration BDD Tests
+| Command | Target Action |
+| :--- | :--- |
+| `pnpm test:solid-seams` | Checks critical abstraction boundaries for HTTP guards, factory engines, and validations. |
+| `pnpm test:secret-hygiene:bdd` | Verifies secret audit reporting is properly masked and redacted. |
+| `pnpm test:db-adapter-registry:bdd` | Confirms store contracts carry zero runtime driver opinions, mapping only to adapter keys. |
+| `pnpm test:store-adapter-contracts:bdd` | Asserts physical database operations (joins, paging, soft-deletes) reside purely in adapter layers. |
+| `pnpm test:runtime-db-credentials:bdd` | Ensures agents query databases via specific schemas, isolating root databases. |
+| `pnpm test:secret-resolver:bdd` | Verifies API keys are securely resolved using abstract ports rather than reading `process.env`. |
+| `pnpm test:tenant-resolver:bdd` | Checks scoped parameter loading (limit ceilings, provider routes, prompt context) by tenant ID. |
+| `pnpm test:prompt-compiler-port:bdd` | Verifies compile-time static schemas resolve into valid instructions at runtime. |
+| `pnpm test:prompt-policy:bdd` | Ensures final system prompts contain immutable validation instructions. |
+| `pnpm test:memory-store-port:bdd` | Validates in-memory and Redis persistence behaviors inside the voice sessions. |
+| `pnpm test:media-bridge-factory:bdd` | Validates PCM streaming triggers and volume meters across the browser layer. |
+| `pnpm test:event-sink-logger-port:bdd` | Verifies internal session logging redacts sensitive API keys and personal data. |
+| `pnpm test:fastify-voice-adapter:bdd` | Asserts Fastify and HTTP templates configure paths and WebSocket handshakes cleanly. |
 | `pnpm test:tool-contracts:bdd` | Verifies executable tool definitions remain separate from serializable manifests. |
-| `pnpm test:tool-registry-adapter:bdd` | Verifies tool resolution flows through `ToolRegistryAdapterPort`. |
-| `pnpm test:runtime-tool-authorization:bdd` | Checks that the runtime exposes *only* server-validated executable tools. |
-| `pnpm test:builder-draft-ownership:bdd` | Verifies builder routes reject loading drafts belonging to different owners. |
-| `pnpm test:document-ingestion:bdd` | Checks parser limits, file upload boundaries, timeouts, and IP quotas. |
-| `pnpm test:database-provisioning` | Runs database provisioner checks against safe pgvector templates and malicious SQL inputs. |
+| `pnpm test:tool-registry-adapter:bdd` | Validates runtime tool execution maps to registered client/server actions. |
+| `pnpm test:runtime-tool-authorization:bdd` | Asserts that agents can only execute tools explicitly allowlisted by their current schema. |
+| `pnpm test:builder-draft-ownership:bdd` | Confirms builder routes restrict draft modifications to authenticated authors only. |
+| `pnpm test:document-ingestion:bdd` | Enforces file ingestion boundaries, upload types, parsing limits, and IP rate limits. |
+| `pnpm test:database-provisioning` | Validates sql template generation against code injection or unauthorized permissions. |
 | `pnpm test:adapter-boundaries:bdd` | Checks Milvus/graph adapter ownership boundaries and promotion requirements. |
-| `pnpm test:temporal-worker:bdd` | Verifies post-session learning dispatches asynchronously to Temporal workers. |
-| `pnpm test:redis-memory:bdd` | Checks the Redis learning memory adapter against an ephemeral container for TTL/scope. |
+| `pnpm test:temporal-worker:bdd` | Tests async background job handoff to Temporal queues. |
+| `pnpm test:redis-memory:bdd` | Validates temporal learned data persistence across Redis TTL sessions. |
 | `pnpm test:graph-memory-adapters:bdd` | Checks Bolt-compatible Cypher (Neo4j/Memgraph) graph memory adapters. |
-| `pnpm test:infra-evolution-approval:bdd` | Verifies dangerous/destructive infrastructure changes remain pending until approved. |
-| `pnpm test:infra-runner:bdd` | Checks OpenTofu/cloud-init runner scopes and execution. |
-| `pnpm test:learning` / `:learning:bdd` | Verifies post-session background knowledge compilation and facts extraction. |
-| `pnpm test:knowledge-tool` | Checks runtime knowledge tool injection. |
-| `pnpm test:llm-harness` | Checks adaptive builder model resolver, planner, research, and validation workflows. |
-| `pnpm test:debug-audio:bdd` | Verifies debug dumps are secured (0700/0600 permissions, auto-cleanup). |
-| `pnpm test:runtime-tool-call` | Checks basic runtime tool invoking. |
-| `pnpm test:rtc-e2e` | Runs a complete, end-to-end WebSocket voice communication test. |
+| `pnpm test:infra-evolution-approval:bdd` | Ensures cloud or destructive network provisioning changes require manual confirmation. |
+| `pnpm test:infra-runner:bdd` | Validates variables and execution scopes for OpenTofu / Infrastructure-as-Code scripts. |
+| `pnpm test:learning` / `:learning:bdd` | Asserts background topic analysis, fact extraction, and agent drafting work correctly. |
+| `pnpm test:knowledge-tool` | Tests pgvector search injection during conversation sessions. |
+| `pnpm test:llm-harness` | Asserts builder model resolver, planner, research, and validation workflows function correctly. |
+| `pnpm test:debug-audio:bdd` | Verifies local audio dump safety policies (0700/0600 folder permissions). |
+| `pnpm test:runtime-tool-call` | Evaluates functional tool calling protocols. |
+| `pnpm test:rtc-e2e` | Runs an end-to-end WebSocket voice communication test. |
 
 </details>
 
 <details>
-<summary><b>🌐 Starter REST API Routes</b></summary>
+<summary><b>Starter REST API Routes</b></summary>
 <br>
 
-### System & Voice
-*   `GET /health` : Server status, health check, and live active session count.
-*   `GET /config` : Public runtime provider and audio channel configurations.
-*   `GET /voice/ws` : Upgrades incoming connection to the browser real-time PCM WebSocket bridge.
+### System & Telemetry Routes
+*   `GET /health` : Returns runtime health metrics and total live active call count.
+*   `GET /config` : Displays public voice configurations, active media channels, and supported stream formats.
+*   `GET /voice/ws` : Handles browser duplex WebSocket upgrades (PCM16 protocol).
 
-### Onboarding & Infrastructure
-*   `GET /builder/onboarding` : Displays dependency environment checks and redacted setup variables.
-*   `POST /builder/onboarding/env` : Safely persists allowlisted onboarding keys directly to `.env.local`.
+### Installation & Provisioning
+*   `GET /builder/onboarding` : Evaluates local prerequisites (Docker, CLI tools) and lists redacted setup metrics.
+*   `POST /builder/onboarding/env` : Persists allowlisted builder key values directly into `.env.local`.
 *   `POST /builder/onboarding/infra/:action` : Controls active deployment infrastructure. Actions: `plan`, `apply`, `status`, `destroy`.
 
-### Agent & Draft Operations
-*   `GET /builder/session` : Inspects the compiled builder workflow session.
-*   `POST /builder/session` : Triggers/activates an existing compiled draft by ID.
-*   `GET /builder/agents` : Lists all compiled/draft versions inside the Agent Bank.
-*   `GET /builder/drafts/:draftId` : Returns detailed properties of a specific persisted draft.
+### Agent Directory
+*   `GET /builder/session` : Inspects the currently active builder session state.
+*   `POST /builder/session` : Deploys and compiles an existing draft agent schema into the voice runtime.
+*   `GET /builder/agents` : Lists all compiled versions and pending schemas in the local repository database.
+*   `GET /builder/drafts/:draftId` : Returns configuration values for a specific saved workspace draft.
 
-### Builder LLM Workflow & Planning
-*   `POST /builder/prompt-plan` : Starts the loop. Composes initial Prompt Plan from identity and raw intent.
-*   `POST /builder/prompt-clarifications` : Merges user-answered questions back into the planning context.
-*   `POST /builder/ingest-document` : Safe upload & chunking gateway for external files.
+### Agent Compiler Pipeline
+*   `POST /builder/prompt-plan` : Starts the agent generation loop, mapping intent to structural prompt blueprints.
+*   `POST /builder/prompt-clarifications` : Merges user-supplied answers back into the planning context.
+*   `POST /builder/ingest-document` : Ingests, parses, and segments PDF/Word/Excel documents into raw chunks.
 *   `POST /builder/run-research` : Runs budget-constrained web/knowledge research to improve definitions.
-*   `POST /builder/autonomous-knowledge` : Runs research, creates plans, provisions databases, and chunks knowledge autonomously.
-*   `POST /builder/knowledge-plan` : Evaluates chunks, indexing settings, and RAG strategy.
-*   `POST /builder/database-plan` : Designs safe Postgres database tables and pgvector definitions.
-*   `POST /builder/apply-database` : Provisions the pgvector SQL template into the physical instance.
-*   `POST /builder/compile-knowledge` : Generates text embeddings and inserts chunks into the active vector store.
-*   `POST /builder/compile-agent` : Synthesizes the finalized voice prompt, registers safe tools, and publishes the active runnable artifact.
+*   `POST /builder/autonomous-knowledge` : Runs research, plans indexing schemes, provisions databases, and chunks text autonomously.
+*   `POST /builder/knowledge-plan` : Evaluates chunk sizes, overlap ratios, and retrieval strategies.
+*   `POST /builder/database-plan` : Generates relational schemas and pgvector indexes based on user data types.
+*   `POST /builder/apply-database` : Executes the generated schema on the target database schema context.
+*   `POST /builder/compile-knowledge` : Generates vector embeddings and indexes chunks in the pgvector backend.
+*   `POST /builder/compile-agent` : Merges instructions, hooks safe actions, generates models, and outputs a runnable compiled artifact.
 
 </details>
 
 <details>
-<summary><b>⚙️ Environment Variables (Env Cheat Sheet)</b></summary>
+<summary><b>Environment Variables (Env Cheat Sheet)</b></summary>
 <br>
 
 ### 1. Realtime Streaming Providers (Gemini / OpenAI)
-*   `DEFAULT_REALTIME_PROVIDER` : Choose `gemini` (default) or `openai` for live audio streaming.
-*   `GEMINI_API_KEY` : API Token for Gemini Realtime/Live services.
-*   `GEMINI_REALTIME_MODEL` : Live model name (default: `gemini-3.1-flash-live-preview`).
-*   `GEMINI_REALTIME_VOICE` : Selected voice model name (e.g., `Puck`, `Charon`).
-*   `OPENAI_API_KEY` : API Token for OpenAI Realtime services.
-*   `OPENAI_REALTIME_MODEL` : OpenAI audio model name (default: `gpt-realtime-1.5`).
-*   `OPENAI_REALTIME_VOICE` : Selected OpenAI voice name (e.g., `marin`).
-*   `VOICE_DEBUG_AUDIO` : Set to `local` to save audio inputs/outputs for debugging (automatically disabled in production).
-*   `VOICE_DEBUG_AUDIO_DIR` : Path to dump raw audio streams (e.g. `/tmp/voice-debug`). Files are saved with `0600` permissions.
+*   `DEFAULT_REALTIME_PROVIDER` : Target realtime provider (`gemini` or `openai`).
+*   `GEMINI_API_KEY` : API Token for Google Gemini Live/Realtime.
+*   `GEMINI_REALTIME_MODEL` : Gemini live model (default: `gemini-3.1-flash-live-preview`).
+*   `GEMINI_REALTIME_VOICE` : Audio voice setting (e.g., `Puck`).
+*   `OPENAI_API_KEY` : API Token for OpenAI Realtime.
+*   `OPENAI_REALTIME_MODEL` : Realtime audio model (default: `gpt-realtime-1.5`).
+*   `OPENAI_REALTIME_VOICE` : Audio voice selection (e.g., `marin`).
+*   `VOICE_DEBUG_AUDIO` : Set to `local` to dump raw duplex PCM files (requires manual activation, disabled in production).
+*   `VOICE_DEBUG_AUDIO_DIR` : Target directory for local audio logs (logs use `0600` permissions, directories use `0700`).
 
 ### 2. Builder LLM Harness (DeepSeek / Qwen / Kimi / Gemini)
-*   `BUILDER_PROMPT_PROVIDER` : Model provider used for prompt-building (`deepseek`, `qwen`, `kimi`, `gemini`).
-*   `DEEPSEEK_API_KEY` / `DEEPSEEK_MODEL` / `DEEPSEEK_BASE_URL` : Token, model, and endpoint URL for DeepSeek.
-*   `QWEN_API_KEY` / `QWEN_MODEL` / `QWEN_BASE_URL` : Token, model, and endpoint URL for Qwen (DashScope).
-*   `KIMI_API_KEY` / `KIMI_MODEL` : Token and model name for Kimi.
-*   `GEMINI_TEXT_MODEL` : Non-realtime text model used by Gemini for builder tasks (default: `gemini-3.5-flash`).
+*   `BUILDER_PROMPT_PROVIDER` : Selected compiler LLM provider (`deepseek`, `qwen`, `kimi`, `gemini`).
+*   `DEEPSEEK_API_KEY` / `DEEPSEEK_MODEL` / `DEEPSEEK_BASE_URL` : Custom endpoint configurations for DeepSeek models.
+*   `QWEN_API_KEY` / `QWEN_MODEL` / `QWEN_BASE_URL` : Custom endpoint configurations for Qwen models.
+*   `KIMI_API_KEY` / `KIMI_MODEL` : API configurations for Kimi models.
+*   `GEMINI_TEXT_MODEL` : Non-realtime model used for prompt analysis and checks (default: `gemini-3.5-flash`).
 
 ### 3. Knowledge Base & Vector Engines (Voyage / Milvus)
-*   `VOYAGE_API_KEY` : API Token for Voyage AI embeddings.
+*   `VOYAGE_API_KEY` : Token for Voyage AI text embeddings.
 *   `VOYAGE_EMBEDDING_MODEL` : Selected Voyage model (default: `voyage-4-large`).
-*   `VOYAGE_EMBEDDING_DIMENSIONS` : Vector dimension size (default: `1024`).
-*   `DATABASE_URL` : Root Postgres URL used for schemas, vector embeddings, and tenant storage.
-*   `BUILDER_VECTOR_BACKEND` : Set to `milvus` to route RAG queries to Milvus instead of standard pgvector.
-*   `MILVUS_URL` / `MILVUS_ADDRESS` : Milvus connection details.
+*   `VOYAGE_EMBEDDING_DIMENSIONS` : Embedding dimensional size (default: `1024`).
+*   `DATABASE_URL` : Primary Postgres instance used for schemas, vectors, and accounts.
+*   `BUILDER_VECTOR_BACKEND` : Set to `milvus` to use external Milvus clusters instead of pgvector.
+*   `MILVUS_URL` / `MILVUS_ADDRESS` : Milvus vector cluster address.
 
 ### 4. Background Learning & State Memory (Temporal / Redis / Neo4j)
-*   `REDIS_URL` : Redis address used for active caching, sessions, and Temporal post-session queues.
-*   `AGENT_RUNTIME_MEMORY_DRIVER` : Set to `redis` to share runtime session contexts across containers (default: `local`).
-*   `AGENT_LEARNING_ENABLED` : Enable background analysis and fact compilation on session shutdown (default: `true`).
-*   `AGENT_LEARNING_WORKFLOW_DRIVER` : Set to `temporal` to offload learning workflows to microservices (default: `local`).
-*   `AGENT_LEARNING_MEMORY_DRIVER` : Storage engine for compiled facts (`local` or `redis`).
-*   `TEMPORAL_ADDRESS` / `TEMPORAL_NAMESPACE` / `TEMPORAL_TASK_QUEUE` : Settings for the background Temporal orchestration worker.
-*   `NEO4J_URI` / `MEMGRAPH_URI` / `GRAPH_DATABASE_URL` : Target graph endpoints for structural memory extraction.
+*   `REDIS_URL` : Primary Redis cache database.
+*   `AGENT_RUNTIME_MEMORY_DRIVER` : Set to `redis` to share conversation state contexts horizontally (default: `local`).
+*   `AGENT_LEARNING_ENABLED` : Triggers background analytics and version updates upon call completion (default: `true`).
+*   `AGENT_LEARNING_WORKFLOW_DRIVER` : Set to `temporal` to offload background learning to microservices (default: `local`).
+*   `AGENT_LEARNING_MEMORY_DRIVER` : Storage system for factual memories (`local` or `redis`).
+*   `TEMPORAL_ADDRESS` / `TEMPORAL_NAMESPACE` / `TEMPORAL_TASK_QUEUE` : Connection targets for Temporal workflows.
+*   `NEO4J_URI` / `MEMGRAPH_URI` / `GRAPH_DATABASE_URL` : Target graph endpoints for relational memory compilation.
 
 ### 5. Infrastructure IaC & Onboarding
 *   `BUILDER_INFRA_COMPUTE_TARGET` : Physical deployment type (`local`, `vm`, `k3s`, `kubernetes`, `managed`).
-*   `BUILDER_INFRA_ISOLATION` : Workload boundary schema (`namespace`, `dedicated_database`, `dedicated_vm`).
+*   `BUILDER_INFRA_ISOLATION` : Workload separation strategy (`namespace`, `dedicated_database`, `dedicated_vm`).
 *   `BUILDER_INFRA_PROVISIONING_MODE` : Deployment logic (`server_template`, `iac_plan`, `manual`, `external`).
-*   `BUILDER_INFRA_APPLY_DRIVER` : Orchestrator script (`dev-local`, `external` [OpenTofu], `k3s-docker`, `kubectl`).
+*   `BUILDER_INFRA_APPLY_DRIVER` : Provisioning executor (`dev-local`, `external` [OpenTofu], `k3s-docker`, `kubectl`).
 
 </details>
 
 ---
 
-## 🔌 Public Export Cheat Sheet
+## Public Export Cheat Sheet
 
-Integrating the SDK into your own TypeScript application? Use these target entrypoints:
+When integrating the SDK into custom applications, import components through dedicated entrypoints:
 
 ```ts
 import { ... } from "@voiceagentsdk/core";                 // Main facade SDK export
@@ -326,7 +386,7 @@ import { ... } from "@voiceagentsdk/core/client/browser";  // Browser PCM record
 
 ---
 
-## 💻 SDK Usage Example
+## SDK Usage Example
 
 ```ts
 import {
@@ -335,20 +395,23 @@ import {
   createToolBuilder,
 } from "@voiceagentsdk/core/sdk";
 
-// 1. Create a safe executable tool definition
+// 1. Declare a secure executable tool.
+// Serialization is separated: parameter structures remain clean, while the execution
+// handler is dynamically bound by the server engine.
 const lookupOrder = createToolBuilder("lookup_order")
   .describe("Look up an order by id after the user provides it.")
-  .parameters({o
+  .parameters({
     type: "object",
     properties: { orderId: { type: "string" } },
     required: ["orderId"],
   })
   .handler(async (input, context) => {
+    // Queries are checked against boundaries inside context.database
     return context.database?.query("orders", input) ?? null;
   })
   .build();
 
-// 2. Define the Agent declarative properties
+// 2. Define the Voice Agent's properties using a type-safe fluent API.
 const definition = createAgentBuilder()
   .tenant({
     id: "local",
@@ -359,7 +422,7 @@ const definition = createAgentBuilder()
   .provider({
     id: "gemini",
     kind: "gemini-live",
-    apiKey: { name: "GEMINI_API_KEY" },
+    apiKey: { name: "GEMINI_API_KEY" }, // References resolved securely at runtime
     model: "gemini-3.1-flash-live-preview",
     voice: "Puck",
   })
@@ -380,16 +443,16 @@ const definition = createAgentBuilder()
   .tool(lookupOrder)
   .build();
 
-// 3. Compile your agent and resolve instructions
+// 3. Compile the static configuration into a runnable, validated SDK wrapper.
 const runtime = compileVoiceAgentSdk(definition);
 const prompt = runtime.promptFor({ channel: "voice" });
 ```
 
 ---
 
-## 🔒 Safe Repository Layer
+## Safe Repository Layer
 
-The SDK injects strict boundaries before arbitrary DB queries are made. By specifying filters, sorts, and operations inside your declarative definition, SQL injections and unauthorized read/writes are caught instantly.
+The SDK places a strict safety proxy before database adapters. In standard systems, models might be tricked into accessing other users' data. The SDK's Repository Pattern prevents this by validating scopes before executing queries.
 
 ```ts
 import {
@@ -400,22 +463,22 @@ import {
   createStoreBuilder,
 } from "@voiceagentsdk/core/sdk";
 
-// 1. Declare safe fields and operations
+// 1. Declare safe schemas, filtering options, and permissions.
 const store = createStoreBuilder("crm")
-  .adapterRef("postgres.crm")
+  .adapterRef("postgres.crm") // Explicit link, carrying zero implementation leaks
   .entity("contacts", (entity) => {
     entity
       .field("name", "string")
       .field("email", "string")
-      .tenantScoped("tenantId")
-      .operations(["get", "list", "create", "update"])
+      .tenantScoped("tenantId")                       // Enforces automatic tenant boundaries
+      .operations(["get", "list", "create", "update"]) // Block raw deletes
       .filterable(["tenantId", "email"])
       .sortable(["email"])
-      .maxPageSize(50);
+      .maxPageSize(50);                                // Prevents Denial of Service via massive queries
   })
   .build();
 
-// 2. Map physical schema adapters securely
+// 2. Bind physical adapters at the app layer.
 const registry = createDbAdapterRegistry({
   stores: {
     "postgres.crm": createStoreAdapterBinding(
@@ -428,24 +491,24 @@ const registry = createDbAdapterRegistry({
   },
 });
 
-// 3. Obtain a runtime repository (automatically throws on unauthorized requests)
+// 3. Obtain a runtime repository (automatically throws on unauthorized requests).
 const contacts = createSafeRepositoryFromRegistry(store, "contacts", registry);
 ```
 
 ---
 
-## 🏗️ SOLID & Clean Architecture Quality Gates
+## SOLID and Clean Architecture Quality Gates
 
-This repository treats software design rules as **executable compile-time constraints**. Any code violating clean architecture boundary rules will cause local audits to fail:
+This repository treats design patterns as **executable compile-time constraints**. Any developer trying to bypass abstraction layers will cause automated checks to fail:
 
-1. **Cycle & Leak Prevention (`pnpm audit:architecture`)**: Fails instantly if SDK code imports server adapters, if UI code bypasses API gateways, or if features import sibling internal properties directly.
-2. **Single Responsibility Principle (`pnpm audit:responsibility`)**: Enforces file ceilings (max 5 exports per file, 1 JSX component per file, pure model/view domains, barrel-only rules for `index.ts` files).
+1. **Cycle & Leak Prevention (`pnpm audit:architecture`)**: Fails instantly if compiler configurations import server-side runtime code, or if browser clients attempt to reuse database schemas directly.
+2. **Single Responsibility Principle (`pnpm audit:responsibility`)**: Enforces file ceilings (max 5 exports per file, 1 component per TSX leaf, pure domain packages, barrel-only rules for `index.ts` files).
 3. **Boundaries (`pnpm audit:sdk-boundary` / `:imports` / `:tool-contracts`)**: Checks that runtime tool bindings remain strictly serializable manifests. Ensures `unknown.*` actions do not fall back silently.
 
 ---
 
-## 🏷️ Project Status & Context
+## Architectural Boundary Rules & Guidelines
 
-This is an early clean-core SDK and starter. All major bridges—Tenant, Secret, Provider, Prompt, and DB resolvers—work through standard interfaces.
-
-*   **Contribution Rule**: Keep application-specific routes, third-party authentication models, and custom database schemas out of `src/`. Place them in starter packages, domain packs, or your downstream projects.
+*   **Logic Separation**: The `src` directory contains only generic SDK core and orchestrator code. Business logic, specialized API routers, custom CSS layouts, and concrete databases belong strictly inside your downstream app, a domain pack, or starter packages.
+*   **Decoupled Secret Scoping**: Code inside `src` must never inspect `process.env`. All credentials must resolve through the injectable `SecretResolverPort` at startup.
+*   **Observability**: Telemetry events, live session logs, transcripts, and trace parameters must pass through the `EventSinkPort` and `LoggerPort` which enforce automated data masking.
