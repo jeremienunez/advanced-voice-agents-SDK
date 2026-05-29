@@ -4,9 +4,9 @@
   border: 1px solid rgba(226, 232, 240, 0.5);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border-radius: var(--radius-lg);
+  border-radius: var(--studio-radius);
   padding: 20px 24px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--studio-shadow-sm);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -18,7 +18,7 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 1.2px;
-  color: var(--slate-400);
+  color: var(--studio-subtle);
   border-bottom: 1px solid rgba(226, 232, 240, 0.4);
   padding-bottom: 10px;
   display: flex;
@@ -42,20 +42,20 @@
   font-size: 9px;
   font-weight: 800;
   text-transform: uppercase;
-  color: var(--slate-400);
+  color: var(--studio-subtle);
   letter-spacing: 0.5px;
 }
 
 .console-stats-grid .metric p {
   font-size: 13px;
   font-weight: 700;
-  color: var(--slate-800);
+  color: var(--studio-text);
 }
 
 .console-log-trace {
   font-family: 'Fira Code', 'Courier New', Courier, monospace;
   font-size: 10px;
-  color: var(--slate-500);
+  color: var(--studio-muted);
   line-height: 1.5;
   margin: 0;
   overflow-y: auto;

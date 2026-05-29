@@ -1,18 +1,18 @@
 .envDrawer,
 .checkDrawer {
-  border: 1px solid var(--slate-200);
-  border-radius: var(--radius-md);
-  background: #ffffff;
+  border: 1px solid var(--studio-border-soft);
+  border-radius: var(--studio-radius);
+  background: var(--studio-surface);
   overflow: hidden;
 }
 
 .envDrawer[open],
 .checkDrawer[open] {
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--studio-shadow-sm);
 }
 
 .envDrawer.attention {
-  border-color: var(--google-yellow);
+  border-color: var(--studio-warning);
 }
 
 .envDrawerSummary,
@@ -39,9 +39,9 @@
   width: 22px;
   height: 22px;
   place-items: center;
-  border: 1px solid var(--slate-200);
+  border: 1px solid var(--studio-border-soft);
   border-radius: 999px;
-  color: var(--slate-500);
+  color: var(--studio-muted);
   font-size: 14px;
   font-weight: 900;
 }
@@ -53,7 +53,7 @@
 
 .envDrawerSummary span,
 .checkDrawer summary span {
-  color: var(--slate-800);
+  color: var(--studio-text);
   font-size: 12px;
   font-weight: 850;
   letter-spacing: 0.7px;
@@ -63,22 +63,22 @@
 .envDrawerSummary small,
 .checkDrawer summary small {
   margin-left: auto;
-  color: var(--slate-500);
+  color: var(--studio-muted);
   font-size: 11px;
   font-weight: 700;
 }
 
 .envDrawer.attention .envDrawerSummary small {
-  color: var(--google-yellow);
+  color: var(--studio-warning);
 }
 
 .envDrawerBody {
   display: grid;
   padding: 0 14px 8px;
-  border-top: 1px solid var(--slate-100);
+  border-top: 1px solid var(--studio-surface-muted);
 }
 
 .checkDrawer .dependencyList {
   padding: 0 14px 8px;
-  border-top: 1px solid var(--slate-100);
+  border-top: 1px solid var(--studio-surface-muted);
 }

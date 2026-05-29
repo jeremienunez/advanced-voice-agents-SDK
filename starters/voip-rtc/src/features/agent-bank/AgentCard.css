@@ -85,21 +85,21 @@
 }
 
 .agent-profile-card {
-  background: #ffffff;
-  border: 1px solid var(--slate-200);
-  border-radius: var(--radius-lg);
+  background: var(--studio-surface);
+  border: 1px solid var(--studio-border-soft);
+  border-radius: var(--studio-radius);
   padding: 28px;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--studio-shadow-md);
   display: flex;
   flex-direction: column;
   gap: 20px;
-  transition: var(--transition-normal);
+  transition: var(--studio-transition-normal);
 }
 
 .agent-profile-card:hover {
   transform: translateY(-4px);
-  border-color: var(--google-blue);
-  box-shadow: var(--shadow-lg);
+  border-color: var(--studio-action);
+  box-shadow: var(--studio-shadow-lg);
 }
 
 .agent-header {

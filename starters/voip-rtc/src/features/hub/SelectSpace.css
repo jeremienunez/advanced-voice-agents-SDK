@@ -5,7 +5,7 @@
   width: 100vw;
   height: 100vh;
   background: transparent;
-  color: var(--slate-800);
+  color: var(--studio-text);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -76,7 +76,7 @@
 /* Top Header Bar */
 .hub-header {
   height: 72px;
-  border-bottom: 1px solid var(--slate-100);
+  border-bottom: 1px solid var(--studio-surface-muted);
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -98,7 +98,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--google-blue);
+  background: var(--studio-action);
   box-shadow: 0 0 8px rgba(26, 115, 232, 0.5);
 }
 
@@ -106,7 +106,7 @@
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 1.5px;
-  color: var(--slate-500);
+  color: var(--studio-muted);
 }
 
 .hub-server-status {
@@ -116,15 +116,15 @@
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.5px;
-  color: var(--slate-400);
+  color: var(--studio-subtle);
 }
 
 .hub-server-status .pulse-led {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--google-green);
-  box-shadow: 0 0 6px var(--google-green);
+  background: var(--studio-success);
+  box-shadow: 0 0 6px var(--studio-success);
 }
 
 /* Asymmetric Launchpad Grid (42vw / 58vw) */
@@ -143,7 +143,7 @@
    ========================================== */
 .hub-left-pane {
   height: 100%;
-  border-right: 1px solid var(--slate-100);
+  border-right: 1px solid var(--studio-surface-muted);
   padding: 56px 48px;
   display: flex;
   flex-direction: column;
@@ -158,7 +158,7 @@
   font-size: clamp(32px, 3.8vw, 54px);
   font-weight: 900;
   letter-spacing: -0.05em;
-  color: var(--slate-900);
+  color: var(--studio-text-strong);
   line-height: 1.05;
   margin: 8px 0 16px 0;
 }
@@ -166,7 +166,7 @@
 .hub-subtitle {
   font-size: 14px;
   line-height: 1.6;
-  color: var(--slate-500);
+  color: var(--studio-muted);
   max-width: 90%;
 }
 
@@ -178,7 +178,7 @@
 .hub-onboarding-panel h3 {
   font-size: 10px;
   font-weight: 850;
-  color: var(--slate-400);
+  color: var(--studio-subtle);
   margin-bottom: 18px;
   letter-spacing: 1px;
 }
@@ -198,33 +198,33 @@
   gap: 12px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--slate-400);
-  transition: var(--transition-fast);
+  color: var(--studio-subtle);
+  transition: var(--studio-transition-fast);
 }
 
 .onboarding-steps li .step-icon {
   font-size: 12px;
   font-weight: 800;
-  color: var(--slate-300);
+  color: var(--studio-border-medium);
   width: 14px;
   display: inline-block;
   text-align: center;
 }
 
 .onboarding-steps li.completed {
-  color: var(--slate-700);
+  color: var(--studio-text-alt);
 }
 
 .onboarding-steps li.completed .step-icon {
-  color: var(--google-green);
+  color: var(--studio-success);
 }
 
 .onboarding-steps li.active {
-  color: var(--google-blue);
+  color: var(--studio-action);
 }
 
 .onboarding-steps li.active .step-icon {
-  color: var(--google-blue);
+  color: var(--studio-action);
   animation: pulseActiveArrow 1s ease-in-out infinite alternate;
 }
 
@@ -236,7 +236,7 @@
 .step-inline-link {
   background: transparent;
   border: none;
-  color: var(--google-blue);
+  color: var(--studio-action);
   font-weight: 800;
   cursor: pointer;
   padding-left: 6px;

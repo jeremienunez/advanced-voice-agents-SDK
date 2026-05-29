@@ -140,24 +140,24 @@
 
 .jarvis-live-bubble {
   align-items: center;
-  background: rgba(255, 255, 255, 0.76);
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+  background: var(--studio-glass-bg);
+  border: 1px solid var(--studio-glass-border);
+  border-radius: var(--studio-radius);
+  box-shadow: var(--studio-shadow-md);
   display: flex;
   gap: 12px;
   line-height: 1.5;
   margin: 0;
   padding: 12px 24px;
   text-align: center;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
 }
 
 .jarvis-live-bubble strong {
-  background: var(--google-blue-light);
+  background: var(--studio-action-soft);
   border-radius: 6px;
-  color: var(--google-blue);
+  color: var(--studio-action);
   font-size: 9px;
   font-weight: 900;
   letter-spacing: 0.8px;
@@ -166,12 +166,12 @@
 }
 
 .jarvis-live-bubble.agent strong {
-  background: var(--google-green-light);
-  color: var(--google-green);
+  background: var(--studio-success-soft);
+  color: var(--studio-success);
 }
 
 .jarvis-live-bubble span {
-  color: var(--slate-800);
+  color: var(--studio-text);
   font-size: 14px;
   font-style: italic;
   font-weight: 600;

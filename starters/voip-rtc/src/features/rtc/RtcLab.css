@@ -50,11 +50,12 @@
 .rtcSidePanel,
 .rtcControlDock,
 .rtcDiagnostics {
-  border: 1px solid rgba(226, 232, 240, 0.95);
+  border: 1px solid var(--studio-glass-border);
   border-radius: var(--studio-radius);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.82) 100%);
-  backdrop-filter: blur(20px);
-  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.03), 0 1px 4px rgba(15, 23, 42, 0.01);
+  background: var(--studio-glass-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: var(--studio-shadow-sm);
 }
 
 .rtcSidePanel {
@@ -294,7 +295,7 @@
   backdrop-filter: blur(4px);
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--transition-normal);
+  transition: opacity var(--studio-transition-normal);
 }
 
 .rtcDrawerBackdrop.open {
@@ -309,16 +310,17 @@
   bottom: 0;
   z-index: 1000;
   height: 72vh;
-  border-top: 1px solid var(--studio-border);
+  border-top: 1px solid var(--studio-glass-border);
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  box-shadow: 0 -12px 32px rgba(15, 23, 42, 0.12);
+  background: var(--studio-glass-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: var(--studio-shadow-lg);
   display: grid;
   grid-template-rows: 64px 1fr;
   transform: translateY(100%);
-  transition: transform var(--transition-normal);
+  transition: transform var(--studio-transition-normal);
 }
 
 .rtcDiagnosticsDrawer.open {
@@ -361,7 +363,7 @@
   line-height: 1;
   color: var(--studio-muted);
   cursor: pointer;
-  transition: color var(--transition-fast);
+  transition: color var(--studio-transition-fast);
   padding: 4px;
 }
 
@@ -375,7 +377,7 @@
 }
 
 .rtcTopbar {
-  border-radius: var(--radius-lg);
+  border-radius: var(--studio-radius);
 }
 
 .rtcCentralStage {
@@ -413,14 +415,16 @@
 
 .rtcDrawer {
   overflow: hidden;
-  border: 1px solid var(--slate-200);
-  border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.82);
-  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--studio-glass-border);
+  border-radius: var(--studio-radius);
+  background: var(--studio-glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--studio-shadow-sm);
 }
 
 .rtcDrawer[open] {
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--studio-shadow-md);
 }
 
 .rtcDrawer summary {
@@ -446,9 +450,9 @@
   height: 22px;
   flex: 0 0 auto;
   place-items: center;
-  border: 1px solid var(--slate-200);
+  border: 1px solid var(--studio-glass-border);
   border-radius: 999px;
-  color: var(--slate-500);
+  color: var(--studio-muted);
   font-size: 14px;
   font-weight: 900;
 }
@@ -458,7 +462,7 @@
 }
 
 .rtcDrawer summary span {
-  color: var(--slate-800);
+  color: var(--studio-text);
   font-size: 12px;
   font-weight: 850;
   letter-spacing: 0.7px;
@@ -468,7 +472,7 @@
 .rtcDrawer summary small {
   margin-left: auto;
   overflow: hidden;
-  color: var(--slate-500);
+  color: var(--studio-muted);
   font-size: 11px;
   font-weight: 700;
   text-overflow: ellipsis;
@@ -477,7 +481,7 @@
 
 .rtcDrawerBody {
   padding: 16px;
-  border-top: 1px solid var(--slate-100);
+  border-top: 1px solid var(--studio-surface-muted);
 }
 
 .rtcDrawerBody > .panel,

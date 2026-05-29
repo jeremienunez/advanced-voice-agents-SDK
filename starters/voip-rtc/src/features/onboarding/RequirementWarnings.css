@@ -9,25 +9,25 @@
   gap: 12px;
   align-items: center;
   padding: 14px 16px;
-  border: 1px solid var(--google-yellow);
-  border-radius: var(--radius-md);
-  background: var(--google-yellow-light);
+  border: 1px solid var(--studio-warning);
+  border-radius: var(--studio-radius);
+  background: var(--studio-warning-soft);
 }
 
 .requirementCard.ok {
-  border-color: var(--google-green);
-  background: var(--google-green-light);
+  border-color: var(--studio-success);
+  background: var(--studio-success-soft);
 }
 
 .requirementCard strong {
   display: block;
-  color: var(--slate-900);
+  color: var(--studio-text-strong);
   font-size: 13px;
 }
 
 .requirementCard p {
   margin-top: 4px;
-  color: var(--slate-700);
+  color: var(--studio-text-alt);
   font-size: 13px;
   line-height: 1.45;
 }
@@ -35,13 +35,13 @@
 .requirementCard span {
   display: block;
   margin-top: 6px;
-  color: var(--slate-500);
+  color: var(--studio-muted);
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
   font-size: 11px;
 }
 
 .requirementCard a {
-  color: var(--google-blue);
+  color: var(--studio-action);
   font-size: 11px;
   font-weight: 850;
   text-decoration: none;

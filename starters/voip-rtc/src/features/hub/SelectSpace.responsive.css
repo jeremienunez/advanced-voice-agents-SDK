@@ -12,7 +12,7 @@
   .hub-left-pane {
     height: auto;
     border-right: none;
-    border-bottom: 1px solid var(--slate-100);
+    border-bottom: 1px solid var(--studio-surface-muted);
     padding: 40px 24px;
   }
 

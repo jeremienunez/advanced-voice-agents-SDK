@@ -24,7 +24,7 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 64px 48px;
-  border-right: 1px solid var(--slate-200);
+  border-right: 1px solid var(--studio-border-soft);
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
@@ -106,7 +106,7 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--google-blue);
+  background: var(--studio-action);
   box-shadow: 0 0 8px rgba(26, 115, 232, 0.6);
 }
 
@@ -115,7 +115,7 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  color: var(--slate-500);
+  color: var(--studio-muted);
 }
 
 /* Odometer Rolling Index */
@@ -136,7 +136,7 @@
   font-size: 80px;
   font-weight: 900;
   line-height: 80px;
-  color: var(--google-blue);
+  color: var(--studio-action);
   letter-spacing: -3px;
   opacity: 0.85;
 }
@@ -147,7 +147,7 @@
   font-weight: 900;
   line-height: 1.1;
   letter-spacing: -0.05em;
-  color: var(--slate-900);
+  color: var(--studio-text-strong);
   margin: 16px 0 24px 0;
   display: flex;
   flex-wrap: wrap;
@@ -173,7 +173,7 @@
 .step-description-text {
   font-size: 14px;
   line-height: 1.6;
-  color: var(--slate-500);
+  color: var(--studio-muted);
   margin-bottom: 32px;
   max-width: 90%;
   animation: fadeIn 0.5s ease-out forwards;
@@ -188,8 +188,8 @@
   border: 1px solid rgba(226, 232, 240, 0.6);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+  border-radius: var(--studio-radius);
+  box-shadow: var(--studio-shadow-md);
   overflow: hidden;
   height: calc(100% - 280px);
   margin-top: 12px;
@@ -213,7 +213,7 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 1.2px;
-  color: var(--slate-400);
+  color: var(--studio-subtle);
   margin-bottom: 12px;
   display: flex;
   align-items: center;
@@ -224,19 +224,19 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--google-green);
-  box-shadow: 0 0 6px var(--google-green);
+  background: var(--studio-success);
+  box-shadow: 0 0 6px var(--studio-success);
 }
 
 .pulse-led.busy {
-  background: var(--google-blue);
-  box-shadow: 0 0 8px var(--google-blue);
+  background: var(--studio-action);
+  box-shadow: 0 0 8px var(--studio-action);
   animation: pulseLed 1.2s ease-in-out infinite alternate;
 }
 
 .pulse-led.error {
-  background: var(--google-red);
-  box-shadow: 0 0 8px var(--google-red);
+  background: var(--studio-danger);
+  box-shadow: 0 0 8px var(--studio-danger);
 }
 
 @keyframes pulseLed {
@@ -248,7 +248,7 @@
   font-family: 'Fira Code', 'Courier New', Courier, monospace;
   font-size: 11px;
   line-height: 1.5;
-  color: var(--slate-700);
+  color: var(--studio-text-alt);
   margin: 0;
   overflow-y: auto;
   flex-grow: 1;
@@ -257,6 +257,6 @@
 }
 
 .console-code.prompt-code {
-  color: var(--slate-600);
+  color: var(--studio-muted);
   font-style: italic;
 }

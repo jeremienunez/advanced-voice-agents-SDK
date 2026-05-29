@@ -40,9 +40,9 @@ select,
 textarea {
   width: 100%;
   min-width: 0;
-  border: 1px solid rgba(216, 222, 230, 0.95);
-  border-radius: 10px; /* Modern sleek corners */
-  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--studio-border-soft);
+  border-radius: var(--studio-radius-sm);
+  background: var(--studio-surface);
   color: var(--studio-text-strong);
   font-family: var(--font-sans);
   outline: none;
@@ -58,15 +58,15 @@ select:focus,
 textarea:focus {
   border-color: var(--studio-action);
   box-shadow: 
-    0 0 0 4px rgba(11, 87, 208, 0.12),
+    0 0 0 4px var(--studio-action-focus),
     inset 0 1px 2px rgba(15, 23, 42, 0.01);
-  background: #ffffff;
+  background: var(--studio-surface-raised);
 }
 
 input:hover:not(:disabled),
 select:hover:not(:disabled),
 textarea:hover:not(:disabled) {
-  border-color: #a3b0c0;
+  border-color: var(--studio-border-medium);
 }
 
 input {
@@ -124,7 +124,7 @@ button {
   text-transform: uppercase;
   cursor: pointer;
   box-shadow: var(--studio-shadow-sm);
-  transition: all var(--transition-fast);
+  transition: all var(--studio-transition-fast);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -154,7 +154,7 @@ button.primary:hover:not(:disabled) {
   background: var(--studio-action-hover);
   border-color: var(--studio-action-hover);
   color: #ffffff;
-  box-shadow: 0 6px 18px rgba(11, 87, 208, 0.3);
+  box-shadow: var(--studio-glow-action);
 }
 
 button.ghost {

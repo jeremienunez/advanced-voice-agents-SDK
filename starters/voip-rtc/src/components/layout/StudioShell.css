@@ -4,11 +4,12 @@
   display: grid;
   grid-template-columns: 100px minmax(0, 1fr);
   min-height: 100vh;
-  background: var(--studio-bg, var(--bg-primary, #f8fafc));
-  color: var(--studio-text, var(--slate-800, #1e293b));
-  transition: all 0.3s ease;
+  background: var(--studio-bg);
+  color: var(--studio-text);
+  transition: background var(--studio-transition-smooth), color var(--studio-transition-smooth);
 }
 
+/* ─── Sidebar: Glassmorphic premium ─── */
 .studioSidebar {
   position: sticky;
   top: 0;
@@ -18,13 +19,40 @@
   align-items: center;
   gap: 32px;
   padding: 28px 10px;
-  border-right: 1px solid rgba(226, 232, 240, 0.8);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
-  backdrop-filter: blur(20px);
+  border-right: 1px solid var(--studio-glass-border);
+  background: var(--studio-glass-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   box-shadow: 4px 0 30px rgba(15, 23, 42, 0.02);
   z-index: 10;
+  overflow: hidden;
 }
 
+/* Holographic gradient shimmer on sidebar */
+.studioSidebar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    rgba(77, 155, 245, 0.04) 0%,
+    transparent 30%,
+    transparent 70%,
+    rgba(61, 214, 140, 0.03) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.studioSidebar > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Logo Mark: Premium holographic ─── */
 .studioMark {
   display: grid;
   width: 44px;
@@ -37,7 +65,7 @@
   font-size: 14px;
   font-weight: 900;
   letter-spacing: -0.02em;
-  box-shadow: 0 4px 16px rgba(11, 87, 208, 0.25);
+  box-shadow: var(--studio-glow-action);
   position: relative;
   overflow: hidden;
 }
@@ -49,13 +77,14 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, transparent 60%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, transparent 60%);
 }
 
+/* ─── Navigation ─── */
 .studioNav {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 4px;
   width: 100%;
 }
 
@@ -71,7 +100,7 @@
   justify-content: center;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   padding: 2px;
   position: relative;
 }
@@ -89,7 +118,7 @@
 }
 
 .studioNavItem:hover .navIconContainer {
-  background: rgba(11, 87, 208, 0.05);
+  background: var(--studio-action-soft);
   color: var(--studio-action);
   transform: translateY(-1px);
 }
@@ -97,11 +126,26 @@
 .studioNavItem.active .navIconContainer {
   background: var(--studio-action-soft);
   color: var(--studio-action);
-  box-shadow: 0 2px 4px rgba(11, 87, 208, 0.05);
+  box-shadow: 0 0 12px rgba(77, 155, 245, 0.12);
+}
+
+/* Active indicator bar */
+.studioNavItem.active::after {
+  content: "";
+  position: absolute;
+  right: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 24px;
+  border-radius: 3px;
+  background: var(--studio-action);
+  box-shadow: 0 0 8px var(--studio-action);
+  animation: glowPulse 2s ease-in-out infinite;
 }
 
 .studioNavItem span:not(.navIconContainer) {
-  font-size: 11px;
+  font-size: var(--studio-text-xs);
   font-weight: 700;
   letter-spacing: 0.1px;
   color: var(--studio-muted);
@@ -122,28 +166,31 @@
   outline-offset: 2px;
 }
 
+/* ─── Main Content ─── */
 .studioMain {
   display: grid;
   grid-template-rows: auto 1fr;
   min-width: 0;
 }
 
+/* ─── Topbar: Glassmorphic ─── */
 .studioTopbar {
   display: grid;
   grid-template-columns: minmax(180px, 280px) minmax(260px, 1fr) auto;
   gap: 24px;
   align-items: center;
   padding: 18px 32px;
-  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--studio-glass-border);
+  background: var(--studio-glass-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   z-index: 9;
 }
 
 .studioTitleBlock h1 {
   font-family: var(--font-display, var(--font-sans));
   margin: 0;
-  color: var(--studio-text-strong, var(--slate-950, #020617));
+  color: var(--studio-text-strong);
   font-size: 24px;
   font-weight: 800;
   letter-spacing: -0.03em;
@@ -152,13 +199,14 @@
 
 .studioEyebrow {
   margin: 0 0 4px;
-  color: var(--studio-muted, var(--slate-500, #64748b));
+  color: var(--studio-muted);
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 
+/* ─── Search command palette ─── */
 .studioCommand {
   display: block;
   position: relative;
@@ -168,12 +216,12 @@
   width: 100%;
   max-width: 460px;
   height: 42px;
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  border-radius: 12px;
-  background: rgba(241, 245, 249, 0.5);
-  color: var(--studio-text, var(--slate-800, #1e293b));
+  border: 1px solid var(--studio-glass-border);
+  border-radius: var(--studio-radius-sm);
+  background: var(--studio-surface-muted);
+  color: var(--studio-text);
   padding: 0 16px 0 36px;
-  font-size: 13px;
+  font-size: var(--studio-text-sm);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -189,22 +237,24 @@
 }
 
 .studioCommand input:focus {
-  background: var(--studio-surface, #ffffff);
-  border-color: var(--studio-action, #2563eb);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15), var(--studio-shadow-sm);
+  background: var(--studio-surface);
+  border-color: var(--studio-action);
+  box-shadow: 0 0 0 3px var(--studio-action-focus), var(--studio-shadow-sm);
   outline: none;
 }
 
+/* ─── Health status indicator ─── */
 .studioHealth {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 8px 16px;
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  border-radius: 9999px;
-  background: var(--studio-surface, var(--bg-secondary, #ffffff));
+  border: 1px solid var(--studio-glass-border);
+  border-radius: var(--studio-radius-full);
+  background: var(--studio-surface);
   box-shadow: var(--studio-shadow-sm);
   position: relative;
+  transition: all var(--studio-transition-normal);
 }
 
 .studioHealth::before {
@@ -214,52 +264,55 @@
   height: 8px;
   border-radius: 50%;
   background: var(--studio-muted);
+  transition: all var(--studio-transition-normal);
 }
 
 .studioHealth strong {
-  color: var(--studio-text-strong, var(--slate-950, #020617));
+  color: var(--studio-text-strong);
   font-size: 12px;
   font-weight: 700;
 }
 
 .studioHealth span {
-  color: var(--studio-muted, var(--slate-500, #64748b));
-  font-size: 11px;
+  color: var(--studio-muted);
+  font-size: var(--studio-text-xs);
   font-weight: 500;
-  border-left: 1px solid rgba(226, 232, 240, 0.8);
+  border-left: 1px solid var(--studio-glass-border);
   padding-left: 10px;
 }
 
 .studioHealth.ready {
-  border-color: rgba(16, 185, 129, 0.2);
-  background: rgba(16, 185, 129, 0.05);
+  border-color: var(--studio-success-border);
+  background: var(--studio-success-soft);
 }
 
 .studioHealth.ready::before {
-  background: var(--studio-success, #0f9f6e);
-  box-shadow: 0 0 8px var(--studio-success, #0f9f6e);
+  background: var(--studio-success);
+  box-shadow: 0 0 8px var(--studio-success);
+  animation: glowPulse 2s ease-in-out infinite;
 }
 
 .studioHealth.warning {
-  border-color: rgba(245, 158, 11, 0.2);
-  background: rgba(245, 158, 11, 0.05);
+  border-color: var(--studio-warning-border);
+  background: var(--studio-warning-soft);
 }
 
 .studioHealth.warning::before {
-  background: #f59e0b;
-  box-shadow: 0 0 8px #f59e0b;
+  background: var(--studio-warning);
+  box-shadow: 0 0 8px var(--studio-warning);
 }
 
 .studioHealth.error {
-  border-color: rgba(220, 38, 38, 0.2);
-  background: rgba(220, 38, 38, 0.05);
+  border-color: var(--studio-danger-border);
+  background: var(--studio-danger-soft);
 }
 
 .studioHealth.error::before {
-  background: var(--studio-danger, #dc2626);
-  box-shadow: 0 0 8px var(--studio-danger, #dc2626);
+  background: var(--studio-danger);
+  box-shadow: 0 0 8px var(--studio-danger);
 }
 
+/* ─── Content area ─── */
 .studioContent {
   min-width: 0;
   padding: 32px;
@@ -277,6 +330,87 @@
   border: 0;
 }
 
+/* ─── Theme Toggle ─── */
+.studioThemeToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--studio-glass-border);
+  border-radius: 50%;
+  background: var(--studio-surface-muted);
+  color: var(--studio-muted);
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 0;
+  margin-bottom: 8px;
+}
+
+.studioThemeToggle:hover {
+  background: var(--studio-action-soft);
+  color: var(--studio-action);
+  border-color: var(--studio-action-border);
+  transform: rotate(20deg);
+}
+
+/* ─── Mode Selector (UI vs IDE) ─── */
+.studioModeSelectorContainer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding-top: 20px;
+  border-top: 1px solid var(--studio-glass-border);
+}
+
+.studioModeLabel {
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--studio-muted);
+}
+
+.studioModeSelector {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  background: var(--studio-surface-muted);
+  padding: 4px;
+  border-radius: var(--studio-radius-full);
+  border: 1px solid var(--studio-glass-border);
+}
+
+.modeSelBtn {
+  border: 0;
+  background: transparent;
+  color: var(--studio-muted);
+  font-size: var(--studio-text-xs);
+  font-weight: 700;
+  padding: 8px 0;
+  border-radius: var(--studio-radius-full);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: center;
+}
+
+.modeSelBtn:hover {
+  color: var(--studio-text-strong);
+  background: var(--studio-surface);
+}
+
+.modeSelBtn.active {
+  background: var(--studio-surface);
+  color: var(--studio-action);
+  box-shadow: var(--studio-shadow-sm);
+}
+
+/* ─── Responsive ─── */
 @media (max-width: 920px) {
   .studioShell {
     grid-template-columns: 1fr;
@@ -290,9 +424,23 @@
     flex-direction: row;
     justify-content: space-between;
     border-right: 0;
-    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    border-bottom: 1px solid var(--studio-glass-border);
     padding: 12px 16px;
     gap: 16px;
+  }
+
+  .studioSidebar::before {
+    background: linear-gradient(
+      90deg,
+      rgba(77, 155, 245, 0.04) 0%,
+      transparent 30%,
+      transparent 70%,
+      rgba(61, 214, 140, 0.03) 100%
+    );
+  }
+
+  .studioNavItem.active::after {
+    display: none;
   }
 
   .studioNav {
@@ -319,7 +467,7 @@
 
   .studioNavItem.active {
     box-shadow: none;
-    background: rgba(11, 87, 208, 0.04);
+    background: var(--studio-action-soft);
   }
 
   .studioTopbar {
@@ -335,64 +483,7 @@
   .studioContent {
     padding: 16px;
   }
-}
 
-/* Studio Mode Selector (UI vs IDE) */
-.studioModeSelectorContainer {
-  margin-top: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding-top: 20px;
-  border-top: 1px solid rgba(226, 232, 240, 0.8);
-}
-
-.studioModeLabel {
-  font-size: 9px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--studio-muted);
-}
-
-.studioModeSelector {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  width: 100%;
-  background: rgba(241, 245, 249, 0.8);
-  padding: 4px;
-  border-radius: 9999px;
-  border: 1px solid rgba(226, 232, 240, 0.8);
-}
-
-.modeSelBtn {
-  border: 0;
-  background: transparent;
-  color: var(--studio-muted);
-  font-size: 11px;
-  font-weight: 700;
-  padding: 8px 0;
-  border-radius: 9999px;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  text-align: center;
-}
-
-.modeSelBtn:hover {
-  color: var(--studio-text-strong);
-  background: rgba(255, 255, 255, 0.5);
-}
-
-.modeSelBtn.active {
-  background: #ffffff;
-  color: var(--studio-action);
-  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
-}
-
-@media (max-width: 920px) {
   .studioModeSelectorContainer {
     margin-top: 0;
     padding-top: 0;
@@ -400,18 +491,22 @@
     flex-direction: row;
     width: auto;
   }
-  
+
   .studioModeLabel {
     display: none;
   }
-  
+
   .studioModeSelector {
     flex-direction: row;
     width: auto;
     padding: 3px;
   }
-  
+
   .modeSelBtn {
     padding: 6px 14px;
+  }
+
+  .studioThemeToggle {
+    margin-bottom: 0;
   }
 }

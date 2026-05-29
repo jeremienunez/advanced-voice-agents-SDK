@@ -1,0 +1,484 @@
+/* ═══════════════════════════════════════════════════════════════
+   Studio UI Component Library
+   Badge · Card · Skeleton · Tooltip · Page Transitions
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Badge ─── */
+.studioBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: var(--studio-radius-full);
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  line-height: 1;
+  transition: all var(--studio-transition-fast);
+}
+
+.studioBadge--md {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 11px;
+}
+
+.studioBadge__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Variant: Neutral */
+.studioBadge--neutral {
+  background: var(--studio-surface-muted);
+  color: var(--studio-muted);
+  border: 1px solid var(--studio-border-soft);
+}
+
+.studioBadge--neutral .studioBadge__dot {
+  background: var(--studio-subtle);
+}
+
+/* Variant: Success */
+.studioBadge--success {
+  background: var(--studio-success-soft);
+  color: var(--studio-success);
+  border: 1px solid var(--studio-success-border);
+}
+
+.studioBadge--success .studioBadge__dot {
+  background: var(--studio-success);
+  box-shadow: 0 0 6px var(--studio-success);
+}
+
+/* Variant: Info */
+.studioBadge--info {
+  background: var(--studio-action-soft);
+  color: var(--studio-action);
+  border: 1px solid var(--studio-action-border);
+}
+
+.studioBadge--info .studioBadge__dot {
+  background: var(--studio-action);
+  box-shadow: 0 0 6px var(--studio-action);
+}
+
+/* Variant: Warning */
+.studioBadge--warning {
+  background: var(--studio-warning-soft);
+  color: var(--studio-warning);
+  border: 1px solid var(--studio-warning-border);
+}
+
+.studioBadge--warning .studioBadge__dot {
+  background: var(--studio-warning);
+}
+
+/* Variant: Danger */
+.studioBadge--danger {
+  background: var(--studio-danger-soft);
+  color: var(--studio-danger);
+  border: 1px solid var(--studio-danger-border);
+}
+
+.studioBadge--danger .studioBadge__dot {
+  background: var(--studio-danger);
+}
+
+/* ─── Card ─── */
+.studioCard {
+  border-radius: var(--studio-radius);
+  font-family: var(--font-sans);
+  padding: 24px;
+  transition: all var(--studio-transition-normal);
+}
+
+.studioCard--flush {
+  padding: 0;
+}
+
+/* Card: Elevated — glassmorphic with holographic tint */
+.studioCard--elevated {
+  background: var(--studio-glass-bg);
+  backdrop-filter: blur(var(--studio-glass-blur));
+  -webkit-backdrop-filter: blur(var(--studio-glass-blur));
+  border: 1px solid var(--studio-glass-border);
+  box-shadow: var(--studio-shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Holographic edge shimmer */
+.studioCard--elevated::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--studio-action-border) 30%,
+    var(--studio-success-border) 60%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity var(--studio-transition-normal);
+}
+
+.studioCard--elevated:hover {
+  border-color: var(--studio-border);
+  box-shadow: var(--studio-shadow-md);
+  transform: translateY(-2px);
+}
+
+.studioCard--elevated:hover::before {
+  opacity: 1;
+}
+
+/* Card: Flat */
+.studioCard--flat {
+  background: var(--studio-surface-muted);
+  border: 1px solid transparent;
+  box-shadow: none;
+}
+
+.studioCard--flat:hover {
+  background: var(--studio-surface);
+  border-color: var(--studio-border-soft);
+}
+
+/* Card: Outlined */
+.studioCard--outlined {
+  background: transparent;
+  border: 1px solid var(--studio-border);
+  box-shadow: none;
+}
+
+.studioCard--outlined:hover {
+  border-color: var(--studio-action-border);
+  background: rgba(11, 87, 208, 0.02);
+}
+
+/* Card inner layout */
+.studioCard__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.studioCard__body {
+  display: grid;
+  gap: 12px;
+}
+
+/* ─── Skeleton ─── */
+.studioSkeleton {
+  background: linear-gradient(
+    90deg,
+    var(--studio-surface-muted) 25%,
+    rgba(226, 232, 240, 0.6) 50%,
+    var(--studio-surface-muted) 75%
+  );
+  background-size: 200% 100%;
+  animation: studioSkeletonShimmer 1.5s ease-in-out infinite;
+  border-radius: var(--studio-radius-sm);
+}
+
+.studioSkeleton--text {
+  height: 14px;
+  width: 100%;
+  border-radius: var(--studio-radius-xs);
+}
+
+.studioSkeleton--short {
+  width: 65%;
+}
+
+.studioSkeleton--circle {
+  border-radius: 50%;
+  aspect-ratio: 1;
+}
+
+.studioSkeleton--rect {
+  min-height: 80px;
+}
+
+.studioSkeleton__group {
+  display: grid;
+  gap: 10px;
+}
+
+@keyframes studioSkeletonShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studioSkeleton {
+    animation: none;
+    background: var(--studio-surface-muted);
+  }
+}
+
+/* ─── Tooltip ─── */
+.studioTooltip__anchor {
+  position: relative;
+  display: inline-flex;
+}
+
+.studioTooltip {
+  position: absolute;
+  z-index: 1000;
+  pointer-events: none;
+  animation: studioTooltipFadeIn 150ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.studioTooltip__content {
+  display: block;
+  max-width: 260px;
+  padding: 6px 12px;
+  background: var(--studio-text-strong);
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  border-radius: var(--studio-radius-sm);
+  box-shadow: var(--studio-shadow-md);
+  white-space: nowrap;
+}
+
+.studioTooltip__arrow {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--studio-text-strong);
+  transform: rotate(45deg);
+}
+
+/* Placement: Top */
+.studioTooltip--top {
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.studioTooltip--top .studioTooltip__arrow {
+  bottom: -4px;
+  left: 50%;
+  margin-left: -4px;
+}
+
+/* Placement: Bottom */
+.studioTooltip--bottom {
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.studioTooltip--bottom .studioTooltip__arrow {
+  top: -4px;
+  left: 50%;
+  margin-left: -4px;
+}
+
+/* Placement: Left */
+.studioTooltip--left {
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.studioTooltip--left .studioTooltip__arrow {
+  right: -4px;
+  top: 50%;
+  margin-top: -4px;
+}
+
+/* Placement: Right */
+.studioTooltip--right {
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.studioTooltip--right .studioTooltip__arrow {
+  left: -4px;
+  top: 50%;
+  margin-top: -4px;
+}
+
+@keyframes studioTooltipFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ─── Page Transitions ─── */
+
+/* Slide in from right (for page forward navigation) */
+.studioPageEnter {
+  animation: studioSlideInRight 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Slide in from left (for page backward navigation) */
+.studioPageEnterBack {
+  animation: studioSlideInLeft 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Fade & scale up (for modal-like page entries) */
+.studioPageScale {
+  animation: studioScaleUp 240ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Stagger children entrance */
+.studioStagger > * {
+  opacity: 0;
+  animation: studioFadeUp 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.studioStagger > *:nth-child(1) { animation-delay: 0ms; }
+.studioStagger > *:nth-child(2) { animation-delay: 50ms; }
+.studioStagger > *:nth-child(3) { animation-delay: 100ms; }
+.studioStagger > *:nth-child(4) { animation-delay: 150ms; }
+.studioStagger > *:nth-child(5) { animation-delay: 200ms; }
+.studioStagger > *:nth-child(6) { animation-delay: 250ms; }
+.studioStagger > *:nth-child(7) { animation-delay: 300ms; }
+.studioStagger > *:nth-child(8) { animation-delay: 350ms; }
+
+@keyframes studioSlideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes studioSlideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes studioScaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes studioFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studioPageEnter,
+  .studioPageEnterBack,
+  .studioPageScale,
+  .studioStagger > * {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Premium Holographic Utilities
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Holographic border glow on focus/active */
+.holoFocus:focus-within {
+  box-shadow: var(--studio-glow-action);
+  border-color: var(--studio-action-border);
+}
+
+/* Premium gradient text */
+.holoText {
+  background: linear-gradient(
+    135deg,
+    var(--studio-text-strong) 0%,
+    var(--studio-action) 50%,
+    var(--studio-success) 100%
+  );
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: holoShimmer 6s linear infinite;
+}
+
+/* Neon glow border animation */
+.neonBorder {
+  position: relative;
+}
+
+.neonBorder::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    var(--neon-angle, 135deg),
+    var(--studio-action) 0%,
+    var(--studio-success) 33%,
+    var(--studio-warning) 66%,
+    var(--studio-action) 100%
+  );
+  background-size: 300% 300%;
+  animation: neonRotate 4s linear infinite;
+  z-index: -1;
+  opacity: 0.4;
+  filter: blur(4px);
+}
+
+@keyframes neonRotate {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Ambient particle dot for premium sections */
+.ambientDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--studio-action);
+  box-shadow: 0 0 12px var(--studio-action);
+  animation: glowPulse 2s ease-in-out infinite;
+}

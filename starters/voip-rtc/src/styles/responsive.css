@@ -56,7 +56,7 @@
     min-height: 0;
     gap: 14px;
     padding: 20px;
-    border-radius: var(--radius-lg);
+    border-radius: var(--studio-radius);
   }
 
   .status {
@@ -67,8 +67,8 @@
     gap: 14px;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     padding: 20px;
-    border-top: 1px solid var(--slate-200);
-    border-radius: var(--radius-lg);
+    border-top: 1px solid var(--studio-border-soft);
+    border-radius: var(--studio-radius);
   }
 
   .fieldWide {

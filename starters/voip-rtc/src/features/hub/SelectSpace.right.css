@@ -18,10 +18,10 @@
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 1.5px;
-  color: var(--slate-400);
+  color: var(--studio-subtle);
   text-transform: uppercase;
   margin: 0 0 16px 0;
-  border-bottom: 1px solid var(--slate-100);
+  border-bottom: 1px solid var(--studio-surface-muted);
   padding-bottom: 8px;
 }
 
@@ -40,18 +40,18 @@
   position: relative;
   background: transparent;
   border: none;
-  border-top: 1px solid var(--slate-100);
+  border-top: 1px solid var(--studio-surface-muted);
   padding: 24px 0;
   cursor: pointer;
   display: grid;
   grid-template-columns: 56px 1fr 32px;
   gap: 20px;
   align-items: center;
-  transition: var(--transition-normal);
+  transition: var(--studio-transition-normal);
 }
 
 .spaces-grid > .space-card:last-child {
-  border-bottom: 1px solid var(--slate-100);
+  border-bottom: 1px solid var(--studio-surface-muted);
 }
 
 .space-card:hover {
@@ -67,26 +67,26 @@
 .space-icon-wrapper {
   font-size: 28px;
   font-weight: 800;
-  color: var(--slate-200);
+  color: var(--studio-border-soft);
   line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: var(--transition-normal);
+  transition: var(--studio-transition-normal);
 }
 
 .space-card:hover .space-icon-wrapper {
-  color: var(--google-blue);
+  color: var(--studio-action);
   transform: scale(1.1);
 }
 
-.space-card.bank:hover .space-icon-wrapper { color: var(--google-green); }
-.space-card.rtc:hover .space-icon-wrapper { color: var(--google-yellow); }
+.space-card.bank:hover .space-icon-wrapper { color: var(--studio-success); }
+.space-card.rtc:hover .space-icon-wrapper { color: var(--studio-warning); }
 
 .space-content h3 {
   font-size: 16px;
   font-weight: 800;
-  color: var(--slate-900);
+  color: var(--studio-text-strong);
   margin: 0 0 4px 0;
   letter-spacing: -0.3px;
 }
@@ -94,32 +94,32 @@
 .space-content p {
   font-size: 13px;
   line-height: 1.5;
-  color: var(--slate-500);
+  color: var(--studio-muted);
   margin: 0;
 }
 
 .space-action-link {
   font-size: 16px;
   font-weight: 800;
-  color: var(--slate-300);
+  color: var(--studio-border-medium);
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  transition: var(--transition-fast);
+  transition: var(--studio-transition-fast);
 }
 
 .space-card:hover .space-action-link {
-  color: var(--google-blue);
+  color: var(--studio-action);
   transform: translateX(4px);
 }
 
-.space-card.bank:hover .space-action-link { color: var(--google-green); }
-.space-card.rtc:hover .space-action-link { color: var(--google-yellow); }
+.space-card.bank:hover .space-action-link { color: var(--studio-success); }
+.space-card.rtc:hover .space-action-link { color: var(--studio-warning); }
 
 /* Quick Vault List (Minimalist Rows) */
 .quick-vault-empty {
   font-size: 13px;
-  color: var(--slate-400);
+  color: var(--studio-subtle);
   padding: 16px 0;
   font-style: italic;
 }
@@ -133,9 +133,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--slate-100);
+  border-bottom: 1px solid var(--studio-surface-muted);
   padding: 14px 0;
-  transition: var(--transition-fast);
+  transition: var(--studio-transition-fast);
 }
 
 .quick-agent-meta {
@@ -148,7 +148,7 @@
 .quick-agent-meta strong {
   font-size: 13px;
   font-weight: 700;
-  color: var(--slate-900);
+  color: var(--studio-text-strong);
 }
 
 .quick-agent-badge {
@@ -158,13 +158,13 @@
   text-transform: uppercase;
   padding: 2px 6px;
   border-radius: 4px;
-  background: var(--slate-100);
-  color: var(--slate-600);
+  background: var(--studio-surface-muted);
+  color: var(--studio-muted);
 }
 
 .quick-agent-desc {
   font-size: 12px;
-  color: var(--slate-400);
+  color: var(--studio-subtle);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -174,19 +174,19 @@
   height: 32px;
   padding: 0 14px;
   font-size: 11px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--studio-radius-sm);
   background: transparent;
-  border: 1px solid var(--slate-200);
-  color: var(--slate-600);
+  border: 1px solid var(--studio-border-soft);
+  color: var(--studio-muted);
   font-weight: 700;
   cursor: pointer;
-  transition: var(--transition-fast);
+  transition: var(--studio-transition-fast);
 }
 
 .quick-agent-actions button:hover {
-  background: var(--slate-50);
-  border-color: var(--slate-300);
-  color: var(--slate-900);
+  background: var(--studio-bg);
+  border-color: var(--studio-border-medium);
+  color: var(--studio-text-strong);
 }
 
 /* Minimalist Global Configuration Panel */
@@ -210,23 +210,23 @@
 .config-fields-grid .field span {
   font-size: 10px;
   font-weight: 850;
-  color: var(--slate-400);
+  color: var(--studio-subtle);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .config-fields-grid input {
-  background: #ffffff;
-  border: 1px solid var(--slate-200);
-  border-radius: var(--radius-md);
+  background: var(--studio-surface);
+  border: 1px solid var(--studio-border-soft);
+  border-radius: var(--studio-radius);
   padding: 10px 14px;
   font-size: 13px;
-  color: var(--slate-800);
-  transition: var(--transition-fast);
+  color: var(--studio-text);
+  transition: var(--studio-transition-fast);
 }
 
 .config-fields-grid input:focus {
-  border-color: var(--google-blue);
+  border-color: var(--studio-action);
   outline: none;
   box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.08);
 }
@@ -243,7 +243,7 @@
   justify-content: space-between;
   font-size: 11px;
   font-weight: 600;
-  color: var(--slate-500);
+  color: var(--studio-muted);
 }
 
 .status-label {
@@ -254,7 +254,7 @@
 }
 
 .status-label.green {
-  color: var(--google-green);
+  color: var(--studio-success);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -263,7 +263,7 @@
 .status-label.green::before {
   content: "•";
   font-size: 14px;
-  color: var(--google-green);
+  color: var(--studio-success);
 }
 
 .config-actions {
@@ -274,20 +274,20 @@
 
 .config-actions button {
   padding: 10px 24px;
-  border-radius: var(--radius-md);
+  border-radius: var(--studio-radius);
   font-size: 12px;
   font-weight: 700;
-  background: var(--google-blue);
+  background: var(--studio-action);
   color: #ffffff;
   border: none;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--studio-shadow-sm);
   cursor: pointer;
-  transition: var(--transition-fast);
+  transition: var(--studio-transition-fast);
 }
 
 .config-actions button:hover {
-  background: var(--google-blue-hover);
-  box-shadow: var(--shadow-md);
+  background: var(--studio-action-hover);
+  box-shadow: var(--studio-shadow-md);
 }
 
 .config-actions button:active {

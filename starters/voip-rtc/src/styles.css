@@ -1,5 +1,6 @@
 @import "./styles/base.css";
 @import "./styles/forms.css";
+@import "./components/ui/ui-components.css";
 @import "./styles/loader.css";
 @import "./styles/created-overlay.css";
 @import "./components/layout/StudioShell.css";

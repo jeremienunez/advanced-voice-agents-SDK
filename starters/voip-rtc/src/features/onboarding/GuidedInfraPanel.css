@@ -4,12 +4,12 @@
   justify-content: space-between;
   gap: 16px;
   padding-bottom: 14px;
-  border-bottom: 1px solid var(--slate-100);
+  border-bottom: 1px solid var(--studio-surface-muted);
 }
 
 .guideHeader h2 {
   margin: 0 0 8px;
-  color: var(--slate-900);
+  color: var(--studio-text-strong);
   font-size: 18px;
   letter-spacing: 0;
   text-transform: none;
@@ -18,7 +18,7 @@
 .guideHeader span {
   display: block;
   max-width: 520px;
-  color: var(--slate-500);
+  color: var(--studio-muted);
   font-size: 13px;
   line-height: 1.5;
 }
@@ -41,15 +41,15 @@
   gap: 4px;
   justify-items: start;
   padding: 12px 14px;
-  border-radius: var(--radius-md);
+  border-radius: var(--studio-radius);
   text-align: left;
   text-transform: none;
 }
 
 .infraModeSwitch button.active {
-  border-color: var(--google-blue);
-  background: var(--google-blue-light);
-  color: var(--google-blue);
+  border-color: var(--studio-action);
+  background: var(--studio-action-soft);
+  color: var(--studio-action);
 }
 
 .infraModeSwitch span {
@@ -58,7 +58,7 @@
 }
 
 .infraModeSwitch small {
-  color: var(--slate-500);
+  color: var(--studio-muted);
   font-size: 11px;
   font-weight: 700;
 }
@@ -69,14 +69,14 @@
   gap: 12px;
   align-items: center;
   padding: 14px;
-  border: 1px solid var(--slate-200);
-  border-radius: var(--radius-md);
-  background: var(--slate-100);
+  border: 1px solid var(--studio-border-soft);
+  border-radius: var(--studio-radius);
+  background: var(--studio-surface-muted);
 }
 
 .guideStep.primary {
   border-color: rgba(26, 115, 232, 0.26);
-  background: var(--google-blue-light);
+  background: var(--studio-action-soft);
 }
 
 .guideIndex {
@@ -85,35 +85,35 @@
   height: 28px;
   place-items: center;
   border-radius: 999px;
-  background: #ffffff;
-  color: var(--slate-700);
+  background: var(--studio-surface);
+  color: var(--studio-text-alt);
   font-size: 11px;
   font-weight: 900;
 }
 
 .guideStep strong {
   display: block;
-  color: var(--slate-900);
+  color: var(--studio-text-strong);
   font-size: 13px;
 }
 
 .guideStep p,
 .advancedCleanup p {
   margin: 4px 0 0;
-  color: var(--slate-500);
+  color: var(--studio-muted);
   font-size: 12px;
   line-height: 1.45;
 }
 
 .advancedCleanup {
   padding: 12px 14px;
-  border: 1px solid var(--slate-200);
-  border-radius: var(--radius-md);
-  background: #ffffff;
+  border: 1px solid var(--studio-border-soft);
+  border-radius: var(--studio-radius);
+  background: var(--studio-surface);
 }
 
 .advancedCleanup summary {
-  color: var(--slate-700);
+  color: var(--studio-text-alt);
   cursor: pointer;
   font-size: 12px;
   font-weight: 850;
@@ -122,8 +122,8 @@
 
 .advancedCleanup button {
   margin-top: 12px;
-  border-color: var(--google-red);
-  color: var(--google-red);
+  border-color: var(--studio-danger);
+  color: var(--studio-danger);
 }
 
 @media (max-width: 720px) {
