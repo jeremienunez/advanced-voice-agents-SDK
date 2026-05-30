@@ -1,8 +1,8 @@
 # Voice Agent SDK
 
-> **Provider-pluggable SDK** for building production-ready, low-latency conversational voice agents. Engineered with declarative prompts, secure tool execution, pgvector-backed knowledge bases, safe repository patterns, and background learning orchestration.
+> **Provider-pluggable SDK** for building production-ready primitives for low-latency conversational voice agents. Engineered with declarative prompts, secure tool execution, pgvector-backed knowledge bases, safe repository patterns, and background learning orchestration.
 
-In plain English: This framework turns **"make me an AI that talks"** into a structured, production-grade agent. By declaring explicit intent, boundaries, tools, and vector retrieval upfront, it prevents models from confidently hallucinating their way into your production systems.
+In plain English: This framework turns **"make me an AI that talks"** into a structured, production-oriented agent runtime. By declaring explicit intent, boundaries, tools, and vector retrieval upfront, it prevents models from confidently hallucinating their way into your production systems.
 
 ---
 
@@ -103,6 +103,45 @@ flowchart LR
 
 > [!NOTE]
 > The core SDK defines compile-time contracts. Consuming applications bind physical adapters to abstract ports—such as authentication, secret resolvers, database drivers, and metrics telemetry—during initialization.
+> Production readiness depends on downstream adapters for auth, storage, secrets, telemetry, and deployment policy.
+
+## What this SDK intentionally does not own
+
+- User accounts.
+- Production authentication.
+- OAuth/JWT provider choice.
+- Tenant databases.
+- Billing.
+- Compliance programs.
+- Secret manager backends.
+- Cloud providers.
+- Production storage.
+
+These are application-owned concerns. The SDK exposes ports and adapters so applications can plug their own implementations.
+
+## Security Model
+
+- Model output is untrusted.
+- Uploaded documents are untrusted data.
+- Tool execution requires server-side policy.
+- Auth is application-owned through ports such as `AuthTicketPort`.
+- Query identity is dev-only.
+- Local state is dev-only for sensitive workflows.
+- Server-owned prompt policy must remain the final prompt suffix.
+- Learning changes must preserve prompt, tool, confirmation, and safety invariants.
+
+## Local / Starter / Production Integration
+
+| Capability | Local demo | Starter integration | Production app |
+| --- | --- | --- | --- |
+| Auth | dev token | custom `AuthTicketPort` | app-owned |
+| Draft state | local file | repository port | durable DB |
+| Active agent | global fallback | scoped port | explicit/scoped |
+| Tool confirmation | pending action | pending action | app-owned confirmation UI/workflow |
+| Learning | local async | Temporal optional | durable workflow |
+| Memory | in-memory/local | Redis optional | app-owned Redis/DB |
+| Graph | local/Postgres | optional graph | app-owned graph |
+| Infra apply | plan/dev-local | opt-in | approval workflow |
 
 ---
 
@@ -288,6 +327,10 @@ To keep this guide concise, the comprehensive technical tables are grouped below
 | `pnpm test:tenant-resolver:bdd` | Checks scoped parameter loading (limit ceilings, provider routes, prompt context) by tenant ID. |
 | `pnpm test:prompt-compiler-port:bdd` | Verifies compile-time static schemas resolve into valid instructions at runtime. |
 | `pnpm test:prompt-policy:bdd` | Ensures final system prompts contain immutable validation instructions. |
+| `pnpm test:learning-preserves-server-policy:bdd` | Ensures learned memory is inserted before the final server-owned policy suffix. |
+| `pnpm test:model-cannot-self-confirm-tool:bdd` | Verifies model-supplied arguments cannot self-confirm write or external tools. |
+| `pnpm test:tool-execution-policy-engine:bdd` | Checks runtime schema validation, authorization, call limits, timeouts, audit, and redaction. |
+| `pnpm test:starter-production-mode:bdd` | Verifies production starter mode refuses local-only fallbacks. |
 | `pnpm test:memory-store-port:bdd` | Validates in-memory and Redis persistence behaviors inside the voice sessions. |
 | `pnpm test:media-bridge-factory:bdd` | Validates PCM streaming triggers and volume meters across the browser layer. |
 | `pnpm test:event-sink-logger-port:bdd` | Verifies internal session logging redacts sensitive API keys and personal data. |

@@ -20,6 +20,7 @@ export function serverEnv(): StarterServerEnv {
     browserSampleRate: 24_000,
     hostname: "127.0.0.1",
     isProduction: false,
+    mode: "local",
     port: 8787,
     publicHost: "http://127.0.0.1:8787",
   };

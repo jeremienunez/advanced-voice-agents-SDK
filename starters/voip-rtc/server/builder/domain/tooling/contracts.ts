@@ -134,24 +134,21 @@ function handoffParameters(): JsonSchema {
   return objectSchema({
     reason: { type: "string" },
     urgency: { type: "string", enum: ["low", "normal", "high"] },
-    confirmed: { type: "boolean" },
-  }, ["reason", "confirmed"]);
+  }, ["reason"]);
 }
 
 function followUpParameters(): JsonSchema {
   return objectSchema({
     topic: { type: "string" },
     dueAt: { type: "string" },
-    confirmed: { type: "boolean" },
-  }, ["topic", "confirmed"]);
+  }, ["topic"]);
 }
 
 function noteParameters(): JsonSchema {
   return objectSchema({
     eventType: { type: "string" },
     payload: { type: "object" },
-    confirmed: { type: "boolean" },
-  }, ["eventType", "payload", "confirmed"]);
+  }, ["eventType", "payload"]);
 }
 
 function objectSchema(properties: Record<string, JsonSchema>, required: string[]): JsonSchema {

@@ -39,3 +39,16 @@ export {
   createRealtimeVoiceSession,
   type RealtimeVoiceSessionDeps,
 } from "./voice-session.js";
+
+export {
+  createInMemoryPendingActionPort,
+  type InMemoryPendingActionPortOptions,
+} from "./pending-action-port.js";
+
+export {
+  ToolExecutionPolicyEngine,
+  type ToolAuthorizationResult,
+  type ToolExecutionPolicyAuditEvent,
+  type ToolExecutionPolicyEngineOptions,
+  type ToolExecutionPolicyInput,
+} from "./tool-execution-policy-engine.js";

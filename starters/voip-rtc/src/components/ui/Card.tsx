@@ -29,27 +29,3 @@ export function Card({
     </div>
   );
 }
-
-export function CardHeader({
-  children,
-  className = "",
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={`studioCard__header ${className}`.trim()}>{children}</div>
-  );
-}
-
-export function CardBody({
-  children,
-  className = "",
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={`studioCard__body ${className}`.trim()}>{children}</div>
-  );
-}

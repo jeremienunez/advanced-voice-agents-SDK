@@ -1,5 +1,6 @@
 import { createInMemoryMemoryStore } from "@voiceagentsdk/core/server";
 import type { MemoryStorePort } from "@voiceagentsdk/core/sdk";
+import { starterModeFromEnv } from "../../app/starter-mode.js";
 import { RedisRuntimeMemoryStore } from "./redis-store.js";
 import type {
   RedisRuntimeMemoryStoreOptions,
@@ -17,6 +18,14 @@ export function createRuntimeMemoryStoreFromEnv(
     env,
     options.defaultTtlSeconds ?? DEFAULT_RUNTIME_MEMORY_TTL_SECONDS,
   );
+  if (
+    starterModeFromEnv(env) === "production" &&
+    memoryDriver(env) === "local"
+  ) {
+    throw new Error(
+      "local runtime memory is local-only and refused in production starter mode",
+    );
+  }
   if (memoryDriver(env) === "redis") {
     const redisOptions = redisMemoryOptions(env, defaultTtlSeconds);
     return options.redisFactory?.(redisOptions) ??

@@ -12,6 +12,7 @@ import type {
 import type { ProviderFunctionCall } from "../types/transport.types.js";
 import { AgentError, ERROR_CODES } from "../types/error.types.js";
 import { createAgentLogger } from "../utils/index.js";
+import { ToolExecutionPolicyEngine } from "./tool-execution-policy-engine.js";
 import { createStateMachine, type SessionStateMachine } from "./state-machine.js";
 import {
   addPendingToolCall,
@@ -26,6 +27,7 @@ import {
 export interface RealtimeVoiceSessionDeps {
   provider: IRealtimeProvider;
   tools?: VoiceSessionTool[];
+  toolPolicyEngine?: ToolExecutionPolicyEngine;
 }
 
 export class RealtimeVoiceSession implements IVoiceSession {
@@ -35,6 +37,7 @@ export class RealtimeVoiceSession implements IVoiceSession {
   private readonly provider: IRealtimeProvider;
   private readonly callbacks: VoiceSessionCallbacks;
   private readonly stateMachine: SessionStateMachine;
+  private readonly toolPolicyEngine: ToolExecutionPolicyEngine;
   private readonly tools: Map<string, VoiceSessionTool>;
   private context: SessionContext;
   private readonly logger = createAgentLogger("RealtimeVoiceSession");
@@ -48,6 +51,7 @@ export class RealtimeVoiceSession implements IVoiceSession {
     this.config = config;
     this.provider = deps.provider;
     this.callbacks = callbacks;
+    this.toolPolicyEngine = deps.toolPolicyEngine ?? new ToolExecutionPolicyEngine();
     this.tools = new Map((deps.tools ?? []).map((tool) => [tool.name, tool]));
     this.context = createSessionContext(config);
     this.stateMachine = createStateMachine({
@@ -161,12 +165,13 @@ export class RealtimeVoiceSession implements IVoiceSession {
     this.transitionTo("processing_tool");
 
     try {
-      const result = await tool.execute(args, {
+      const context = {
         sessionId: this.sessionId,
         tenantId: this.config.tenantId,
         userId: this.config.userId,
         providerId: this.config.providerId,
-      });
+      };
+      const result = await this.toolPolicyEngine.execute({ tool, args, context });
       await this.provider.submitFunctionResult(call.callId, result, true);
       const completed: PendingToolCall = {
         ...executing,

@@ -27,6 +27,18 @@ function toRuntimeTool(
     name: tool.name,
     description: tool.description,
     parameters: tool.parameters,
+    policy: {
+      sideEffect: tool.sideEffect ?? "none",
+      executionMode: tool.executionMode ?? "explicit",
+      maxCallsPerSession: tool.maxCallsPerSession,
+      timeoutMs: tool.timeoutMs,
+      confirmationReason: confirmationReason(tool),
+    },
     execute: (args, context) => registry.execute({ tool, args, context }),
   };
+}
+
+function confirmationReason(tool: ToolManifest): string | undefined {
+  if (tool.executionMode !== "confirmation") return undefined;
+  return "External action or write side effect.";
 }

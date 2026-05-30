@@ -14,6 +14,11 @@ export function createVoiceSessionFactory(
   options: StarterVoiceServiceOptions,
 ): BrowserVoiceServiceConfig["createSession"] {
   return async (request, callbacks) => {
+    if (options.starterMode === "production" && !request.agent) {
+      throw new Error(
+        "Explicit agent id is required in production starter mode",
+      );
+    }
     const tenant = options.tenantResolver.resolveTenant(
       tenantResolutionInputFromRequest(request),
     );

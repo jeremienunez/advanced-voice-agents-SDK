@@ -96,11 +96,21 @@ export interface VoiceSessionToolContext {
   providerId?: string;
 }
 
+export interface VoiceSessionToolPolicy {
+  sideEffect?: "none" | "read" | "write" | "external_action" | "handoff";
+  executionMode?: "automatic" | "confirmation" | "explicit";
+  maxCallsPerSession?: number;
+  timeoutMs?: number;
+  confirmationReason?: string;
+  redactResult?: boolean;
+}
+
 export interface VoiceSessionTool {
   type: "function";
   name: string;
   description: string;
   parameters: Record<string, unknown>;
+  policy?: VoiceSessionToolPolicy;
   execute(
     args: Record<string, unknown>,
     context: VoiceSessionToolContext,

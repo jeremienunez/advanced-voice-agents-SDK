@@ -33,6 +33,8 @@ export async function accessGuard(
   if (!url.pathname.startsWith("/builder/") && url.pathname !== "/voice/ws") {
     return {};
   }
+  const modeFailure = productionModeFallbackGuard(env, request, url);
+  if (modeFailure) return { response: modeFailure };
   const identity = await verifier.verifyTicket(
     authTicketInputFromRequest(request, url),
   );
@@ -43,4 +45,28 @@ export async function accessGuard(
       headers: corsHeadersFor(env, request),
     }),
   };
+}
+
+function productionModeFallbackGuard(
+  env: StarterServerEnv,
+  request: Request,
+  url: URL,
+): Response | null {
+  if (env.mode !== "production") return null;
+  const queryIdentity = ["tenantId", "userId", "planId"].filter((key) =>
+    url.searchParams.has(key)
+  );
+  if (queryIdentity.length > 0) {
+    return new Response(
+      `Requested query identity (${queryIdentity.join(", ")}) is local-only and refused in production mode`,
+      { status: 400, headers: corsHeadersFor(env, request) },
+    );
+  }
+  if (url.searchParams.has("token")) {
+    return new Response(
+      "Query auth token is local-only and refused in production mode",
+      { status: 400, headers: corsHeadersFor(env, request) },
+    );
+  }
+  return null;
 }

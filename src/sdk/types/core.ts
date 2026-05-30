@@ -121,6 +121,7 @@ export interface ToolManifest {
   executionMode?: "automatic" | "confirmation" | "explicit";
   voicePreamble?: string;
   maxCallsPerSession?: number;
+  timeoutMs?: number;
 }
 
 export interface ToolDefinition<TInput = unknown, TOutput = unknown>

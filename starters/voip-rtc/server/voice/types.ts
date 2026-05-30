@@ -14,6 +14,7 @@ import type {
 } from "@voiceagentsdk/core/server";
 import type { BrowserVoiceMediaBridgeFactory } from "@voiceagentsdk/core/server/browser";
 import type { createBuilderService } from "../builder/index.js";
+import type { StarterMode } from "../app/starter-mode.js";
 import type { RuntimeProviderConfig } from "../providers/catalog.js";
 import type { StarterLearningService } from "../learning/service.js";
 
@@ -37,6 +38,7 @@ export interface StarterVoiceServiceOptions {
   learning?: StarterLearningService;
   memoryStore?: MemoryStorePort;
   secretResolver: SecretResolverPort;
+  starterMode?: StarterMode;
   tenantResolver: TenantResolverPort;
   sdk: StarterSdk;
 }

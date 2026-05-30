@@ -18,5 +18,6 @@ export function toToolManifest(tool: ToolManifest): ToolManifest {
     executionMode: tool.executionMode,
     voicePreamble: tool.voicePreamble,
     maxCallsPerSession: tool.maxCallsPerSession,
+    timeoutMs: tool.timeoutMs,
   };
 }

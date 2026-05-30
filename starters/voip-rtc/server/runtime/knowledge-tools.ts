@@ -63,6 +63,11 @@ function knowledgeTool(
       },
       required: ["query"],
     },
+    policy: {
+      sideEffect: "read",
+      executionMode: "explicit",
+      timeoutMs: 10_000,
+    },
     execute: async (args) => {
       const query = readString(args.query);
       if (!query) return { status: "empty", reason: "query is required" };

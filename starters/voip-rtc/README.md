@@ -199,6 +199,10 @@ BDD and regression checks:
 ```bash
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:learning
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:learning:bdd
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:learning-preserves-server-policy:bdd
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:model-cannot-self-confirm-tool:bdd
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:tool-execution-policy-engine:bdd
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:starter-production-mode:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:temporal-worker:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:rtc-e2e
 ```
@@ -246,6 +250,14 @@ This starter provides a dev-token verifier using `VOICE_DEV_AUTH_TOKEN`; an
 application can replace it with its own session, JWT, or one-time WebSocket
 ticket verifier.
 
+`VOICE_STARTER_MODE` controls whether starter-only fallbacks are allowed:
+
+| Mode | Behavior |
+| --- | --- |
+| `local` | Keeps local DX fallbacks such as query identity, dev-token auth, global active draft, and local memory. |
+| `demo` | Reserved for deployed demos that still bind explicit app adapters. |
+| `production` | Refuses query identity, query tokens, the dev-token verifier, implicit active agent fallback, and local runtime memory. |
+
 The voice runtime receives the verifier result as user context. Query params
 such as `tenantId` and `userId` are only dev-mode requested identity hints, not
 the trusted runtime identity source.
@@ -263,6 +275,7 @@ and audio contracts from `/config`.
 Useful env vars:
 
 - `DEFAULT_REALTIME_PROVIDER=gemini`
+- `VOICE_STARTER_MODE=local` (`production` refuses local-only fallbacks)
 - `GEMINI_API_KEY`
 - `GEMINI_REALTIME_MODEL` defaults to `gemini-3.1-flash-live-preview`
 - `GEMINI_REALTIME_VOICE`
@@ -339,6 +352,10 @@ pnpm --filter @voiceagentsdk/starter-voip-rtc test:event-sink-logger-port:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:memory-store-port:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:prompt-compiler-port:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:prompt-policy:bdd
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:learning-preserves-server-policy:bdd
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:model-cannot-self-confirm-tool:bdd
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:tool-execution-policy-engine:bdd
+pnpm --filter @voiceagentsdk/starter-voip-rtc test:starter-production-mode:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:runtime-tool-authorization:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:runtime-db-credentials:bdd
 pnpm --filter @voiceagentsdk/starter-voip-rtc test:builder-draft-ownership:bdd

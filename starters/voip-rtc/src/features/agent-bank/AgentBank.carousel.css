@@ -1,0 +1,247 @@
+@media (max-width: 1024px) {
+  .agentsLayout {
+    grid-template-columns: 1fr;
+  }
+  .agentDetailPanel {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .agentsToolbar {
+    grid-template-columns: 1fr;
+  }
+  .agentsHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+  }
+  .bankStats {
+    width: 100%;
+  }
+}
+
+/* Layout Switcher (Carousel vs Grid Toggle) */
+.layoutToggleWrapper {
+  display: grid;
+  gap: 6px;
+  color: var(--studio-muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.layoutToggle {
+  display: flex;
+  background: var(--studio-surface-muted);
+  border: 1px solid var(--studio-border-soft);
+  border-radius: 9999px;
+  padding: 4px;
+  min-height: 38px;
+}
+
+.toggleBtn {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: var(--studio-muted);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.toggleBtn:hover {
+  color: var(--studio-text-strong);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.toggleBtn.active {
+  background: var(--studio-surface);
+  color: var(--studio-action);
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+}
+
+/* Agent Carousel Wrapper */
+.agentCarouselSection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 560px;
+}
+
+.agentCarouselWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  width: 100%;
+  position: relative;
+  overflow: visible;
+  padding: 10px 0;
+}
+
+.agentCarouselViewport {
+  position: relative;
+  width: 100%;
+  max-width: 680px;
+  height: 480px;
+  perspective: 1200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.agentCarouselTrack {
+  position: relative;
+  width: 320px;
+  height: 100%;
+  transform-style: preserve-3d;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.agentCarouselSlide {
+  position: absolute;
+  width: 320px;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+
+/* 3D Inactive Slide Collapsing (Pure CSS Overlap Solution) */
+.agentCarouselSlide.prev .agentCard,
+.agentCarouselSlide.next .agentCard {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%) !important;
+  border-color: rgba(226, 232, 240, 0.8) !important;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04) !important;
+  max-height: 110px;
+  overflow: hidden;
+  padding: 16px 20px !important;
+  filter: blur(0.4px);
+  gap: 8px !important;
+}
+
+/* Hide all detailed contents inside background slides except the top title header button */
+.agentCarouselSlide.prev .agentCard > *:not(.agentCardSelect),
+.agentCarouselSlide.next .agentCard > *:not(.agentCardSelect) {
+  display: none !important;
+}
+
+/* 3D Coverflow Angles & Offsets */
+.agentCarouselSlide.active {
+  transform: rotateY(0deg) translate3d(0, 0, 80px);
+  opacity: 1;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.agentCarouselSlide.prev {
+  transform: rotateY(25deg) translate3d(-240px, 0, -100px);
+  opacity: 0.6;
+  z-index: 5;
+  pointer-events: auto;
+}
+
+.agentCarouselSlide.next {
+  transform: rotateY(-25deg) translate3d(240px, 0, -100px);
+  opacity: 0.6;
+  z-index: 5;
+  pointer-events: auto;
+}
+
+.agentCarouselSlide.far-prev {
+  transform: rotateY(30deg) translate3d(-380px, 0, -180px);
+  opacity: 0.15;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.agentCarouselSlide.far-next {
+  transform: rotateY(-30deg) translate3d(380px, 0, -180px);
+  opacity: 0.15;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.agentCarouselSlide.hidden {
+  opacity: 0;
+  transform: translate3d(0, 0, -300px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Carousel Control Elements */
+.carouselControls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--studio-border-soft);
+  border-radius: 9999px;
+  padding: 6px 16px;
+  box-shadow: 0 4px 15px rgba(15, 23, 42, 0.05);
+  backdrop-filter: blur(10px);
+}
+
+.carouselNavBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--studio-border-soft);
+  background: var(--studio-surface);
+  color: var(--studio-text-strong);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.carouselNavBtn:hover {
+  border-color: var(--studio-action-border);
+  background: var(--studio-action-soft);
+  color: var(--studio-action);
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+.carouselNavBtn:active {
+  transform: scale(0.95);
+}
+
+.carouselCounter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--studio-text-strong);
+  min-width: 50px;
+  justify-content: center;
+}
+
+.carouselCounter .current {
+  color: var(--studio-action);
+}
+
+.carouselCounter .separator {
+  color: var(--studio-subtle);
+  font-size: 11px;
+}
+
+.carouselCounter .total {
+  color: var(--studio-muted);
+}

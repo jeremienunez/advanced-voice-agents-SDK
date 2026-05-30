@@ -17,6 +17,7 @@ export function compileToolDefinitions(plan: ToolBuildPlan): ToolManifest[] {
       handlerRef: tool.runtimeBinding.handlerRef,
       sideEffect: tool.sideEffect,
       executionMode: tool.confirmation.required ? "confirmation" : "explicit",
+      timeoutMs: tool.runtimeBinding.timeoutMs,
     }));
 }
 

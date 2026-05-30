@@ -1,0 +1,293 @@
+
+/* Background spotlight neon pulse inside VoiceOrb Stage */
+.rtcOrbStage::before {
+  content: "";
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(11, 87, 208, 0.45) 0%, rgba(19, 115, 51, 0.18) 50%, transparent 100%);
+  filter: blur(44px);
+  z-index: 0;
+  pointer-events: none;
+  animation: orbSpotlightPulse 4s ease-in-out infinite alternate;
+  transition: background 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.rtcOrbStage.speaking::before {
+  background: radial-gradient(circle, rgba(11, 87, 208, 0.55) 0%, rgba(14, 165, 233, 0.22) 50%, transparent 100%);
+}
+
+.rtcOrbStage.listening::before {
+  background: radial-gradient(circle, rgba(19, 115, 51, 0.55) 0%, rgba(52, 168, 83, 0.22) 50%, transparent 100%);
+}
+
+.rtcOrbStage.muted::before {
+  background: radial-gradient(circle, rgba(197, 34, 31, 0.45) 0%, rgba(176, 96, 0, 0.18) 50%, transparent 100%);
+}
+
+@keyframes orbSpotlightPulse {
+  from {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1.1);
+    opacity: 1.2;
+  }
+}
+
+/* Diagnostics Sliding Bottom Drawer Overlay */
+.rtcDrawerBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--studio-transition-normal);
+}
+
+.rtcDrawerBackdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.rtcDiagnosticsDrawer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  height: 72vh;
+  border-top: 1px solid var(--studio-glass-border);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  background: var(--studio-glass-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: var(--studio-shadow-lg);
+  display: grid;
+  grid-template-rows: 64px 1fr;
+  transform: translateY(100%);
+  transition: transform var(--studio-transition-normal);
+}
+
+.rtcDiagnosticsDrawer.open {
+  transform: translateY(0);
+}
+
+.rtcDrawerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--studio-border-soft);
+}
+
+.rtcDrawerTitleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rtcDrawerTitleBlock h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--studio-text-strong);
+}
+
+.rtcDrawerEventCount {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--studio-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.rtcDrawerCloseBtn {
+  border: 0;
+  background: transparent;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--studio-muted);
+  cursor: pointer;
+  transition: color var(--studio-transition-fast);
+  padding: 4px;
+}
+
+.rtcDrawerCloseBtn:hover {
+  color: var(--studio-danger);
+}
+
+.rtcDrawerScrollArea {
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.rtcTopbar {
+  border-radius: var(--studio-radius);
+}
+
+.rtcCentralStage {
+  display: flex;
+  min-height: clamp(480px, 58vh, 620px);
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  isolation: isolate;
+}
+
+.rtcCentralStage::before {
+  content: "";
+  position: absolute;
+  inset: 8% 14%;
+  z-index: -1;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 42% 28%, rgba(255, 255, 255, 0.9), transparent 20%),
+    radial-gradient(circle, rgba(66, 133, 244, 0.055), rgba(52, 168, 83, 0.035) 45%, transparent 72%);
+  filter: blur(34px);
+}
+
+.rtcDrawerDeck,
+.rtcDrawerGrid,
+.rtcDiagnosticsGrid {
+  display: grid;
+  gap: 16px;
+}
+
+.rtcDrawerGrid,
+.rtcDiagnosticsGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.rtcDrawer {
+  overflow: hidden;
+  border: 1px solid var(--studio-glass-border);
+  border-radius: var(--studio-radius);
+  background: var(--studio-glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--studio-shadow-sm);
+}
+
+.rtcDrawer[open] {
+  box-shadow: var(--studio-shadow-md);
+}
+
+.rtcDrawer summary {
+  display: flex;
+  min-height: 50px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 16px;
+  cursor: pointer;
+  list-style: none;
+  position: relative;
+}
+
+.rtcDrawer summary::-webkit-details-marker {
+  display: none;
+}
+
+.rtcDrawer summary::after {
+  content: "+";
+  display: grid;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--studio-glass-border);
+  border-radius: 999px;
+  color: var(--studio-muted);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.rtcDrawer[open] > summary::after {
+  content: "-";
+}
+
+.rtcDrawer summary span {
+  color: var(--studio-text);
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+.rtcDrawer summary small {
+  margin-left: auto;
+  overflow: hidden;
+  color: var(--studio-muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rtcDrawerBody {
+  padding: 16px;
+  border-top: 1px solid var(--studio-surface-muted);
+}
+
+.rtcDrawerBody > .panel,
+.rtcDrawerBody > .controlPanel {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.rtcDrawerBody > .panel > h2 {
+  display: none;
+}
+
+.rtcDrawerBody > .controlPanel {
+  grid-template-columns: minmax(260px, 1.2fr) minmax(140px, 0.6fr) minmax(220px, 0.9fr) minmax(120px, 0.45fr);
+}
+
+@media (max-width: 1200px) {
+  .rtcControlDock > .controlPanel,
+  .rtcDrawerBody > .controlPanel {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .rtcLab {
+    gap: 14px;
+  }
+
+  .rtcCentralStage {
+    min-height: clamp(360px, 54vh, 500px);
+  }
+
+  .rtcDrawerGrid,
+  .rtcControlDock > .controlPanel,
+  .rtcDrawerBody > .controlPanel {
+    grid-template-columns: 1fr;
+  }
+
+  .rtcDrawer summary {
+    min-height: 62px;
+    align-items: flex-start;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .rtcDrawer summary::after {
+    position: absolute;
+    right: 16px;
+  }
+
+  .rtcDrawer summary small {
+    max-width: calc(100% - 36px);
+    margin-left: 0;
+  }
+}

@@ -102,7 +102,7 @@ export function createProvider(
 }
 
 function providerTools(tools: readonly VoiceSessionTool[]) {
-  return tools.map(({ execute: _execute, ...tool }) => tool);
+  return tools.map(({ execute: _execute, policy: _policy, ...tool }) => tool);
 }
 
 function providerApiKey(

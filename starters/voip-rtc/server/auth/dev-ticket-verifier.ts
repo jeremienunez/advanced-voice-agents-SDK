@@ -8,6 +8,11 @@ import type { StarterServerEnv } from "../http/types.js";
 export function createDevAuthTicketVerifier(
   env: StarterServerEnv,
 ): AuthTicketPort {
+  if (env.mode === "production") {
+    throw new Error(
+      "DevAuthTicketVerifier is local-only and cannot be used when VOICE_STARTER_MODE=production",
+    );
+  }
   return new DevAuthTicketVerifier({
     allowUnauthenticated: !env.authToken,
     authToken: env.authToken,

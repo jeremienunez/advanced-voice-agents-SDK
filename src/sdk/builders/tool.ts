@@ -40,6 +40,11 @@ export class ToolBuilder<TInput = unknown, TOutput = unknown> {
     return this;
   }
 
+  sideEffect(effect: ToolDefinition["sideEffect"]): this {
+    this.definition.sideEffect = effect;
+    return this;
+  }
+
   voicePreamble(text: string): this {
     this.definition.voicePreamble = text;
     return this;
@@ -47,6 +52,11 @@ export class ToolBuilder<TInput = unknown, TOutput = unknown> {
 
   maxCallsPerSession(limit: number): this {
     this.definition.maxCallsPerSession = limit;
+    return this;
+  }
+
+  timeoutMs(ms: number): this {
+    this.definition.timeoutMs = ms;
     return this;
   }
 

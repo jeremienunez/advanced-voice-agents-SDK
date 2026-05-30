@@ -1,11 +1,17 @@
 import { useMemo } from "react";
 import { Button } from "../../components/ui/Button.js";
 import type {
-  AgentBankItem,
   AgentBuildDraft,
   CompiledAgentSummary,
 } from "../../domain/builder.js";
 import { useAgentBank } from "../../hooks/useAgentBank.js";
+import { CommandActionCard } from "./CommandActionCard.js";
+import { HealthRow } from "./HealthRow.js";
+import {
+  draftCandidate,
+  formatDate,
+  summarizeAgent,
+} from "./command-center-summary.js";
 
 export function CommandCenter({
   apiBase,
@@ -80,7 +86,7 @@ export function CommandCenter({
       <div className="commandLayout">
         <div className="commandMain">
           <div className="commandActions">
-            <ActionCard
+            <CommandActionCard
               eyebrow="Realtime"
               title="Test Voice"
               description={
@@ -99,7 +105,7 @@ export function CommandCenter({
                 if (voiceAgent && !bankBusy) void bank.loadInRtc(voiceAgent);
               }}
             />
-            <ActionCard
+            <CommandActionCard
               eyebrow="Builder"
               title="Create or Resume"
               description={
@@ -124,7 +130,7 @@ export function CommandCenter({
                 onCreateAgent();
               }}
             />
-            <ActionCard
+            <CommandActionCard
               eyebrow="Operations"
               title="Operate Agent"
               description="Review compiled agents, drafts, knowledge, tools, and versions."
@@ -242,91 +248,4 @@ export function CommandCenter({
       </div>
     </section>
   );
-}
-
-function ActionCard({
-  eyebrow,
-  title,
-  description,
-  actionLabel,
-  disabled,
-  primary = false,
-  onClick,
-}: {
-  eyebrow: string;
-  title: string;
-  description: string;
-  actionLabel: string;
-  disabled?: boolean;
-  primary?: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <article className={primary ? "commandActionCard primary" : "commandActionCard"}>
-      <p className="commandKicker">{eyebrow}</p>
-      <h3>{title}</h3>
-      <p>{description}</p>
-      <Button variant={primary ? "primary" : "default"} onClick={onClick} disabled={disabled}>
-        {actionLabel}
-      </Button>
-    </article>
-  );
-}
-
-function HealthRow({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone: "ready" | "idle" | "error";
-}) {
-  return (
-    <div className={`healthRow ${tone}`}>
-      <span>{label}</span>
-      <strong>{value}</strong>
-    </div>
-  );
-}
-
-function draftCandidate(agents: AgentBankItem[]) {
-  return (
-    agents.find((agent) => agent.kind === "draft") ??
-    agents.find((agent) => !agent.canRunRtc) ??
-    null
-  );
-}
-
-function summarizeAgent(agent: AgentBankItem | null) {
-  if (!agent) {
-    return {
-      name: "No agent selected",
-      intent: "Create or compile an agent to unlock the voice preview.",
-      status: "Empty",
-      knowledge: "Not configured",
-      updated: "Never",
-    };
-  }
-
-  return {
-    name: agent.publicAgentName,
-    intent: agent.intent || "No intent recorded.",
-    status: agent.active ? "Active" : agent.status,
-    knowledge: agent.knowledge?.strategy ?? "Not configured",
-    updated: formatDate(agent.updatedAt),
-  };
-}
-
-function formatDate(value: string | null | undefined) {
-  if (!value) return "Unknown";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Unknown";
-
-  return new Intl.DateTimeFormat("en", {
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
 }

@@ -13,11 +13,13 @@ import { corsHeadersFor } from "../http/cors.js";
 import { loadStarterServerEnv } from "./env.js";
 import { createRuntimeKnowledgeFromEnv } from "./runtime-knowledge.js";
 import { createStarterSdk } from "./starter-sdk.js";
+import { assertLocalFileStateAllowed } from "./starter-mode.js";
 import { createStarterPromptCompiler } from "../runtime/prompt-compiler.js";
 import { createRuntimeMemoryStoreFromEnv } from "../runtime/memory-store.js";
 
 export function createStarterServerApp() {
   const env = loadStarterServerEnv();
+  assertLocalFileStateAllowed(env.mode);
   const providerCatalog = createProviderCatalog();
   const defaultProviderId = resolveDefaultProviderId(providerCatalog);
   const sdk = createStarterSdk(
@@ -44,6 +46,7 @@ export function createStarterServerApp() {
     promptCompiler: createStarterPromptCompiler({ builderService, sdk }),
     runtimeKnowledge: createRuntimeKnowledgeFromEnv({ secretResolver }),
     secretResolver,
+    starterMode: env.mode,
     tenantResolver: createDevTenantResolver(sdk),
     sdk,
   });

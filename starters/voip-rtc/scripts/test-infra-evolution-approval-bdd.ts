@@ -7,6 +7,7 @@ import type {
   InfraProvisioningMode,
 } from "@voiceagentsdk/core/sdk";
 import { requireDraft, saveDraft } from "../server/builder/state/draft-store.js";
+import { appendServerOwnedPromptPolicy } from "../server/builder/domain/prompt-policy.js";
 import { asRecord } from "../server/builder/utils/record-readers.js";
 import { StarterAgentEvolution } from "../server/learning/evolution.js";
 import { assert } from "./shared/assertions.js";
@@ -89,7 +90,7 @@ async function scenarioLocalInfraEvolutionCanApplyImmediately(): Promise<string>
 function compiledDraft(id: string): AgentBuildDraft {
   const now = new Date(0).toISOString();
   const infra = infraPlan(id, "baseline-plan", "local", "server_template", false);
-  return {
+  const draft: AgentBuildDraft = {
     id,
     status: "compiled",
     identity: {
@@ -106,9 +107,14 @@ function compiledDraft(id: string): AgentBuildDraft {
     toolRegistry: [],
     selectedTools: [],
     promptParts: { final: "Base prompt." },
-    compiled: compiledArtifact(id, "Base prompt."),
     createdAt: now,
     updatedAt: now,
+  };
+  const prompt = appendServerOwnedPromptPolicy("Base prompt.", draft, []);
+  return {
+    ...draft,
+    promptParts: { final: prompt },
+    compiled: compiledArtifact(id, prompt),
   };
 }
 

@@ -1,4 +1,5 @@
 import type { AgentEvolutionInput } from "@voiceagentsdk/core/sdk";
+import { SERVER_POLICY_START } from "../builder/domain/prompt-policy.js";
 
 export function buildPromptVersion(
   currentPrompt: string,
@@ -18,11 +19,32 @@ export function buildPromptVersion(
     retrievalLine ? `Retrieval weights: ${retrievalLine}` : "",
     "Use these notes as private operating context. Do not reveal raw memory IDs or audit details to users.",
   ].filter(Boolean).join("\n");
-  return `${stripPreviousLearningBlock(currentPrompt).trim()}\n\n${block}`.trim();
+  return insertLearningBeforeServerPolicy(
+    stripPreviousLearningBlock(currentPrompt),
+    block,
+  );
 }
 
 function stripPreviousLearningBlock(prompt: string): string {
-  return prompt.replace(/\n*## Learned Session Memory[\s\S]*$/m, "");
+  const policyStart = prompt.lastIndexOf(SERVER_POLICY_START);
+  if (policyStart < 0) {
+    return prompt.replace(/\n*## Learned Session Memory[\s\S]*$/m, "");
+  }
+  const beforePolicy = prompt.slice(0, policyStart)
+    .replace(/\n*## Learned Session Memory[\s\S]*$/m, "");
+  const policy = prompt.slice(policyStart);
+  return [beforePolicy.trimEnd(), policy.trimStart()]
+    .filter(Boolean)
+    .join("\n\n");
+}
+
+function insertLearningBeforeServerPolicy(prompt: string, block: string): string {
+  const trimmed = prompt.trim();
+  const policyStart = trimmed.lastIndexOf(SERVER_POLICY_START);
+  if (policyStart < 0) return `${trimmed}\n\n${block}`.trim();
+  const beforePolicy = trimmed.slice(0, policyStart).trim();
+  const policy = trimmed.slice(policyStart).trim();
+  return [beforePolicy, block, policy].filter(Boolean).join("\n\n");
 }
 
 function redact(value: string): string {

@@ -1,0 +1,136 @@
+.voicePreview {
+  overflow: hidden;
+}
+
+.previewOrb {
+  position: relative;
+  display: grid;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 20px;
+  place-items: center;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.88), transparent 28%),
+    linear-gradient(135deg, #2563eb, #14b8a6 58%, #22c55e);
+  box-shadow: 0 18px 44px rgba(37, 99, 235, 0.22);
+}
+
+.previewOrb span {
+  width: 54px;
+  height: 54px;
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  border-radius: inherit;
+  background: rgba(255, 255, 255, 0.24);
+  animation: orbSubtleWave 3s ease-in-out infinite alternate;
+}
+
+@keyframes orbSubtleWave {
+  from {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1.1);
+    opacity: 1.1;
+  }
+}
+
+.voicePreview > p:not(.commandKicker) {
+  margin: 10px 0 16px;
+  line-height: 1.5;
+  font-size: 13px;
+}
+
+.previewSummary {
+  margin: 0 0 18px;
+}
+
+.previewSummary div,
+.healthRow {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--studio-border-soft);
+  border-radius: 12px;
+  background: var(--studio-surface-muted);
+}
+
+.previewSummary dt,
+.healthRow span {
+  color: var(--studio-muted);
+  font-size: 10px;
+  font-weight: 855;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.previewSummary dd,
+.healthRow strong {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--studio-text-strong);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.healthRow.ready {
+  border-color: var(--studio-success-border);
+  background: var(--studio-success-soft);
+}
+
+.healthRow.error {
+  border-color: var(--studio-danger-border);
+  background: var(--studio-danger-soft);
+}
+
+.healthRow.idle {
+  background: var(--studio-surface);
+}
+
+.commandMessage.error {
+  margin: 0;
+  padding: 12px 16px;
+  border: 1px solid var(--studio-danger-border);
+  border-radius: 12px;
+  background: var(--studio-danger-soft);
+  color: var(--studio-danger);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.commandEmpty {
+  margin: 0;
+  padding: 24px;
+  border: 1px dashed var(--studio-border);
+  border-radius: 16px;
+  text-align: center;
+  color: var(--studio-muted);
+  font-size: 13px;
+}
+
+@media (max-width: 1024px) {
+  .commandLayout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .commandActions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .commandHero h2 {
+    font-size: 26px;
+  }
+  .commandHero {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 24px;
+  }
+  .commandHeroStats {
+    width: 100%;
+  }
+}

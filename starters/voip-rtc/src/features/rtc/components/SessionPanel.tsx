@@ -37,7 +37,7 @@ export function SessionPanel({
       </div>
 
       {snapshot.error ? <p className="error-box">{snapshot.error}</p> : null}
-      {snapshot.learning && (snapshot.learning.status === "running" || snapshot.learning.status === "pending") ? (
+      {snapshot.learning && (snapshot.learning.status === "running" || snapshot.learning.status === "queued") ? (
         <div className="learning-loader-box">
           <div className="learning-loader-spinner"></div>
           <div className="learning-loader-content">

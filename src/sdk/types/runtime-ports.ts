@@ -117,6 +117,47 @@ export interface LoggerPort {
   child(context: RuntimeLogContext): LoggerPort;
 }
 
+export type PendingActionStatus =
+  | "confirmation_required"
+  | "approved"
+  | "rejected"
+  | "expired";
+
+export interface PendingActionCreateInput {
+  sessionId: string;
+  tenantId?: string;
+  userId?: string;
+  providerId?: string;
+  toolName: string;
+  arguments: Record<string, unknown>;
+  sideEffect?: string;
+  reason?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface PendingActionRecord extends PendingActionCreateInput {
+  id: string;
+  status: PendingActionStatus;
+  createdAt: string;
+  resolvedAt?: string;
+}
+
+export interface PendingActionResolveInput {
+  id: string;
+  status: Extract<PendingActionStatus, "approved" | "rejected" | "expired">;
+  reason?: string;
+}
+
+export interface PendingActionPort {
+  create(
+    input: PendingActionCreateInput,
+  ): PendingActionRecord | Promise<PendingActionRecord>;
+  get?(id: string): PendingActionRecord | null | Promise<PendingActionRecord | null>;
+  resolve?(
+    input: PendingActionResolveInput,
+  ): PendingActionRecord | Promise<PendingActionRecord>;
+}
+
 export interface MediaBridgeFactoryInput<TOptions = unknown> {
   definition: MediaBridgeDefinition;
   browserSampleRate?: number;

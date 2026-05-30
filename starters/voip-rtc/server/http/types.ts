@@ -1,6 +1,7 @@
 import type { AuthTicketPort } from "@voiceagentsdk/core/sdk";
 import type { BuilderRequestContext } from "../builder/types.js";
 import type { RuntimeProviderConfig } from "../providers/catalog.js";
+import type { StarterMode } from "../app/starter-mode.js";
 
 export interface StarterServerEnv {
   allowedOrigins: Set<string>;
@@ -8,6 +9,7 @@ export interface StarterServerEnv {
   browserSampleRate: number;
   hostname: string;
   isProduction: boolean;
+  mode: StarterMode;
   port: number;
   publicHost: string;
 }

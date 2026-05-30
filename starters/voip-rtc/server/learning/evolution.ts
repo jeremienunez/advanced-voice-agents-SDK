@@ -14,6 +14,7 @@ import {
   currentEvolution,
 } from "./evolution-state.js";
 import type { AgentEvolutionMetadata } from "./evolution-types.js";
+import { assertServerOwnedPromptPolicy } from "../builder/domain/prompt-policy.js";
 
 export class StarterAgentEvolution implements AgentEvolutionPort {
   async validateAndApply(
@@ -36,6 +37,7 @@ export class StarterAgentEvolution implements AgentEvolutionPort {
     const previousArtifactId = current.currentArtifactId ||
       artifactIdFor(draft.id, current.version);
     const prompt = buildPromptVersion(draft.compiled.prompt, input);
+    assertServerOwnedPromptPolicy(prompt);
     const infraDecision = decideInfraEvolution(input, now);
     const nextArtifact: CompiledAgentArtifact = {
       ...draft.compiled,
@@ -149,6 +151,7 @@ export class StarterAgentEvolution implements AgentEvolutionPort {
     const nextVersion = current.version + 1;
     const artifactId = artifactIdFor(draft.id, nextVersion);
     const approvedArtifact = { ...draft.compiled, createdAt: now };
+    assertServerOwnedPromptPolicy(approvedArtifact.prompt);
     const nextEvolution: AgentEvolutionMetadata = {
       ...current,
       version: nextVersion,
@@ -221,6 +224,7 @@ export class StarterAgentEvolution implements AgentEvolutionPort {
       ...current.rollbackArtifact,
       createdAt: now,
     };
+    assertServerOwnedPromptPolicy(rollbackArtifact.prompt);
     const nextEvolution: AgentEvolutionMetadata = {
       ...current,
       version: nextVersion,

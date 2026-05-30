@@ -14,17 +14,17 @@ const actionHandlers: Record<string, ActionToolHandler> = {
     keyFacts: readStringArray(args.keyFacts),
     nextActions: readStringArray(args.nextActions),
   }),
-  "handoff.create": async ({ args }) => confirmed(args, {
+  "handoff.create": async ({ args }) => ({
     status: "handoff_requested",
     reason: readString(args.reason),
     urgency: readString(args.urgency) || "normal",
   }),
-  "task.schedule": async ({ args }) => confirmed(args, {
+  "task.schedule": async ({ args }) => ({
     status: "follow_up_scheduled",
     topic: readString(args.topic),
     dueAt: readString(args.dueAt),
   }),
-  "event.emit": async ({ args }) => confirmed(args, {
+  "event.emit": async ({ args }) => ({
     status: "note_emitted",
     eventType: readString(args.eventType),
     payload: readRecord(args.payload),
@@ -45,19 +45,6 @@ export const actionToolRegistryAdapter: ToolRegistryAdapterPort = {
     return handler(input);
   },
 };
-
-async function confirmed(
-  args: Record<string, unknown>,
-  output: Record<string, unknown>,
-): Promise<Record<string, unknown>> {
-  if (args.confirmed !== true) {
-    return {
-      status: "blocked",
-      reason: "explicit user confirmation is required before this action",
-    };
-  }
-  return output;
-}
 
 function readString(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
