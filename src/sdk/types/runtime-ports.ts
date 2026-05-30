@@ -121,7 +121,9 @@ export type PendingActionStatus =
   | "confirmation_required"
   | "approved"
   | "rejected"
-  | "expired";
+  | "expired"
+  | "executed"
+  | "failed";
 
 export interface PendingActionCreateInput {
   sessionId: string;
@@ -144,7 +146,7 @@ export interface PendingActionRecord extends PendingActionCreateInput {
 
 export interface PendingActionResolveInput {
   id: string;
-  status: Extract<PendingActionStatus, "approved" | "rejected" | "expired">;
+  status: Exclude<PendingActionStatus, "confirmation_required">;
   reason?: string;
 }
 
@@ -156,6 +158,21 @@ export interface PendingActionPort {
   resolve?(
     input: PendingActionResolveInput,
   ): PendingActionRecord | Promise<PendingActionRecord>;
+}
+
+export interface ActiveAgentScope {
+  tenantId?: string;
+  userId?: string;
+  planId?: string;
+}
+
+export interface ActiveAgentAssignmentPort {
+  getActiveAgent(
+    input: ActiveAgentScope,
+  ): string | undefined | Promise<string | undefined>;
+  setActiveAgent(
+    input: ActiveAgentScope & { draftId: string },
+  ): void | Promise<void>;
 }
 
 export interface MediaBridgeFactoryInput<TOptions = unknown> {

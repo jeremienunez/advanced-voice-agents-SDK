@@ -9,12 +9,13 @@ import { accessGuard } from "../server/http/guards.js";
 import { createRuntimeMemoryStoreFromEnv } from "../server/runtime/memory-store.js";
 import { createVoiceSessionFactory } from "../server/voice/session-factory.js";
 import { assert } from "./shared/assertions.js";
-import { voiceOptions } from "./solid-seams/fixtures.js";
+import { agentDraft, builderService, voiceOptions } from "./solid-seams/fixtures.js";
 
 const results = [
   scenarioInvalidStarterModeFailsClosed(),
   scenarioProductionModeRejectsDevTokenVerifier(),
   scenarioProductionModeRejectsLocalFileStateBootstrap(),
+  scenarioProductionModeAcceptsInjectedAdapters(),
   await scenarioProductionModeRejectsQueryIdentityAndToken(),
   await scenarioProductionModeRequiresExplicitAgent(),
   scenarioProductionModeRejectsLocalRuntimeMemory(),
@@ -76,6 +77,69 @@ function scenarioProductionModeRejectsLocalFileStateBootstrap() {
   }
 
   return "production-mode-rejects-local-file-state-bootstrap";
+}
+
+function scenarioProductionModeAcceptsInjectedAdapters() {
+  const restore = withEnv({
+    VOICE_STARTER_MODE: "production",
+  });
+  const authTicketVerifier = {
+    verifyTicket: () => ({ tenantId: "tenant-prod", userId: "user-prod" }),
+  };
+  try {
+    const app = createStarterServerApp({
+      authTicketVerifier,
+      builderService: builderService(agentDraft("draft-prod-injected")),
+      learningService: {
+        approveInfraEvolution: async () => ({
+          status: "skipped" as const,
+          draftId: "draft-prod-injected",
+          version: 0,
+          reason: "test",
+        }),
+        enqueueSessionLearning: () => ({
+          jobId: "job-prod",
+          runId: "run-prod",
+          status: "skipped",
+          queuedAt: new Date(0).toISOString(),
+        }),
+        getLearningStatus: () => null,
+        rollback: async () => ({
+          status: "skipped" as const,
+          draftId: "draft-prod-injected",
+          version: 0,
+          reason: "test",
+        }),
+      },
+      runtimeMemoryStore: {
+        write: (input) => ({
+          id: "memory-prod",
+          kind: input.kind,
+          scope: input.scope,
+          value: input.value,
+          createdAt: new Date(0).toISOString(),
+        }),
+        list: () => [],
+      },
+      tenantResolver: {
+        resolveTenant: () => ({
+          tenantId: "tenant-prod",
+          providerId: "gemini",
+          mediaBridgeId: "browser",
+          planId: "prod",
+          userId: "user-prod",
+        }),
+      },
+    });
+    assert(
+      app.authTicketVerifier === authTicketVerifier,
+      "production bootstrap must use injected auth verifier",
+    );
+  } finally {
+    restore();
+  }
+
+  return "production-mode-accepts-injected-adapters";
 }
 
 async function scenarioProductionModeRejectsQueryIdentityAndToken() {

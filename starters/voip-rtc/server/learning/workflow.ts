@@ -70,6 +70,8 @@ export class LearnFromSessionWorkflow implements LearnFromSessionRunner {
       runId: input.runId ?? `learn_${crypto.randomUUID()}`,
       draftId,
       agentId: input.agentId,
+      tenantId: input.tenantId,
+      userId: input.userId,
       sourceSessionId: input.summary.sessionId,
       memories,
       graph: {

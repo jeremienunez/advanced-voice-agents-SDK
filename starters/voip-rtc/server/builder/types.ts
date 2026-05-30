@@ -1,6 +1,7 @@
 import type {
   AgentInfraPlan,
   AgentBuilderLlmProvider,
+  ActiveAgentAssignmentPort,
   AuthTicketIdentity,
   DatabasePlannerPort,
   DatabaseProvisionerPort,
@@ -22,6 +23,7 @@ import type { DocumentIngestionQuotaPort } from "./quotas/document-ingestion-quo
 export interface BuilderServiceOptions {
   port: number;
   corsHeaders: Record<string, string> | ((request: Request) => Record<string, string>);
+  activeAgentAssignment?: ActiveAgentAssignmentPort;
   composition?: BuilderServiceComposition;
 }
 
@@ -124,6 +126,7 @@ export interface BuilderWorkflowDependencies {
   toolRegistry: ToolRegistryItem[];
   availableToolHandlerRefs: string[];
   availableSecretNames: string[];
+  activeAgentAssignment?: ActiveAgentAssignmentPort;
 }
 
 export interface BuilderServiceComposition {

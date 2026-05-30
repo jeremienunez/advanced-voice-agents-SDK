@@ -13,7 +13,11 @@ import type {
 export function createBuilderService(options: BuilderServiceOptions) {
   const composition =
     options.composition ?? createBuilderServiceCompositionFromEnv();
-  const workflows = createBuilderWorkflows(composition.workflows);
+  const workflows = createBuilderWorkflows({
+    ...composition.workflows,
+    activeAgentAssignment: options.activeAgentAssignment ??
+      composition.workflows.activeAgentAssignment,
+  });
   const router = createBuilderRouter({
     config: composition.config,
     corsHeaders: options.corsHeaders,

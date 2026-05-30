@@ -9,7 +9,7 @@ import type { StarterVoiceServiceOptions } from "./types.js";
 export function createSessionEndedLearningHook(
   options: StarterVoiceServiceOptions,
 ): NonNullable<BrowserVoiceServiceConfig["onSessionEnded"]> {
-  return (input, emitStatus) => {
+  return async (input, emitStatus) => {
     if (!options.learning) {
       emitStatus(skippedLearningStatus(
         input.summary.sessionId,
@@ -17,8 +17,14 @@ export function createSessionEndedLearningHook(
       ));
       return;
     }
-    const draft = options.builderService.getCompiledDraft(input.request.agent);
-    const draftId = input.request.agent ?? draft?.id;
+    const agentId = input.request.agent ??
+      await options.activeAgentAssignment?.getActiveAgent({
+        tenantId: input.summary.tenantId,
+        userId: input.summary.userId,
+        planId: input.request.user.planId,
+      });
+    const draft = options.builderService.getCompiledDraft(agentId);
+    const draftId = agentId ?? draft?.id;
     if (!draftId) {
       emitStatus(skippedLearningStatus(
         input.summary.sessionId,

@@ -38,6 +38,7 @@ export interface BaseSessionConfig {
 
 export interface VoiceSessionConfig extends BaseSessionConfig {
   channel: "voice";
+  agentId?: string;
   callSid?: string;
   streamSid?: string;
   providerId?: string;
@@ -93,6 +94,7 @@ export interface VoiceSessionToolContext {
   sessionId: string;
   tenantId?: string;
   userId?: string;
+  agentId?: string;
   providerId?: string;
 }
 

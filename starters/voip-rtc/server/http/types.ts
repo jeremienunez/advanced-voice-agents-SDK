@@ -2,6 +2,7 @@ import type { AuthTicketPort } from "@voiceagentsdk/core/sdk";
 import type { BuilderRequestContext } from "../builder/types.js";
 import type { RuntimeProviderConfig } from "../providers/catalog.js";
 import type { StarterMode } from "../app/starter-mode.js";
+import type { RuntimePendingActionApprovalService } from "../voice/pending-action-approval.js";
 
 export interface StarterServerEnv {
   allowedOrigins: Set<string>;
@@ -30,6 +31,7 @@ export interface StarterRouteContext {
     rollback(draftId: string): Promise<unknown>;
   };
   providerCatalog: RuntimeProviderConfig[];
+  runtimePendingActions?: RuntimePendingActionApprovalService;
   voiceService: {
     readonly activeSessionCount: number;
   };

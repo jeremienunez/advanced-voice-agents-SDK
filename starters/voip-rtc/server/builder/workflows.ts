@@ -6,9 +6,16 @@ import { normalizeIdentity } from "./request/identity.js";
 import { normalizeKnowledgeDocuments } from "./request/knowledge-documents.js";
 import { normalizeResearchSettings } from "./request/research-settings.js";
 import { normalizeResearchBudget } from "./domain/research.js";
-import { requireDraft, resolveDraft, saveDraft } from "./state/draft-store.js";
-import { ownerMetadata, resolveOwnedDraft } from "./state/draft-ownership.js";
-import { setActiveDraft } from "./state/session-store.js";
+import { saveDraft } from "./state/draft-store.js";
+import {
+  ownerMetadata,
+  requireOwnedDraft,
+  resolveOwnedDraft,
+} from "./state/draft-ownership.js";
+import {
+  activeAgentScopeFromContext,
+  createGlobalActiveAgentAssignment,
+} from "./state/active-agent-assignment.js";
 import type { BuilderRequestContext, BuilderWorkflowDependencies } from "./types.js";
 import { asRecord, readString } from "./utils/record-readers.js";
 import { buildEagerKnowledge } from "./eager-knowledge.js";
@@ -18,12 +25,12 @@ import { createValidatedInfraPlan } from "./workflow-infra.js";
 
 export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
   return {
-    activateSession(body: unknown) {
+    async activateSession(body: unknown, context: BuilderRequestContext = {}) {
       const draftId = readString(body, "draftId");
       if (!draftId) throw new Error("draftId is required");
-      const draft = requireDraft(draftId);
+      const draft = requireOwnedDraft(draftId, context);
       if (!draft.compiled) throw new Error(`Draft "${draftId}" is not compiled`);
-      setActiveDraft(draftId);
+      await setActiveAgent(deps, draftId, context);
     },
 
     async createPromptPlan(body: unknown, context: BuilderRequestContext = {}) {
@@ -52,8 +59,8 @@ export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
       return { draft: nextDraft };
     },
 
-    async savePromptClarifications(body: unknown) {
-      const draft = resolveDraft(body);
+    async savePromptClarifications(body: unknown, context: BuilderRequestContext = {}) {
+      const draft = resolveOwnedDraft(body, context);
       if (!draft.promptPlan) throw new Error("Prompt plan is required");
       const answers = normalizePromptAnswers(body);
       const acceptUnanswered = asRecord(body).acceptUnanswered !== false;
@@ -77,8 +84,8 @@ export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
       return ingestDocumentWithGuards({ context, deps, request });
     },
 
-    async runResearch(body: unknown) {
-      const draft = resolveDraft(body);
+    async runResearch(body: unknown, context: BuilderRequestContext = {}) {
+      const draft = resolveOwnedDraft(body, context);
       const documents = normalizeKnowledgeDocuments(body);
       const research = normalizeResearchSettings(body, researchDefaults(deps));
       if (!deps.research.isConfigured(research)) {
@@ -113,8 +120,8 @@ export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
       return { status: result.draft.status, ...result };
     },
 
-    async createKnowledgePlan(body: unknown) {
-      const draft = resolveDraft(body);
+    async createKnowledgePlan(body: unknown, context: BuilderRequestContext = {}) {
+      const draft = resolveOwnedDraft(body, context);
       const documents = normalizeKnowledgeDocuments(body);
       const plan = await deps.planner.createKnowledgePlan({ draft, documents });
       const nextDraft = mutateDraft(draft).knowledgePlan(plan).build();
@@ -230,10 +237,22 @@ export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
       return { status: "compiled", result, draft: nextDraft };
     },
 
-    async compileAgent(body: unknown) {
-      return compileAgentWithServerPolicy(body, deps);
+    async compileAgent(body: unknown, context: BuilderRequestContext = {}) {
+      return compileAgentWithServerPolicy(body, deps, context);
     },
   };
+}
+
+async function setActiveAgent(
+  deps: BuilderWorkflowDependencies,
+  draftId: string,
+  context: BuilderRequestContext,
+): Promise<void> {
+  const assignment = deps.activeAgentAssignment ?? createGlobalActiveAgentAssignment();
+  await assignment.setActiveAgent({
+    ...activeAgentScopeFromContext(context),
+    draftId,
+  });
 }
 
 function researchDefaults(deps: BuilderWorkflowDependencies) {

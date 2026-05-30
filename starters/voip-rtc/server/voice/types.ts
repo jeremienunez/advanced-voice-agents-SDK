@@ -1,4 +1,5 @@
 import type {
+  ActiveAgentAssignmentPort,
   CompiledVoiceAgentSdk,
   EmbeddingPort,
   KnowledgeSearchPort,
@@ -10,6 +11,7 @@ import type {
 } from "@voiceagentsdk/core/sdk";
 import type {
   IRealtimeProvider,
+  ToolExecutionPolicyEngine,
   VoiceSessionTool,
 } from "@voiceagentsdk/core/server";
 import type { BrowserVoiceMediaBridgeFactory } from "@voiceagentsdk/core/server/browser";
@@ -28,6 +30,7 @@ export interface RuntimeKnowledge {
 }
 
 export interface StarterVoiceServiceOptions {
+  activeAgentAssignment?: ActiveAgentAssignmentPort;
   builderService: BuilderService;
   browserSampleRate: number;
   mediaBridgeFactory?: BrowserVoiceMediaBridgeFactory;
@@ -40,5 +43,6 @@ export interface StarterVoiceServiceOptions {
   secretResolver: SecretResolverPort;
   starterMode?: StarterMode;
   tenantResolver: TenantResolverPort;
+  toolPolicyEngine?: ToolExecutionPolicyEngine;
   sdk: StarterSdk;
 }

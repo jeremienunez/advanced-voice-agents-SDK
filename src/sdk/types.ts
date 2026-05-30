@@ -13,4 +13,5 @@ export * from "./types/builder.js";
 export * from "./types/database.js";
 export * from "./types/draft.js";
 export * from "./types/ports.js";
+export * from "./types/runtime-ports.js";
 export * from "./types/diagnostics.js";

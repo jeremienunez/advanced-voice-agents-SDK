@@ -4,6 +4,7 @@ import { resolveClientIp } from "./client-ip.js";
 import { corsHeadersFor } from "./cors.js";
 import { readBodyString, readDraftId } from "./draft-id.js";
 import { accessGuard, originGuard } from "./guards.js";
+import { requireOwnedDraft } from "../builder/state/draft-ownership.js";
 import type { BuilderRequestContext } from "../builder/types.js";
 import type { StarterRouteContext } from "./types.js";
 
@@ -95,9 +96,25 @@ async function handleBuilderRoute(
   url: URL,
   context: BuilderRequestContext,
 ): Promise<Response> {
+  const pendingRoute = pendingActionRoute(url, request.method);
+  if (pendingRoute) {
+    if (!app.runtimePendingActions) {
+      return json({ error: "Pending action approval is not configured" }, app, request, {
+        status: 404,
+      });
+    }
+    if (pendingRoute.action === "approve") {
+      const result = await app.runtimePendingActions.approve(pendingRoute.id, context);
+      return json({ status: "executed", result }, app, request);
+    }
+    const pending = await app.runtimePendingActions.reject(pendingRoute.id, context);
+    return json({ status: "rejected", pendingActionId: pending.id }, app, request);
+  }
+
   if (url.pathname === "/builder/agents/rollback" && request.method === "POST") {
     const draftId = readDraftId(await request.json());
     if (!draftId) return json({ error: "draftId is required" }, app, request);
+    requireOwnedDraft(draftId, context);
     return json(await app.learningService.rollback(draftId), app, request);
   }
   if (url.pathname === "/builder/agents/approve-infra-evolution" && request.method === "POST") {
@@ -106,6 +123,7 @@ async function handleBuilderRoute(
     const pendingId = readBodyString(body, "pendingId");
     if (!draftId) return json({ error: "draftId is required" }, app, request);
     if (!pendingId) return json({ error: "pendingId is required" }, app, request);
+    requireOwnedDraft(draftId, context);
     return json(await app.learningService.approveInfraEvolution(draftId, pendingId), app, request);
   }
   const { response } = await app.builderService.handle(request, url, context);
@@ -116,6 +134,24 @@ function json(
   data: unknown,
   app: StarterRouteContext,
   request: Request,
+  init: ResponseInit = {},
 ): Response {
-  return Response.json(data, { headers: corsHeadersFor(app.env, request) });
+  const headers = new Headers(corsHeadersFor(app.env, request));
+  new Headers(init.headers).forEach((value, key) => headers.set(key, value));
+  return Response.json(data, {
+    ...init,
+    headers,
+  });
+}
+
+function pendingActionRoute(
+  url: URL,
+  method: string,
+): { id: string; action: "approve" | "reject" } | null {
+  if (method !== "POST") return null;
+  const prefix = "/builder/runtime/pending-actions/";
+  if (!url.pathname.startsWith(prefix)) return null;
+  const [id, action] = url.pathname.slice(prefix.length).split("/");
+  if (!id || (action !== "approve" && action !== "reject")) return null;
+  return { id: decodeURIComponent(id), action };
 }

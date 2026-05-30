@@ -2,11 +2,12 @@ import type {
   AgentEvolutionInput,
   AgentEvolutionPort,
   AgentEvolutionResult,
+  ActiveAgentAssignmentPort,
   CompiledAgentArtifact,
 } from "@voiceagentsdk/core/sdk";
 import { mutateDraft } from "../builder/domain/drafts.js";
 import { requireDraft, saveDraft } from "../builder/state/draft-store.js";
-import { setActiveDraft } from "../builder/state/session-store.js";
+import { createGlobalActiveAgentAssignment } from "../builder/state/active-agent-assignment.js";
 import { decideInfraEvolution } from "./evolution-infra.js";
 import { buildPromptVersion } from "./evolution-prompt.js";
 import {
@@ -17,6 +18,13 @@ import type { AgentEvolutionMetadata } from "./evolution-types.js";
 import { assertServerOwnedPromptPolicy } from "../builder/domain/prompt-policy.js";
 
 export class StarterAgentEvolution implements AgentEvolutionPort {
+  private readonly activeAgentAssignment: ActiveAgentAssignmentPort;
+
+  constructor(options: { activeAgentAssignment?: ActiveAgentAssignmentPort } = {}) {
+    this.activeAgentAssignment = options.activeAgentAssignment ??
+      createGlobalActiveAgentAssignment();
+  }
+
   async validateAndApply(
     input: AgentEvolutionInput,
   ): Promise<AgentEvolutionResult> {
@@ -108,7 +116,11 @@ export class StarterAgentEvolution implements AgentEvolutionPort {
     const nextDraft = builder.build();
 
     saveDraft(nextDraft);
-    setActiveDraft(nextDraft.id);
+    await this.activeAgentAssignment.setActiveAgent({
+      draftId: nextDraft.id,
+      tenantId: input.tenantId,
+      userId: input.userId,
+    });
     return {
       status: "applied",
       draftId: nextDraft.id,
@@ -192,7 +204,7 @@ export class StarterAgentEvolution implements AgentEvolutionPort {
       .build();
 
     saveDraft(nextDraft);
-    setActiveDraft(nextDraft.id);
+    await this.activeAgentAssignment.setActiveAgent({ draftId: nextDraft.id });
     return {
       status: "applied",
       draftId,
@@ -259,7 +271,7 @@ export class StarterAgentEvolution implements AgentEvolutionPort {
       .build();
 
     saveDraft(nextDraft);
-    setActiveDraft(nextDraft.id);
+    await this.activeAgentAssignment.setActiveAgent({ draftId: nextDraft.id });
     return {
       status: "applied",
       draftId,

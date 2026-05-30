@@ -1,5 +1,6 @@
 import type {
   AgentEvolutionResult,
+  ActiveAgentAssignmentPort,
   LearningJobStatus,
   LearningSessionInput,
 } from "@voiceagentsdk/core/sdk";
@@ -32,6 +33,7 @@ export interface StarterLearningService {
 export function createStarterLearningServiceFromEnv(
   env: Record<string, string | undefined> = Bun.env,
   options: {
+    activeAgentAssignment?: ActiveAgentAssignmentPort;
     graphClient?: CypherGraphClientPort;
     temporalClient?: TemporalWorkerClientPort;
   } = {},
@@ -46,7 +48,9 @@ export function createStarterLearningServiceFromEnv(
   const graphStore = createGraphMemoryStoreFromEnv(env, {
     cypherClient: options.graphClient,
   });
-  const evolution = new StarterAgentEvolution();
+  const evolution = new StarterAgentEvolution({
+    activeAgentAssignment: options.activeAgentAssignment,
+  });
 
   return {
     approveInfraEvolution(draftId, pendingId) {

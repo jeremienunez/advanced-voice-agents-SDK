@@ -1,5 +1,5 @@
 import { builderAgentBankPayload } from "./state/agent-bank-payload.js";
-import { requireDraft } from "./state/draft-store.js";
+import { requireOwnedDraft } from "./state/draft-ownership.js";
 import { builderSessionPayload } from "./state/session-payload.js";
 import { json } from "./http.js";
 import { routeOnboardingRequest } from "./onboarding/routes.js";
@@ -47,7 +47,7 @@ export function createBuilderRouter(options: {
           );
           if (!draftId) throw new Error("draftId is required");
           return {
-            response: json({ draft: requireDraft(draftId) }, corsHeaders),
+            response: json({ draft: requireOwnedDraft(draftId, context) }, corsHeaders),
           };
         }
 
@@ -85,7 +85,7 @@ async function routePostRequest(
 
   if (url.pathname === "/builder/session") {
     const body = await request.json();
-    workflows.activateSession(body);
+    await workflows.activateSession(body, context);
     return builderSessionPayload();
   }
 
@@ -94,7 +94,7 @@ async function routePostRequest(
   }
 
   if (url.pathname === "/builder/prompt-clarifications") {
-    return workflows.savePromptClarifications(await request.json());
+    return workflows.savePromptClarifications(await request.json(), context);
   }
 
   if (url.pathname === "/builder/ingest-document") {
@@ -102,7 +102,7 @@ async function routePostRequest(
   }
 
   if (url.pathname === "/builder/run-research") {
-    return workflows.runResearch(await request.json());
+    return workflows.runResearch(await request.json(), context);
   }
 
   if (url.pathname === "/builder/autonomous-knowledge") {
@@ -110,7 +110,7 @@ async function routePostRequest(
   }
 
   if (url.pathname === "/builder/knowledge-plan") {
-    return workflows.createKnowledgePlan(await request.json());
+    return workflows.createKnowledgePlan(await request.json(), context);
   }
 
   if (url.pathname === "/builder/database-plan") {
@@ -126,7 +126,7 @@ async function routePostRequest(
   }
 
   if (url.pathname === "/builder/compile-agent") {
-    return workflows.compileAgent(await request.json());
+    return workflows.compileAgent(await request.json(), context);
   }
 
   return null;

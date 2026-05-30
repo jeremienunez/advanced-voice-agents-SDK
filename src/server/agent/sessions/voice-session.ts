@@ -169,6 +169,7 @@ export class RealtimeVoiceSession implements IVoiceSession {
         sessionId: this.sessionId,
         tenantId: this.config.tenantId,
         userId: this.config.userId,
+        agentId: this.config.agentId,
         providerId: this.config.providerId,
       };
       const result = await this.toolPolicyEngine.execute({ tool, args, context });

@@ -136,6 +136,8 @@ export interface AgentEvolutionInput {
   runId: string;
   draftId: string;
   agentId?: string;
+  tenantId?: string;
+  userId?: string;
   sourceSessionId: string;
   memories: TemporalMemoryRecord[];
   graph: {

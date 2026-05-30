@@ -1,6 +1,7 @@
 import type {
   AgentBuildDraft,
   AgentEvolutionInput,
+  AuthTicketIdentity,
   FinalPromptBuildRequest,
   PromptPlannerPort,
   ToolName,
@@ -13,6 +14,7 @@ import { createBuilderWorkflows } from "../server/builder/workflows.js";
 import { assert } from "./shared/assertions.js";
 
 const policyEnd = "END SERVER-OWNED SAFETY AND TOOL POLICY";
+const owner = identity("tenant-learning", "user-learning");
 
 const results = [
   await scenarioLearningKeepsServerPolicyFinal(),
@@ -33,7 +35,7 @@ async function scenarioLearningKeepsServerPolicyFinal() {
   const { artifact } = await workflows.compileAgent({
     draftId: draft.id,
     selectedTools: ["create_summary"],
-  });
+  }, { identity: owner });
   assert(
     artifact.prompt.trim().endsWith(policyEnd),
     "compiled prompt must start with server policy as final suffix",
@@ -119,6 +121,7 @@ function draftForLearningPolicy(id: string): AgentBuildDraft {
     promptParts: {},
     createdAt: now,
     updatedAt: now,
+    metadata: { builderOwner: owner },
   };
 }
 
@@ -139,4 +142,8 @@ function learningInput(draftId: string): AgentEvolutionInput {
     graph: { nodes: [], edges: [] },
     recommendations: { retrievalWeights: { temporal: 0.7 } },
   };
+}
+
+function identity(tenantId: string, userId: string): AuthTicketIdentity {
+  return { tenantId, userId, scopes: ["builder:access"] };
 }

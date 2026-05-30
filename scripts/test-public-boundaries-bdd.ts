@@ -1,7 +1,19 @@
+import type {
+  ActiveAgentAssignmentPort,
+  ActiveAgentScope,
+  EventSinkPort,
+  MemoryStorePort,
+  PendingActionPort,
+  PendingActionRecord,
+  RuntimeEventRecord,
+  TenantResolverPort,
+} from "@voiceagentsdk/core/sdk";
+
 type PackageModule = Record<string, unknown>;
 
 const results = [
   await scenarioSdkCompilesThroughPublicExports(),
+  await scenarioRuntimePortsArePublicTypes(),
   await scenarioBrowserProtocolParserIsPublicAndStable(),
   await scenarioDeclaredPackageEntrypointsResolve(),
 ];
@@ -27,6 +39,22 @@ async function scenarioSdkCompilesThroughPublicExports(): Promise<string> {
   );
 
   return "sdk-compiles-through-public-exports";
+}
+
+async function scenarioRuntimePortsArePublicTypes(): Promise<string> {
+  type PublicRuntimePorts = [
+    PendingActionPort,
+    PendingActionRecord,
+    ActiveAgentAssignmentPort,
+    ActiveAgentScope,
+    RuntimeEventRecord,
+    EventSinkPort,
+    MemoryStorePort,
+    TenantResolverPort,
+  ];
+  const publicPortsCompile: PublicRuntimePorts | null = null;
+  assert(publicPortsCompile === null, "runtime ports must be public type exports");
+  return "runtime-ports-are-public-types";
 }
 
 async function scenarioBrowserProtocolParserIsPublicAndStable(): Promise<string> {

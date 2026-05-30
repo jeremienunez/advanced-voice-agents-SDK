@@ -47,6 +47,7 @@ export {
 
 export {
   ToolExecutionPolicyEngine,
+  type ApprovedPendingActionExecutionInput,
   type ToolAuthorizationResult,
   type ToolExecutionPolicyAuditEvent,
   type ToolExecutionPolicyEngineOptions,

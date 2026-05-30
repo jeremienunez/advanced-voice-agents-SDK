@@ -1,5 +1,6 @@
 import type {
   AgentBuildDraft,
+  AuthTicketIdentity,
   FinalPromptBuildRequest,
   PromptPlannerPort,
   ToolName,
@@ -13,6 +14,7 @@ import { assert } from "./shared/assertions.js";
 
 const policyStart = "BEGIN SERVER-OWNED SAFETY AND TOOL POLICY";
 const policyEnd = "END SERVER-OWNED SAFETY AND TOOL POLICY";
+const owner = identity("tenant-policy", "user-policy");
 
 const results = [
   await scenarioCompiledPromptEndsWithServerPolicy(),
@@ -34,7 +36,7 @@ async function scenarioCompiledPromptEndsWithServerPolicy() {
   const { artifact } = await workflows.compileAgent({
     draftId: draft.id,
     selectedTools: ["create_summary", "wire_money"],
-  });
+  }, { identity: owner });
   const policy = policySuffix(artifact.prompt);
 
   assert(
@@ -76,7 +78,7 @@ async function scenarioRejectsPromptMissingCoreInvariants() {
     workflows.compileAgent({
       draftId: draft.id,
       selectedTools: ["create_summary"],
-    })
+    }, { identity: owner })
   );
 
   assert(
@@ -145,6 +147,7 @@ function draftWithTools(id = "draft_prompt_policy_bdd"): AgentBuildDraft {
     promptParts: {},
     createdAt: now,
     updatedAt: now,
+    metadata: { builderOwner: owner },
   };
 }
 
@@ -172,4 +175,8 @@ async function captureError(
   } catch (error) {
     return error instanceof Error ? error : new Error(String(error));
   }
+}
+
+function identity(tenantId: string, userId: string): AuthTicketIdentity {
+  return { tenantId, userId, scopes: ["builder:access"] };
 }

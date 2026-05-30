@@ -4,7 +4,7 @@ import type {
 } from "@voiceagentsdk/core/sdk";
 import type { BuilderRequestContext } from "../types.js";
 import { asRecord, readString } from "../utils/record-readers.js";
-import { resolveDraft } from "./draft-store.js";
+import { requireDraft, resolveDraft } from "./draft-store.js";
 
 const ownerKey = "builderOwner";
 
@@ -30,7 +30,16 @@ export function resolveOwnedDraft(
   return draft;
 }
 
-function assertDraftOwnedBy(
+export function requireOwnedDraft(
+  draftId: string,
+  context: BuilderRequestContext,
+): AgentBuildDraft {
+  const draft = requireDraft(draftId);
+  assertDraftOwnedBy(draft, context);
+  return draft;
+}
+
+export function assertDraftOwnedBy(
   draft: AgentBuildDraft,
   context: BuilderRequestContext,
 ): void {

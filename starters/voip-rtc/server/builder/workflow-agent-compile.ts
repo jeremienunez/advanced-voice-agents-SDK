@@ -9,15 +9,20 @@ import { createToolBuildPlan } from "./domain/tooling/contracts.js";
 import { toolInstructionsFromPlan } from "./domain/tooling/compile.js";
 import { validatedToolPlan, validateToolBuildPlan } from "./domain/tooling/validation.js";
 import { normalizeSelectedTools } from "./request/selected-tools.js";
-import { resolveDraft, saveDraft } from "./state/draft-store.js";
-import { setActiveDraft } from "./state/session-store.js";
-import type { BuilderWorkflowDependencies } from "./types.js";
+import { saveDraft } from "./state/draft-store.js";
+import { resolveOwnedDraft } from "./state/draft-ownership.js";
+import {
+  activeAgentScopeFromContext,
+  createGlobalActiveAgentAssignment,
+} from "./state/active-agent-assignment.js";
+import type { BuilderRequestContext, BuilderWorkflowDependencies } from "./types.js";
 
 export async function compileAgentWithServerPolicy(
   body: unknown,
   deps: BuilderWorkflowDependencies,
+  context: BuilderRequestContext = {},
 ) {
-  const draft = resolveDraft(body);
+  const draft = resolveOwnedDraft(body, context);
   const selectedTools = normalizeSelectedTools(body, draft);
   const plannedTools = createToolBuildPlan(draft, selectedTools);
   const validation = validateToolBuildPlan(
@@ -57,7 +62,12 @@ export async function compileAgentWithServerPolicy(
     .compiled(artifact)
     .build();
   saveDraft(nextDraft);
-  setActiveDraft(nextDraft.id);
+  const activeAgentAssignment = deps.activeAgentAssignment ??
+    createGlobalActiveAgentAssignment();
+  await activeAgentAssignment.setActiveAgent({
+    ...activeAgentScopeFromContext(context),
+    draftId: nextDraft.id,
+  });
   return { draft: nextDraft, artifact };
 }
 
