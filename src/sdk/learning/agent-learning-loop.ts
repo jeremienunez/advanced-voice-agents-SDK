@@ -10,6 +10,8 @@ import type {
   TemporalMemoryRecord,
 } from "../types.js";
 import { normalizeLearningLoopProfile } from "./in-memory-run-repository.js";
+import { createNoopEvaluationHarness } from "./noop-evaluation-harness.js";
+import { createLearningReceipt } from "./receipts.js";
 
 const terminalStatuses = new Set<LearningRunStatus>([
   "evaluated",
@@ -119,6 +121,19 @@ async function executeLearningRun(
       input,
       signals,
     });
+    const evaluation = await (
+      options.evaluationHarness ?? createNoopEvaluationHarness()
+    ).evaluate({
+      input,
+      deltas: signals.deltas,
+    });
+    await options.receiptSink?.emit(createLearningReceipt({
+      runId: running.runId,
+      session: input,
+      signals,
+      decision,
+      evaluation,
+    }));
     const shouldWriteMemory = shouldWriteLearningArtifacts(decision.action);
     const memories = shouldWriteMemory
       ? await writeMemory(options, input, draftId, signals)

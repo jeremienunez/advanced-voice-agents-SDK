@@ -1,6 +1,8 @@
 import type {
   GraphMemoryEdge,
   GraphMemoryNode,
+  LearningDelta,
+  LearningMemorySignal,
   LearningSessionInput,
   SessionLearningSignals,
 } from "../types.js";
@@ -16,6 +18,11 @@ export function extractDefaultSessionLearningSignals(
     .map((entry) => entry.text.trim())
     .filter(Boolean)
     .join(" ");
+  const safeUserText = sanitizeText(userText);
+  const redactions = collectRedactions([
+    userText,
+    ...input.toolCalls.map((call) => call.error ?? ""),
+  ].join(" "));
   const failedTools = input.toolCalls.filter((call) => call.status === "failed");
   const missingTools = failedTools
     .filter((call) => /unknown tool|missing|not configured/i.test(call.error ?? ""))
@@ -33,7 +40,7 @@ export function extractDefaultSessionLearningSignals(
         endReason: input.summary.endReason,
       },
     },
-    ...extractPreferences(userText).map((text) => ({
+    ...extractPreferences(safeUserText).map((text) => ({
       kind: "preference" as const,
       text,
       data: { source: "transcript" },
@@ -49,7 +56,9 @@ export function extractDefaultSessionLearningSignals(
       data: { toolName },
     })),
   ];
-  const nodes = graphNodes(input, userText);
+  const nodes = graphNodes(input, safeUserText);
+  const promptRecommendation = memories.map((memory) => memory.text).join("\n");
+  const confidence = finalTranscript.length || failedTools.length ? 0.8 : 0.35;
 
   return {
     memories,
@@ -58,13 +67,22 @@ export function extractDefaultSessionLearningSignals(
       edges: graphEdges(input, nodes),
     },
     missingTools,
-    promptRecommendation: memories.map((memory) => memory.text).join("\n"),
+    promptRecommendation,
     retrievalWeights: {
       temporal: finalTranscript.length ? 0.35 : 0.2,
       graph: nodes.length > 1 ? 0.3 : 0.15,
       knowledge: 0.35,
     },
-    confidence: finalTranscript.length || failedTools.length ? 0.8 : 0.35,
+    deltas: createDeltas({
+      confidence,
+      memories,
+      missingTools,
+      promptRecommendation,
+      sessionId: input.summary.sessionId,
+      userText: safeUserText,
+    }),
+    redactions,
+    confidence,
   };
 }
 
@@ -170,6 +188,76 @@ function uniqueNodes(nodes: GraphMemoryNode[]): GraphMemoryNode[] {
 
 function stableToken(value: string): string {
   return sanitizeText(value).toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+}
+
+function createDeltas(input: {
+  confidence: number;
+  memories: LearningMemorySignal[];
+  missingTools: string[];
+  promptRecommendation: string;
+  sessionId: string;
+  userText: string;
+}): LearningDelta[] {
+  const memoryDeltas = input.memories.map((memory) =>
+    delta("memory", memory.kind, memory.text, input, {
+      data: memory.data ?? null,
+      kind: memory.kind,
+      text: memory.text,
+    })
+  );
+  const toolDeltas = input.missingTools.map((tool) =>
+    delta("tool", `Missing tool ${tool}`, `Add or bind runtime tool ${tool}.`, input, { tool })
+  );
+  const promptDelta = input.promptRecommendation
+    ? [delta("prompt", "Prompt learning summary", input.promptRecommendation, input, {
+        prompt: input.promptRecommendation,
+      })]
+    : [];
+  const skillDelta = proceduralGuidance(input.userText)
+    ? [delta("skill", "Procedural session guidance", input.userText, input, {
+        procedure: splitProcedure(input.userText),
+      })]
+    : [];
+  return [...memoryDeltas, ...toolDeltas, ...promptDelta, ...skillDelta];
+}
+
+function delta(
+  kind: LearningDelta["kind"],
+  title: string,
+  summary: string,
+  input: { confidence: number; sessionId: string },
+  payload: LearningDelta["payload"],
+): LearningDelta {
+  return {
+    id: `delta_${kind}_${stableToken(`${input.sessionId}_${title}`).slice(0, 56)}`,
+    kind,
+    scope: kind === "memory" ? "user" : "agent",
+    title,
+    summary,
+    confidence: input.confidence,
+    payload,
+    sourceSessionIds: [input.sessionId],
+    promotionState: "candidate",
+  };
+}
+
+function proceduralGuidance(text: string): boolean {
+  return /\b(always|first|step|when)\b/i.test(text);
+}
+
+function splitProcedure(text: string): string[] {
+  return text.split(/[.!?]+/).map((item) => item.trim()).filter(Boolean).slice(0, 6);
+}
+
+function collectRedactions(value: string): string[] {
+  const checks: Array<[string, RegExp]> = [
+    ["openai-key", /sk-[A-Za-z0-9_-]{12,}/],
+    ["bearer-token", /Bearer\s+[A-Za-z0-9._-]+/i],
+    ["named-secret", /(api[_-]?key|token|secret|password)\s*[:=]\s*\S+/i],
+  ];
+  return checks
+    .filter(([, pattern]) => pattern.test(value))
+    .map(([name]) => name);
 }
 
 function sanitizeText(value: string): string {

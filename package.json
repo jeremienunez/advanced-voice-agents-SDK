@@ -86,7 +86,7 @@
     "test:prompt-compiler-port:bdd": "pnpm build && pnpm --filter @voiceagentsdk/starter-voip-rtc test:prompt-compiler-port:bdd",
     "test:provider-factory:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:provider-factory:bdd",
     "test:public-boundaries:bdd": "pnpm build && pnpm exec tsc --noEmit --target ES2023 --module NodeNext --moduleResolution NodeNext --lib ES2023,DOM --strict --skipLibCheck scripts/test-public-boundaries-bdd.ts && bun run scripts/test-public-boundaries-bdd.ts",
-    "test:adaptive-learning-loop:bdd": "pnpm build && pnpm exec tsc --noEmit --target ES2023 --module NodeNext --moduleResolution NodeNext --lib ES2023,DOM --strict --skipLibCheck scripts/test-adaptive-learning-loop-core-bdd.ts && bun run scripts/test-adaptive-learning-loop-core-bdd.ts",
+    "test:adaptive-learning-loop:bdd": "pnpm build && pnpm exec tsc --noEmit --target ES2023 --module NodeNext --moduleResolution NodeNext --lib ES2023,DOM --strict --skipLibCheck scripts/test-adaptive-learning-loop-core-bdd.ts scripts/test-adaptive-learning-loop-receipts-bdd.ts && bun run scripts/test-adaptive-learning-loop-core-bdd.ts && bun run scripts/test-adaptive-learning-loop-receipts-bdd.ts",
     "test:agentrx-diagnostics:bdd": "pnpm build && pnpm exec tsc --noEmit --target ES2023 --module NodeNext --moduleResolution NodeNext --lib ES2023,DOM --strict --skipLibCheck scripts/test-agentrx-diagnostics-bdd.ts && bun run scripts/test-agentrx-diagnostics-bdd.ts",
     "test:runtime-tool-authorization:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:runtime-tool-authorization:bdd",
     "test:active-agent-assignment:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:active-agent-assignment:bdd",

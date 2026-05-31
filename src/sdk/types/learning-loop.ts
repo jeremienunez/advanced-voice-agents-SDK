@@ -168,6 +168,10 @@ export interface LearningAuditSinkPort {
   emit(event: LearningAuditEvent): void | Promise<void>;
 }
 
+export interface LearningReceiptSinkPort {
+  emit(receipt: LearningReceipt): void | Promise<void>;
+}
+
 export interface LearningMemorySignal {
   kind: TemporalMemoryRecord["kind"];
   text: string;
@@ -183,6 +187,8 @@ export interface SessionLearningSignals {
   missingTools: string[];
   promptRecommendation?: string;
   retrievalWeights?: Record<string, number>;
+  deltas: LearningDelta[];
+  redactions: string[];
   confidence: number;
 }
 
@@ -220,5 +226,7 @@ export interface AgentLearningLoopOptions {
   evolution?: AgentEvolutionPort;
   statusSink?: LearningStatusSinkPort;
   auditSink?: LearningAuditSinkPort;
+  evaluationHarness?: EvaluationHarnessPort;
+  receiptSink?: LearningReceiptSinkPort;
   defaultProfile?: LearningLoopProfile;
 }
