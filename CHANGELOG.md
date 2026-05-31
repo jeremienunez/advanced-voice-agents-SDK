@@ -12,7 +12,7 @@ starter local ni de concerns app-owned dans le core.
 
 ### Journal
 
-- Passage en version `0.1.0-alpha.0` avec metadata npm publique.
+- Passage en version `0.1.0-alpha.1` avec metadata npm publique.
 - Ajout de la licence MIT et du test `test:package-metadata:bdd`.
 - Ajout des docs release alpha et integrations app-owned.
 - README et starter README clarifient l'installation npm, les adapters

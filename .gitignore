@@ -10,9 +10,5 @@ coverage/
 .builder-state/
 starters/voip-rtc/.builder-state/
 
-# Internal LLM-generated documentation, except public release docs.
-docs/*
-!docs/release-alpha.md
-!docs/sdk/
-docs/sdk/*
-!docs/sdk/app-owned-integration.md
+# Internal LLM-generated documentation.
+docs/

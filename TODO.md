@@ -25,7 +25,7 @@ Ne pas transformer le SDK en produit SaaS complet:
 
 ### P0-001 - Finaliser les metadonnees npm
 
-Statut: ferme pour alpha `0.1.0-alpha.0`.
+Statut: ferme pour alpha `0.1.0-alpha.1`.
 
 Action:
 
@@ -139,7 +139,7 @@ Statut: ferme pour alpha.
 Action:
 
 - Strategie choisie: `0.1.0-alpha.x`.
-- Procedure release ajoutee dans `docs/release-alpha.md`.
+- Procedure release ajoutee dans `RELEASE_ALPHA.md`.
 - Optionnel: npm provenance / trusted publishing GitHub Actions.
 
 ### P1-002 - Exemples d'integration app-owned

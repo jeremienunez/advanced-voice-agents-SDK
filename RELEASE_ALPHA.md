@@ -8,7 +8,7 @@ is a reference integration and is not included in the npm package tarball.
 Use prerelease versions for the first public alpha line:
 
 ```bash
-pnpm version 0.1.0-alpha.0 --no-git-tag-version
+pnpm version 0.1.0-alpha.1 --no-git-tag-version
 ```
 
 Increment the suffix for follow-up alpha builds: `0.1.0-alpha.1`,

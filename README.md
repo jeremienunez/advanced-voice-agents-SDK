@@ -24,8 +24,8 @@ import { createVoiceWSClient } from "@voiceagentsdk/core/client/browser";
 
 ### Alpha Package Points
 
-- Alpha package target: `@voiceagentsdk/core@0.1.0-alpha.0`.
-- Publish channel: npm `alpha` dist-tag, with git tag `v0.1.0-alpha.0`.
+- Alpha package target: `@voiceagentsdk/core@0.1.0-alpha.1`.
+- Publish channel: npm `alpha` dist-tag, with git tag `v0.1.0-alpha.1`.
 - Published package surface stays SDK-only: `dist`, `README.md`, `CHANGELOG.md`, `TODO.md`, `LICENSE`, and the short public integration/release docs.
 - The VOIP RTC starter remains a local/demo reference and is not shipped inside the npm package.
 - Release gate: `pnpm audit:solid`, `pnpm pack:dry-run`, and `git diff --check`.
@@ -498,8 +498,8 @@ import { ... } from "@voiceagentsdk/core/client/browser";  // Browser PCM record
 
 Additional integration docs:
 
-- [App-owned auth, secrets, approvals and ports](docs/sdk/app-owned-integration.md)
-- [Alpha release procedure](docs/release-alpha.md)
+- [App-owned auth, secrets, approvals and ports](APP_OWNED_INTEGRATION.md)
+- [Alpha release procedure](RELEASE_ALPHA.md)
 
 ---
 
