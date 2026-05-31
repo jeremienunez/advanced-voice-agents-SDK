@@ -115,6 +115,16 @@ Validation:
 
 ## P1 - Publication alpha propre
 
+### P1-000 - Adaptive Agent Learning Loop
+
+Statut:
+
+- Public SDK contracts: profiles, run records, repository, workflow, extractor, policy, status.
+- Embedded implementation: in-memory run repository and local orchestrator.
+- Starter integration: default `auto_apply_prompt_safe` demo profile.
+- Distributed readiness: worker terminal status updates through shared run repository.
+- UI proof: RTC learning timeline and Agent Bank version/audit visibility.
+
 ### P1-001 - Release workflow
 
 Action:

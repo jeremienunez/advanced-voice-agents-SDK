@@ -173,11 +173,17 @@ entities and relations, then appends a validated agent version. Guardrails keep
 versions append-only, keep a rollback pointer, audit every apply/rollback, redact
 secret-looking learned memory, and forbid destructive infra migration.
 
+The RTC Lab demonstrates the closed loop: after session end, the UI shows
+`queued`, `running`, `evaluated`, and a terminal learning status. In demo mode,
+prompt-safe learning can append a new agent version while tool and infra changes
+remain approval-gated.
+
 Required/optional learning env:
 
 | Env var | Purpose |
 | --- | --- |
 | `AGENT_LEARNING_ENABLED` | Enables post-session learning, default `true`. |
+| `AGENT_LEARNING_PROFILE` | `observe`, `memory_only`, `memory_and_candidates`, `auto_apply_prompt_safe`, or `approval_required`; starter default is `auto_apply_prompt_safe` for demo visibility. |
 | `AGENT_LEARNING_WORKFLOW_DRIVER` | `local` keeps dev learning in-process; `temporal` dispatches to a Temporal worker. |
 | `AGENT_RUNTIME_MEMORY_DRIVER` | `local` keeps runtime memory in-process; `redis` uses the Redis runtime memory adapter. |
 | `AGENT_RUNTIME_MEMORY_NAMESPACE` | Redis key namespace for runtime memory, default `agent-runtime`. |

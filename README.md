@@ -61,6 +61,19 @@ Guided configuration tool to verify local CLI engines (Docker, Kubernetes, Terra
 *   **Safe Repositories**: A strict data access layer that enforces tenant isolation, allowed operations, filterable fields, and paging limits before queries reach physical databases.
 *   **SOLID Quality Gates**: Strict architectural validation scripts that enforce clean import boundaries, single responsibility rules, and code ceilings at compile time.
 
+### Adaptive Agent Learning Loop
+
+The SDK includes an embedded-first, distributed-ready learning loop for
+post-session adaptation. A completed session can produce scoped memory, graph
+signals, evolution proposals, prompt-safe agent versions, pending approvals,
+audit records, and observable learning statuses.
+
+Default SDK behavior is conservative: `memory_only`. Applications can opt into
+`observe`, `memory_and_candidates`, `auto_apply_prompt_safe`, or
+`approval_required` profiles. Production readiness still depends on
+application-owned adapters for workflow durability, auth, storage, approvals,
+audit, and telemetry.
+
 ---
 
 ## Architecture and Conceptual Flow
