@@ -30,7 +30,7 @@ The SDK should expose a small profile set that controls mutation behavior:
 export type LearningLoopProfile =
   | "observe"
   | "memory_only"
-  | "propose"
+  | "memory_and_candidates"
   | "auto_apply_prompt_safe"
   | "approval_required";
 ```
@@ -39,7 +39,7 @@ Profile semantics:
 
 - `observe`: classify the session and emit evaluation results; no memory write and no agent mutation.
 - `memory_only`: write scoped memory and graph signals; do not create or apply agent evolution.
-- `propose`: create an evolution proposal; do not apply it automatically.
+- `memory_and_candidates`: write scoped memory and create candidate learning deltas; do not promote them automatically.
 - `auto_apply_prompt_safe`: apply prompt-only evolution when all server-side policies pass; sensitive tool, handoff, or infra changes remain pending.
 - `approval_required`: create pending approvals for every agent, tool, handoff, or infra mutation.
 
@@ -48,6 +48,123 @@ Recommended defaults:
 - SDK default: `memory_only`
 - Starter demo default: `auto_apply_prompt_safe`
 - Regulated app guidance: `observe` or `approval_required`
+
+## External Inspiration
+
+Hermes Agent and OpenClaw point to a useful direction: agent-layer learning should accumulate reusable capabilities, not pretend to fine-tune foundation models after every call. The relevant patterns are persistent memories, versioned skills, isolated sessions/workspaces, profile or allowlist controls, and explicit promotion of learned artifacts.
+
+The SDK should adapt these patterns without copying their product shape:
+
+- Hermes-style skill learning becomes a portable `AgentSkillArtifact` candidate.
+- OpenClaw-style isolation becomes strict tenant/user/agent/channel/session scoping.
+- GEPA/SkillOpt-style optimization becomes evaluation-gated promotion, not automatic mutation.
+- Security research on OpenClaw-style agents reinforces that skills and memories are untrusted supply-chain inputs until validated.
+
+Reference themes:
+
+- Hermes Agent architecture and skills: persistent memory, tools, sessions, profiles, skill reuse.
+- OpenClaw gateway and multi-agent routing: isolated workspaces, session stores, agent bindings, and scoped permissions.
+- GEPA, SkillOpt, and SkillOps: text/skill optimization through traces, evaluation, and maintenance.
+
+## Learning Deltas
+
+The loop should produce typed deltas instead of a single opaque recommendation:
+
+```ts
+export type LearningDeltaKind =
+  | "memory"
+  | "prompt"
+  | "skill"
+  | "tool"
+  | "infra";
+
+export interface LearningDelta {
+  id: string;
+  kind: LearningDeltaKind;
+  scope: "session" | "user" | "agent" | "tenant" | "global";
+  title: string;
+  summary: string;
+  confidence: number;
+  payload: JsonObject;
+  sourceSessionIds: string[];
+}
+```
+
+Default behavior:
+
+- memory deltas can be written automatically in `memory_only`, `memory_and_candidates`, `auto_apply_prompt_safe`, and `approval_required`;
+- prompt deltas can auto-promote only in `auto_apply_prompt_safe` and only after policy/evaluation pass;
+- skill, tool, and infra deltas remain candidates or pending approvals by default;
+- global-scope deltas are never auto-promoted by the SDK default implementation.
+
+## Skill Distillation
+
+Repeated session patterns should become skill candidates. This is a second-stage feature on top of the learning loop, not a prerequisite for the first embedded implementation.
+
+```ts
+export interface AgentSkillArtifact {
+  id: string;
+  title: string;
+  description: string;
+  scope: "agent" | "tenant" | "global";
+  preconditions: string[];
+  procedure: string[];
+  pitfalls: string[];
+  validationChecks: string[];
+  sourceSessionIds: string[];
+  confidence: number;
+  createdAt: string;
+  updatedAt?: string;
+  metadata?: JsonObject;
+}
+```
+
+The first SDK implementation can expose the type and candidate delta path. A later slice can add a `SkillDistillerPort` that creates a skill candidate after repeated similar traces.
+
+## Promotion Pipeline
+
+Learned artifacts should move through explicit states:
+
+```text
+candidate -> evaluated -> approved -> active -> rolled_back
+                       \-> rejected
+                       \-> expired
+```
+
+Promotion rules:
+
+- `candidate`: created from extracted learning signals.
+- `evaluated`: policy and evaluation harness completed.
+- `approved`: a server/user approval accepted a sensitive candidate.
+- `active`: artifact was promoted to an agent version, skill library, or memory store.
+- `rolled_back`: active artifact was reverted.
+- `rejected`: policy, evaluation, or reviewer rejected it.
+- `expired`: pending candidate exceeded its TTL.
+
+This pipeline should apply independently to memory, prompt, skill, tool, and infra deltas.
+
+## Learning Receipts
+
+Every run should be able to emit a receipt that can be stored or shown in the Agent Bank:
+
+```ts
+export interface LearningReceipt {
+  id: string;
+  runId: string;
+  sourceSessionId: string;
+  inputHash: string;
+  redactions: string[];
+  deltas: LearningDelta[];
+  decision: LearningRunDecision;
+  evaluation?: EvaluationResult;
+  previousArtifactId?: string;
+  nextArtifactId?: string;
+  approvedBy?: string;
+  createdAt: string;
+}
+```
+
+The receipt is the audit-friendly proof that the loop learned from redacted evidence, passed or failed policy, and produced traceable deltas.
 
 ## Logical SOA
 
@@ -112,7 +229,8 @@ Responsibility:
 - Validate server-owned prompt policy remains final.
 - Enforce tool execution, confirmation, side-effect, safety, identity, uncertainty, and success invariants.
 - Reject recursive or runaway AgentRx patterns.
-- Classify mutation decisions as apply, propose, pending approval, reject, or skip.
+- Classify mutation decisions as apply, candidate, pending approval, reject, or skip.
+- Separate memory, prompt, skill, tool, and infra deltas before promotion.
 
 This is the key safety boundary. No agent artifact changes without this policy layer.
 
@@ -126,6 +244,16 @@ Responsibility:
 - Keep active agent assignment scoped when an evolution becomes active.
 
 Local starter implementation can continue using local draft state. Production apps replace it with durable repositories.
+
+### Evaluation Harness
+
+Responsibility:
+
+- Replay a small agent-specific benchmark before promotion.
+- Compare previous and candidate artifacts on success, safety, tool behavior, confirmation behavior, and regression checks.
+- Return a structured result that policy can use before activation.
+
+The default embedded implementation can be a no-op pass for `memory_only`. Production integrations can plug deterministic scenario replay, CI jobs, or offline evaluators.
 
 ### Approval Service
 
@@ -156,8 +284,10 @@ RTC session ended
   -> WorkflowDriver starts local or distributed work
   -> LearningRun running
   -> SessionLearningExtractor emits learning signals
+  -> Candidate deltas are produced
   -> MemoryWriter writes scoped temporal/graph memory according to profile
   -> EvolutionPolicy evaluates proposal and profile
+  -> EvaluationHarness validates promotable candidates
   -> AgentEvolutionRepository applies version, creates proposal, or skips
   -> ApprovalService creates pending approval for sensitive changes
   -> LearningRun terminal status is persisted
@@ -221,6 +351,8 @@ Proposed public ports:
 - `GraphMemoryStorePort`
 - `AgentEvolutionPolicyPort`
 - `AgentEvolutionRepositoryPort`
+- `SkillDistillerPort`
+- `EvaluationHarnessPort`
 - `PendingApprovalPort`
 - `LearningStatusSinkPort`
 - `AuditEventSinkPort`
@@ -299,15 +431,16 @@ Expected behavior:
 2. Introduce `AgentLearningLoop` as the orchestration boundary.
 3. Move the current starter local learning path behind the new orchestration boundary.
 4. Add terminal status propagation for distributed workflow drivers.
-5. Add profile handling and policy decisions.
-6. Update the starter UI/API to show the richer learning timeline.
-7. Document local, starter, and production integration modes.
+5. Add profile handling, learning deltas, and policy decisions.
+6. Add evaluation receipts and promotion states.
+7. Update the starter UI/API to show the richer learning timeline.
+8. Document local, starter, and production integration modes.
 
 ## Test Strategy
 
 Required tests:
 
-- profile behavior for `observe`, `memory_only`, `propose`, `auto_apply_prompt_safe`, and `approval_required`;
+- profile behavior for `observe`, `memory_only`, `memory_and_candidates`, `auto_apply_prompt_safe`, and `approval_required`;
 - local status progression through terminal states;
 - distributed driver can report terminal worker status;
 - idempotent duplicate session-end handling;
@@ -316,6 +449,8 @@ Required tests:
 - memory writes are scoped and redacted;
 - graph failure is degraded but observable;
 - sensitive changes create pending approvals;
+- skill candidates remain inactive until evaluated and approved;
+- learning receipts include redacted evidence and delta decisions;
 - RTC E2E shows learning timeline and version increment in demo mode.
 
 ## Non-Goals
