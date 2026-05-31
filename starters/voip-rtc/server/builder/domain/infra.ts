@@ -51,6 +51,7 @@ export class IntentInfraPlanner implements InfraPlannerPort {
       Boolean(this.options.graphUrl);
     const wantsCache = hasAny(intent, cacheTerms) || Boolean(this.options.redisUrl);
     const learningEnabled = normalizeBoolean(this.options.learningEnabled);
+    const learningProfile = this.options.learningProfile ?? "auto_apply_prompt_safe";
     const explicitMilvus = isMilvusRequested(this.options.defaultVectorBackend);
     const includeMilvus = explicitMilvus ||
       wantsVectorScale ||
@@ -205,6 +206,7 @@ export class IntentInfraPlanner implements InfraPlannerPort {
         graphIntent: wantsGraph,
         cacheIntent: wantsCache,
         learningEnabled,
+        learningProfile,
       },
     };
   }

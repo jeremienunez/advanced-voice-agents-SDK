@@ -2,6 +2,7 @@ import { useState } from "react";
 import { StatusBadge } from "../../components/ui/StatusBadge.js";
 import type { CompiledAgentSummary } from "../../domain/builder.js";
 import { useRtcLab } from "../../hooks/useRtcLab.js";
+import { LearningTimeline } from "./components/LearningTimeline.js";
 import { RtcControlPanel } from "./components/RtcControlPanel.js";
 import { VoiceOrb } from "./components/VoiceOrb.js";
 import { RtcDiagnosticsDrawer } from "./RtcDiagnosticsDrawer.js";
@@ -67,6 +68,7 @@ export function RtcLab({
               <dd>{Math.round(rtc.snapshot.durationMs / 1000)}s</dd>
             </div>
           </dl>
+          <LearningTimeline learning={rtc.snapshot.learning} />
         </aside>
 
         <section className={`rtcOrbStage ${rtc.snapshot.state} ${rtc.snapshot.isMuted ? "muted" : ""}`} aria-label="Voice state">

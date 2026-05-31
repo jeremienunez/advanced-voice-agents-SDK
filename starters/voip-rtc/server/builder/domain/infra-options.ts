@@ -4,6 +4,7 @@ export interface IntentInfraPlannerOptions {
   defaultVectorBackend?: string;
   learningEnabled?: string | boolean;
   learningMemoryTtlSeconds?: string | number;
+  learningProfile?: string;
   graphUrl?: string;
   isolation?: string;
   milvusUrl?: string;

@@ -184,6 +184,7 @@ export function createBuilderServiceCompositionFromEnv(
         defaultVectorBackend: env.BUILDER_VECTOR_BACKEND,
         learningEnabled: env.AGENT_LEARNING_ENABLED ?? "true",
         learningMemoryTtlSeconds: env.AGENT_LEARNING_MEMORY_TTL_SECONDS,
+        learningProfile: env.AGENT_LEARNING_PROFILE,
         graphUrl: env.NEO4J_URI ?? env.GRAPH_DATABASE_URL,
         isolation: env.BUILDER_INFRA_ISOLATION,
         milvusUrl: env.MILVUS_URL ?? env.MILVUS_ADDRESS,

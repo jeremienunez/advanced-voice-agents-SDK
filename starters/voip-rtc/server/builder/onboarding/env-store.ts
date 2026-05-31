@@ -82,6 +82,7 @@ export const envFieldDefinitions: EnvFieldDefinition[] = [
   field("MEMGRAPH_URI", "infra", "Memgraph URI", "Optional Memgraph endpoint for graph-ready agents.", undefined, undefined, true),
   field("AGENT_LEARNING_GRAPH_DRIVER", "infra", "Learning graph driver", "Use local, Postgres, Neo4j, or Memgraph graph memory.", ["local", "postgres", "neo4j", "memgraph"], "local"),
   field("AGENT_LEARNING_ENABLED", "infra", "Session learning", "Enables post-session memory and agent version evolution.", ["true", "false"], "true"),
+  field("AGENT_LEARNING_PROFILE", "infra", "Learning profile", "Controls post-session learning mutation behavior.", ["observe", "memory_only", "memory_and_candidates", "auto_apply_prompt_safe", "approval_required"], "auto_apply_prompt_safe"),
   field("AGENT_LEARNING_WORKFLOW_DRIVER", "infra", "Learning workflow driver", "Use local in-process learning in dev or dispatch to a Temporal worker.", ["local", "temporal"], "local"),
   field("AGENT_LEARNING_MEMORY_DRIVER", "infra", "Learning memory driver", "Use local in-memory learning in dev or Redis temporal memory.", ["local", "redis"], "local"),
   field("AGENT_LEARNING_MEMORY_NAMESPACE", "infra", "Learning memory namespace", "Redis key namespace for temporal learned memory.", undefined, "agent-learning"),

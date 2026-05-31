@@ -146,10 +146,16 @@ const started = events.find((event) => event.type === "session.started");
 const ended = events.find((event) => event.type === "session.ended");
 const learning = events.find((event) => event.type === "learning.status");
 const stateChanges = events.filter((event) => event.type === "state.change");
+const learningStatuses = learningStatusValues(events);
 
 assert(started, "session.started was not received");
 assert(ended, "session.ended was not received");
 assert(learning, "learning.status was not received");
+assert(learningStatuses.includes("evaluated"), "learning.status evaluated was not received");
+assert(
+  learningStatuses.some((status) => status === "applied" || status === "pending_approval"),
+  "learning terminal status was not received",
+);
 assert(
   stateChanges.some((event) => event.state === "listening"),
   "listening state was not received",
@@ -166,6 +172,7 @@ console.log(
       model,
       voice,
       eventTypes: events.map((event) => event.type),
+      learningStatuses,
       sessionId: readString(started, "sessionId"),
       initialVersion,
       learnedVersion: readRecordNumber(
@@ -190,6 +197,7 @@ async function startManagedServer(): Promise<string> {
     stderr: "inherit",
     env: {
       ...env,
+      AGENT_LEARNING_PROFILE: "auto_apply_prompt_safe",
       RTC_E2E_FAKE_PROVIDER: "1",
       VOICE_SERVER_PORT: String(port),
     },
@@ -271,6 +279,12 @@ function readString(value: unknown, key: string): string {
 
 function readArray(value: unknown): unknown[] {
   return Array.isArray(value) ? value : [];
+}
+
+function learningStatusValues(events: JsonRecord[]): string[] {
+  return events
+    .filter((event) => event.type === "learning.status")
+    .map((event) => readString(asRecord(event.learning), "status"));
 }
 
 function assert(condition: unknown, message: string): asserts condition {

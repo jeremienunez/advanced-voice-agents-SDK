@@ -1,4 +1,7 @@
-import type { ServerVoiceMessage } from "@voiceagentsdk/core/client/browser";
+import type {
+  ServerVoiceMessage,
+  VoiceLearningSummary,
+} from "@voiceagentsdk/core/client/browser";
 
 export interface EventLogEntry {
   id: string;
@@ -23,7 +26,7 @@ function summarizeMessage(message: ServerVoiceMessage): string {
     case "session.ended":
       return `${message.summary.durationMs} ms`;
     case "learning.status":
-      return `${message.learning.status}: ${message.learning.message ?? message.learning.runId}`;
+      return summarizeLearningStatus(message.learning);
     case "session.error":
       return message.error.message;
     case "state.change":
@@ -36,5 +39,19 @@ function summarizeMessage(message: ServerVoiceMessage): string {
       return message.tool.name;
     default:
       return JSON.stringify(message);
+  }
+}
+
+function summarizeLearningStatus(learning: VoiceLearningSummary): string {
+  const detail = learning.message ?? learning.runId;
+  switch (learning.status) {
+    case "evaluated":
+      return `evaluated: ${detail}`;
+    case "pending_approval":
+      return `pending approval: ${detail}`;
+    case "rejected":
+      return `rejected: ${detail}`;
+    default:
+      return `${learning.status}: ${detail}`;
   }
 }
