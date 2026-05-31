@@ -1,4 +1,5 @@
 import {
+  createAgentLearningLoop,
   createDefaultLearningPolicy,
   createInMemoryLearningRunRepository,
   extractDefaultSessionLearningSignals,
@@ -13,6 +14,9 @@ const results = [
   await scenarioRepositoryFindsDuplicateSessionRuns(),
   await scenarioExtractorRedactsSecretsAndFindsSignals(),
   await scenarioPolicyProfilesGateMutations(),
+  await scenarioLoopRunsMemoryOnlyWithoutEvolution(),
+  await scenarioLoopAppliesPromptSafeEvolution(),
+  await scenarioLoopIsIdempotentBySourceSession(),
 ];
 
 console.log(JSON.stringify({ status: "ok", results }, null, 2));
@@ -117,6 +121,102 @@ async function scenarioPolicyProfilesGateMutations(): Promise<string> {
   return "policy-profiles-gate-mutations";
 }
 
+async function scenarioLoopRunsMemoryOnlyWithoutEvolution(): Promise<string> {
+  const repository = createInMemoryLearningRunRepository();
+  const memoryWrites: number[] = [];
+  const evolutionCalls: string[] = [];
+  const loop = createAgentLearningLoop({
+    repository,
+    extractor: { extract: extractDefaultSessionLearningSignals },
+    policy: createDefaultLearningPolicy(),
+    memoryStore: {
+      isConfigured: () => true,
+      write: async (writeInput) => {
+        memoryWrites.push(writeInput.records.length);
+        return writeInput.records.map((record, index) => ({
+          ...record,
+          id: `memory-${index}`,
+          scope: writeInput.scope,
+          createdAt: new Date().toISOString(),
+        }));
+      },
+      list: async () => [],
+    },
+    graphStore: fakeGraphStore(),
+    evolution: {
+      async validateAndApply(input) {
+        evolutionCalls.push(input.draftId);
+        return { status: "applied", draftId: input.draftId, version: 2, reason: "applied" };
+      },
+    },
+  });
+  const final = await waitForTerminal(await loop.enqueueSessionLearning(learningInput({
+    transcript: "I prefer short answers.",
+  }), {
+    profile: "memory_only",
+  }), repository);
+
+  assert(final.status === "evaluated", "memory_only loop must stop after evaluation");
+  assert((memoryWrites[0] ?? 0) > 0, "memory_only loop must write memory");
+  assert(evolutionCalls.length === 0, "memory_only loop must not apply evolution");
+  return "loop-runs-memory-only-without-evolution";
+}
+
+async function scenarioLoopAppliesPromptSafeEvolution(): Promise<string> {
+  const repository = createInMemoryLearningRunRepository();
+  let applied = false;
+  const loop = createAgentLearningLoop({
+    repository,
+    extractor: { extract: extractDefaultSessionLearningSignals },
+    policy: createDefaultLearningPolicy(),
+    memoryStore: fakeMemoryStore(),
+    graphStore: fakeGraphStore(),
+    evolution: {
+      async validateAndApply(input) {
+        applied = true;
+        return { status: "applied", draftId: input.draftId, version: 2, reason: "applied" };
+      },
+    },
+  });
+  const final = await waitForTerminal(await loop.enqueueSessionLearning(learningInput({
+    transcript: "I prefer short answers.",
+  }), {
+    profile: "auto_apply_prompt_safe",
+  }), repository);
+
+  assert(final.status === "applied", "auto_apply_prompt_safe must apply eligible evolution");
+  assert(applied, "loop must call evolution port");
+  return "loop-applies-prompt-safe-evolution";
+}
+
+async function scenarioLoopIsIdempotentBySourceSession(): Promise<string> {
+  const repository = createInMemoryLearningRunRepository();
+  const loop = createAgentLearningLoop({
+    repository,
+    extractor: { extract: extractDefaultSessionLearningSignals },
+    policy: createDefaultLearningPolicy(),
+    memoryStore: fakeMemoryStore(),
+    graphStore: fakeGraphStore(),
+    evolution: {
+      async validateAndApply(input) {
+        return { status: "applied", draftId: input.draftId, version: 2, reason: "applied" };
+      },
+    },
+  });
+  const first = await loop.enqueueSessionLearning(learningInput({
+    transcript: "I prefer short answers.",
+  }), {
+    profile: "memory_only",
+  });
+  const second = await loop.enqueueSessionLearning(learningInput({
+    transcript: "I prefer short answers.",
+  }), {
+    profile: "memory_only",
+  });
+  assert(first.runId === second.runId, "duplicate session learning must reuse the existing run");
+  return "loop-is-idempotent-by-source-session";
+}
+
 function learningInput(options: {
   transcript?: string;
   toolStatus?: string;
@@ -154,6 +254,40 @@ function learningInput(options: {
         }]
       : [],
   };
+}
+
+function fakeMemoryStore(): import("@voiceagentsdk/core/sdk").TemporalMemoryStorePort {
+  return {
+    isConfigured: () => true,
+    write: async (writeInput) =>
+      writeInput.records.map((record, index) => ({
+        ...record,
+        id: `memory-${index}`,
+        scope: writeInput.scope,
+        createdAt: new Date().toISOString(),
+      })),
+    list: async () => [],
+  };
+}
+
+function fakeGraphStore(): import("@voiceagentsdk/core/sdk").GraphMemoryStorePort {
+  return {
+    isConfigured: () => true,
+    upsert: async () => ({ nodeCount: 1, edgeCount: 1 }),
+  };
+}
+
+async function waitForTerminal(
+  queued: import("@voiceagentsdk/core/sdk").LearningRunRecord,
+  repository: import("@voiceagentsdk/core/sdk").LearningRunRepositoryPort,
+) {
+  const terminal = new Set(["evaluated", "applied", "pending_approval", "rejected", "failed", "skipped"]);
+  for (let attempt = 0; attempt < 40; attempt++) {
+    const current = await repository.get(queued.runId);
+    if (current && terminal.has(current.status)) return current;
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+  throw new Error(`Timed out waiting for terminal learning run ${queued.runId}`);
 }
 
 function assert(condition: unknown, message: string): asserts condition {
