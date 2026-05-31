@@ -12,6 +12,7 @@ export const emptyIdentity: BuilderIdentity = {
 };
 
 export const defaultResearchBudget: KnowledgeResearchBudget = {
+  maxCycles: 5,
   maxQueriesPerCycle: 4,
   maxSources: 10,
   maxEstimatedTokens: 12000,

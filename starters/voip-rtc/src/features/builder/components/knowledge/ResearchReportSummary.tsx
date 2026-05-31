@@ -14,7 +14,7 @@ export function ResearchReportSummary({
         <Metric label="Recherche" value={report.status} />
         <Metric
           label="Consommation"
-          value={`${report.spend.cycles} checkpoints, ${report.spend.sources}/${report.budget.maxSources} sources`}
+          value={`${report.spend.cycles}/${report.budget.maxCycles} cycles, ${report.spend.sources}/${report.budget.maxSources} sources`}
         />
         <Metric
           label="Coût Estimé"

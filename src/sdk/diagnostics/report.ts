@@ -4,6 +4,11 @@ import type {
   AgentRxTrajectory,
   AgentRxViolation,
 } from "../types.js";
+import {
+  agentRxStructuralConstraints,
+  agentRxStructuralViolations,
+  summarizeAgentRxIterations,
+} from "./iterations.js";
 import { AGENTRX_TAXONOMY_VERSION } from "./taxonomy.js";
 
 export interface AgentRxReportInput {
@@ -17,18 +22,29 @@ export function createAgentRxDiagnosticReport(
   input: AgentRxReportInput,
 ): AgentRxDiagnosticReport {
   const generatedAt = new Date().toISOString();
-  const criticalFailure = firstUnrecoveredViolation(input.violations);
+  const iterationSummary = summarizeAgentRxIterations(input.trajectory);
+  const structuralViolations = agentRxStructuralViolations(iterationSummary);
+  const violations = uniqueViolations([
+    ...input.violations,
+    ...structuralViolations,
+  ]);
+  const constraints = uniqueConstraints([
+    ...input.constraints,
+    ...agentRxStructuralConstraints(iterationSummary),
+  ]);
+  const criticalFailure = firstUnrecoveredViolation(violations);
   return {
     trajectoryId: input.trajectory.id,
     generatedAt,
     taxonomyVersion: AGENTRX_TAXONOMY_VERSION,
     status: reportStatus(criticalFailure),
     trajectory: input.trajectory.steps,
-    constraints: input.constraints,
-    violations: input.violations,
+    constraints,
+    violations,
+    iterationSummary,
     validationLog: {
       trajectoryId: input.trajectory.id,
-      violations: input.violations,
+      violations,
       generatedAt,
     },
     criticalFailure,
@@ -56,4 +72,32 @@ function severityRank(violation: AgentRxViolation): number {
   if (violation.severity === "high") return 3;
   if (violation.severity === "medium") return 2;
   return 1;
+}
+
+function uniqueConstraints(
+  constraints: AgentRxConstraint[],
+): AgentRxConstraint[] {
+  const seen = new Set<string>();
+  return constraints.filter((constraint) => {
+    if (seen.has(constraint.id)) return false;
+    seen.add(constraint.id);
+    return true;
+  });
+}
+
+function uniqueViolations(
+  violations: AgentRxViolation[],
+): AgentRxViolation[] {
+  const seen = new Set<string>();
+  return violations.filter((violation) => {
+    const key = [
+      violation.stepIndex,
+      violation.constraintId,
+      violation.category,
+      violation.evidence,
+    ].join("\u0000");
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }

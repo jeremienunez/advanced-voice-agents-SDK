@@ -34,6 +34,8 @@ export interface AgentRxTrajectoryStep {
   action: string;
   status: AgentRxStepStatus;
   summary: string;
+  iteration?: number;
+  parentStepIndex?: number;
   evidence?: Record<string, unknown>;
 }
 
@@ -69,6 +71,22 @@ export interface AgentRxValidationLog {
   generatedAt: string;
 }
 
+export interface AgentRxRepeatedActionSummary {
+  phase: string;
+  actor: string;
+  action: string;
+  count: number;
+  maxIteration: number;
+}
+
+export interface AgentRxIterationSummary {
+  repeatedActions: AgentRxRepeatedActionSummary[];
+  maxIteration: number;
+  maxRecursionDepth: number;
+  recursiveCycleDetected: boolean;
+  invalidParentStepIndexes: number[];
+}
+
 export interface AgentRxDiagnosticReport {
   trajectoryId?: string;
   generatedAt?: string;
@@ -77,6 +95,7 @@ export interface AgentRxDiagnosticReport {
   trajectory: AgentRxTrajectoryStep[];
   constraints: AgentRxConstraint[];
   violations: AgentRxViolation[];
+  iterationSummary?: AgentRxIterationSummary;
   validationLog?: AgentRxValidationLog;
   criticalFailure?: AgentRxViolation;
   recommendation?: string;

@@ -22,6 +22,7 @@ export function readHarnessBudget(
   source: Record<string, string | undefined>,
 ): HarnessBudget {
   return {
+    maxCycles: readNumber(source.HARNESS_RESEARCH_MAX_CYCLES, 5),
     maxQueriesPerCycle: readNumber(
       source.HARNESS_RESEARCH_MAX_QUERIES_PER_CYCLE,
       3,

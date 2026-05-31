@@ -161,7 +161,8 @@ function violation(
 }
 
 function exceedsBudget(report: KnowledgeResearchResult): boolean {
-  return report.spend.sources > report.budget.maxSources ||
+  return report.spend.cycles > report.budget.maxCycles ||
+    report.spend.sources > report.budget.maxSources ||
     report.spend.estimatedTokens > report.budget.maxEstimatedTokens ||
     report.spend.estimatedCostUsd > report.budget.maxEstimatedCostUsd;
 }

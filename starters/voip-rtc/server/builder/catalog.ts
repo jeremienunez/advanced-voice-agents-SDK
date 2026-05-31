@@ -58,6 +58,7 @@ export const defaultToolRegistry: ToolRegistryItem[] = [
 
 export function defaultResearchBudget(): KnowledgeResearchBudget {
   return {
+    maxCycles: 5,
     maxQueriesPerCycle: 4,
     maxSources: 10,
     maxEstimatedTokens: 12_000,
@@ -70,6 +71,10 @@ export function researchBudgetFromEnv(
 ): KnowledgeResearchBudget {
   const defaults = defaultResearchBudget();
   return {
+    maxCycles: readEnvNumber(
+      env.BUILDER_RESEARCH_MAX_CYCLES,
+      defaults.maxCycles,
+    ),
     maxQueriesPerCycle: readEnvNumber(
       env.BUILDER_RESEARCH_MAX_QUERIES_PER_CYCLE,
       defaults.maxQueriesPerCycle,

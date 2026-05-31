@@ -11,6 +11,14 @@ export function ResearchBudgetFields({
   return (
     <div className="budgetGrid">
       <NumberField
+        label="Cycles max"
+        max={12}
+        min={1}
+        name="researchCycles"
+        value={budget.maxCycles}
+        onValueChange={(value) => updateResearchBudget("maxCycles", value)}
+      />
+      <NumberField
         label="Requêtes / checkpoint"
         max={32}
         min={1}

@@ -11,6 +11,7 @@ export interface KnowledgeDocument {
 }
 
 export interface KnowledgeResearchBudget {
+  maxCycles: number;
   maxQueriesPerCycle: number;
   maxSources: number;
   maxEstimatedTokens: number;

@@ -56,11 +56,14 @@ export class LlmKnowledgeResearch implements KnowledgeResearchPort {
     }
 
     const budget = resolveResearchBudget(input.budget);
-    const objectives = buildResearchObjectives(input);
+    const requestedObjectives = buildResearchObjectives(input);
+    const objectives = requestedObjectives.slice(0, budget.maxCycles);
     const documents: KnowledgeDocument[] = [];
     const cycles: KnowledgeResearchCycle[] = [];
     const spend = emptyResearchSpend();
-    let stopReason: string | undefined;
+    let stopReason = requestedObjectives.length > objectives.length
+      ? "Research cycle limit reached before all objectives completed"
+      : undefined;
 
     for (const objective of objectives) {
       if (isResearchBudgetExhausted(spend, budget)) {

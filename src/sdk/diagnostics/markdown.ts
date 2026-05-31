@@ -19,6 +19,10 @@ export function renderAgentRxReportMarkdown(
     "",
     ...violationLines(report),
     "",
+    "## Iterations",
+    "",
+    ...iterationLines(report),
+    "",
     "## Trajectory",
     "",
     ...report.trajectory.map((step) => {
@@ -27,6 +31,26 @@ export function renderAgentRxReportMarkdown(
     "",
   ];
   return `${lines.join("\n")}\n`;
+}
+
+function iterationLines(report: AgentRxDiagnosticReport): string[] {
+  const summary = report.iterationSummary;
+  if (!summary) return ["No iteration summary."];
+  const lines = [
+    `- Max iteration: ${summary.maxIteration}`,
+    `- Max recursion depth: ${summary.maxRecursionDepth}`,
+    `- Recursive cycle detected: ${summary.recursiveCycleDetected ? "yes" : "no"}`,
+  ];
+  if (summary.repeatedActions.length === 0) {
+    return [...lines, "- Repeated actions: none"];
+  }
+  return [
+    ...lines,
+    "- Repeated actions:",
+    ...summary.repeatedActions.map((item) => {
+      return `  - ${item.action}: ${item.count} runs, max iteration ${item.maxIteration}`;
+    }),
+  ];
 }
 
 function criticalFailureMarkdown(report: AgentRxDiagnosticReport): string {

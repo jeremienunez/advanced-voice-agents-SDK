@@ -14,6 +14,7 @@ export function normalizeResearchBudget(
 ): Partial<KnowledgeResearchBudget> {
   const source = asRecord(asRecord(body).budget ?? body);
   return {
+    maxCycles: readPositiveNumber(source, "maxCycles"),
     maxQueriesPerCycle: readPositiveNumber(source, "maxQueriesPerCycle"),
     maxSources: readPositiveNumber(source, "maxSources"),
     maxEstimatedTokens: readPositiveNumber(source, "maxEstimatedTokens"),
@@ -26,6 +27,7 @@ export function resolveResearchBudget(
 ): KnowledgeResearchBudget {
   const defaults = defaultResearchBudget();
   return {
+    maxCycles: clampBudget(input?.maxCycles, 1, 12, defaults.maxCycles),
     maxQueriesPerCycle: clampBudget(
       input?.maxQueriesPerCycle,
       1,

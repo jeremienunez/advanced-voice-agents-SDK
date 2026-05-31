@@ -12,6 +12,7 @@ export interface TelemetryEvent {
 }
 
 export interface HarnessBudget {
+  maxCycles: number;
   maxQueriesPerCycle: number;
   maxSources: number;
   maxEstimatedTokens: number;

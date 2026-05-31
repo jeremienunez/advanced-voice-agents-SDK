@@ -20,6 +20,7 @@ const results = await Promise.all([
   scenarioPromptPlannerFallsBackWhenJsonIsInvalid(),
   scenarioPromptDataIsQuotedAsData(),
   scenarioResearchCreatesDocumentsAndCheckpoints(),
+  scenarioResearchCycleLimitBoundsFailedIterations(),
   scenarioVerifierNormalizesInvalidVerdicts(),
   scenarioResolverHonorsRequestedModelsAndFallbacks(),
 ]);
@@ -91,6 +92,7 @@ async function scenarioResearchCreatesDocumentsAndCheckpoints() {
     draft: draft(),
     documents: [document()],
     budget: {
+      maxCycles: 5,
       maxEstimatedCostUsd: 1,
       maxEstimatedTokens: 2_000,
       maxQueriesPerCycle: 1,
@@ -113,6 +115,44 @@ async function scenarioResearchCreatesDocumentsAndCheckpoints() {
   assert(runner.tasks[0].role === "builder.researcher", "research must call researcher role");
 
   return "research-document-checkpoints";
+}
+
+async function scenarioResearchCycleLimitBoundsFailedIterations() {
+  const runner = new FailingLlmRunner();
+  const research = new LlmKnowledgeResearch({
+    estimatedCostPer1kTokens: 0.01,
+    profiles: [profile({ provider: "deepseek", roles: ["builder.researcher"] })],
+    prompts: prompts(),
+    runner,
+  });
+  const output = await research.growKnowledge({
+    draft: draft(),
+    documents: [document()],
+    budget: {
+      maxCycles: 3,
+      maxEstimatedCostUsd: 1,
+      maxEstimatedTokens: 20_000,
+      maxQueriesPerCycle: 1,
+      maxSources: 20,
+    },
+    settings: {
+      provider: "deepseek",
+      model: "deepseek-test",
+      researchIntents: Array.from({ length: 12 }, (_, index) => ({
+        objective: `objective ${index + 1}`,
+        queries: [`query ${index + 1}`],
+      })),
+    },
+  });
+
+  assert(output.cycles.length === 3, "research cycles must stop at maxCycles");
+  assert(runner.tasks.length === 3, "failed research iterations must still be bounded");
+  assert(
+    output.stopReason?.includes("cycle limit"),
+    `research stop reason must mention cycle limit, got ${output.stopReason ?? "none"}`,
+  );
+
+  return "research-cycle-limit-bounds-failed-iterations";
 }
 
 async function scenarioVerifierNormalizesInvalidVerdicts() {
@@ -142,6 +182,15 @@ async function scenarioVerifierNormalizesInvalidVerdicts() {
   assert(verdict.recommendedQueries[0] === "pricing source", "valid query list must survive normalization");
 
   return "verifier-verdict-normalization";
+}
+
+class FailingLlmRunner {
+  readonly tasks: LlmTask[] = [];
+
+  async run(task: LlmTask): Promise<never> {
+    this.tasks.push(task);
+    throw new Error("research iteration failed");
+  }
 }
 
 async function scenarioResolverHonorsRequestedModelsAndFallbacks() {

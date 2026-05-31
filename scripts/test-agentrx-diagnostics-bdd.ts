@@ -17,6 +17,7 @@ import { writeAgentRxArtifacts } from "../starters/voip-rtc/scripts/route-wines/
 const results = [
   scenarioQualitySignalsAreDeclaredAndScripted(),
   scenarioSdkReportKeepsAuditableFailureLocalization(),
+  scenarioSdkReportSummarizesIterationsAndRecursiveCycles(),
   await scenarioRouteWinesArtifactsArePresentAndNonEmpty(),
 ];
 
@@ -59,6 +60,60 @@ function scenarioSdkReportKeepsAuditableFailureLocalization(): string {
   assert(markdown.includes("Step: 1"), "markdown report must include the critical step");
 
   return "sdk-report-keeps-auditable-failure-localization";
+}
+
+function scenarioSdkReportSummarizesIterationsAndRecursiveCycles(): string {
+  const report = createAgentRxDiagnosticReport({
+    trajectory: iterativeTrajectory(),
+    constraints: [],
+    violations: [],
+    recommendation: "Break the recursive retry loop before continuing.",
+  });
+  const repeated = report.iterationSummary?.repeatedActions.find((item) => {
+    return item.action === "search_knowledge";
+  });
+
+  assert(repeated?.count === 2, "report must count repeated trajectory actions");
+  assert(repeated.maxIteration === 2, "report must keep the highest action iteration");
+  assert(
+    report.iterationSummary?.recursiveCycleDetected === true,
+    "report must detect recursive parent cycles iteratively",
+  );
+  assert(
+    report.criticalFailure?.constraintId === "agentrx_trajectory_acyclic",
+    "recursive trajectory cycle must become the critical structural failure",
+  );
+  assert(report.status === "failed", "recursive trajectory cycles must fail the report");
+
+  return "sdk-report-summarizes-iterations-and-recursive-cycles";
+}
+
+function iterativeTrajectory(): AgentRxTrajectory {
+  return {
+    id: "bdd-agentrx-iterations",
+    instruction: "Retry search, then recover without entering recursive loops.",
+    steps: [
+      trajectoryStep(0, "plan", "planner", "select_tool", "completed"),
+      {
+        ...trajectoryStep(1, "execute", "tool", "search_knowledge", "failed"),
+        iteration: 1,
+        parentStepIndex: 0,
+      },
+      {
+        ...trajectoryStep(2, "execute", "tool", "search_knowledge", "completed"),
+        iteration: 2,
+        parentStepIndex: 1,
+      },
+      {
+        ...trajectoryStep(3, "recover", "agent", "retry", "running"),
+        parentStepIndex: 4,
+      },
+      {
+        ...trajectoryStep(4, "recover", "agent", "retry", "running"),
+        parentStepIndex: 3,
+      },
+    ],
+  };
 }
 
 async function scenarioRouteWinesArtifactsArePresentAndNonEmpty(): Promise<string> {
@@ -133,7 +188,7 @@ function trajectoryStep(
   phase: string,
   actor: string,
   action: string,
-  status: "completed" | "failed",
+  status: "completed" | "failed" | "running",
 ) {
   return { index, phase, actor, action, status, summary: `${actor}.${action}` };
 }
