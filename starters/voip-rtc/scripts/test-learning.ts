@@ -6,6 +6,7 @@ import type {
 } from "@voiceagentsdk/core/sdk";
 import { LocalGraphMemoryStore } from "../server/learning/graph-store.js";
 import { LocalRedisTemporalMemoryStore } from "../server/learning/memory-store.js";
+import { createStarterLearningServiceFromEnv } from "../server/learning/service.js";
 import { LocalTemporalWorkflowPort } from "../server/learning/temporal-workflow.js";
 import { LearnFromSessionWorkflow } from "../server/learning/workflow.js";
 
@@ -14,6 +15,7 @@ await Promise.all([
   testGraphUpsertIdempotency(),
   testGraphFailureDoesNotFailLearning(),
   testLearningJobPayload(),
+  testStarterLearningProfiles(),
 ]);
 
 console.log(JSON.stringify({ status: "ok" }, null, 2));
@@ -162,18 +164,53 @@ async function testLearningJobPayload() {
   assert(seen.toolCalls.length === 1, "learning payload should include tool calls");
 }
 
+async function testStarterLearningProfiles() {
+  const memoryOnly = createStarterLearningServiceFromEnv({
+    AGENT_LEARNING_PROFILE: "memory_only",
+    AGENT_LEARNING_WORKFLOW_DRIVER: "local",
+    AGENT_LEARNING_MEMORY_DRIVER: "local",
+    AGENT_LEARNING_GRAPH_DRIVER: "local",
+  });
+  const memoryOnlyStatus = await waitForLearning(
+    memoryOnly,
+    memoryOnly.enqueueSessionLearning(learningSessionInput({
+      runId: "learn-profile-memory-only",
+      sessionId: "session-profile-memory-only",
+    })),
+  );
+  assert(memoryOnlyStatus.status === "evaluated", "memory_only profile must stop after evaluation");
+
+  const approvalRequired = createStarterLearningServiceFromEnv({
+    AGENT_LEARNING_PROFILE: "approval_required",
+    AGENT_LEARNING_WORKFLOW_DRIVER: "local",
+    AGENT_LEARNING_MEMORY_DRIVER: "local",
+    AGENT_LEARNING_GRAPH_DRIVER: "local",
+  });
+  const approvalStatus = await waitForLearning(
+    approvalRequired,
+    approvalRequired.enqueueSessionLearning(learningSessionInput({
+      runId: "learn-profile-approval-required",
+      sessionId: "session-profile-approval-required",
+    })),
+  );
+  assert(approvalStatus.status === "pending_approval", "approval_required profile must stop pending approval");
+}
+
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) fail(message);
 }
 
-function learningSessionInput(): LearningSessionInput {
+function learningSessionInput(
+  input: { runId?: string; sessionId?: string } = {},
+): LearningSessionInput {
   return {
+    runId: input.runId,
     agentId: "agent-a",
     draftId: "draft-a",
     tenantId: "tenant-a",
     userId: "user-a",
     summary: {
-      sessionId: "session-a",
+      sessionId: input.sessionId ?? "session-a",
       tenantId: "tenant-a",
       userId: "user-a",
       channel: "voice",
@@ -194,6 +231,19 @@ function learningSessionInput(): LearningSessionInput {
     ],
     toolCalls: [],
   };
+}
+
+async function waitForLearning(
+  service: ReturnType<typeof createStarterLearningServiceFromEnv>,
+  initial: Awaited<ReturnType<ReturnType<typeof createStarterLearningServiceFromEnv>["enqueueSessionLearning"]>>,
+) {
+  const terminal = new Set(["evaluated", "applied", "pending_approval", "rejected", "failed", "skipped"]);
+  for (let attempt = 0; attempt < 50; attempt++) {
+    const status = service.getLearningStatus(initial.runId);
+    if (status && terminal.has(status.status)) return status;
+    await Bun.sleep(10);
+  }
+  throw new Error(`Timed out waiting for ${initial.runId}`);
 }
 
 function failingGraphStore(): GraphMemoryStorePort {

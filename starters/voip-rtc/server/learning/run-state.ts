@@ -1,4 +1,9 @@
-import type { LearningJobStatus } from "@voiceagentsdk/core/sdk";
+import type {
+  LearningJobStatus,
+  LearningLoopProfile,
+  LearningRunRecord,
+  LearningRunRepositoryPort,
+} from "@voiceagentsdk/core/sdk";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { asRecord } from "../builder/utils/record-readers.js";
@@ -25,6 +30,64 @@ export function latestLearningRunForDraft(
       const rightTime = Date.parse(right.finishedAt ?? right.startedAt ?? right.queuedAt);
       return (rightTime || 0) - (leftTime || 0);
     })[0] ?? null;
+}
+
+export function createLocalLearningRunRepository(): LearningRunRepositoryPort {
+  return {
+    createQueued(input, options) {
+      const run: LearningRunRecord = {
+        jobId: options.jobId,
+        runId: options.runId,
+        status: "queued",
+        profile: options.profile,
+        agentId: input.agentId,
+        draftId: input.draftId,
+        tenantId: input.tenantId,
+        userId: input.userId,
+        sourceSessionId: input.summary.sessionId,
+        queuedAt: new Date().toISOString(),
+        message: "Learning job queued.",
+      };
+      saveLearningRun(run);
+      return run;
+    },
+
+    save(record) {
+      saveLearningRun(record);
+      return record;
+    },
+
+    get(runId) {
+      return asLearningRunRecord(getLearningRun(runId));
+    },
+
+    findBySource(input) {
+      return Array.from(runs.values())
+        .map(asLearningRunRecord)
+        .filter((run): run is LearningRunRecord => Boolean(run))
+        .find((run) => {
+          return run.sourceSessionId === input.sourceSessionId &&
+            (!input.agentId || run.agentId === input.agentId) &&
+            (!input.draftId || run.draftId === input.draftId);
+        }) ?? null;
+    },
+  };
+}
+
+export function learningProfileFromEnv(
+  env: Record<string, string | undefined>,
+): LearningLoopProfile {
+  const value = env.AGENT_LEARNING_PROFILE;
+  if (
+    value === "observe" ||
+    value === "memory_only" ||
+    value === "memory_and_candidates" ||
+    value === "auto_apply_prompt_safe" ||
+    value === "approval_required"
+  ) {
+    return value;
+  }
+  return "auto_apply_prompt_safe";
 }
 
 function loadRuns(): Map<string, LearningJobStatus> {
@@ -61,4 +124,14 @@ function isLearningJobStatus(value: unknown): value is LearningJobStatus {
     typeof record.status === "string" &&
     typeof record.queuedAt === "string"
   );
+}
+
+function asLearningRunRecord(
+  run: LearningJobStatus | null,
+): LearningRunRecord | null {
+  if (!run) return null;
+  return {
+    profile: "memory_only",
+    ...run,
+  };
 }

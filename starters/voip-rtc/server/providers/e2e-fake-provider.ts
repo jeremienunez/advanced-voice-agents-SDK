@@ -12,6 +12,7 @@ export class E2EFakeRealtimeProvider implements IRealtimeProvider {
   state: TransportState = "disconnected";
   lastSpeechEndMs: number | null = null;
   currentResponseItemId: string | null = null;
+  private transcriptHandler: ((text: string, isFinal: boolean) => void) | null = null;
 
   get isConnected(): boolean {
     return this.state === "connected";
@@ -19,6 +20,10 @@ export class E2EFakeRealtimeProvider implements IRealtimeProvider {
 
   async connect(): Promise<void> {
     this.state = "connected";
+    this.transcriptHandler?.(
+      "I prefer concise answers for route planning tests.",
+      true,
+    );
   }
 
   async disconnect(): Promise<void> {
@@ -49,7 +54,9 @@ export class E2EFakeRealtimeProvider implements IRealtimeProvider {
   onSpeechStopped(_handler: (audioEndMs?: number) => void): void {}
   onResponseStarted(_handler: (responseId: string) => void): void {}
   onResponseCompleted(_handler: (responseId: string) => void): void {}
-  onTranscript(_handler: (text: string, isFinal: boolean) => void): void {}
+  onTranscript(handler: (text: string, isFinal: boolean) => void): void {
+    this.transcriptHandler = handler;
+  }
   onError(_handler: (error: ProviderError) => void): void {}
 }
 

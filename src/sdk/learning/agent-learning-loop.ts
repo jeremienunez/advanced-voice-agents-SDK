@@ -24,34 +24,68 @@ export function createAgentLearningLoop(
   options: AgentLearningLoopOptions,
 ): AgentLearningLoopPort {
   return {
-    async enqueueSessionLearning(input, enqueueOptions) {
-      const duplicate = await options.repository.findBySource?.({
+    enqueueSessionLearning(input, enqueueOptions) {
+      const duplicate = options.repository.findBySource?.({
         sourceSessionId: input.summary.sessionId,
         agentId: input.agentId,
         draftId: input.draftId,
       });
-      if (duplicate) return duplicate;
-
-      const profile = normalizeLearningLoopProfile(
-        enqueueOptions?.profile,
-        options.defaultProfile ?? "memory_only",
+      if (isPromise(duplicate)) {
+        return duplicate.then((resolved) =>
+          enqueueAfterDuplicate(options, enqueueOptions, input, resolved)
+        );
+      }
+      return enqueueAfterDuplicate(
+        options,
+        enqueueOptions,
+        input,
+        duplicate ?? null,
       );
-      const run = await options.repository.createQueued(input, {
-        profile,
-        runId: input.runId ?? `learn_${crypto.randomUUID()}`,
-        jobId: `job_${crypto.randomUUID()}`,
-      });
-      await publish(options, enqueueOptions, run);
-      setTimeout(() => {
-        void executeLearningRun(options, enqueueOptions, input, run);
-      }, 0);
-      return run;
     },
 
     getLearningRun(runId) {
       return options.repository.get(runId);
     },
   };
+}
+
+function enqueueAfterDuplicate(
+  options: AgentLearningLoopOptions,
+  enqueueOptions: LearningLoopEnqueueOptions | undefined,
+  input: LearningSessionInput,
+  duplicate: LearningRunRecord | null,
+): Promise<LearningRunRecord> | LearningRunRecord {
+  if (duplicate) return duplicate;
+
+  const profile = normalizeLearningLoopProfile(
+    enqueueOptions?.profile,
+    options.defaultProfile ?? "memory_only",
+  );
+  const queued = options.repository.createQueued(input, {
+    profile,
+    runId: input.runId ?? `learn_${crypto.randomUUID()}`,
+    jobId: `job_${crypto.randomUUID()}`,
+  });
+  if (isPromise(queued)) {
+    return queued.then((run) => {
+      scheduleLearningRun(options, enqueueOptions, input, run);
+      return run;
+    });
+  }
+  scheduleLearningRun(options, enqueueOptions, input, queued);
+  return queued;
+}
+
+function scheduleLearningRun(
+  options: AgentLearningLoopOptions,
+  enqueueOptions: LearningLoopEnqueueOptions | undefined,
+  input: LearningSessionInput,
+  run: LearningRunRecord,
+): void {
+  void publish(options, enqueueOptions, run);
+  setTimeout(() => {
+    void executeLearningRun(options, enqueueOptions, input, run);
+  }, 0);
 }
 
 async function executeLearningRun(
@@ -120,7 +154,7 @@ async function executeLearningRun(
     if (decision.action !== "apply" || !options.evolution) return;
 
     const evolution = await options.evolution.validateAndApply(
-      evolutionInput(input, draftId, memories, signals),
+      evolutionInput(input, evaluated.runId, draftId, memories, signals),
     );
     await publish(options, enqueueOptions, {
       ...evaluated,
@@ -184,12 +218,13 @@ async function writeGraph(
 
 function evolutionInput(
   input: LearningSessionInput,
+  runId: string,
   draftId: string,
   memories: TemporalMemoryRecord[],
   signals: SessionLearningSignals,
 ): AgentEvolutionInput {
   return {
-    runId: input.runId ?? `learn_${crypto.randomUUID()}`,
+    runId,
     draftId,
     agentId: input.agentId,
     tenantId: input.tenantId,
@@ -225,4 +260,8 @@ function shouldWriteLearningArtifacts(
     action === "candidate" ||
     action === "apply" ||
     action === "pending_approval";
+}
+
+function isPromise<T>(value: T | Promise<T> | undefined): value is Promise<T> {
+  return Boolean(value && typeof (value as Promise<T>).then === "function");
 }

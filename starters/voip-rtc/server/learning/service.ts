@@ -5,6 +5,11 @@ import type {
   LearningJobStatus,
   LearningSessionInput,
 } from "@voiceagentsdk/core/sdk";
+import {
+  createAgentLearningLoop,
+  createDefaultLearningPolicy,
+  extractDefaultSessionLearningSignals,
+} from "@voiceagentsdk/core/sdk";
 import { StarterAgentEvolution } from "./evolution.js";
 import {
   createGraphMemoryStoreFromEnv,
@@ -17,6 +22,10 @@ import {
 } from "./temporal-worker.js";
 import type { LearningStatusSink } from "./temporal-workflow.js";
 import { LearnFromSessionWorkflow } from "./workflow.js";
+import {
+  createLocalLearningRunRepository,
+  learningProfileFromEnv,
+} from "./run-state.js";
 
 export interface StarterLearningService {
   approveInfraEvolution(
@@ -53,6 +62,17 @@ export function createStarterLearningServiceFromEnv(
   const evolution = new StarterAgentEvolution({
     activeAgentAssignment: options.activeAgentAssignment,
   });
+  const repository = createLocalLearningRunRepository();
+  const profile = learningProfileFromEnv(env);
+  const loop = createAgentLearningLoop({
+    repository,
+    extractor: { extract: extractDefaultSessionLearningSignals },
+    policy: createDefaultLearningPolicy(),
+    memoryStore,
+    graphStore,
+    evolution,
+    defaultProfile: profile,
+  });
 
   return {
     approveInfraEvolution(draftId, pendingId, scope) {
@@ -60,43 +80,48 @@ export function createStarterLearningServiceFromEnv(
     },
 
     enqueueSessionLearning(input, onStatus) {
-      const workflow = new LearnFromSessionWorkflow({
-        memoryStore,
-        graphStore,
-        evolution,
-        memoryTtlSeconds,
-      });
-      const temporal = createLearningWorkflowPort({
-        env,
-        workflow,
+      if (isTemporalLearningDriver(env)) {
+        return createTemporalPort(onStatus).enqueueLearningSession(input);
+      }
+      return loop.enqueueSessionLearning(input, {
+        profile,
         onStatus,
-        temporalClient: options.temporalClient,
-      });
-      return temporal.enqueueLearningSession(input);
+      }) as LearningJobStatus;
     },
 
     getLearningStatus(runId) {
-      const workflow = new LearnFromSessionWorkflow({
-        memoryStore,
-        graphStore,
-        evolution,
-        memoryTtlSeconds,
-      });
-      const temporal = createLearningWorkflowPort({
-        env,
-        workflow,
-        temporalClient: options.temporalClient,
-      });
-      return temporal.getLearningStatus(runId);
+      if (!isTemporalLearningDriver(env)) {
+        return loop.getLearningRun(runId) as LearningJobStatus | null;
+      }
+      return createTemporalPort().getLearningStatus(runId);
     },
 
     rollback(draftId, scope) {
       return evolution.rollback(draftId, scope);
     },
   };
+
+  function createTemporalPort(onStatus?: LearningStatusSink) {
+    const workflow = new LearnFromSessionWorkflow({
+      memoryStore,
+      graphStore,
+      evolution,
+      memoryTtlSeconds,
+    });
+    return createLearningWorkflowPort({
+      env,
+      workflow,
+      onStatus,
+      temporalClient: options.temporalClient,
+    });
+  }
 }
 
 function positiveInteger(value: string | undefined, fallback: number): number {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
+}
+
+function isTemporalLearningDriver(env: Record<string, string | undefined>): boolean {
+  return env.AGENT_LEARNING_WORKFLOW_DRIVER === "temporal";
 }
