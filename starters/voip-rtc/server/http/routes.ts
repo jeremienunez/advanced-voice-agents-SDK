@@ -5,6 +5,7 @@ import { corsHeadersFor } from "./cors.js";
 import { readBodyString, readDraftId } from "./draft-id.js";
 import { accessGuard, originGuard } from "./guards.js";
 import { requireOwnedDraft } from "../builder/state/draft-ownership.js";
+import { activeAgentScopeFromContext } from "../builder/state/active-agent-assignment.js";
 import type { BuilderRequestContext } from "../builder/types.js";
 import type { StarterRouteContext } from "./types.js";
 
@@ -115,7 +116,11 @@ async function handleBuilderRoute(
     const draftId = readDraftId(await request.json());
     if (!draftId) return json({ error: "draftId is required" }, app, request);
     requireOwnedDraft(draftId, context);
-    return json(await app.learningService.rollback(draftId), app, request);
+    return json(
+      await app.learningService.rollback(draftId, activeAgentScopeFromContext(context)),
+      app,
+      request,
+    );
   }
   if (url.pathname === "/builder/agents/approve-infra-evolution" && request.method === "POST") {
     const body = await request.json();
@@ -124,7 +129,15 @@ async function handleBuilderRoute(
     if (!draftId) return json({ error: "draftId is required" }, app, request);
     if (!pendingId) return json({ error: "pendingId is required" }, app, request);
     requireOwnedDraft(draftId, context);
-    return json(await app.learningService.approveInfraEvolution(draftId, pendingId), app, request);
+    return json(
+      await app.learningService.approveInfraEvolution(
+        draftId,
+        pendingId,
+        activeAgentScopeFromContext(context),
+      ),
+      app,
+      request,
+    );
   }
   const { response } = await app.builderService.handle(request, url, context);
   return response ?? new Response("Not found", { status: 404 });

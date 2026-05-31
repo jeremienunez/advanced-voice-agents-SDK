@@ -134,6 +134,7 @@ export interface PendingActionCreateInput {
   arguments: Record<string, unknown>;
   sideEffect?: string;
   reason?: string;
+  expiresAt?: string;
   metadata?: Record<string, unknown>;
 }
 

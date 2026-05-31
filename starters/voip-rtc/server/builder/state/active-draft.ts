@@ -1,19 +1,25 @@
 import type { AgentBuildDraft } from "@voiceagentsdk/core/sdk";
+import type { BuilderRequestContext } from "../types.js";
+import { draftVisibleToContext } from "./draft-owner-scope.js";
 import { activeDraftId } from "./session-store.js";
 import { draftValues, getDraft } from "./draft-store.js";
 
-export function activeCompiledDraft(): AgentBuildDraft | undefined {
+export function activeCompiledDraft(
+  context: BuilderRequestContext = {},
+): AgentBuildDraft | undefined {
   const draftId = activeDraftId();
   if (draftId) {
     const active = getDraft(draftId);
-    if (active?.compiled) return active;
+    if (active?.compiled && draftVisibleToContext(active, context)) return active;
   }
-  return latestCompiledDraft();
+  return latestCompiledDraft(context);
 }
 
-function latestCompiledDraft(): AgentBuildDraft | undefined {
+function latestCompiledDraft(
+  context: BuilderRequestContext,
+): AgentBuildDraft | undefined {
   return draftValues()
-    .filter((draft) => Boolean(draft.compiled))
+    .filter((draft) => Boolean(draft.compiled) && draftVisibleToContext(draft, context))
     .sort((left, right) => {
       const leftTime = Date.parse(left.compiled?.createdAt ?? "");
       const rightTime = Date.parse(right.compiled?.createdAt ?? "");

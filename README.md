@@ -124,6 +124,10 @@ These are application-owned concerns. The SDK exposes ports and adapters so appl
 - Model output is untrusted.
 - Uploaded documents are untrusted data.
 - Tool execution requires server-side policy.
+- Runtime tool argument validation covers a basic JSON Schema subset (`required`,
+  primitive `type`, `enum`, numeric bounds). Complex schemas remain
+  application-owned unless a downstream app adds a stricter validator around
+  `ToolExecutionPolicyEngine`.
 - Auth is application-owned through ports such as `AuthTicketPort`.
 - Query identity is dev-only.
 - Local state is dev-only for sensitive workflows.
@@ -329,6 +333,7 @@ To keep this guide concise, the comprehensive technical tables are grouped below
 | `pnpm test:prompt-policy:bdd` | Ensures final system prompts contain immutable validation instructions. |
 | `pnpm test:learning-preserves-server-policy:bdd` | Ensures learned memory is inserted before the final server-owned policy suffix. |
 | `pnpm test:model-cannot-self-confirm-tool:bdd` | Verifies model-supplied arguments cannot self-confirm write or external tools. |
+| `pnpm test:pending-action-expiry-quota:bdd` | Verifies pending tool confirmations expire and enforce per-session open-action quotas. |
 | `pnpm test:tool-execution-policy-engine:bdd` | Checks runtime schema validation, authorization, call limits, timeouts, audit, and redaction. |
 | `pnpm test:starter-production-mode:bdd` | Verifies production starter mode refuses local-only fallbacks. |
 | `pnpm test:memory-store-port:bdd` | Validates in-memory and Redis persistence behaviors inside the voice sessions. |
@@ -338,7 +343,9 @@ To keep this guide concise, the comprehensive technical tables are grouped below
 | `pnpm test:tool-contracts:bdd` | Verifies executable tool definitions remain separate from serializable manifests. |
 | `pnpm test:tool-registry-adapter:bdd` | Validates runtime tool execution maps to registered client/server actions. |
 | `pnpm test:runtime-tool-authorization:bdd` | Asserts that agents can only execute tools explicitly allowlisted by their current schema. |
+| `pnpm test:learning-active-assignment-scope:bdd` | Verifies rollback and infra approval keep active agent assignment scoped to the draft owner. |
 | `pnpm test:builder-draft-ownership:bdd` | Confirms builder routes restrict draft modifications to authenticated authors only. |
+| `pnpm test:builder-session-filtering:bdd` | Verifies builder session and agent-bank reads filter drafts by authenticated owner. |
 | `pnpm test:document-ingestion:bdd` | Enforces file ingestion boundaries, upload types, parsing limits, and IP rate limits. |
 | `pnpm test:database-provisioning` | Validates sql template generation against code injection or unauthorized permissions. |
 | `pnpm test:adapter-boundaries:bdd` | Checks Milvus/graph adapter ownership boundaries and promotion requirements. |

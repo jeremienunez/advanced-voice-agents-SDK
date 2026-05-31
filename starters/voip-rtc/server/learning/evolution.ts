@@ -2,6 +2,7 @@ import type {
   AgentEvolutionInput,
   AgentEvolutionPort,
   AgentEvolutionResult,
+  ActiveAgentScope,
   ActiveAgentAssignmentPort,
   CompiledAgentArtifact,
 } from "@voiceagentsdk/core/sdk";
@@ -9,6 +10,7 @@ import { mutateDraft } from "../builder/domain/drafts.js";
 import { requireDraft, saveDraft } from "../builder/state/draft-store.js";
 import { createGlobalActiveAgentAssignment } from "../builder/state/active-agent-assignment.js";
 import { decideInfraEvolution } from "./evolution-infra.js";
+import { activeScopeForDraft } from "./evolution-scope.js";
 import { buildPromptVersion } from "./evolution-prompt.js";
 import {
   artifactIdFor,
@@ -118,8 +120,10 @@ export class StarterAgentEvolution implements AgentEvolutionPort {
     saveDraft(nextDraft);
     await this.activeAgentAssignment.setActiveAgent({
       draftId: nextDraft.id,
-      tenantId: input.tenantId,
-      userId: input.userId,
+      ...activeScopeForDraft(nextDraft, {
+        tenantId: input.tenantId,
+        userId: input.userId,
+      }),
     });
     return {
       status: "applied",
@@ -138,6 +142,7 @@ export class StarterAgentEvolution implements AgentEvolutionPort {
   async approveInfraEvolution(
     draftId: string,
     pendingId: string,
+    scope: ActiveAgentScope = {},
   ): Promise<AgentEvolutionResult> {
     const draft = requireDraft(draftId);
     const current = currentEvolution(draft);
@@ -204,7 +209,10 @@ export class StarterAgentEvolution implements AgentEvolutionPort {
       .build();
 
     saveDraft(nextDraft);
-    await this.activeAgentAssignment.setActiveAgent({ draftId: nextDraft.id });
+    await this.activeAgentAssignment.setActiveAgent({
+      ...activeScopeForDraft(nextDraft, scope),
+      draftId: nextDraft.id,
+    });
     return {
       status: "applied",
       draftId,
@@ -217,7 +225,10 @@ export class StarterAgentEvolution implements AgentEvolutionPort {
     };
   }
 
-  async rollback(draftId: string): Promise<AgentEvolutionResult> {
+  async rollback(
+    draftId: string,
+    scope: ActiveAgentScope = {},
+  ): Promise<AgentEvolutionResult> {
     const draft = requireDraft(draftId);
     const current = currentEvolution(draft);
     if (!current.rollbackArtifact) {
@@ -271,7 +282,10 @@ export class StarterAgentEvolution implements AgentEvolutionPort {
       .build();
 
     saveDraft(nextDraft);
-    await this.activeAgentAssignment.setActiveAgent({ draftId: nextDraft.id });
+    await this.activeAgentAssignment.setActiveAgent({
+      ...activeScopeForDraft(nextDraft, scope),
+      draftId: nextDraft.id,
+    });
     return {
       status: "applied",
       draftId,

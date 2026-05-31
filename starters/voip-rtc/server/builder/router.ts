@@ -31,11 +31,11 @@ export function createBuilderRouter(options: {
         }
 
         if (url.pathname === "/builder/session" && request.method === "GET") {
-          return { response: json(builderSessionPayload(), corsHeaders) };
+          return { response: json(builderSessionPayload(context), corsHeaders) };
         }
 
         if (url.pathname === "/builder/agents" && request.method === "GET") {
-          return { response: json(builderAgentBankPayload(), corsHeaders) };
+          return { response: json(builderAgentBankPayload(context), corsHeaders) };
         }
 
         if (
@@ -86,7 +86,7 @@ async function routePostRequest(
   if (url.pathname === "/builder/session") {
     const body = await request.json();
     await workflows.activateSession(body, context);
-    return builderSessionPayload();
+    return builderSessionPayload(context);
   }
 
   if (url.pathname === "/builder/prompt-plan") {

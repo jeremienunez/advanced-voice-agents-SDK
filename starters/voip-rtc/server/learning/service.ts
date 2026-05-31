@@ -1,6 +1,7 @@
 import type {
   AgentEvolutionResult,
   ActiveAgentAssignmentPort,
+  ActiveAgentScope,
   LearningJobStatus,
   LearningSessionInput,
 } from "@voiceagentsdk/core/sdk";
@@ -21,13 +22,14 @@ export interface StarterLearningService {
   approveInfraEvolution(
     draftId: string,
     pendingId: string,
+    scope?: ActiveAgentScope,
   ): Promise<AgentEvolutionResult>;
   enqueueSessionLearning(
     input: LearningSessionInput,
     onStatus?: LearningStatusSink,
   ): LearningJobStatus;
   getLearningStatus(runId: string): LearningJobStatus | null;
-  rollback(draftId: string): Promise<AgentEvolutionResult>;
+  rollback(draftId: string, scope?: ActiveAgentScope): Promise<AgentEvolutionResult>;
 }
 
 export function createStarterLearningServiceFromEnv(
@@ -53,8 +55,8 @@ export function createStarterLearningServiceFromEnv(
   });
 
   return {
-    approveInfraEvolution(draftId, pendingId) {
-      return evolution.approveInfraEvolution(draftId, pendingId);
+    approveInfraEvolution(draftId, pendingId, scope) {
+      return evolution.approveInfraEvolution(draftId, pendingId, scope);
     },
 
     enqueueSessionLearning(input, onStatus) {
@@ -88,8 +90,8 @@ export function createStarterLearningServiceFromEnv(
       return temporal.getLearningStatus(runId);
     },
 
-    rollback(draftId) {
-      return evolution.rollback(draftId);
+    rollback(draftId, scope) {
+      return evolution.rollback(draftId, scope);
     },
   };
 }

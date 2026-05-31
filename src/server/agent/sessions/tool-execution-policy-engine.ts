@@ -52,6 +52,8 @@ export interface ToolExecutionPolicyEngineOptions {
   audit?: (event: ToolExecutionPolicyAuditEvent) => void | Promise<void>;
   now?: () => Date;
   defaultTimeoutMs?: number;
+  pendingActionTtlMs?: number;
+  maxPendingActionsPerSession?: number;
 }
 
 export class ToolExecutionPolicyEngine {
@@ -60,7 +62,11 @@ export class ToolExecutionPolicyEngine {
 
   constructor(private readonly options: ToolExecutionPolicyEngineOptions = {}) {
     this.pendingActions = options.pendingActions ??
-      createInMemoryPendingActionPort({ now: options.now });
+      createInMemoryPendingActionPort({
+        defaultTtlMs: options.pendingActionTtlMs,
+        maxPendingActionsPerSession: options.maxPendingActionsPerSession,
+        now: options.now,
+      });
   }
 
   async execute(input: ToolExecutionPolicyInput): Promise<unknown> {
@@ -94,6 +100,7 @@ export class ToolExecutionPolicyEngine {
         sideEffect: input.tool.policy?.sideEffect,
         reason: input.tool.policy?.confirmationReason ??
           "Server-side confirmation is required before this action.",
+        expiresAt: pendingExpiresAt(this.options),
         metadata: input.context.agentId ? { agentId: input.context.agentId } : undefined,
       });
       await this.audit(input, "tool.confirmation_required", pending.reason, pending.id);
@@ -102,6 +109,7 @@ export class ToolExecutionPolicyEngine {
         pendingActionId: pending.id,
         toolName: input.tool.name,
         reason: pending.reason,
+        expiresAt: pending.expiresAt,
       };
     }
 
@@ -223,4 +231,13 @@ export class ToolExecutionPolicyEngine {
 
 function callCountKey(input: ToolExecutionPolicyInput): string {
   return `${input.context.sessionId}:${input.tool.name}`;
+}
+
+function pendingExpiresAt(
+  options: ToolExecutionPolicyEngineOptions,
+): string | undefined {
+  const ttlMs = options.pendingActionTtlMs;
+  if (!Number.isFinite(ttlMs) || !ttlMs || ttlMs < 1) return undefined;
+  const now = options.now?.() ?? new Date();
+  return new Date(now.getTime() + ttlMs).toISOString();
 }

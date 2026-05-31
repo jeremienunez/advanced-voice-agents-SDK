@@ -1,4 +1,5 @@
 import type { AuthTicketPort } from "@voiceagentsdk/core/sdk";
+import type { ActiveAgentScope } from "@voiceagentsdk/core/sdk";
 import type { BuilderRequestContext } from "../builder/types.js";
 import type { RuntimeProviderConfig } from "../providers/catalog.js";
 import type { StarterMode } from "../app/starter-mode.js";
@@ -27,8 +28,12 @@ export interface StarterRouteContext {
   env: StarterServerEnv;
   authTicketVerifier: AuthTicketPort;
   learningService: {
-    approveInfraEvolution(draftId: string, pendingId: string): Promise<unknown>;
-    rollback(draftId: string): Promise<unknown>;
+    approveInfraEvolution(
+      draftId: string,
+      pendingId: string,
+      scope?: ActiveAgentScope,
+    ): Promise<unknown>;
+    rollback(draftId: string, scope?: ActiveAgentScope): Promise<unknown>;
   };
   providerCatalog: RuntimeProviderConfig[];
   runtimePendingActions?: RuntimePendingActionApprovalService;

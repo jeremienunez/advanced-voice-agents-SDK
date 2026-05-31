@@ -1,20 +1,26 @@
 import { activeCompiledDraft } from "./active-draft.js";
 import { activeDraftId } from "./session-store.js";
 import { summarizeDraftForBank } from "./draft-bank-summary.js";
+import type { BuilderRequestContext } from "../types.js";
+import { draftVisibleToContext } from "./draft-owner-scope.js";
 import { draftValues } from "./draft-store.js";
 
-export function builderAgentBankPayload(): Record<string, unknown> {
-  const activeDraft = activeCompiledDraft();
+export function builderAgentBankPayload(
+  context: BuilderRequestContext = {},
+): Record<string, unknown> {
+  const activeDraft = activeCompiledDraft(context);
   return {
     activeDraftId: activeDraft?.id ?? null,
-    agents: agentBankItems(activeDraft?.id ?? activeDraftId()),
+    agents: agentBankItems(activeDraft?.id ?? activeDraftId(), context),
   };
 }
 
 function agentBankItems(
   currentDraftId: string | undefined,
+  context: BuilderRequestContext,
 ): Array<Record<string, unknown>> {
   return draftValues()
+    .filter((draft) => draftVisibleToContext(draft, context))
     .sort((left, right) => {
       const leftTime = Date.parse(
         left.compiled?.createdAt ?? left.updatedAt ?? left.createdAt,

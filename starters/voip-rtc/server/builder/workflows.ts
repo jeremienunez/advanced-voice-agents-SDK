@@ -8,10 +8,10 @@ import { normalizeResearchSettings } from "./request/research-settings.js";
 import { normalizeResearchBudget } from "./domain/research.js";
 import { saveDraft } from "./state/draft-store.js";
 import {
-  ownerMetadata,
   requireOwnedDraft,
   resolveOwnedDraft,
 } from "./state/draft-ownership.js";
+import { ownerMetadata } from "./state/draft-owner-scope.js";
 import {
   activeAgentScopeFromContext,
   createGlobalActiveAgentAssignment,
