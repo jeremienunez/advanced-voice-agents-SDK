@@ -1,5 +1,7 @@
 import type {
   LearningJobStatus,
+  LearningRunRepositoryPort,
+  LearningRunStatusUpdate,
   LearningSessionInput,
   TemporalWorkflowPort,
 } from "@voiceagentsdk/core/sdk";
@@ -32,10 +34,12 @@ export interface LearningWorkflowPortInput {
   env: Record<string, string | undefined>;
   workflow: LearnFromSessionRunner;
   onStatus?: LearningStatusSink;
+  repository?: LearningRunRepositoryPort;
   temporalClient?: TemporalWorkerClientPort;
 }
 
 export interface StarterLearningWorkflowPort extends TemporalWorkflowPort {
   enqueueLearningSession(input: LearningSessionInput): LearningJobStatus;
   getLearningStatus(runId: string): LearningJobStatus | null;
+  publishWorkerStatus(update: LearningRunStatusUpdate): Promise<LearningJobStatus>;
 }

@@ -1,11 +1,13 @@
 import type {
   LearningJobStatus,
+  LearningRunRecord,
+  LearningRunRepositoryPort,
+  LearningRunStatusUpdate,
   LearningSessionInput,
 } from "@voiceagentsdk/core/sdk";
 import {
-  getLearningRun,
-  saveLearningRun,
-} from "../run-state.js";
+  publishLearningRunStatus,
+} from "@voiceagentsdk/core/sdk";
 import type { LearningStatusSink } from "../temporal-workflow.js";
 import type {
   StarterLearningWorkflowPort,
@@ -19,6 +21,7 @@ export class TemporalWorkerWorkflowPort implements StarterLearningWorkflowPort {
       client: TemporalWorkerClientPort;
       namespace: string;
       onStatus?: LearningStatusSink;
+      repository: LearningRunRepositoryPort;
       taskQueue: string;
       workflowType: string;
     },
@@ -26,12 +29,16 @@ export class TemporalWorkerWorkflowPort implements StarterLearningWorkflowPort {
 
   enqueueLearningSession(input: LearningSessionInput): LearningJobStatus {
     const runId = input.runId ?? `learn_${crypto.randomUUID()}`;
-    const queued: LearningJobStatus = {
+    const queued: LearningRunRecord = {
       jobId: `job_${crypto.randomUUID()}`,
       runId,
       status: "queued",
+      profile: "memory_only",
       agentId: input.agentId,
       draftId: input.draftId,
+      tenantId: input.tenantId,
+      userId: input.userId,
+      sourceSessionId: input.summary.sessionId,
       queuedAt: new Date().toISOString(),
       message: "Learning job queued for Temporal worker.",
     };
@@ -43,12 +50,20 @@ export class TemporalWorkerWorkflowPort implements StarterLearningWorkflowPort {
   }
 
   getLearningStatus(runId: string): LearningJobStatus | null {
-    return getLearningRun(runId);
+    return this.options.repository.get(runId) as LearningJobStatus | null;
+  }
+
+  async publishWorkerStatus(
+    update: LearningRunStatusUpdate,
+  ): Promise<LearningJobStatus> {
+    const status = await publishLearningRunStatus(this.options.repository, update);
+    this.options.onStatus?.(status);
+    return status;
   }
 
   private async startWorkerWorkflow(
     input: LearningSessionInput,
-    queued: LearningJobStatus,
+    queued: LearningRunRecord,
   ): Promise<void> {
     try {
       await this.options.client.startLearningWorkflow({
@@ -76,8 +91,8 @@ export class TemporalWorkerWorkflowPort implements StarterLearningWorkflowPort {
     }
   }
 
-  private publish(status: LearningJobStatus): void {
-    saveLearningRun(status);
+  private publish(status: LearningRunRecord): void {
+    this.options.repository.save(status);
     this.options.onStatus?.(status);
   }
 }

@@ -1,5 +1,7 @@
 import type {
   LearningJobStatus,
+  LearningRunStatus,
+  LearningRunStatusUpdate,
   LearningSessionInput,
   TemporalWorkflowPort,
 } from "@voiceagentsdk/core/sdk";
@@ -41,6 +43,24 @@ export class LocalTemporalWorkflowPort implements TemporalWorkflowPort {
     return getLearningRun(runId);
   }
 
+  async publishWorkerStatus(
+    update: LearningRunStatusUpdate,
+  ): Promise<LearningJobStatus> {
+    const current = getLearningRun(update.runId);
+    if (!current) throw new Error(`Learning run not found: ${update.runId}`);
+    const next: LearningJobStatus = {
+      ...current,
+      status: update.status,
+      message: update.message ?? current.message,
+      error: update.error,
+      finishedAt: isTerminal(update.status)
+        ? new Date().toISOString()
+        : current.finishedAt,
+    };
+    this.publish(next);
+    return next;
+  }
+
   private async run(
     input: LearningSessionInput,
     queued: LearningJobStatus,
@@ -75,4 +95,8 @@ export class LocalTemporalWorkflowPort implements TemporalWorkflowPort {
     saveLearningRun(status);
     this.options.onStatus?.(status);
   }
+}
+
+function isTerminal(status: LearningRunStatus): boolean {
+  return ["applied", "pending_approval", "rejected", "failed", "skipped"].includes(status);
 }

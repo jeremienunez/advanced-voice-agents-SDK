@@ -12,6 +12,7 @@ import { assert } from "./shared/assertions.js";
 const results = [
   await scenarioTemporalDriverDispatchesToWorker(),
   await scenarioTemporalStartFailureStaysAsync(),
+  await scenarioTemporalWorkerCanPublishTerminalStatus(),
   await scenarioLocalDriverStillRunsInProcess(),
   await scenarioLearningServiceUsesTemporalDriverFromEnv(),
 ];
@@ -65,6 +66,31 @@ async function scenarioTemporalStartFailureStaysAsync(): Promise<string> {
   assert(statuses.join(">") === "queued>failed", "Temporal start failure must be reported async");
 
   return "temporal-start-failure-async-status";
+}
+
+async function scenarioTemporalWorkerCanPublishTerminalStatus(): Promise<string> {
+  const client = recordingClient();
+  const temporal = createLearningWorkflowPort({
+    env: temporalEnv(),
+    workflow: recordingWorkflow(),
+    temporalClient: client,
+  });
+  const queued = temporal.enqueueLearningSession(learningSession({ runId: "learn-worker-terminal" }));
+  await waitFor(() => client.starts.length === 1);
+
+  const terminal = await temporal.publishWorkerStatus({
+    runId: queued.runId,
+    status: "applied",
+    message: "Worker applied learning.",
+  });
+
+  assert(terminal.status === "applied", "worker terminal status must be persisted");
+  assert(
+    temporal.getLearningStatus(queued.runId)?.status === "applied",
+    "terminal status must be queryable",
+  );
+
+  return "temporal-worker-can-publish-terminal-status";
 }
 
 async function scenarioLocalDriverStillRunsInProcess(): Promise<string> {

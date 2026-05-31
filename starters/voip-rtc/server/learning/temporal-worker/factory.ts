@@ -1,4 +1,5 @@
 import { LocalTemporalWorkflowPort } from "../temporal-workflow.js";
+import { createLocalLearningRunRepository } from "../run-state.js";
 import { DynamicTemporalWorkerClient } from "./dynamic-client.js";
 import type {
   LearningWorkflowDriver,
@@ -16,6 +17,7 @@ export function createLearningWorkflowPort(
       client: input.temporalClient ?? new DynamicTemporalWorkerClient(),
       namespace: input.env.TEMPORAL_NAMESPACE ?? "default",
       onStatus: input.onStatus,
+      repository: input.repository ?? createLocalLearningRunRepository(),
       taskQueue: input.env.TEMPORAL_TASK_QUEUE ?? "agent-learning",
       workflowType: input.env.TEMPORAL_WORKFLOW_TYPE ?? "learnFromSession",
     });

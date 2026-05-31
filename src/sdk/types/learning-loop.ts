@@ -110,6 +110,15 @@ export interface LearningRunRecord {
   metadata?: JsonObject;
 }
 
+export interface LearningRunStatusUpdate {
+  runId: string;
+  status: LearningRunStatus;
+  message?: string;
+  error?: string;
+  decision?: LearningRunDecision;
+  metadata?: JsonObject;
+}
+
 export interface LearningLoopEnqueueOptions {
   profile?: LearningLoopProfile;
   onStatus?: (status: LearningRunRecord) => void;
