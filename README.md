@@ -8,6 +8,20 @@ In plain English: This framework turns **"make me an AI that talks"** into a str
 
 ## Quick Start
 
+Install the SDK package in a downstream Node application:
+
+```bash
+pnpm add @voiceagentsdk/core
+```
+
+Minimal imports:
+
+```ts
+import { compileVoiceAgentSdk, createAgentBuilder } from "@voiceagentsdk/core/sdk";
+import { createBrowserVoiceService } from "@voiceagentsdk/core/server/browser";
+import { createVoiceWSClient } from "@voiceagentsdk/core/client/browser";
+```
+
 Get the local development starter up and running in **under 30 seconds**:
 
 ```bash
@@ -117,6 +131,7 @@ flowchart LR
 > [!NOTE]
 > The core SDK defines compile-time contracts. Consuming applications bind physical adapters to abstract ports—such as authentication, secret resolvers, database drivers, and metrics telemetry—during initialization.
 > Production readiness depends on downstream adapters for auth, storage, secrets, telemetry, and deployment policy.
+> The VOIP RTC starter is a local/demo reference integration. It is not a multi-tenant production application unless a downstream app supplies production adapters and policies.
 
 ## What this SDK intentionally does not own
 
@@ -472,6 +487,11 @@ import { ... } from "@voiceagentsdk/core/server/providers";// Facade real-time p
 import { ... } from "@voiceagentsdk/core/server/media";    // Media captures & audio helper algorithms
 import { ... } from "@voiceagentsdk/core/client/browser";  // Browser PCM recorder client SDK
 ```
+
+Additional integration docs:
+
+- [App-owned auth, secrets, approvals and ports](docs/sdk/app-owned-integration.md)
+- [Alpha release procedure](docs/release-alpha.md)
 
 ---
 

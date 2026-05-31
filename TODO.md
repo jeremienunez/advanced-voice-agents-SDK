@@ -25,15 +25,14 @@ Ne pas transformer le SDK en produit SaaS complet:
 
 ### P0-001 - Finaliser les metadonnees npm
 
+Statut: ferme pour alpha `0.1.0-alpha.0`.
+
 Action:
 
-- Retirer `"private": true` quand la publication est decidee.
-- Ajouter ou verifier `license`.
-- Ajouter `repository`.
-- Ajouter `bugs`.
-- Ajouter `homepage`.
-- Ajouter `publishConfig.access = "public"` si le scope npm est public.
-- Verifier que `files` publie uniquement le package attendu.
+- `"private": true` retire.
+- `license`, `repository`, `bugs`, `homepage` et `publishConfig.access` ajoutes.
+- `files` limite au package core attendu: `dist`, README, changelog, TODO, license.
+- `test:package-metadata:bdd` verrouille ces invariants.
 
 Validation:
 
@@ -42,6 +41,8 @@ Validation:
 - inspecter le tarball dry-run.
 
 ### P0-002 - Verrouiller les exports publics
+
+Statut: ferme pour alpha.
 
 Action:
 
@@ -65,6 +66,8 @@ Validation:
 
 ### P0-003 - Garder les invariants de securite deja fermes
 
+Statut: ferme et couvert par `audit:solid`.
+
 Ces points restent P0 car ils ne dependent pas d'une auth proprietaire:
 
 - server-owned prompt policy reste suffix final apres learning;
@@ -83,6 +86,8 @@ Validation:
 
 ### P0-004 - CI visible pour package alpha
 
+Statut: ferme.
+
 Action:
 
 - Garder `.github/workflows/ci.yml`.
@@ -98,10 +103,12 @@ Validation:
 
 ### P0-005 - README alpha clair
 
+Statut: ferme pour alpha.
+
 Action:
 
-- Ajouter une section installation npm:
-  - `pnpm add @voiceagentsdk/core`
+- Section installation npm ajoutee:
+  - `pnpm add @voiceagentsdk/core`;
   - exemple minimal import SDK;
   - exemple minimal server/browser.
 - Clarifier que la readiness production depend des adapters downstream.
@@ -127,19 +134,17 @@ Statut:
 
 ### P1-001 - Release workflow
 
+Statut: ferme pour alpha.
+
 Action:
 
-- Choisir la strategie de version:
-  - `0.1.0-alpha.x` pour premiere publication publique;
-  - ou `0.1.0` si l'API publique est assume stable alpha.
-- Ajouter une procedure release:
-  - changelog;
-  - `pnpm audit:solid`;
-  - `pnpm pack:dry-run`;
-  - `npm publish --tag alpha`.
+- Strategie choisie: `0.1.0-alpha.x`.
+- Procedure release ajoutee dans `docs/release-alpha.md`.
 - Optionnel: npm provenance / trusted publishing GitHub Actions.
 
 ### P1-002 - Exemples d'integration app-owned
+
+Statut: ferme pour alpha docs.
 
 Action:
 
@@ -158,6 +163,8 @@ But:
 
 ### P1-003 - Documentation ports/adapters
 
+Statut: ferme pour alpha docs.
+
 Action:
 
 - Documenter les ports publics principaux:
@@ -172,6 +179,8 @@ Action:
   - repository/store adapter contracts.
 
 ### P1-004 - Matrice Local / Starter / Production integration
+
+Statut: ferme.
 
 Action:
 
@@ -189,6 +198,8 @@ Action:
 | Infra apply | plan/dev-local | opt-in | approval workflow |
 
 ### P1-005 - Starter production-mode usage guide
+
+Statut: ferme pour alpha docs.
 
 Action:
 

@@ -1,5 +1,30 @@
 # Changelog
 
+## release: prepare npm alpha package
+
+Status: implemented locally
+Date: 2026-05-31
+
+### Intent
+
+Rendre `@voiceagentsdk/core` publiable comme package npm alpha, sans inclure le
+starter local ni de concerns app-owned dans le core.
+
+### Journal
+
+- Passage en version `0.1.0-alpha.0` avec metadata npm publique.
+- Ajout de la licence MIT et du test `test:package-metadata:bdd`.
+- Ajout des docs release alpha et integrations app-owned.
+- README et starter README clarifient l'installation npm, les adapters
+  production et la limite local/demo du starter.
+
+### Validation
+
+- `pnpm test:package-metadata:bdd`
+- `pnpm test:public-boundaries:bdd`
+- `pnpm audit:solid`
+- `pnpm pack:dry-run`
+
 ## test: add agentrx diagnostics contracts
 
 Status: implemented locally

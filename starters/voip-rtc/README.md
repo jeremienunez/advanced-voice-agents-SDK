@@ -268,6 +268,15 @@ The voice runtime receives the verifier result as user context. Query params
 such as `tenantId` and `userId` are only dev-mode requested identity hints, not
 the trusted runtime identity source.
 
+When `VOICE_STARTER_MODE=production`, a downstream app must inject production
+adapters instead of relying on local fallbacks:
+
+- `AuthTicketPort` or equivalent verifier for builder and voice routes;
+- app-owned `builderService` that authorizes explicit runtime agent IDs;
+- app-owned learning service or durable workflow driver;
+- scoped `TenantResolverPort`;
+- runtime memory store that is not local in-memory state.
+
 Builder drafts are owned by the verified builder identity at creation time.
 Privileged database/knowledge workflows reload the stored draft by `draftId`,
 check that owner, and ignore request-supplied draft payloads.
