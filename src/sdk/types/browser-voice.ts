@@ -67,7 +67,10 @@ export interface VoiceSessionSummary {
 export type VoiceLearningStatus =
   | "queued"
   | "running"
+  | "evaluated"
   | "applied"
+  | "pending_approval"
+  | "rejected"
   | "failed"
   | "skipped";
 
@@ -79,7 +82,9 @@ export interface VoiceLearningSummary {
   draftId?: string;
   queuedAt: string;
   startedAt?: string;
+  evaluatedAt?: string;
   finishedAt?: string;
   message?: string;
   error?: string;
+  metadata?: Record<string, unknown>;
 }

@@ -1,7 +1,19 @@
 import type {
   ActiveAgentAssignmentPort,
   ActiveAgentScope,
+  AgentLearningLoopPort,
+  AgentLearningPolicyPort,
+  AgentSkillArtifact,
+  EvaluationHarnessPort,
   EventSinkPort,
+  LearningDelta,
+  LearningLoopProfile,
+  LearningPromotionState,
+  LearningReceipt,
+  LearningRunRecord,
+  LearningRunRepositoryPort,
+  LearningRunStatus,
+  LearningWorkflowDriverPort,
   MemoryStorePort,
   PendingActionPort,
   PendingActionRecord,
@@ -14,6 +26,7 @@ type PackageModule = Record<string, unknown>;
 const results = [
   await scenarioSdkCompilesThroughPublicExports(),
   await scenarioRuntimePortsArePublicTypes(),
+  await scenarioLearningLoopPortsArePublicTypes(),
   await scenarioBrowserProtocolParserIsPublicAndStable(),
   await scenarioDeclaredPackageEntrypointsResolve(),
 ];
@@ -55,6 +68,26 @@ async function scenarioRuntimePortsArePublicTypes(): Promise<string> {
   const publicPortsCompile: PublicRuntimePorts | null = null;
   assert(publicPortsCompile === null, "runtime ports must be public type exports");
   return "runtime-ports-are-public-types";
+}
+
+async function scenarioLearningLoopPortsArePublicTypes(): Promise<string> {
+  type PublicLearningLoopTypes = [
+    AgentLearningLoopPort,
+    AgentLearningPolicyPort,
+    AgentSkillArtifact,
+    EvaluationHarnessPort,
+    LearningDelta,
+    LearningLoopProfile,
+    LearningPromotionState,
+    LearningReceipt,
+    LearningRunRecord,
+    LearningRunRepositoryPort,
+    LearningRunStatus,
+    LearningWorkflowDriverPort,
+  ];
+  const compileOnly: PublicLearningLoopTypes | null = null;
+  assert(compileOnly === null, "learning loop ports must be public type exports");
+  return "learning-loop-ports-are-public-types";
 }
 
 async function scenarioBrowserProtocolParserIsPublicAndStable(): Promise<string> {
