@@ -2,7 +2,7 @@
 
 import {
   auditSecretHygiene,
-} from "./secret-hygiene/audit.ts";
+} from "../secret-hygiene/audit.ts";
 
 const includeLocalEnv = process.env.AUDIT_LOCAL_ENV_SECRETS === "1";
 const result = auditSecretHygiene({

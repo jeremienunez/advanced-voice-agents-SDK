@@ -11,8 +11,8 @@ import {
 import {
   AGENTRX_ARTIFACTS,
   AGENTRX_QUALITY_SIGNALS,
-} from "./agentrx-diagnostics/manifest.js";
-import { writeAgentRxArtifacts } from "../starters/voip-rtc/scripts/route-wines/agentrx.js";
+} from "../agentrx-diagnostics/manifest.js";
+import { writeAgentRxArtifacts } from "../../starters/voip-rtc/scripts/route-wines/agentrx.js";
 
 const results = [
   scenarioQualitySignalsAreDeclaredAndScripted(),

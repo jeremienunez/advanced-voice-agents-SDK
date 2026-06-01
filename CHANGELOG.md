@@ -1,5 +1,29 @@
 # Changelog
 
+## chore: organize repository tooling
+
+Status: implemented locally
+Date: 2026-06-01
+
+### Intent
+
+Rendre le tree plus lisible sans modifier la surface runtime du package npm.
+
+### Journal
+
+- Deplacement des audits racine vers `scripts/audits`.
+- Deplacement des BDD racine vers `scripts/bdd`.
+- Deplacement du smoke test runtime vers `scripts/smoke`.
+- Ajout de `REPO_STRUCTURE.md` comme carte publique des dossiers et des
+  boundaries de publication.
+- Les scripts npm racine pointent vers les nouveaux chemins.
+
+### Validation
+
+- `pnpm audit:solid` OK
+- `pnpm pack:dry-run` OK
+- `git diff --check` OK
+
 ## release: prepare npm alpha package
 
 Status: implemented locally

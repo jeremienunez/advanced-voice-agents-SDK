@@ -8,7 +8,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   auditSecretHygiene,
-} from "./secret-hygiene/audit.ts";
+} from "../secret-hygiene/audit.ts";
 
 const results = [
   scenarioCommittedScanReportsSecretsWithoutLeakingValues(),

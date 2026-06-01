@@ -3,15 +3,15 @@ import {
   type FastifyLike,
   type FastifyRequestLike,
   type FastifyRouteHandler,
-} from "../src/server/adapters/fastify/index.js";
+} from "../../src/server/adapters/fastify/index.js";
 import type {
   BrowserVoiceServiceConfig,
   BrowserVoiceSocket,
   BrowserVoiceUserContext,
-} from "../src/server/browser/index.js";
+} from "../../src/server/browser/index.js";
 import type {
   VoiceSessionConfig,
-} from "../src/server/index.js";
+} from "../../src/server/index.js";
 
 const results = [
   await scenarioRegistersHealthAndWebSocketRoutes(),

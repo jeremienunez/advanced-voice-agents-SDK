@@ -26,7 +26,7 @@ import { createVoiceWSClient } from "@voiceagentsdk/core/client/browser";
 
 - Alpha package target: `@voiceagentsdk/core@0.1.0-alpha.1`.
 - Publish channel: npm `alpha` dist-tag, with git tag `v0.1.0-alpha.1`.
-- Published package surface stays SDK-only: `dist`, `README.md`, `CHANGELOG.md`, `TODO.md`, `LICENSE`, and the short public integration/release docs.
+- Published package surface stays SDK-only: `dist`, `README.md`, `CHANGELOG.md`, `TODO.md`, `LICENSE`, and the short public integration/release/structure docs.
 - The VOIP RTC starter remains a local/demo reference and is not shipped inside the npm package.
 - Release gate: `pnpm audit:solid`, `pnpm pack:dry-run`, and `git diff --check`.
 
@@ -193,7 +193,12 @@ These are application-owned concerns. The SDK exposes ports and adapters so appl
 | **`src/server`** | Duplex audio orchestrator, model provider adapters, and session lifecycles. |
 | **`src/client/browser`** | Web-native client wrapper for microphone streams, speaker queues, and websocket events. |
 | **`starters/voip-rtc`** | A fully wired React + Vite + Bun template showcasing gemini-live, open-realtime, and pgvector RAG. |
-| **`scripts`** | BDD test runners, static analysis checkers, and architectural quality audits. |
+| **`scripts/audits`** | Static architecture, boundary, LOC, package, and secret-hygiene audits. |
+| **`scripts/bdd`** | Root SDK BDD scenarios that prove public package and runtime contracts. |
+| **`scripts/smoke`** | Focused runtime smoke checks for low-level behavior. |
+| **`scripts/type-tests`** | Compile-only public contract tests. |
+
+See [REPO_STRUCTURE.md](REPO_STRUCTURE.md) for the canonical tree and ownership rules.
 
 ---
 

@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 
 import { readdir, readFile } from "node:fs/promises";
-import { fileURLToPath } from "node:url";
-import { join } from "node:path";
+import { join, relative } from "node:path";
 
-const root = fileURLToPath(new URL("../", import.meta.url));
-const sdkRoot = fileURLToPath(new URL("../src/sdk", import.meta.url));
+const root = process.cwd();
+const sdkRoot = join(root, "src/sdk");
 
 const forbidden = [
   "gaspard",
@@ -53,7 +52,7 @@ if (violations.length > 0) {
   console.error("SDK boundary violations:");
   for (const violation of violations) {
     console.error(
-      `- ${violation.file.replace(root, "")}: ${violation.term}`,
+      `- ${relative(root, violation.file)}: ${violation.term}`,
     );
   }
   process.exit(1);

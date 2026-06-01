@@ -1,4 +1,4 @@
-import { createAgentLogger } from "../src/server/agent/utils/logger.js";
+import { createAgentLogger } from "../../src/server/agent/utils/logger.js";
 
 const results = [
   scenarioConsoleLoggerRedactsContentAndSecretsRecursively(),

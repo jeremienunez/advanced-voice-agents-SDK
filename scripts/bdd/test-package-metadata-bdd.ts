@@ -44,6 +44,7 @@ function scenarioPackageFilesStayCoreOnly(): string {
   assert(files.includes("LICENSE"), "package must publish license");
   assert(files.includes("RELEASE_ALPHA.md"), "package must publish alpha release procedure");
   assert(files.includes("APP_OWNED_INTEGRATION.md"), "package must publish integration docs");
+  assert(files.includes("REPO_STRUCTURE.md"), "package must publish repository structure docs");
   assert(!files.some((entry) => entry.startsWith("starters")), "package must not publish starter");
   assert(!files.some((entry) => entry.startsWith("docs/")), "package must not publish internal docs");
   assert(!files.some((entry) => entry.startsWith("examples")), "package must not publish examples");

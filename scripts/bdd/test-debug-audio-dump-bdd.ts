@@ -10,10 +10,10 @@ import { join } from "node:path";
 import type {
   AgentLogger,
   LogContext,
-} from "../src/server/agent/utils/logger.js";
+} from "../../src/server/agent/utils/logger.js";
 import {
   createOpenAIDebugAudioDump,
-} from "../src/server/agent/transports/openai-realtime/debug-audio.js";
+} from "../../src/server/agent/transports/openai-realtime/debug-audio.js";
 
 try {
   const results = [
