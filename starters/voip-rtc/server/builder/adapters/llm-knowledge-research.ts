@@ -14,6 +14,7 @@ import {
   estimateTokens,
   resolveResearchBudget,
 } from "../domain/research.js";
+import { capResearchIntentQueries } from "../domain/research-budget-scope.js";
 import type { BuilderPromptLibrary } from "../prompts/template.js";
 import { renderPromptTemplate } from "../prompts/template.js";
 import {
@@ -33,6 +34,7 @@ import {
   summarizeDocumentForResearch,
   type LlmResearchCycleResult,
 } from "./llm-research-helpers.js";
+import { researchCycleTokenBudget } from "./research-token-budget.js";
 
 export class LlmKnowledgeResearch implements KnowledgeResearchPort {
   constructor(
@@ -70,9 +72,22 @@ export class LlmKnowledgeResearch implements KnowledgeResearchPort {
         stopReason = "Research budget exhausted by source, token, or cost limit";
         break;
       }
-      const cycle = createResearchCycle(cycles.length, objective);
+      const cycleObjective = capResearchIntentQueries(objective, budget);
+      if (!cycleObjective) continue;
+      const cycle = createResearchCycle(cycles.length, cycleObjective);
       cycles.push(cycle);
-      await this.runCycle(input, objective, budget, spend, documents, cycle);
+      const cycleStopReason = await this.runCycle(
+        input,
+        cycleObjective,
+        budget,
+        spend,
+        documents,
+        cycle,
+      );
+      if (cycleStopReason) {
+        stopReason = cycleStopReason;
+        break;
+      }
     }
 
     return {
@@ -94,7 +109,7 @@ export class LlmKnowledgeResearch implements KnowledgeResearchPort {
     spend: KnowledgeResearchSpend,
     documents: KnowledgeDocument[],
     cycle: KnowledgeResearchCycle,
-  ): Promise<void> {
+  ): Promise<string | undefined> {
     try {
       pushResearchCheckpoint(cycle, {
         label: "cycle-started",
@@ -102,12 +117,48 @@ export class LlmKnowledgeResearch implements KnowledgeResearchPort {
         detail: objective.objective,
         metadata: { queryCount: objective.queries.length },
       });
+      const provider = input.settings?.provider;
+      const model = input.settings?.model || undefined;
+      const user = this.renderResearchPrompt(input, objective, budget, spend);
+      pushResearchCheckpoint(cycle, {
+        label: "prompt-rendered",
+        status: "completed",
+        detail: "Research prompt rendered from external template.",
+        metadata: {
+          promptChars: user.length,
+          provider: provider ?? "auto",
+          model: model ?? defaultResearchModel(this.config.profiles, provider) ??
+            "auto",
+        },
+      });
+      const tokenBudget = researchCycleTokenBudget(
+        spend,
+        budget,
+        estimateTokens(this.config.prompts.research.system) +
+          estimateTokens(user),
+      );
+      if (tokenBudget.stopReason) {
+        cycle.status = "skipped";
+        cycle.warnings = [tokenBudget.stopReason];
+        pushResearchCheckpoint(cycle, {
+          label: "cycle-skipped",
+          status: "failed",
+          detail: tokenBudget.stopReason,
+          metadata: {
+            promptTokens: tokenBudget.promptTokens,
+            remainingTokens: tokenBudget.remainingTokens,
+          },
+        });
+        return tokenBudget.stopReason;
+      }
       const result = await this.requestResearch(
         input,
         objective,
         budget,
         spend,
         cycle,
+        user,
+        tokenBudget.maxOutputTokens,
       );
       const document = researchDocument(input.draft, result);
       documents.push(document);
@@ -143,6 +194,7 @@ export class LlmKnowledgeResearch implements KnowledgeResearchPort {
       });
       cycle.warnings = [message];
     }
+    return undefined;
   }
 
   private async requestResearch(
@@ -151,33 +203,11 @@ export class LlmKnowledgeResearch implements KnowledgeResearchPort {
     budget: KnowledgeResearchBudget,
     spend: KnowledgeResearchSpend,
     cycle: KnowledgeResearchCycle,
+    user: string,
+    maxOutputTokens: number,
   ): Promise<LlmResearchCycleResult> {
-    const user = renderPromptTemplate(this.config.prompts.research.user, {
-      objective: objective.objective,
-      queriesJson: objective.queries.slice(0, budget.maxQueriesPerCycle),
-      remainingSources: budget.maxSources - spend.sources,
-      agentIntent: input.draft.identity.intent,
-      mustDo: input.draft.identity.mustDo.join("; "),
-      mustNotDo: input.draft.identity.mustNotDo.join("; "),
-      documentsJson: input.documents.map(summarizeDocumentForResearch),
-    });
     const provider = input.settings?.provider;
     const model = input.settings?.model || undefined;
-    const maxOutputTokens = Math.min(
-      16_384,
-      Math.max(512, budget.maxEstimatedTokens),
-    );
-    pushResearchCheckpoint(cycle, {
-      label: "prompt-rendered",
-      status: "completed",
-      detail: "Research prompt rendered from external template.",
-      metadata: {
-        promptChars: user.length,
-        provider: provider ?? "auto",
-        model: model ?? defaultResearchModel(this.config.profiles, provider) ??
-          "auto",
-      },
-    });
     pushResearchCheckpoint(cycle, {
       label: "model-call-started",
       status: "running",
@@ -215,7 +245,8 @@ export class LlmKnowledgeResearch implements KnowledgeResearchPort {
       budget.maxSources - spend.sources,
     );
     const estimatedTokens = result.usage?.totalTokens ??
-      estimateTokens(user) + estimateTokens(text);
+      estimateTokens(this.config.prompts.research.system) + estimateTokens(user) +
+        estimateTokens(text);
     const estimatedCostUsd =
       (estimatedTokens / 1000) * this.config.estimatedCostPer1kTokens;
     pushResearchCheckpoint(cycle, {
@@ -238,6 +269,23 @@ export class LlmKnowledgeResearch implements KnowledgeResearchPort {
       provider: String(result.provider),
       model: result.model,
     };
+  }
+
+  private renderResearchPrompt(
+    input: KnowledgeResearchRequest,
+    objective: { objective: string; queries: string[] },
+    budget: KnowledgeResearchBudget,
+    spend: KnowledgeResearchSpend,
+  ): string {
+    return renderPromptTemplate(this.config.prompts.research.user, {
+      objective: objective.objective,
+      queriesJson: objective.queries,
+      remainingSources: budget.maxSources - spend.sources,
+      agentIntent: input.draft.identity.intent,
+      mustDo: input.draft.identity.mustDo.join("; "),
+      mustNotDo: input.draft.identity.mustNotDo.join("; "),
+      documentsJson: input.documents.map(summarizeDocumentForResearch),
+    });
   }
 
   private researchProfiles(settings?: { provider?: string }): LlmModelProfile[] {

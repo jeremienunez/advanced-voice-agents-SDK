@@ -20,6 +20,7 @@ import { ResearchProviderFields } from "./knowledge/ResearchProviderFields.js";
 import { ResearchReportSummary } from "./knowledge/ResearchReportSummary.js";
 
 export function KnowledgeStrategyPanel({
+  apiBase,
   draft,
   documents,
   researchBudget,
@@ -40,6 +41,7 @@ export function KnowledgeStrategyPanel({
   planKnowledge,
   compileKnowledge,
 }: {
+  apiBase: string;
   draft: AgentBuildDraft | null;
   documents: KnowledgeDocument[];
   researchBudget: KnowledgeResearchBudget;
@@ -104,7 +106,11 @@ export function KnowledgeStrategyPanel({
       />
       <AgentRxPanel report={diagnosticReport} />
       {researchReport ? <ResearchReportSummary report={researchReport} /> : null}
-      <DocumentList documents={documents} />
+      <DocumentList
+        apiBase={apiBase}
+        documents={documents}
+        draftId={draft?.id}
+      />
       {draft?.knowledgePlan ? <KnowledgePlanSummary draft={draft} /> : null}
     </Panel>
   );

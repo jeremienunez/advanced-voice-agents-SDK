@@ -15,3 +15,4 @@ export * from "./types/draft.js";
 export * from "./types/ports.js";
 export * from "./types/runtime-ports.js";
 export * from "./types/diagnostics.js";
+export * from "./types/coordination.js";

@@ -37,13 +37,13 @@ export function resolveResearchBudget(
     maxSources: clampBudget(input?.maxSources, 1, 200, defaults.maxSources),
     maxEstimatedTokens: clampBudget(
       input?.maxEstimatedTokens,
-      2000,
+      1,
       250_000,
       defaults.maxEstimatedTokens,
     ),
     maxEstimatedCostUsd: clampBudget(
       input?.maxEstimatedCostUsd,
-      0.01,
+      0,
       50,
       defaults.maxEstimatedCostUsd,
     ),

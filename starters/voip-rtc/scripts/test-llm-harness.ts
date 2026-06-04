@@ -15,11 +15,23 @@ import {
   RecordingLlmRunner,
   result,
 } from "./llm-harness/fixtures.js";
+import {
+  scenarioResearchCapsCycleOutputToRemainingTokenBudget,
+  scenarioResearchCapsCountedQueriesPerCycle,
+  scenarioResearchStopsWhenPromptExceedsRemainingTokenBudget,
+} from "./llm-harness/research-budget-scenarios.js";
+import {
+  scenarioTeacherFollowUpUsesRemainingResearchBudget,
+} from "./llm-harness/teacher-budget-scenarios.js";
 
 const results = await Promise.all([
   scenarioPromptPlannerFallsBackWhenJsonIsInvalid(),
   scenarioPromptDataIsQuotedAsData(),
   scenarioResearchCreatesDocumentsAndCheckpoints(),
+  scenarioResearchCapsCycleOutputToRemainingTokenBudget(),
+  scenarioResearchCapsCountedQueriesPerCycle(),
+  scenarioResearchStopsWhenPromptExceedsRemainingTokenBudget(),
+  scenarioTeacherFollowUpUsesRemainingResearchBudget(),
   scenarioResearchCycleLimitBoundsFailedIterations(),
   scenarioVerifierNormalizesInvalidVerdicts(),
   scenarioResolverHonorsRequestedModelsAndFallbacks(),

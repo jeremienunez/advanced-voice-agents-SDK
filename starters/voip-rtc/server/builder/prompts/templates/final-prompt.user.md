@@ -32,6 +32,20 @@ The `finalPrompt` string should use these compact sections:
 8. Success criteria
 </final_prompt_structure>
 
+<composition_attempt>
+{{compositionAttempt}}
+</composition_attempt>
+
+<quality_feedback>
+If `promptQualityFeedbackJson` is not empty, rewrite the final prompt until every listed invariant is satisfied. Do not explain the repair. Return only the corrected JSON object.
+{{promptQualityFeedbackJson}}
+</quality_feedback>
+
+<previous_prompt>
+If present, this previous attempt failed validation and must be corrected rather than copied.
+{{previousPrompt}}
+</previous_prompt>
+
 <draft_json>
 {{draftJson}}
 </draft_json>

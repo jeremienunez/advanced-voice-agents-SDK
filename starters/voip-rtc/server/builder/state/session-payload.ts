@@ -18,7 +18,13 @@ export function builderSessionPayload(
   return {
     activeDraftId: draft?.id ?? null,
     updatedAt: sessionUpdatedAt() ?? null,
-    artifact: draft?.compiled ?? null,
+    artifact: draft?.compiled
+      ? {
+          ...draft.compiled,
+          publicAgentName:
+            draft.compiled.publicAgentName ?? draft.identity.publicAgentName,
+        }
+      : null,
     draft: draft ? summarizeDraftForSession(draft) : null,
     available: compiledDraftSummaries(context),
   };

@@ -150,6 +150,7 @@ export function BuilderLab({
 
           {currentStep === 2 && (
             <KnowledgeStrategyPanel
+              apiBase={apiBase}
               draft={builder.draft}
               documents={builder.documents}
               researchBudget={builder.researchBudget}
@@ -210,7 +211,7 @@ export function BuilderLab({
         <section className="builderInspectorPanel">
           <h2>Live preview</h2>
           <dl className="builderPreviewList">
-            <div><dt>Draft</dt><dd>{builder.draft?.id ?? "Not created"}</dd></div>
+            <div><dt>Agent</dt><dd>{builder.draft?.identity.publicAgentName ?? "Not created"}</dd></div>
             <div><dt>Status</dt><dd>{builder.draft?.status ?? "Idle"}</dd></div>
             <div><dt>Documents</dt><dd>{builder.documents.length}</dd></div>
             <div><dt>Tools</dt><dd>{builder.selectedTools.length}</dd></div>

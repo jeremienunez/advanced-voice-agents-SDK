@@ -121,6 +121,7 @@ export interface AgentBuildDraft {
 
 export interface CompiledAgentSummary {
   draftId: string;
+  publicAgentName?: string;
   prompt: string;
   selectedTools: string[];
   createdAt: string;

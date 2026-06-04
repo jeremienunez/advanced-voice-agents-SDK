@@ -1,9 +1,5 @@
 import { compileArtifact } from "./domain/prompt.js";
-import { assertCompiledPromptInvariants } from "./domain/prompt-invariants.js";
-import {
-  appendServerOwnedPromptPolicy,
-  assertServerOwnedPromptPolicy,
-} from "./domain/prompt-policy.js";
+import { composeValidFinalPrompt } from "./final-prompt-loop.js";
 import { mutateDraft } from "./domain/drafts.js";
 import { createToolBuildPlan } from "./domain/tooling/contracts.js";
 import { toolInstructionsFromPlan } from "./domain/tooling/compile.js";
@@ -45,17 +41,11 @@ export async function compileAgentWithServerPolicy(
     throw new Error(`Tool validation failed: ${validationErrors(validation)}`);
   }
 
-  const generatedPrompt = await deps.planner.composeFinalPrompt({
+  const prompt = await composeValidFinalPrompt({
+    deps,
     draft: draftWithTools,
     selectedTools,
   });
-  const prompt = appendServerOwnedPromptPolicy(
-    generatedPrompt,
-    draftWithTools,
-    selectedTools,
-  );
-  assertServerOwnedPromptPolicy(prompt);
-  assertCompiledPromptInvariants(prompt, draftWithTools, selectedTools);
   const artifact = compileArtifact(draftWithTools, selectedTools, prompt, toolPlan);
   const nextDraft = mutateDraft(draftWithTools)
     .finalPrompt(prompt)

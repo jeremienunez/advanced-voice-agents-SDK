@@ -18,7 +18,9 @@ import { agentDraft } from "./solid-seams/fixtures.js";
 import { assert } from "./shared/assertions.js";
 
 const results = [
+  await scenarioOwnerCanGetKnowledgeDocument(),
   await scenarioCrossOwnerGetDraftRejected(),
+  await scenarioCrossOwnerGetKnowledgeDocumentRejected(),
   await scenarioCrossOwnerSessionRejected(),
   await scenarioCrossOwnerPromptClarificationsRejected(),
   await scenarioCrossOwnerRunResearchRejected(),
@@ -28,11 +30,49 @@ const results = [
 
 console.log(JSON.stringify({ status: "ok", results }, null, 2));
 
+async function scenarioOwnerCanGetKnowledgeDocument(): Promise<string> {
+  const draft = saveOwnedDraft("route_owner_get_document");
+  const document = draft.knowledgePlan?.documents[0];
+  assert(document, "fixture must include a knowledge document");
+  const response = await route(
+    "GET",
+    `/builder/drafts/${draft.id}/documents/${document.id}`,
+    undefined,
+    identity("tenant-a", "user-a"),
+  );
+  const payload = await response.json() as { document?: { id?: string; text?: string } };
+  assert(
+    response.status === 200,
+    `owner document read must succeed, got ${response.status}`,
+  );
+  assert(
+    payload.document?.id === document.id,
+    "document route must return the requested document",
+  );
+  assert(
+    payload.document?.text === "Owned knowledge document body.",
+    "document route must preserve document text",
+  );
+  return "owner-get-knowledge-document";
+}
+
 async function scenarioCrossOwnerGetDraftRejected(): Promise<string> {
   const draft = saveOwnedDraft("route_owner_get_draft");
   const response = await route("GET", `/builder/drafts/${draft.id}`);
   await assertRejected(response, "GET /builder/drafts/:id");
   return "cross-owner-get-draft-rejected";
+}
+
+async function scenarioCrossOwnerGetKnowledgeDocumentRejected(): Promise<string> {
+  const draft = saveOwnedDraft("route_owner_get_document_rejected");
+  const document = draft.knowledgePlan?.documents[0];
+  assert(document, "fixture must include a knowledge document");
+  const response = await route(
+    "GET",
+    `/builder/drafts/${draft.id}/documents/${document.id}`,
+  );
+  await assertRejected(response, "GET /builder/drafts/:id/documents/:documentId");
+  return "cross-owner-get-knowledge-document-rejected";
 }
 
 async function scenarioCrossOwnerSessionRejected(): Promise<string> {
@@ -88,6 +128,7 @@ async function route(
   method: string,
   path: string,
   body?: unknown,
+  requestIdentity = identity("tenant-b", "user-b"),
 ): Promise<Response> {
   const router = createBuilderRouter({
     config: builderConfig(),
@@ -101,7 +142,7 @@ async function route(
   const result = await router.handle(
     request,
     new URL(request.url),
-    { identity: identity("tenant-b", "user-b") },
+    { identity: requestIdentity },
   );
   assert(result.response, `${method} ${path} must produce a response`);
   return result.response;
@@ -139,6 +180,13 @@ function saveOwnedDraft(id: string): AgentBuildDraft {
       },
     })
     .finalPrompt(prompt)
+    .knowledgePlan({
+      ...base.knowledgePlan!,
+      documents: base.knowledgePlan!.documents.map((document) => ({
+        ...document,
+        text: "Owned knowledge document body.",
+      })),
+    })
     .compiled({ ...base.compiled!, prompt, selectedTools: [] })
     .metadata({ builderOwner: owner })
     .build();

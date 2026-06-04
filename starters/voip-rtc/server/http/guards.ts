@@ -30,7 +30,13 @@ export async function accessGuard(
   request: Request,
   url: URL,
 ): Promise<AccessGuardResult> {
-  if (!url.pathname.startsWith("/builder/") && url.pathname !== "/voice/ws") {
+  if (
+    !url.pathname.startsWith("/builder/") &&
+    url.pathname !== "/a2a" &&
+    !url.pathname.startsWith("/a2a/") &&
+    url.pathname !== "/mcp" &&
+    url.pathname !== "/voice/ws"
+  ) {
     return {};
   }
   const modeFailure = productionModeFallbackGuard(env, request, url);

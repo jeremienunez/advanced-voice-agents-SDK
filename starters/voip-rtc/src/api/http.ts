@@ -13,6 +13,15 @@ export async function postJson<T>(url: string, body: unknown): Promise<T> {
   return (await response.json()) as T;
 }
 
+export async function getJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const response = await fetchWithNetworkError(url, init);
+  if (!response.ok) {
+    const detail = await readError(response);
+    throw new Error(detail || `Request failed with ${response.status}`);
+  }
+  return (await response.json()) as T;
+}
+
 export async function postForm<T>(url: string, body: FormData): Promise<T> {
   const response = await fetchWithNetworkError(url, {
     method: "POST",

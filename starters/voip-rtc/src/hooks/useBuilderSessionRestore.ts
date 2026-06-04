@@ -15,7 +15,14 @@ export function useBuilderSessionRestore({
     async function restoreActiveBuilderSession(): Promise<void> {
       try {
         const session = await fetchBuilderSession(apiBase, controller.signal);
-        if (session?.artifact) onCompiled(session.artifact);
+        if (session?.artifact) {
+          onCompiled({
+            ...session.artifact,
+            publicAgentName:
+              session.artifact.publicAgentName ??
+              session.draft?.identity.publicAgentName,
+          });
+        }
       } catch {
         // RTC still works with the starter default prompt if no builder session exists.
       }

@@ -11,6 +11,7 @@ export {
   buildAutonomousKnowledge,
   compileKnowledgeStore,
   createKnowledgePlan,
+  fetchKnowledgeDocument,
   ingestDocument,
   runAutonomousResearch,
 } from "./builder/knowledgeApi.js";

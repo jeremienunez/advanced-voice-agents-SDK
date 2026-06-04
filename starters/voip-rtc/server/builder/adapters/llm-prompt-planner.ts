@@ -88,7 +88,10 @@ export class LlmPromptPlanner
       skillRef: "builder.final_prompt",
       system: this.config.prompts.finalPrompt.system,
       user: renderPromptTemplate(this.config.prompts.finalPrompt.user, {
+        compositionAttempt: input.compositionAttempt ?? 1,
         draftJson: input.draft,
+        previousPrompt: input.previousPrompt ?? "",
+        promptQualityFeedbackJson: input.promptQualityFeedback ?? [],
         selectedToolsJson: input.selectedTools,
       }),
     });

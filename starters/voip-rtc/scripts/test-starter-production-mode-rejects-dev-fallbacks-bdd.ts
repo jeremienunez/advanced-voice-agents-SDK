@@ -1,4 +1,8 @@
 import type { AuthTicketInput } from "@voiceagentsdk/core/sdk";
+import {
+  createA2AMailboxTaskRouter,
+  createInMemoryAgentMailbox,
+} from "@voiceagentsdk/core/server";
 import type {
   BrowserVoiceSessionRequest,
 } from "@voiceagentsdk/core/server/browser";
@@ -121,6 +125,7 @@ function scenarioProductionModeAcceptsInjectedAdapters() {
         }),
         list: () => [],
       },
+      a2aMailboxRouter: createProductionA2ARouter(),
       tenantResolver: {
         resolveTenant: () => ({
           tenantId: "tenant-prod",
@@ -235,6 +240,15 @@ function requestWithoutAgent(): BrowserVoiceSessionRequest {
     provider: "gemini",
     user: { tenantId: "tenant-a", userId: "user-a" },
   };
+}
+
+function createProductionA2ARouter() {
+  return createA2AMailboxTaskRouter({
+    mailbox: createInMemoryAgentMailbox({
+      idFactory: () => "mail-prod",
+      now: () => new Date(0),
+    }),
+  });
 }
 
 function withEnv(values: Record<string, string | undefined>): () => void {

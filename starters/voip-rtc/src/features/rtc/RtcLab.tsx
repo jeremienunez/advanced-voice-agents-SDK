@@ -16,6 +16,7 @@ export function RtcLab({
   const [isDiagnosticsOpen, setIsDiagnosticsOpen] = useState(false);
 
   const latestTranscript = rtc.snapshot.transcript[rtc.snapshot.transcript.length - 1];
+  const agentName = compiledAgent?.publicAgentName ?? compiledAgent?.draftId;
   const isAgent = latestTranscript
     ? latestTranscript.role.toLowerCase() === "agent" ||
       latestTranscript.role.toLowerCase() === "assistant" ||
@@ -27,7 +28,7 @@ export function RtcLab({
       <header className="rtcImmersiveHeader">
         <div>
           <p className="studioEyebrow">RTC test</p>
-          <h1>{compiledAgent?.draftId ?? "No compiled agent selected"}</h1>
+          <h1>{agentName ?? "No compiled agent selected"}</h1>
           <p>
             {rtc.provider} · {rtc.model || "model not selected"} ·{" "}
             {rtc.snapshot.state}

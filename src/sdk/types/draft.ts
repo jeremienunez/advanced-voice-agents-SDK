@@ -48,6 +48,7 @@ export interface AgentBuildDraft {
 
 export interface CompiledAgentArtifact {
   draftId: string;
+  publicAgentName?: string;
   sdkDefinition: VoiceAgentSdkDefinition;
   prompt: string;
   toolRegistry: ToolRegistryItem[];

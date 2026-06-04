@@ -16,7 +16,7 @@ export function corsHeadersFor(
     "Access-Control-Allow-Origin": allowOrigin,
     "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
     "Access-Control-Allow-Headers":
-      "Authorization,Content-Type,X-Voice-Agent-Token",
+      "Authorization,Content-Type,MCP-Protocol-Version,MCP-Session-Id,X-Voice-Agent-Token",
     Vary: "Origin",
   };
 }

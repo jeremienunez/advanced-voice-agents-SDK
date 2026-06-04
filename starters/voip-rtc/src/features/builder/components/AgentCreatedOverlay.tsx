@@ -21,7 +21,10 @@ export function AgentCreatedOverlay({
         <p>RTC-ready spec compiled. Loading the active session in the lab.</p>
       </div>
       <div className="createdFacts">
-        <Metric label="Draft" value={artifact.draftId} />
+        <Metric
+          label="Agent"
+          value={artifact.publicAgentName ?? publicAgentName}
+        />
         <Metric
           label="Knowledge"
           value={

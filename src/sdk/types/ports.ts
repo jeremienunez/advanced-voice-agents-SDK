@@ -75,6 +75,9 @@ export interface InfraPlanRequest {
 
 export interface FinalPromptBuildRequest {
   draft: AgentBuildDraft;
+  compositionAttempt?: number;
+  previousPrompt?: string;
+  promptQualityFeedback?: string[];
   selectedTools: ToolName[];
 }
 

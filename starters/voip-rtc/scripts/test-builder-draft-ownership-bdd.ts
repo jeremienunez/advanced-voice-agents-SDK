@@ -14,6 +14,7 @@ import { assert } from "./shared/assertions.js";
 const results = [
   await scenarioPrivilegedWorkflowRejectsCrossOwnerDraft(),
   await scenarioPrivilegedWorkflowUsesServerOwnedDraft(),
+  await scenarioLocalDevWorkflowUsesUnownedDraft(),
 ];
 
 console.log(JSON.stringify({ status: "ok", results }, null, 2));
@@ -68,6 +69,30 @@ async function scenarioPrivilegedWorkflowUsesServerOwnedDraft() {
   return "privileged-owner-uses-server-draft";
 }
 
+async function scenarioLocalDevWorkflowUsesUnownedDraft() {
+  const serverDraft = unownedDatabaseDraft("draft_owner_local_dev_unowned");
+  const calls: DatabaseProvisionInput[] = [];
+  saveDraft(serverDraft);
+
+  const workflows = createBuilderWorkflows(workflowDeps(calls));
+  await workflows.applyDatabase(
+    { draftId: serverDraft.id },
+    { identity: localDevIdentity() },
+  );
+
+  assert(calls.length === 1, "local-dev apply must run for unowned persisted drafts");
+  assert(calls[0].draft.id === serverDraft.id, "local-dev apply must use the server draft");
+
+  return "local-dev-unowned-draft-applied";
+}
+
+function unownedDatabaseDraft(id: string): AgentBuildDraft {
+  const draft = agentDraft(id);
+  return mutateDraft(draft)
+    .databasePlan(fallbackDatabasePlan({ draft, documents: [] }))
+    .build();
+}
+
 function ownedDatabaseDraft(
   id: string,
   owner: AuthTicketIdentity,
@@ -111,6 +136,14 @@ function identity(
   userId: string,
 ): AuthTicketIdentity {
   return { tenantId, userId, scopes: ["builder:access"] };
+}
+
+function localDevIdentity(): AuthTicketIdentity {
+  return {
+    ...identity("local", "demo"),
+    planId: "dev",
+    metadata: { authMode: "local-dev" },
+  };
 }
 
 async function captureError(

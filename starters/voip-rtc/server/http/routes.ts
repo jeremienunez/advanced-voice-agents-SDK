@@ -6,6 +6,8 @@ import { readBodyString, readDraftId } from "./draft-id.js";
 import { accessGuard, originGuard } from "./guards.js";
 import { requireOwnedDraft } from "../builder/state/draft-ownership.js";
 import { activeAgentScopeFromContext } from "../builder/state/active-agent-assignment.js";
+import { a2aAgentCardResponse, handleA2ARoute } from "./a2a-routes.js";
+import { handleMcpRoute } from "./mcp-routes.js";
 import type { BuilderRequestContext } from "../builder/types.js";
 import type { StarterRouteContext } from "./types.js";
 
@@ -24,6 +26,9 @@ export function createFetchHandler(app: StarterRouteContext) {
 
     if (url.pathname === "/health") return healthResponse(app, request);
     if (url.pathname === "/config") return configResponse(app, request);
+    if (url.pathname === "/.well-known/agent-card.json") {
+      return a2aAgentCardResponse(app, request);
+    }
 
     const access = await accessGuard(
       app.env,
@@ -35,6 +40,20 @@ export function createFetchHandler(app: StarterRouteContext) {
 
     if (url.pathname.startsWith("/builder/")) {
       return handleBuilderRoute(app, request, url, {
+        identity: access.identity,
+        clientIp: resolveClientIp(request, server),
+      });
+    }
+
+    if (url.pathname === "/a2a" || url.pathname.startsWith("/a2a/")) {
+      return handleA2ARoute(app, request, url, {
+        identity: access.identity,
+        clientIp: resolveClientIp(request, server),
+      });
+    }
+
+    if (url.pathname === "/mcp") {
+      return handleMcpRoute(app, request, url, {
         identity: access.identity,
         clientIp: resolveClientIp(request, server),
       });

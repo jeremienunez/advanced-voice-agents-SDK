@@ -7,3 +7,18 @@ export * from "./providers/index.js";
 export * from "./media/index.js";
 export * from "./observability/index.js";
 export * from "./memory/index.js";
+export * from "./mailbox/index.js";
+export * from "./protocols/index.js";
+export * from "../sdk/protocols/index.js";
+export type {
+  AgentMailboxAckInput,
+  AgentMailboxAddress,
+  AgentMailboxClaimInput,
+  AgentMailboxListInput,
+  AgentMailboxMessage,
+  AgentMailboxMessagePart,
+  AgentMailboxMessageStatus,
+  AgentMailboxPort,
+  AgentMailboxSendInput,
+  AgentMailboxSubscribeInput,
+} from "../sdk/types.js";

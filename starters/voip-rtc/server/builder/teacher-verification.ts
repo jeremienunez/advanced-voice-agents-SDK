@@ -5,6 +5,10 @@ import type {
   KnowledgeResearchResult,
   KnowledgeVerificationVerdict,
 } from "@voiceagentsdk/core/sdk";
+import {
+  capResearchIntentQueries,
+  remainingResearchBudget,
+} from "./domain/research-budget-scope.js";
 import type { BuilderWorkflowDependencies } from "./types.js";
 
 export interface TeacherVerificationInput {
@@ -93,18 +97,29 @@ export async function runTeacherVerification(
     if (verdict.recommendedQueries.length === 0) break;
     if (!input.deps.research.isConfigured(input.researchSettings)) break;
     const followUpProvider = input.researchSettings.provider;
+    const budgetScope = remainingResearchBudget(input.budget, research?.spend);
+    if (!budgetScope.budget) {
+      steps.push({
+        name: `${followUpProvider ?? "research"}-follow-up-${pass}`,
+        status: "budget-exhausted",
+        detail: budgetScope.stopReason,
+      });
+      break;
+    }
+    const researchIntent = capResearchIntentQueries({
+      objective: `${verifierProvider} teacher follow-up pass ${pass}`,
+      queries: verdict.recommendedQueries,
+    }, budgetScope.budget);
+    if (!researchIntent) break;
 
     const followUp = await input.deps.research.growKnowledge({
       draft: input.draft,
       documents,
-      budget: input.budget,
+      budget: budgetScope.budget,
       settings: {
         ...input.researchSettings,
         provider: followUpProvider,
-        researchIntents: [{
-          objective: `Kimi teacher follow-up pass ${pass}`,
-          queries: verdict.recommendedQueries,
-        }],
+        researchIntents: [researchIntent],
       },
     });
     documents = [...documents, ...followUp.documents];
@@ -229,6 +244,7 @@ function mergeResearch(
   if (!previous) return next;
   return {
     ...next,
+    budget: previous.budget,
     documents: [...previous.documents, ...next.documents],
     cycles: [...previous.cycles, ...next.cycles],
     checkpoints: [

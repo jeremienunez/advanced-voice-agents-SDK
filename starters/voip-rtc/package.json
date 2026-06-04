@@ -21,6 +21,8 @@
     "test:db-adapter-registry:bdd": "bun run scripts/test-db-adapter-registry-bdd.ts",
     "test:adapter-boundaries:bdd": "bun run scripts/test-adapter-boundaries-bdd.ts",
     "test:active-agent-assignment:bdd": "bun run scripts/test-active-agent-assignment-bdd.ts",
+    "test:a2a-mailbox-routes:bdd": "pnpm build:sdk && bun run scripts/test-a2a-mailbox-routes-bdd.ts",
+    "test:mcp-routes:bdd": "pnpm build:sdk && bun run scripts/test-mcp-routes-bdd.ts && bun run scripts/test-mcp-protocol-routes-bdd.ts",
     "test:builder-draft-ownership:bdd": "bun run scripts/test-builder-draft-ownership-bdd.ts",
     "test:builder-route-ownership:bdd": "bun run scripts/test-builder-route-ownership-bdd.ts",
     "test:builder-session-filtering:bdd": "bun run scripts/test-builder-session-filtering-bdd.ts",

@@ -6,14 +6,26 @@ export function assertCompiledPromptInvariants(
   draft: AgentBuildDraft,
   selectedTools: ToolName[],
 ): void {
-  const body = promptBody(prompt).toLowerCase();
-  const missing = [
-    ...missingBodySections(body, draft, selectedTools),
-    ...missingSelectedTools(body, selectedTools),
-  ];
+  const missing = compiledPromptInvariantViolations(
+    prompt,
+    draft,
+    selectedTools,
+  );
   if (missing.length > 0) {
     throw new Error(`Compiled prompt invariant failed: ${missing.join(", ")}`);
   }
+}
+
+export function compiledPromptInvariantViolations(
+  prompt: string,
+  draft: AgentBuildDraft,
+  selectedTools: ToolName[],
+): string[] {
+  const body = promptBody(prompt).toLowerCase();
+  return [
+    ...missingBodySections(body, draft, selectedTools),
+    ...missingSelectedTools(body, selectedTools),
+  ];
 }
 
 function missingBodySections(
@@ -33,13 +45,31 @@ function missingBodySections(
   const missing: string[] = required
     .filter(([needle]) => !body.includes(needle))
     .map(([, label]) => label);
-  if (!body.includes("uncertain") && !body.includes("missing context")) {
+  if (!hasUncertaintyRule(body)) {
     missing.push("uncertainty rule");
   }
   if (selectedTools.length > 0 && !body.includes("tool policy")) {
     missing.push("selected tool policy");
   }
   return missing;
+}
+
+function hasUncertaintyRule(body: string): boolean {
+  const uncertaintySignals = [
+    "uncertain",
+    "missing context",
+    "context is missing",
+    "knowledge is missing",
+    "missing, weak",
+    "weak, or outside scope",
+    "outside scope",
+    "low confidence",
+    "confidence is low",
+    "unclear",
+    "conflicting context",
+    "context conflicts",
+  ];
+  return uncertaintySignals.some((signal) => body.includes(signal));
 }
 
 function missingSelectedTools(

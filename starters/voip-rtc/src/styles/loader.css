@@ -1,9 +1,10 @@
 .workLoader {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: 40;
   overflow: hidden;
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: progress;
 }
 
 .animatedGradientBackground,

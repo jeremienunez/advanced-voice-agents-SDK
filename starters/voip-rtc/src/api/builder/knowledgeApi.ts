@@ -5,12 +5,22 @@ import type {
   KnowledgeResearchBudget,
   KnowledgeResearchResult,
 } from "../../domain/builder.js";
-import { postForm, postJson } from "../http.js";
+import { getJson, postForm, postJson } from "../http.js";
 
 export function ingestDocument(apiBase: string, formData: FormData) {
   return postForm<{ document: KnowledgeDocument }>(
     `${apiBase}/ingest-document`,
     formData,
+  );
+}
+
+export function fetchKnowledgeDocument(
+  apiBase: string,
+  draftId: string,
+  documentId: string,
+) {
+  return getJson<{ document: KnowledgeDocument }>(
+    `${apiBase}/drafts/${encodeURIComponent(draftId)}/documents/${encodeURIComponent(documentId)}`,
   );
 }
 

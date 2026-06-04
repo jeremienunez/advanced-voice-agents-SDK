@@ -50,7 +50,13 @@ export function useAgentBank({
     try {
       const session = await activateAgentSession(apiBase, agent.draftId);
       if (!session.artifact) throw new Error("Selected agent is not compiled");
-      onLoadRtc(session.artifact);
+      onLoadRtc({
+        ...session.artifact,
+        publicAgentName:
+          session.artifact.publicAgentName ??
+          session.draft?.identity.publicAgentName ??
+          agent.publicAgentName,
+      });
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Could not load agent");
     } finally {

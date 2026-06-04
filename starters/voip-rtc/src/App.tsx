@@ -54,6 +54,8 @@ export function App() {
 
   const builderApiBase =
     import.meta.env.VITE_BUILDER_API_URL ?? DEFAULT_BUILDER_URL;
+  const activeAgentLabel =
+    compiledAgent?.publicAgentName ?? compiledAgent?.draftId;
 
   const loadRtcAgent = useCallback((artifact: CompiledAgentSummary) => {
     setCompiledAgent(artifact);
@@ -87,7 +89,7 @@ export function App() {
         health={{
           tone: compiledAgent ? "ready" : "idle",
           label: compiledAgent ? "Agent loaded" : "Studio ready",
-          detail: compiledAgent?.draftId ?? "No active RTC agent",
+          detail: activeAgentLabel ?? "No active RTC agent",
         }}
       >
         {mode === "command" ? (

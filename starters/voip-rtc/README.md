@@ -230,6 +230,9 @@ The server listens on `http://localhost:8787` by default and exposes:
 - `GET /health`
 - `GET /config`
 - `GET /voice/ws`
+- `GET /.well-known/agent-card.json`
+- `POST /a2a`
+- `POST /mcp`
 
 ## Route Cheat Sheet
 
@@ -238,6 +241,9 @@ The server listens on `http://localhost:8787` by default and exposes:
 | `GET /health` | Server status and active session count. |
 | `GET /config` | Runtime providers, models, voices, and audio contracts. |
 | `GET /voice/ws` | Browser voice WebSocket endpoint. |
+| `GET /.well-known/agent-card.json` | A2A Agent Card with JSON-RPC supported interface for mailbox interoperability. |
+| `POST /a2a` | A2A JSON-RPC mailbox task endpoint returning A2A `task`/`message` objects. |
+| `POST /mcp` | MCP Streamable HTTP JSON-RPC tools endpoint; pass `agentId` to select a compiled draft and use A2A mailbox tools. Use `Accept: application/json, text/event-stream`; `initialize.params.protocolVersion` can negotiate `2025-11-25`, then send `MCP-Protocol-Version` on later requests. |
 | `GET /builder/config` | Builder provider/tool availability. |
 | `GET /builder/onboarding` | Dependency checks plus redacted `.env.local` state. |
 | `GET /builder/session` | Active compiled builder session. |
@@ -251,7 +257,7 @@ The server listens on `http://localhost:8787` by default and exposes:
 
 ## Control Plane Auth
 
-`/builder/*` and `/voice/ws` are protected through the SDK `AuthTicketPort`.
+`/builder/*`, `/a2a`, `/mcp`, and `/voice/ws` are protected through the SDK `AuthTicketPort`.
 This starter provides a dev-token verifier using `VOICE_DEV_AUTH_TOKEN`; an
 application can replace it with its own session, JWT, or one-time WebSocket
 ticket verifier.

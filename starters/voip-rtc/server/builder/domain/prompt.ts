@@ -252,6 +252,7 @@ export function compileArtifact(
 
   return {
     draftId: draft.id,
+    publicAgentName: draft.identity.publicAgentName,
     sdkDefinition,
     prompt,
     toolRegistry: draft.toolRegistry,

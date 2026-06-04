@@ -4,3 +4,4 @@ export * from "./diagnostics/index.js";
 export * from "./learning/index.js";
 export * from "./runtime.js";
 export * from "./store.js";
+export * from "./protocols/index.js";

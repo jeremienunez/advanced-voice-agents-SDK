@@ -45,8 +45,15 @@ or internal `docs/`. Runtime imports are constrained by `package.json` `exports`
 
 - `src/sdk` defines app-facing contracts and does not import runtime, client,
   starter, example, or tooling modules.
+- `src/sdk/protocols` defines protocol-neutral A2A/MCP mappings. It must not
+  import protocol runtime SDK packages or server adapters.
 - `src/server` owns runtime orchestration and depends on SDK contracts, not the
   browser client.
+- `src/server/mailbox` owns reusable runtime mailbox adapters and workers for
+  claim/ack coordination across concurrent agents.
+- `src/server/protocols` owns optional runtime adapters for external protocols,
+  including MCP JSON-RPC over Streamable HTTP. Executable tool calls must still
+  pass through server policy.
 - `src/client/browser` owns browser-side audio and websocket ergonomics and does
   not import server internals.
 - `starters/voip-rtc` is a reference integration. It can consume the SDK, but

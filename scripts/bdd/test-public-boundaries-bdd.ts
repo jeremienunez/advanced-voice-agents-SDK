@@ -1,8 +1,28 @@
 import type {
+  A2AJsonRpcRequest,
+  A2AJsonRpcResponse,
+  A2AJsonRpcMailboxAdapter,
+  A2AMailboxMcpToolsOptions,
+  A2AMailboxTaskRouter,
+  AgentMailboxWorker,
+  AgentMailboxWorkerOptions,
+  AgentMailboxWorkerRunResult,
+  McpJsonRpcToolAdapter,
+  McpJsonRpcRequest,
+  McpJsonRpcResponse,
+  McpStreamableHttpToolHandler,
+  McpToolRegistryAdapter,
+} from "@voiceagentsdk/core/server";
+
+import type {
   ActiveAgentAssignmentPort,
   ActiveAgentScope,
+  A2AAgentCard,
+  A2ATask,
   AgentLearningLoopPort,
   AgentLearningPolicyPort,
+  AgentMailboxMessage,
+  AgentMailboxPort,
   AgentSkillArtifact,
   EvaluationHarnessPort,
   EventSinkPort,
@@ -16,8 +36,10 @@ import type {
   LearningRunStatus,
   LearningWorkflowDriverPort,
   MemoryStorePort,
+  McpToolDescriptor,
   PendingActionPort,
   PendingActionRecord,
+  ProtocolCompatibilityProfile,
   RuntimeEventRecord,
   TenantResolverPort,
 } from "@voiceagentsdk/core/sdk";
@@ -28,6 +50,7 @@ const results = [
   await scenarioSdkCompilesThroughPublicExports(),
   await scenarioRuntimePortsArePublicTypes(),
   await scenarioLearningLoopPortsArePublicTypes(),
+  await scenarioProtocolCompatibilityPortsArePublic(),
   await scenarioBrowserProtocolParserIsPublicAndStable(),
   await scenarioDeclaredPackageEntrypointsResolve(),
 ];
@@ -90,6 +113,47 @@ async function scenarioLearningLoopPortsArePublicTypes(): Promise<string> {
   const compileOnly: PublicLearningLoopTypes | null = null;
   assert(compileOnly === null, "learning loop ports must be public type exports");
   return "learning-loop-ports-are-public-types";
+}
+
+async function scenarioProtocolCompatibilityPortsArePublic(): Promise<string> {
+  type PublicProtocolTypes = [
+    A2AAgentCard,
+    A2ATask,
+    A2AJsonRpcRequest,
+    A2AJsonRpcResponse,
+    A2AJsonRpcMailboxAdapter,
+    A2AMailboxMcpToolsOptions,
+    A2AMailboxTaskRouter,
+    AgentMailboxWorker,
+    AgentMailboxWorkerOptions,
+    AgentMailboxWorkerRunResult,
+    AgentMailboxMessage,
+    AgentMailboxPort,
+    McpJsonRpcToolAdapter,
+    McpJsonRpcRequest,
+    McpJsonRpcResponse,
+    McpStreamableHttpToolHandler,
+    McpToolRegistryAdapter,
+    McpToolDescriptor,
+    ProtocolCompatibilityProfile,
+  ];
+  const compileOnly: PublicProtocolTypes | null = null;
+  const sdk = await import("@voiceagentsdk/core/sdk") as PackageModule;
+  const server = await import("@voiceagentsdk/core/server") as PackageModule;
+
+  assert(typeof sdk.toMcpToolDescriptor === "function", "sdk export must expose toMcpToolDescriptor");
+  assert(typeof sdk.mailboxMessageToA2ATask === "function", "sdk export must expose mailboxMessageToA2ATask");
+  assert(typeof server.createAgentMailboxWorker === "function", "server export must expose createAgentMailboxWorker");
+  assert(typeof server.createInMemoryAgentMailbox === "function", "server export must expose createInMemoryAgentMailbox");
+  assert(typeof server.createA2AMailboxTaskRouter === "function", "server export must expose createA2AMailboxTaskRouter");
+  assert(typeof server.createA2AMailboxMcpTools === "function", "server export must expose createA2AMailboxMcpTools");
+  assert(typeof server.createA2AJsonRpcMailboxAdapter === "function", "server export must expose createA2AJsonRpcMailboxAdapter");
+  assert(typeof server.createMcpToolRegistryAdapter === "function", "server export must expose createMcpToolRegistryAdapter");
+  assert(typeof server.createMcpJsonRpcToolAdapter === "function", "server export must expose createMcpJsonRpcToolAdapter");
+  assert(typeof server.createMcpStreamableHttpToolHandler === "function", "server export must expose createMcpStreamableHttpToolHandler");
+  assert(compileOnly === null, "protocol compatibility and mailbox types must be public");
+
+  return "protocol-compatibility-ports-are-public";
 }
 
 async function scenarioBrowserProtocolParserIsPublicAndStable(): Promise<string> {

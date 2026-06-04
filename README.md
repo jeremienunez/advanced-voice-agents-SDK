@@ -79,6 +79,7 @@ Guided configuration tool to verify local CLI engines (Docker, Kubernetes, Terra
 *   **Declarative Agent SDK**: Define agents, prompt priority stacks, tool specifications, model providers, and vector store adapters via a typed fluent API.
 *   **Low-Latency Voice Orchestrator**: A high-performance server runtime managing provider connections (WebSockets/WebRTC), raw duplex PCM16 audio streams, tool executions, and client websocket sessions.
 *   **Browser Audio Client**: Lightweight client SDK that abstracts microphone capture, speaker playback queues, live volume meter calculations, and websocket connection lifecycles.
+*   **A2A/MCP Compatibility Layer**: Protocol-neutral mailbox with claim/ack leases, concurrent mailbox workers, A2A task/card mappings, MCP mailbox tools, and Streamable HTTP JSON-RPC handling that keep tool calls behind server-owned policy.
 *   **Post-Session Learning Loop**: Safe, decoupled background task queue that triggers upon call completion to extract user facts, update graphs, and compile versioned drafts.
 *   **Safe Repositories**: A strict data access layer that enforces tenant isolation, allowed operations, filterable fields, and paging limits before queries reach physical databases.
 *   **SOLID Quality Gates**: Strict architectural validation scripts that enforce clean import boundaries, single responsibility rules, and code ceilings at compile time.
@@ -412,6 +413,9 @@ To keep this guide concise, the comprehensive technical tables are grouped below
 *   `GET /health` : Returns runtime health metrics and total live active call count.
 *   `GET /config` : Displays public voice configurations, active media channels, and supported stream formats.
 *   `GET /voice/ws` : Handles browser duplex WebSocket upgrades (PCM16 protocol).
+*   `GET /.well-known/agent-card.json` : Publishes the A2A Agent Card with its JSON-RPC supported interface for mailbox interoperability.
+*   `POST /a2a` : Accepts A2A JSON-RPC mailbox task requests and returns A2A `task`/`message` objects.
+*   `POST /mcp` : Accepts MCP Streamable HTTP JSON-RPC tool requests; use `agentId` to select a compiled draft's runtime tools and call A2A mailbox tools. POST requests must send `Accept: application/json, text/event-stream`; initial `initialize` can negotiate `2025-11-25` through `params.protocolVersion`, and subsequent requests should include `MCP-Protocol-Version`.
 
 ### Installation & Provisioning
 *   `GET /builder/onboarding` : Evaluates local prerequisites (Docker, CLI tools) and lists redacted setup metrics.

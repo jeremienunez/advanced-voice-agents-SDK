@@ -9,6 +9,8 @@ import type {
   TenantResolverPort,
 } from "@voiceagentsdk/core/sdk";
 import {
+  createA2AMailboxTaskRouter,
+  createInMemoryAgentMailbox,
   createInMemoryPendingActionPort,
   ToolExecutionPolicyEngine,
   type IRealtimeProvider,
@@ -36,6 +38,7 @@ import { createStarterPromptCompiler } from "../runtime/prompt-compiler.js";
 import { createRuntimeMemoryStoreFromEnv } from "../runtime/memory-store.js";
 import { createRuntimePendingActionApprovalService } from "../voice/pending-action-approval.js";
 import { toolsForRequest } from "../voice/toolset.js";
+import { createStarterMcpToolService } from "../mcp/tool-service.js";
 import type {
   BuilderService,
   RuntimeKnowledge,
@@ -53,6 +56,7 @@ export interface StarterServerAppOptions {
   promptCompiler?: PromptCompilerPort;
   providerCatalog?: RuntimeProviderConfig[];
   providerFactory?: ProviderFactoryPort<IRealtimeProvider, VoiceSessionTool>;
+  a2aMailboxRouter?: ReturnType<typeof createA2AMailboxTaskRouter>;
   runtimeKnowledge?: RuntimeKnowledge;
   runtimeMemoryStore?: MemoryStorePort;
   sdk?: StarterSdk;
@@ -115,13 +119,23 @@ export function createStarterServerApp(options: StarterServerAppOptions = {}) {
         runtimeKnowledge,
       }),
   });
+  const a2aMailboxRouter = options.a2aMailboxRouter ??
+    createA2AMailboxTaskRouter({ mailbox: createInMemoryAgentMailbox() });
+  const mcpToolService = createStarterMcpToolService({
+    a2aMailboxRouter,
+    builderService,
+    runtimeKnowledge,
+    toolPolicyEngine,
+  });
 
   return {
+    a2aMailboxRouter,
     authTicketVerifier: options.authTicketVerifier ?? createDevAuthTicketVerifier(env),
     builderService,
     defaultProviderId,
     env,
     learningService,
+    mcpToolService,
     providerCatalog,
     runtimePendingActions,
     sdk,
@@ -148,6 +162,7 @@ function assertStarterServerDependencies(
     ["authTicketVerifier", options.authTicketVerifier],
     ["builderService", options.builderService],
     ["learningService", options.learningService],
+    ["a2aMailboxRouter", options.a2aMailboxRouter],
     ["runtimeMemoryStore", options.runtimeMemoryStore],
     ["tenantResolver", options.tenantResolver],
   ]

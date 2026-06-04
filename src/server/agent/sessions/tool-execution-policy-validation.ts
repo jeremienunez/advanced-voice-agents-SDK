@@ -48,6 +48,7 @@ export function validateArguments(
 }
 
 export function requiresServerConfirmation(tool: VoiceSessionTool): boolean {
+  if (tool.policy?.executionMode === "automatic") return false;
   const sideEffect = tool.policy?.sideEffect;
   return tool.policy?.executionMode === "confirmation" ||
     sideEffect === "write" ||

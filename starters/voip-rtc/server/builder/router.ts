@@ -38,6 +38,17 @@ export function createBuilderRouter(options: {
           return { response: json(builderAgentBankPayload(context), corsHeaders) };
         }
 
+        const documentRequest = parseDraftDocumentPath(url.pathname);
+        if (documentRequest && request.method === "GET") {
+          const draft = requireOwnedDraft(documentRequest.draftId, context);
+          const document = findKnowledgeDocument(
+            draft,
+            documentRequest.documentId,
+          );
+          if (!document) throw new Error("Knowledge document not found");
+          return { response: json({ document }, corsHeaders) };
+        }
+
         if (
           url.pathname.startsWith("/builder/drafts/") &&
           request.method === "GET"
@@ -130,4 +141,27 @@ async function routePostRequest(
   }
 
   return null;
+}
+
+function parseDraftDocumentPath(
+  pathname: string,
+): { draftId: string; documentId: string } | null {
+  const prefix = "/builder/drafts/";
+  if (!pathname.startsWith(prefix)) return null;
+  const suffix = pathname.slice(prefix.length);
+  const marker = "/documents/";
+  const markerIndex = suffix.indexOf(marker);
+  if (markerIndex < 0) return null;
+  const draftId = decodeURIComponent(suffix.slice(0, markerIndex));
+  const documentId = decodeURIComponent(suffix.slice(markerIndex + marker.length));
+  if (!draftId || !documentId) throw new Error("draftId and documentId are required");
+  return { draftId, documentId };
+}
+
+function findKnowledgeDocument(
+  draft: ReturnType<typeof requireOwnedDraft>,
+  documentId: string,
+) {
+  return draft.knowledgePlan?.documents.find((document) => document.id === documentId) ??
+    null;
 }
