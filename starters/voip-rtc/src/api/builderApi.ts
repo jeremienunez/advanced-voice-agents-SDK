@@ -8,10 +8,12 @@ export {
   savePromptClarifications,
 } from "./builder/promptApi.js";
 export {
+  fetchKnowledgeDocument,
+} from "./builder/documentApi.js";
+export {
   buildAutonomousKnowledge,
   compileKnowledgeStore,
   createKnowledgePlan,
-  fetchKnowledgeDocument,
   ingestDocument,
   runAutonomousResearch,
 } from "./builder/knowledgeApi.js";
