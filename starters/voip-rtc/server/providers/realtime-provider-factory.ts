@@ -16,7 +16,7 @@ import {
   runtimeProvider,
   type RuntimeProviderConfig,
 } from "./catalog.js";
-import { resolveRequiredSecret } from "../secrets/index.js";
+import { resolveRequiredSecret } from "../secrets/required-secret.js";
 import {
   E2EFakeRealtimeProvider,
   isE2EFakeProviderEnabled,

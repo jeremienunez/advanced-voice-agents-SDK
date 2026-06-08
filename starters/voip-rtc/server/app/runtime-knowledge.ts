@@ -1,11 +1,11 @@
 import type {
   SecretResolverPort,
 } from "@voiceagentsdk/core/sdk";
-import { VoyageEmbeddingPort } from "../builder/adapters/voyage-embeddings.js";
+import { VoyageEmbeddingPort } from "../builder/adapters/embeddings/voyage.js";
 import { PostgresKnowledgeSearch } from "../adapters/postgres/knowledge-search.js";
 import type { RuntimeKnowledge } from "../voice/types.js";
 import { EnvDatabaseCredentialResolver } from "./env-database-credentials.js";
-import { createEnvSecretResolver } from "../secrets/index.js";
+import { createEnvSecretResolver } from "../secrets/env-secret-resolver.js";
 
 export interface RuntimeKnowledgeEnvInput {
   env?: Record<string, string | undefined>;

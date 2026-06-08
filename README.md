@@ -195,11 +195,14 @@ These are application-owned concerns. The SDK exposes ports and adapters so appl
 | **`src/client/browser`** | Web-native client wrapper for microphone streams, speaker queues, and websocket events. |
 | **`starters/voip-rtc`** | A fully wired React + Vite + Bun template showcasing gemini-live, open-realtime, and pgvector RAG. |
 | **`scripts/audits`** | Static architecture, boundary, LOC, package, and secret-hygiene audits. |
-| **`scripts/bdd`** | Root SDK BDD scenarios that prove public package and runtime contracts. |
-| **`scripts/smoke`** | Focused runtime smoke checks for low-level behavior. |
-| **`scripts/type-tests`** | Compile-only public contract tests. |
+| **`scripts/tests/bdd`** | Root SDK BDD scenarios that prove public package and runtime contracts. |
+| **`scripts/tests/smoke`** | Focused runtime smoke checks for low-level behavior. |
+| **`scripts/tests/type-contracts`** | Compile-only public contract tests. |
+| **`docs/architecture`** | Curated architecture notes, manifests, migrations, and audit records. |
 
-See [REPO_STRUCTURE.md](REPO_STRUCTURE.md) for the canonical tree and ownership rules.
+See [REPO_STRUCTURE.md](REPO_STRUCTURE.md) for the canonical tree and ownership
+rules, and [docs/architecture](docs/architecture/README.md) for deeper
+architecture notes.
 
 ---
 
@@ -509,6 +512,7 @@ Additional integration docs:
 
 - [App-owned auth, secrets, approvals and ports](APP_OWNED_INTEGRATION.md)
 - [Alpha release procedure](RELEASE_ALPHA.md)
+- [Architecture notes](docs/architecture/README.md)
 
 ---
 

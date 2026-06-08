@@ -1,10 +1,12 @@
 import type {
   AgentBuildDraft,
   BuilderResearchSettings,
+} from "../../domain/builder/types.js";
+import type {
   KnowledgeDocument,
   KnowledgeResearchBudget,
   KnowledgeResearchResult,
-} from "../../domain/builder.js";
+} from "../../domain/builder/knowledge.js";
 import { postForm, postJson } from "../http.js";
 
 export function ingestDocument(apiBase: string, formData: FormData) {

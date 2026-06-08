@@ -2,7 +2,7 @@ import type {
   OnboardingDependency,
   OnboardingEnvGroup,
   OnboardingState,
-} from "../../domain/onboarding.js";
+} from "../../domain/onboarding/types.js";
 
 export type EnvironmentStepId = "requirements" | "env" | "preview" | "verify";
 

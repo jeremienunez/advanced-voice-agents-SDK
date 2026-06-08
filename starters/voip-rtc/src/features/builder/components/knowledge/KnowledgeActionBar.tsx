@@ -1,6 +1,6 @@
 import type { ChangeEvent } from "react";
 import { Button } from "../../../../components/ui/Button.js";
-import type { AgentBuildDraft } from "../../../../domain/builder.js";
+import type { AgentBuildDraft } from "../../../../domain/builder/types.js";
 import { FilePickerButton } from "./FilePickerButton.js";
 
 export function KnowledgeActionBar({

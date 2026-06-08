@@ -1,9 +1,9 @@
 import { Button } from "../../../components/ui/Button.js";
 import { Metric } from "../../../components/ui/Metric.js";
 import { Panel } from "../../../components/ui/Panel.js";
-import type { AgentBuildDraft } from "../../../domain/builder.js";
-import type { AgentLearningStoreBackendPlan } from "../../../domain/builder-infra.js";
-import "./DatabaseInstancePanel.css";
+import type { AgentBuildDraft } from "../../../domain/builder/types.js";
+import type { AgentLearningStoreBackendPlan } from "../../../domain/builder/infra.js";
+import "../styles/components/DatabaseInstancePanel.css";
 
 export function DatabaseInstancePanel({
   draft,

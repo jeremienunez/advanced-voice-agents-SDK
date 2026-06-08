@@ -1,5 +1,5 @@
 import type { KnowledgeDocumentKind } from "@voiceagentsdk/core/sdk";
-import { documentKind } from "../domain/document-kind.js";
+import { documentKind } from "../domain/knowledge/document-kind.js";
 
 export const maxUploadBytes = 8 * 1024 * 1024;
 export const maxTextDocumentChars = 1_000_000;

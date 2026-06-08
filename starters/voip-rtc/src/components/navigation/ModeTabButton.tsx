@@ -1,4 +1,4 @@
-import type { AppMode } from "../../domain/app-mode.js";
+import type { AppMode } from "../../domain/app/mode.js";
 
 export function ModeTabButton({
   active,

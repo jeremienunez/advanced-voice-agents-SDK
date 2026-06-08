@@ -1,19 +1,19 @@
-import { PlainTextDocumentIngestion } from "./adapters/document-ingestion.js";
-import { LlmKnowledgeResearch } from "./adapters/llm-knowledge-research.js";
-import { LlmKnowledgeVerifier } from "./adapters/llm-knowledge-verifier.js";
-import { LlmPromptPlanner } from "./adapters/llm-prompt-planner.js";
-import { PlannedInfraProvisioner } from "./adapters/planned-infra-provisioner.js";
-import { PostgresAgentDatabaseProvisioner } from "./adapters/postgres-database-provisioner.js";
-import { PostgresPgVectorKnowledgeStore } from "./adapters/postgres-knowledge-store.js";
-import { VoyageEmbeddingPort } from "./adapters/voyage-embeddings.js";
+import { PlainTextDocumentIngestion } from "./adapters/documents/plain-text-ingestion.js";
+import { LlmKnowledgeResearch } from "./adapters/llm/knowledge-research.js";
+import { LlmKnowledgeVerifier } from "./adapters/llm/knowledge-verifier.js";
+import { LlmPromptPlanner } from "./adapters/llm/prompt-planner.js";
+import { PlannedInfraProvisioner } from "./adapters/infra/planned-provisioner.js";
+import { PostgresAgentDatabaseProvisioner } from "./adapters/postgres/database-provisioner.js";
+import { PostgresPgVectorKnowledgeStore } from "./adapters/postgres/knowledge-store.js";
+import { VoyageEmbeddingPort } from "./adapters/embeddings/voyage.js";
 import {
   defaultResearchBudget,
   defaultToolRegistry,
   researchBudgetFromEnv,
   strategyLabels,
 } from "./catalog.js";
-import { IntentInfraPlanner } from "./domain/infra.js";
-import { PlanOnlyInfraIacGenerator } from "./domain/infra-iac.js";
+import { IntentInfraPlanner } from "./domain/infra/planner.js";
+import { PlanOnlyInfraIacGenerator } from "./domain/infra/iac-generator.js";
 import { createBuilderLlmCatalog } from "./llm/profiles.js";
 import { AdaptiveLlmModelResolver } from "./llm/resolver.js";
 import { BuilderLlmTaskRunner } from "./llm/task-runner.js";
@@ -25,7 +25,7 @@ import type {
   LlmTaskRole,
 } from "@voiceagentsdk/core/sdk";
 import { runtimeToolHandlerRefs } from "../runtime/tools/handler-refs.js";
-import { createEnvSecretResolver } from "../secrets/index.js";
+import { createEnvSecretResolver } from "../secrets/env-secret-resolver.js";
 import type { BuilderConfig, BuilderServiceComposition } from "./types.js";
 
 export function createBuilderServiceCompositionFromEnv(

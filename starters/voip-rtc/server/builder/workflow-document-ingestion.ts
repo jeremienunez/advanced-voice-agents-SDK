@@ -3,7 +3,7 @@ import type {
   DocumentIngestionPort,
   KnowledgeDocument,
 } from "@voiceagentsdk/core/sdk";
-import { documentKind } from "./domain/document-kind.js";
+import { documentKind } from "./domain/knowledge/document-kind.js";
 import type { BuilderRequestContext } from "./types.js";
 import type { DocumentIngestionQuotaPort } from "./quotas/document-ingestion-quota.js";
 import { readDocumentInput } from "./request/document-input.js";

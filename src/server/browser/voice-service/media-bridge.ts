@@ -6,7 +6,7 @@ import type {
 import {
   createBrowserMediaHandler,
   type BrowserMediaHandlerConfig,
-} from "../../agent/handlers/index.js";
+} from "../../agent/handlers/browser-media.handler.js";
 import type { AudioChunk } from "../../agent/types/transport.types.js";
 
 export interface BrowserVoiceMediaBridgeOptions {

@@ -1,4 +1,4 @@
-import "./RtcPanels.css";
+import "../styles/components/RtcPanels.css";
 
 export { AudioContractPanel } from "./AudioContractPanel.js";
 export { EventsPanel } from "./EventsPanel.js";

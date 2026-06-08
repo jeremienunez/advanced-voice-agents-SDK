@@ -1,11 +1,11 @@
 import { createAgentBuildDraftBuilder, type DatabaseBuildPlan, type EmbeddingInput } from "@voiceagentsdk/core/sdk";
-import { chunkDocuments } from "./domain/knowledge.js";
-import { promptPlanWithClarifications } from "./domain/prompt.js";
-import { mutateDraft } from "./domain/drafts.js";
+import { chunkDocuments } from "./domain/knowledge/plan.js";
+import { promptPlanWithClarifications } from "./domain/prompt/plan.js";
+import { mutateDraft } from "./domain/drafts/mutations.js";
 import { normalizeIdentity } from "./request/identity.js";
 import { normalizeKnowledgeDocuments } from "./request/knowledge-documents.js";
 import { normalizeResearchSettings } from "./request/research-settings.js";
-import { normalizeResearchBudget } from "./domain/research.js";
+import { normalizeResearchBudget } from "./domain/research/plan.js";
 import { saveDraft } from "./state/draft-store.js";
 import {
   requireOwnedDraft,

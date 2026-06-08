@@ -1,5 +1,5 @@
 import { Metric } from "../../../../components/ui/Metric.js";
-import type { AgentBuildDraft } from "../../../../domain/builder.js";
+import type { AgentBuildDraft } from "../../../../domain/builder/types.js";
 import { KnowledgePipelineDiagram } from "./KnowledgePipelineDiagram.js";
 
 export function KnowledgePlanSummary({ draft }: { draft: AgentBuildDraft }) {

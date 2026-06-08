@@ -1,5 +1,5 @@
 import { Metric } from "../../../components/ui/Metric.js";
-import type { CompiledAgentSummary } from "../../../domain/builder.js";
+import type { CompiledAgentSummary } from "../../../domain/builder/types.js";
 
 export function AgentCreatedOverlay({
   artifact,

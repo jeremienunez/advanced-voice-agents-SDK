@@ -1,7 +1,7 @@
 import type {
   PendingToolCall,
   SessionContext,
-} from "../types/index.js";
+} from "../types/session.types.js";
 
 export function addPendingToolCall(
   ctx: SessionContext,

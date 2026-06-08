@@ -3,7 +3,7 @@ import type {
   InfraAction,
   InfraActionResult,
   OnboardingDependency,
-} from "../../domain/onboarding.js";
+} from "../../domain/onboarding/types.js";
 
 export function GuidedInfraPanel({
   busy,

@@ -2,7 +2,7 @@ import type {
   AgentBuildDraft,
   BuilderDraftResponse,
   BuilderIdentity,
-} from "../../domain/builder.js";
+} from "../../domain/builder/types.js";
 import { postJson, readError } from "../http.js";
 
 export function createPromptPlan(apiBase: string, identity: BuilderIdentity) {

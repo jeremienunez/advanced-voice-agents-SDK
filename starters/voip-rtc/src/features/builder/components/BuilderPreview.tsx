@@ -1,6 +1,6 @@
 import { Metric } from "../../../components/ui/Metric.js";
 import { Panel } from "../../../components/ui/Panel.js";
-import type { AgentBuildDraft } from "../../../domain/builder.js";
+import type { AgentBuildDraft } from "../../../domain/builder/types.js";
 
 export function BuilderPreview({
   draft,

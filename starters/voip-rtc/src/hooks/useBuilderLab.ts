@@ -6,13 +6,15 @@ import type {
   BuilderIdentity,
   BuilderResearchSettings,
   CompiledAgentSummary,
+} from "../domain/builder/types.js";
+import type {
   KnowledgeDocument,
   KnowledgeResearchBudget,
   KnowledgeResearchResult,
-} from "../domain/builder.js";
-import { defaultResearchBudget, emptyIdentity } from "../domain/builderDefaults.js";
-import { keepLoaderVisible } from "../domain/builderProgress.js";
-import { deriveBuilderState } from "../domain/deriveBuilderState.js";
+} from "../domain/builder/knowledge.js";
+import { defaultResearchBudget, emptyIdentity } from "../domain/builder/defaults.js";
+import { keepLoaderVisible } from "../domain/builder/progress.js";
+import { deriveBuilderState } from "../domain/builder/derive-state.js";
 import { useBuilderConfigBootstrap } from "./useBuilderConfigBootstrap.js";
 import { useBuilderKnowledgeActions } from "./useBuilderKnowledgeActions.js";
 import { useBuilderPromptPlanning } from "./useBuilderPromptPlanning.js";

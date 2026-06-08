@@ -1,6 +1,6 @@
 import { Metric } from "../../../../components/ui/Metric.js";
-import type { KnowledgeResearchResult } from "../../../../domain/builder.js";
-import { formatUsd } from "../../../../domain/formatters.js";
+import type { KnowledgeResearchResult } from "../../../../domain/builder/knowledge.js";
+import { formatUsd } from "../../../../domain/shared/formatters.js";
 
 export function ResearchReportSummary({
   report,

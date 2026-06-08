@@ -2,7 +2,7 @@ import type { RawData } from "ws";
 import { GROK_DEFAULT_SAMPLE_RATE, GROK_EVENTS } from "../../types/grok.types.js";
 import type { AudioChunk } from "../../types/transport.types.js";
 import { decodeAudioBase64 } from "../../utils/audio.js";
-import type { AgentLogger } from "../../utils/index.js";
+import type { AgentLogger } from "../../utils/logger.js";
 import type {
   GrokRealtimeConfig,
   GrokRealtimeHandlers,

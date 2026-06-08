@@ -1,5 +1,5 @@
 import type { KnowledgeDocument } from "@voiceagentsdk/core/sdk";
-import { documentKind } from "../domain/document-kind.js";
+import { documentKind } from "../domain/knowledge/document-kind.js";
 import {
   asRecord,
   readNumber,

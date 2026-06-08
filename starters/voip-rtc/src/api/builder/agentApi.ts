@@ -1,7 +1,7 @@
 import type {
   AgentBankResponse,
   BuilderSessionResponse,
-} from "../../domain/builder.js";
+} from "../../domain/builder/types.js";
 import { postJson, readError } from "../http.js";
 
 export async function fetchAgents(apiBase: string): Promise<AgentBankResponse> {

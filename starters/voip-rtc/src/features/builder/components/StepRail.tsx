@@ -1,4 +1,4 @@
-import "./StepRail.css";
+import "../styles/components/StepRail.css";
 import { StepRailStep } from "./StepRailStep.js";
 
 const BUILDER_STEPS = [

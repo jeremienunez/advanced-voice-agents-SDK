@@ -4,8 +4,10 @@ import type {
   BuilderConfig,
   BuilderIdentity,
   BuilderResearchSettings,
+} from "../domain/builder/types.js";
+import type {
   KnowledgeResearchBudget,
-} from "../domain/builder.js";
+} from "../domain/builder/knowledge.js";
 
 export function useBuilderConfigBootstrap({
   apiBase,

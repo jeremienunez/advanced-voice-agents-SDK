@@ -19,6 +19,29 @@ projects:
 - Post-session learning loop with async status, Redis TTL memory, graph memory,
   audit metadata, rollbackable agent versions, and BDD coverage.
 
+## Repository Layout
+
+```text
+server/
+  app/           bootstrap and environment composition
+  builder/       domain rules, adapters, request normalization, state, workflows
+  http/          route composition and guards
+  learning/      post-session learning workflow and memory/graph stores
+  runtime/       compiled agent, prompt compiler, runtime tools
+  voice/         voice service composition and tenant/tool policies
+src/
+  features/      UI feature slices; feature CSS lives in local styles/
+  components/    shared UI and layout primitives
+  domain/        UI-only domain models and view state
+  api/           browser API clients
+  styles/        global CSS only
+scripts/
+  dev/           local dev launchers
+  infra/         infra planning/apply helpers
+  harnesses/     scenario harnesses
+  tests/         BDD, integration, E2E, shared helpers, fixtures
+```
+
 ## Flow
 
 ```mermaid

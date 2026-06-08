@@ -1,11 +1,11 @@
 import type { AgentBuildDraft, ToolName } from "@voiceagentsdk/core/sdk";
 import {
   compiledPromptInvariantViolations,
-} from "./domain/prompt-invariants.js";
+} from "./domain/prompt/invariants.js";
 import {
   appendServerOwnedPromptPolicy,
   assertServerOwnedPromptPolicy,
-} from "./domain/prompt-policy.js";
+} from "./domain/prompt/policy.js";
 import type { BuilderWorkflowDependencies } from "./types.js";
 
 const MAX_FINAL_PROMPT_ATTEMPTS = 3;

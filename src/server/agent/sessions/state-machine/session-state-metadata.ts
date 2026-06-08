@@ -1,4 +1,4 @@
-import type { SessionState, StateMetadata } from "../../types/index.js";
+import type { SessionState, StateMetadata } from "../../types/session.types.js";
 
 export const STATE_METADATA: Record<SessionState, StateMetadata> = {
   initializing: {

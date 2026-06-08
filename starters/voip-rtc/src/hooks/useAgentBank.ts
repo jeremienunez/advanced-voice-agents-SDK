@@ -10,7 +10,7 @@ import type {
   AgentBankResponse,
   AgentBuildDraft,
   CompiledAgentSummary,
-} from "../domain/builder.js";
+} from "../domain/builder/types.js";
 
 export function useAgentBank({
   apiBase,

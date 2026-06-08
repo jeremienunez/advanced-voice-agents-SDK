@@ -10,7 +10,7 @@ import type {
 } from "../../types/transport.types.js";
 import { GEMINI_INPUT_MIME } from "../../types/gemini.types.js";
 import { AudioBuffer, encodeAudioBase64 } from "../../utils/audio.js";
-import { createAgentLogger } from "../../utils/index.js";
+import { createAgentLogger } from "../../utils/logger.js";
 import {
   connectGeminiRealtimeSocket,
 } from "./connection.js";

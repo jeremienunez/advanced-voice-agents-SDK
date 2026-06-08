@@ -1,7 +1,7 @@
 import type {
   ToolBuildContract,
   ToolValidationReport,
-} from "../../../domain/builder.js";
+} from "../../../domain/builder/tooling.js";
 
 export function ToolContractStatus({
   contract,

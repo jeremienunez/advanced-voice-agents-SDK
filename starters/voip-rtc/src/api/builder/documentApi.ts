@@ -1,4 +1,4 @@
-import type { KnowledgeDocument } from "../../domain/builder.js";
+import type { KnowledgeDocument } from "../../domain/builder/knowledge.js";
 import { getJson } from "../http.js";
 
 export function fetchKnowledgeDocument(

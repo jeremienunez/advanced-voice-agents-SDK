@@ -1,4 +1,4 @@
-import type { AgentBuildDraft } from "../../../../domain/builder.js";
+import type { AgentBuildDraft } from "../../../../domain/builder/types.js";
 
 export function KnowledgeWarnings({
   databaseReady,

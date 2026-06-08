@@ -1,5 +1,5 @@
 import type { RawData } from "ws";
-import type { AgentLogger } from "../../utils/index.js";
+import type { AgentLogger } from "../../utils/logger.js";
 import type {
   OpenAIApiError,
   OpenAIFunctionCall,

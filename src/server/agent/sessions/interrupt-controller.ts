@@ -3,11 +3,11 @@
  * Extracted from VoiceSession to handle response interruption logic
  */
 
-import type { IRealtimeProvider } from "../types/index.js";
+import type { IRealtimeProvider } from "../types/transport.types.js";
 import type { SessionStateMachine } from "./state-machine.js";
-import type { SessionContext } from "../types/index.js";
+import type { SessionContext } from "../types/session.types.js";
 import { setInterrupted, clearInterrupted, updateState } from "./context.js";
-import { createAgentLogger } from "../utils/index.js";
+import { createAgentLogger } from "../utils/logger.js";
 
 // ============================================================================
 // Types

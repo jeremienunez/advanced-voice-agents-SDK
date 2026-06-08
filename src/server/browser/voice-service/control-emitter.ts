@@ -3,7 +3,7 @@ import type {
   EventSinkPort,
   LoggerPort,
 } from "../../../sdk/types.js";
-import { noopEventSink } from "../../observability/index.js";
+import { noopEventSink } from "../../observability/event-sink.js";
 import { WS_OPEN } from "./protocol-constants.js";
 import type { BrowserVoiceSocket } from "./types.js";
 

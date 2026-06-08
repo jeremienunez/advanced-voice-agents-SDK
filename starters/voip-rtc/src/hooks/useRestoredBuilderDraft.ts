@@ -2,10 +2,12 @@ import { useEffect, type Dispatch, type SetStateAction } from "react";
 import type {
   AgentBuildDraft,
   BuilderIdentity,
+} from "../domain/builder/types.js";
+import type {
   KnowledgeDocument,
   KnowledgeResearchResult,
-} from "../domain/builder.js";
-import { emptyIdentity } from "../domain/builderDefaults.js";
+} from "../domain/builder/knowledge.js";
+import { emptyIdentity } from "../domain/builder/defaults.js";
 
 export function useRestoredBuilderDraft({
   restoredDraft,

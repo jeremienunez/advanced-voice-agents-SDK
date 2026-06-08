@@ -3,7 +3,7 @@ import { TextField } from "../../../../components/ui/TextField.js";
 import type {
   BuilderConfig,
   BuilderResearchSettings,
-} from "../../../../domain/builder.js";
+} from "../../../../domain/builder/types.js";
 
 export function ResearchProviderFields({
   config,

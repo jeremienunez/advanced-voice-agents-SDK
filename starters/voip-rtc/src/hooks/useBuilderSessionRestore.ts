@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { fetchBuilderSession } from "../api/builderApi.js";
-import type { CompiledAgentSummary } from "../domain/builder.js";
+import type { CompiledAgentSummary } from "../domain/builder/types.js";
 
 export function useBuilderSessionRestore({
   apiBase,

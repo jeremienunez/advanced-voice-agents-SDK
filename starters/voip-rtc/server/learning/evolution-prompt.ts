@@ -1,5 +1,5 @@
 import type { AgentEvolutionInput } from "@voiceagentsdk/core/sdk";
-import { SERVER_POLICY_START } from "../builder/domain/prompt-policy.js";
+import { SERVER_POLICY_START } from "../builder/domain/prompt/policy.js";
 
 export function buildPromptVersion(
   currentPrompt: string,

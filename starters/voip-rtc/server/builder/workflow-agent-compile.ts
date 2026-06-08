@@ -1,6 +1,6 @@
-import { compileArtifact } from "./domain/prompt.js";
+import { compileArtifact } from "./domain/prompt/plan.js";
 import { composeValidFinalPrompt } from "./final-prompt-loop.js";
-import { mutateDraft } from "./domain/drafts.js";
+import { mutateDraft } from "./domain/drafts/mutations.js";
 import { createToolBuildPlan } from "./domain/tooling/contracts.js";
 import { toolInstructionsFromPlan } from "./domain/tooling/compile.js";
 import { validatedToolPlan, validateToolBuildPlan } from "./domain/tooling/validation.js";

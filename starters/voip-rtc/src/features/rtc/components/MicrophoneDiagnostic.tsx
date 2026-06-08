@@ -1,4 +1,4 @@
-import type { MicrophoneDiagnosticReport } from "../../../domain/microphone.js";
+import type { MicrophoneDiagnosticReport } from "../../../domain/runtime/microphone.js";
 
 export function MicrophoneDiagnostic({
   report,

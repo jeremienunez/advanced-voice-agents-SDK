@@ -3,7 +3,7 @@ import {
   type BrowserVoiceServiceConfig,
   type BrowserVoiceSocket,
   type BrowserVoiceUserContext,
-} from "../../browser/index.js";
+} from "../../browser/voice-service.js";
 
 export interface FastifyVoiceAdapterOptions {
   routePrefix?: string;

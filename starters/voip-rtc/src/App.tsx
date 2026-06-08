@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { DEFAULT_BUILDER_URL } from "./api/constants.js";
 import { StudioShell } from "./components/layout/StudioShell.js";
-import { defaultAppMode, type AppMode } from "./domain/app-mode.js";
+import { defaultAppMode, type AppMode } from "./domain/app/mode.js";
 import type {
   AgentBuildDraft,
   CompiledAgentSummary,
-} from "./domain/builder.js";
+} from "./domain/builder/types.js";
 import { AgentBank } from "./features/agent-bank/AgentBank.js";
 import { BuilderLab } from "./features/builder/BuilderLab.js";
 import { CommandCenter } from "./features/command-center/CommandCenter.js";

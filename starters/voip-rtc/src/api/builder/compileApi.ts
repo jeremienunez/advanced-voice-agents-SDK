@@ -1,7 +1,7 @@
 import type {
   AgentBuildDraft,
   CompiledAgentSummary,
-} from "../../domain/builder.js";
+} from "../../domain/builder/types.js";
 import { postJson } from "../http.js";
 
 export function compileAgentSpec(

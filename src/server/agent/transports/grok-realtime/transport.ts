@@ -9,7 +9,7 @@ import type {
   TransportState,
 } from "../../types/transport.types.js";
 import { encodeAudioBase64 } from "../../utils/audio.js";
-import { createAgentLogger } from "../../utils/index.js";
+import { createAgentLogger } from "../../utils/logger.js";
 import { connectGrokRealtimeSocket } from "./connection.js";
 import {
   handleGrokRealtimeMessage,

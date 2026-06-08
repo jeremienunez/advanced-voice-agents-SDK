@@ -6,7 +6,7 @@ import type {
   ActiveAgentAssignmentPort,
   CompiledAgentArtifact,
 } from "@voiceagentsdk/core/sdk";
-import { mutateDraft } from "../builder/domain/drafts.js";
+import { mutateDraft } from "../builder/domain/drafts/mutations.js";
 import { requireDraft, saveDraft } from "../builder/state/draft-store.js";
 import { createGlobalActiveAgentAssignment } from "../builder/state/active-agent-assignment.js";
 import { decideInfraEvolution } from "./evolution-infra.js";
@@ -17,7 +17,7 @@ import {
   currentEvolution,
 } from "./evolution-state.js";
 import type { AgentEvolutionMetadata } from "./evolution-types.js";
-import { assertServerOwnedPromptPolicy } from "../builder/domain/prompt-policy.js";
+import { assertServerOwnedPromptPolicy } from "../builder/domain/prompt/policy.js";
 
 export class StarterAgentEvolution implements AgentEvolutionPort {
   private readonly activeAgentAssignment: ActiveAgentAssignmentPort;

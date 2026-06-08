@@ -4,8 +4,8 @@ import type {
   AgentMailboxMessageStatus,
   AgentMailboxPort,
 } from "../../../sdk/types.js";
-import type { A2ARole, A2ATask } from "../../../sdk/protocols/index.js";
-import { mailboxMessageToA2ATask } from "../../../sdk/protocols/index.js";
+import { mailboxMessageToA2ATask } from "../../../sdk/protocols/a2a.js";
+import type { A2ARole, A2ATask } from "../../../sdk/protocols/types.js";
 import type { JsonValue } from "../../../sdk/types/json.js";
 
 export interface A2AMailboxMessageInput {

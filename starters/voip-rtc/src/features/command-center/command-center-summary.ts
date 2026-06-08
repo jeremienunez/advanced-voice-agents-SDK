@@ -1,4 +1,4 @@
-import type { AgentBankItem } from "../../domain/builder.js";
+import type { AgentBankItem } from "../../domain/builder/types.js";
 
 export function draftCandidate(agents: AgentBankItem[]) {
   return (

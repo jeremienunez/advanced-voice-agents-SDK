@@ -6,7 +6,7 @@ import type {
   OnboardingEnvGroup,
   OnboardingRequirement,
   OnboardingState,
-} from "../../domain/onboarding.js";
+} from "../../domain/onboarding/types.js";
 import { EnvDrawer } from "./EnvDrawer.js";
 import { GuidedInfraPanel } from "./GuidedInfraPanel.js";
 import {

@@ -1,4 +1,4 @@
-import type { SessionState } from "../../types/index.js";
+import type { SessionState } from "../../types/session.types.js";
 
 export const STATE_TRANSITIONS: Record<SessionState, SessionState[]> = {
   initializing: ["connecting", "error"],

@@ -2,7 +2,7 @@ import type {
   ClientVoiceMessage,
 } from "../../../sdk/types/browser-voice.js";
 import type { IVoiceSession, SessionEndReason } from "../../agent/types/session.types.js";
-import { createConsoleLoggerPort } from "../../observability/index.js";
+import { createConsoleLoggerPort } from "../../observability/logger-port.js";
 import { adaptPcm16SampleRate, resolveSampleRate } from "./audio.js";
 import { createBrowserSessionCallbacks } from "./callbacks.js";
 import {

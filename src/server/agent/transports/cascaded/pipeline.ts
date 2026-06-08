@@ -1,4 +1,4 @@
-import type { AgentLogger } from "../../utils/index.js";
+import type { AgentLogger } from "../../utils/logger.js";
 import { SentenceBuffer } from "./sentence-buffer.js";
 import type {
   ILLM,

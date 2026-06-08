@@ -1,9 +1,9 @@
 import React, { type ReactNode, useCallback, useEffect, useState } from "react";
-import type { AppMode } from "../../domain/app-mode.js";
+import type { AppMode } from "../../domain/app/mode.js";
 import {
   studioNavItems,
   type StudioHealthSummary,
-} from "../../domain/studio.js";
+} from "../../domain/app/studio.js";
 
 const iconsMap: Record<string, React.ReactNode> = {
   command: (

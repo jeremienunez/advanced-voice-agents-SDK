@@ -13,7 +13,7 @@ import {
   relative,
   resolve,
 } from "node:path";
-import type { AgentLogger } from "../../utils/index.js";
+import type { AgentLogger } from "../../utils/logger.js";
 
 export interface OpenAIDebugAudioDump {
   directory: string;

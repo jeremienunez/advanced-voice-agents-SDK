@@ -1,8 +1,8 @@
 import type {
   AgentBuildDraft,
-} from "../../domain/builder.js";
+} from "../../domain/builder/types.js";
 import { postJson } from "../http.js";
-import type { KnowledgeDocument } from "../../domain/builder.js";
+import type { KnowledgeDocument } from "../../domain/builder/knowledge.js";
 
 export function createDatabasePlan(
   apiBase: string,

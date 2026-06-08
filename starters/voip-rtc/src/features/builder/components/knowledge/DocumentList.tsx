@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { fetchKnowledgeDocument } from "../../../../api/builderApi.js";
 import { Button } from "../../../../components/ui/Button.js";
-import type { KnowledgeDocument } from "../../../../domain/builder.js";
-import { formatDocumentMetadata } from "../../../../domain/formatters.js";
-import "./DocumentList.css";
+import type { KnowledgeDocument } from "../../../../domain/builder/knowledge.js";
+import { formatDocumentMetadata } from "../../../../domain/shared/formatters.js";
+import "../../styles/components/knowledge/DocumentList.css";
 
 export function DocumentList({
   apiBase,

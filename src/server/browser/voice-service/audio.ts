@@ -1,4 +1,4 @@
-import { resamplePcm16 } from "../../agent/utils/index.js";
+import { resamplePcm16 } from "../../agent/utils/audio.js";
 import type {
   BrowserVoiceSampleRateResolver,
   BrowserVoiceSessionRequest,

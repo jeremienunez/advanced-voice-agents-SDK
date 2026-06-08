@@ -4,7 +4,7 @@ import { Panel } from "../../../components/ui/Panel.js";
 import type {
   AgentBuildDraft,
   ToolRegistryItem,
-} from "../../../domain/builder.js";
+} from "../../../domain/builder/types.js";
 import { ToolContractStatus } from "./ToolContractStatus.js";
 
 export function ToolRegistryPanel({

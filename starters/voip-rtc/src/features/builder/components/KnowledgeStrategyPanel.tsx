@@ -1,15 +1,17 @@
 import type { ChangeEvent } from "react";
-import "./KnowledgeStrategyPanel.css";
+import "../styles/components/KnowledgeStrategyPanel.css";
 import { Panel } from "../../../components/ui/Panel.js";
 import type {
   AgentBuildDraft,
+  BuilderConfig,
+  BuilderResearchSettings,
+} from "../../../domain/builder/types.js";
+import type {
   KnowledgeDocument,
   KnowledgeResearchBudget,
   KnowledgeResearchResult,
-  BuilderConfig,
-  BuilderResearchSettings,
-} from "../../../domain/builder.js";
-import { diagnoseBuilderTrajectory } from "../../../domain/agentRx.js";
+} from "../../../domain/builder/knowledge.js";
+import { diagnoseBuilderTrajectory } from "../../../domain/builder/agent-rx.js";
 import { AgentRxPanel } from "./diagnostics/AgentRxPanel.js";
 import { DocumentList } from "./knowledge/DocumentList.js";
 import { KnowledgeActionBar } from "./knowledge/KnowledgeActionBar.js";

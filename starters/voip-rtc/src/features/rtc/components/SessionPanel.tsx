@@ -4,9 +4,9 @@ import type {
 } from "@voiceagentsdk/core/client/browser";
 import { Metric } from "../../../components/ui/Metric.js";
 import { Panel } from "../../../components/ui/Panel.js";
-import type { MicrophoneDiagnosticReport } from "../../../domain/microphone.js";
-import type { RuntimeProviderConfig } from "../../../domain/runtime.js";
-import { formatDuration } from "../../../domain/formatters.js";
+import type { MicrophoneDiagnosticReport } from "../../../domain/runtime/microphone.js";
+import type { RuntimeProviderConfig } from "../../../domain/runtime/config.js";
+import { formatDuration } from "../../../domain/shared/formatters.js";
 import { MicrophoneDiagnostic } from "./MicrophoneDiagnostic.js";
 
 export function SessionPanel({

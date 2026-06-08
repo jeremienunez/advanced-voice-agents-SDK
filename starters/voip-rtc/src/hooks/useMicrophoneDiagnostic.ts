@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import type { MicrophoneDiagnosticReport } from "../domain/microphone.js";
+import type { MicrophoneDiagnosticReport } from "../domain/runtime/microphone.js";
 
 export function useMicrophoneDiagnostic() {
   const [microphoneDiagnostic, setMicrophoneDiagnostic] =

@@ -11,4 +11,9 @@ coverage/
 starters/voip-rtc/.builder-state/
 
 # Internal LLM-generated documentation.
-docs/
+docs/superpowers/
+
+# Curated architecture docs are versioned.
+!docs/
+!docs/architecture/
+!docs/architecture/**

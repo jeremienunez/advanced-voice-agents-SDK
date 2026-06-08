@@ -1,13 +1,11 @@
 import type { JsonSchema, ToolManifest } from "../../../sdk/types.js";
-import {
-  toMcpToolDescriptors,
-  type McpToolDescriptor,
-} from "../../../sdk/protocols/index.js";
-import type { ToolExecutionPolicyEngine } from "../../agent/sessions/index.js";
+import { toMcpToolDescriptors } from "../../../sdk/protocols/mcp.js";
+import type { McpToolDescriptor } from "../../../sdk/protocols/types.js";
+import type { ToolExecutionPolicyEngine } from "../../agent/sessions/tool-execution-policy-engine.js";
 import type {
   VoiceSessionTool,
   VoiceSessionToolContext,
-} from "../../agent/types/index.js";
+} from "../../agent/types/session.types.js";
 
 export interface McpToolCallInput {
   name: string;

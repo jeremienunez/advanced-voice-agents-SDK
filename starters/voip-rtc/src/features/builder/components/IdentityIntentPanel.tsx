@@ -6,7 +6,7 @@ import { TextField } from "../../../components/ui/TextField.js";
 import type {
   BuilderConfig,
   BuilderIdentity,
-} from "../../../domain/builder.js";
+} from "../../../domain/builder/types.js";
 
 export function IdentityIntentPanel({
   form,

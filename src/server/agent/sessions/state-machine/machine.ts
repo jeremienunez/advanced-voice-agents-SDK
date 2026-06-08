@@ -4,8 +4,8 @@ import type {
   StateMachineConfig,
   StateMetadata,
   StateTransitionResult,
-} from "../../types/index.js";
-import { AgentError, ERROR_CODES } from "../../types/index.js";
+} from "../../types/session.types.js";
+import { AgentError, ERROR_CODES } from "../../types/error.types.js";
 import {
   getValidNextStates,
   isTerminal,

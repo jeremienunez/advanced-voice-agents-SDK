@@ -50,6 +50,8 @@ export {
 
 export {
   CascadedRealtimeTransport,
+} from "./cascaded/transport.js";
+export {
   createCascadedRealtimeTransport,
-} from "./cascaded/index.js";
+} from "./cascaded/factory.js";
 export type { CascadedMode, CascadedTransportConfig } from "./cascaded/types.js";

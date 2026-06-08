@@ -1,7 +1,7 @@
 import type {
   VoiceSessionTool,
   VoiceSessionToolContext,
-} from "../../agent/types/index.js";
+} from "../../agent/types/session.types.js";
 import type { A2AMailboxTaskRouter } from "./task-router.js";
 
 export interface A2AMailboxMcpToolsOptions {

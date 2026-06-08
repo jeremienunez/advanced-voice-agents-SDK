@@ -1,6 +1,6 @@
 import { Button } from "../../components/ui/Button.js";
-import type { AgentBankItem } from "../../domain/builder.js";
-import { formatDateTime } from "../../domain/formatters.js";
+import type { AgentBankItem } from "../../domain/builder/types.js";
+import { formatDateTime } from "../../domain/shared/formatters.js";
 import { readinessLabel } from "./agent-bank-view-model.js";
 
 export function AgentDetailPanel({

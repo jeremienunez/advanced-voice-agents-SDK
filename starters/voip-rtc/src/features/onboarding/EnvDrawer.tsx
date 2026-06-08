@@ -2,7 +2,7 @@ import type {
   OnboardingEnvField,
   OnboardingEnvGroup,
   OnboardingRequirement,
-} from "../../domain/onboarding.js";
+} from "../../domain/onboarding/types.js";
 
 const groupLabels: Record<OnboardingEnvGroup, string> = {
   voice: "Voice runtime",

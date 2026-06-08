@@ -19,7 +19,7 @@ export async function runOnboardingInfraAction(
   input: OnboardingInfraRequest,
 ) {
   if (!allowedActions.has(action)) throw new Error(`Unsupported infra action: ${action}`);
-  const args = ["run", "scripts/infra-apply.ts", action];
+  const args = ["run", "scripts/infra/apply.ts", action];
   if (input.driver) args.push(`--driver=${allowed(input.driver, allowedDrivers, "driver")}`);
   if (input.target) args.push(`--target=${allowed(input.target, allowedTargets, "target")}`);
   if (input.draftId) args.push(`--draft-id=${safeToken(input.draftId)}`);

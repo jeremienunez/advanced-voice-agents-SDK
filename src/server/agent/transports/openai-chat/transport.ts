@@ -7,7 +7,7 @@ import type {
   ChatToolDefinition,
   IChatTransport,
 } from "../../types/chat.types.js";
-import { createAgentLogger } from "../../utils/index.js";
+import { createAgentLogger } from "../../utils/logger.js";
 import type {
   OpenAIChatConfig,
   OpenAIChatResponse,

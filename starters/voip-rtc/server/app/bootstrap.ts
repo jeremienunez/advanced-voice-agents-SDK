@@ -16,7 +16,7 @@ import {
   type IRealtimeProvider,
   type VoiceSessionTool,
 } from "@voiceagentsdk/core/server";
-import { createBuilderServiceFromEnv } from "../builder/index.js";
+import { createBuilderServiceFromEnv } from "../builder/service.js";
 import { createDevAuthTicketVerifier } from "../auth/dev-ticket-verifier.js";
 import { createGlobalActiveAgentAssignment } from "../builder/state/active-agent-assignment.js";
 import { createStarterLearningServiceFromEnv } from "../learning/service.js";
@@ -26,7 +26,7 @@ import {
   type RuntimeProviderConfig,
 } from "../providers/catalog.js";
 import { createStarterProviderFactory } from "../providers/realtime-provider-factory.js";
-import { createEnvSecretResolver } from "../secrets/index.js";
+import { createEnvSecretResolver } from "../secrets/env-secret-resolver.js";
 import { createStarterVoiceService } from "../voice/service.js";
 import { createDevTenantResolver } from "../voice/dev-tenant-resolver.js";
 import { corsHeadersFor } from "../http/cors.js";

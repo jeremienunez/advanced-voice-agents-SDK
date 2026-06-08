@@ -11,11 +11,13 @@ import {
 import type {
   AgentBuildDraft,
   BuilderResearchSettings,
+} from "../domain/builder/types.js";
+import type {
   KnowledgeDocument,
   KnowledgeResearchBudget,
   KnowledgeResearchResult,
-} from "../domain/builder.js";
-import { keepLoaderVisible } from "../domain/builderProgress.js";
+} from "../domain/builder/knowledge.js";
+import { keepLoaderVisible } from "../domain/builder/progress.js";
 
 interface BuilderKnowledgeActionsInput {
   apiBase: string;

@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { Button } from "../../components/ui/Button.js";
 import { Metric } from "../../components/ui/Metric.js";
-import type { AppMode } from "../../domain/app-mode.js";
+import type { AppMode } from "../../domain/app/mode.js";
 import type {
   AgentBuildDraft,
   CompiledAgentSummary,
-} from "../../domain/builder.js";
+} from "../../domain/builder/types.js";
 import { useAgentBank } from "../../hooks/useAgentBank.js";
 
 export function SelectSpace({

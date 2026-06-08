@@ -1,5 +1,5 @@
 import { NumberField } from "../../../../components/ui/NumberField.js";
-import type { KnowledgeResearchBudget } from "../../../../domain/builder.js";
+import type { KnowledgeResearchBudget } from "../../../../domain/builder/knowledge.js";
 
 export function ResearchBudgetFields({
   budget,

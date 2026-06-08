@@ -7,8 +7,8 @@ import type {
   KnowledgeResearchResult,
   KnowledgeVerificationVerdict,
 } from "@voiceagentsdk/core/sdk";
-import { chunkDocuments } from "./domain/knowledge.js";
-import { mutateDraft } from "./domain/drafts.js";
+import { chunkDocuments } from "./domain/knowledge/plan.js";
+import { mutateDraft } from "./domain/drafts/mutations.js";
 import { saveDraft } from "./state/draft-store.js";
 import { runTeacherVerification } from "./teacher-verification.js";
 import type {

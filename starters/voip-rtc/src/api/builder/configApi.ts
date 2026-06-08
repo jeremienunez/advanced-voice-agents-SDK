@@ -1,7 +1,7 @@
 import type {
   BuilderConfig,
   BuilderSessionResponse,
-} from "../../domain/builder.js";
+} from "../../domain/builder/types.js";
 import { fetchWithNetworkError } from "../http.js";
 
 export async function fetchBuilderConfig(

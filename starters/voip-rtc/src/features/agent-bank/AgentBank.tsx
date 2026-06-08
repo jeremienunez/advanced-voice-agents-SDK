@@ -5,7 +5,7 @@ import { Panel } from "../../components/ui/Panel.js";
 import type {
   AgentBuildDraft,
   CompiledAgentSummary,
-} from "../../domain/builder.js";
+} from "../../domain/builder/types.js";
 import { useAgentBank } from "../../hooks/useAgentBank.js";
 import { AgentDetailPanel } from "./AgentDetailPanel.js";
 import { AgentCard } from "./AgentCard.js";
@@ -14,7 +14,7 @@ import {
   filterAgents,
   type AgentStatusFilter,
 } from "./agent-bank-view-model.js";
-import "./AgentBank.css";
+import "./styles/AgentBank.css";
 
 export function AgentBank({
   apiBase,

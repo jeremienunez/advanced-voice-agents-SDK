@@ -11,7 +11,7 @@ import type {
 } from "../types/session.types.js";
 import type { ProviderFunctionCall } from "../types/transport.types.js";
 import { AgentError, ERROR_CODES } from "../types/error.types.js";
-import { createAgentLogger } from "../utils/index.js";
+import { createAgentLogger } from "../utils/logger.js";
 import { ToolExecutionPolicyEngine } from "./tool-execution-policy-engine.js";
 import { createStateMachine, type SessionStateMachine } from "./state-machine.js";
 import {

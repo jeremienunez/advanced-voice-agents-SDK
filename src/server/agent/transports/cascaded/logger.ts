@@ -1,3 +1,3 @@
-import { createAgentLogger } from "../../utils/index.js";
+import { createAgentLogger } from "../../utils/logger.js";
 
 export const cascadedLogger = createAgentLogger("CascadedTransport");

@@ -2,7 +2,7 @@ import type {
   SessionContext,
   SessionEndReason,
   SessionSummary,
-} from "../types/index.js";
+} from "../types/session.types.js";
 
 export function createSessionSummary(
   ctx: SessionContext,

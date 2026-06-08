@@ -4,7 +4,7 @@ import type {
 } from "@voiceagentsdk/core/client/browser";
 import type { Dispatch, SetStateAction } from "react";
 import { Button } from "../../../components/ui/Button.js";
-import type { RuntimeProviderConfig } from "../../../domain/runtime.js";
+import type { RuntimeProviderConfig } from "../../../domain/runtime/config.js";
 
 export function RtcControlPanel({
   wsUrl,

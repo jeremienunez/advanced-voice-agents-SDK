@@ -6,8 +6,8 @@ import {
 import type {
   AgentBuildDraft,
   BuilderIdentity,
-} from "../domain/builder.js";
-import { keepLoaderVisible } from "../domain/builderProgress.js";
+} from "../domain/builder/types.js";
+import { keepLoaderVisible } from "../domain/builder/progress.js";
 
 export function useBuilderPromptPlanning({
   apiBase,

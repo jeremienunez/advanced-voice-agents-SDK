@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { StatusBadge } from "../../components/ui/StatusBadge.js";
-import type { CompiledAgentSummary } from "../../domain/builder.js";
+import type { CompiledAgentSummary } from "../../domain/builder/types.js";
 import { useRtcLab } from "../../hooks/useRtcLab.js";
 import { LearningTimeline } from "./components/LearningTimeline.js";
 import { RtcControlPanel } from "./components/RtcControlPanel.js";

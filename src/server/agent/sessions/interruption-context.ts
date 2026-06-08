@@ -1,4 +1,4 @@
-import type { SessionContext } from "../types/index.js";
+import type { SessionContext } from "../types/session.types.js";
 
 export function setInterrupted(ctx: SessionContext): SessionContext {
   return {

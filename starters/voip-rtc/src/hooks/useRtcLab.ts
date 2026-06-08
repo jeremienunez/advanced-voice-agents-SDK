@@ -6,13 +6,13 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { DEFAULT_CONFIG_URL, DEFAULT_WS_URL } from "../api/constants.js";
 import { fetchRuntimeConfig } from "../api/runtimeApi.js";
-import type { CompiledAgentSummary } from "../domain/builder.js";
-import { eventFromMessage, type EventLogEntry } from "../domain/events.js";
+import type { CompiledAgentSummary } from "../domain/builder/types.js";
+import { eventFromMessage, type EventLogEntry } from "../domain/runtime/events.js";
 import {
   createFallbackRuntimeProviders,
   initialSnapshot,
   type RuntimeConfig,
-} from "../domain/runtime.js";
+} from "../domain/runtime/config.js";
 import {
   collectMicrophoneDiagnostic,
   useMicrophoneDiagnostic,

@@ -1,4 +1,4 @@
-import type { AppMode } from "../../domain/app-mode.js";
+import type { AppMode } from "../../domain/app/mode.js";
 import { ModeTabButton } from "./ModeTabButton.js";
 
 const APP_TABS: Array<{ label: string; mode: AppMode }> = [

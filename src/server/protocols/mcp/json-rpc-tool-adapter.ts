@@ -1,5 +1,5 @@
 import type { JsonValue } from "../../../sdk/types/json.js";
-import type { VoiceSessionTool } from "../../agent/types/index.js";
+import type { VoiceSessionTool } from "../../agent/types/session.types.js";
 import {
   createMcpToolRegistryAdapter,
   type McpToolRegistryAdapterOptions,

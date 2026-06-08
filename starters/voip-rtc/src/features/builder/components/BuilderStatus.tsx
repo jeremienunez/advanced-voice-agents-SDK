@@ -1,4 +1,4 @@
-import type { BuilderConfig } from "../../../domain/builder.js";
+import type { BuilderConfig } from "../../../domain/builder/types.js";
 
 export function BuilderStatus({
   config,

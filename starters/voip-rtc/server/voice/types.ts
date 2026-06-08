@@ -15,7 +15,7 @@ import type {
   VoiceSessionTool,
 } from "@voiceagentsdk/core/server";
 import type { BrowserVoiceMediaBridgeFactory } from "@voiceagentsdk/core/server/browser";
-import type { createBuilderService } from "../builder/index.js";
+import type { createBuilderService } from "../builder/service.js";
 import type { StarterMode } from "../app/starter-mode.js";
 import type { RuntimeProviderConfig } from "../providers/catalog.js";
 import type { StarterLearningService } from "../learning/service.js";

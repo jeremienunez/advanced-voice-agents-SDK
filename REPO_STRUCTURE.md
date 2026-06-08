@@ -15,14 +15,18 @@ starter and development tooling.
 │   └── packs/            Optional example packs kept outside the core package
 ├── scripts/
 │   ├── audits/           Static architecture, boundary, LOC, and secret audits
-│   ├── bdd/              Root SDK BDD scenarios
-│   ├── smoke/            Focused runtime smoke checks
-│   ├── type-tests/       Compile-only public contract tests
+│   ├── tests/
+│   │   ├── bdd/          Root SDK BDD scenarios
+│   │   ├── smoke/        Focused runtime smoke checks
+│   │   └── type-contracts/
+│   │       └── *.ts      Compile-only public contract tests
 │   ├── secret-hygiene/   Shared secret-scanning implementation
 │   └── agentrx-diagnostics/
 │       └── manifest.ts   Shared AGENTRX diagnostic metadata
 ├── assets/screenshots/   README screenshots
-└── docs/                 Internal planning and audit notes, not packaged
+└── docs/
+    ├── architecture/     Curated architecture notes and audit records
+    └── superpowers/      Generated plans/specs, kept outside normal navigation
 ```
 
 ## Published Package Boundary
@@ -40,6 +44,7 @@ The npm package is intentionally SDK-only. `package.json` publishes:
 
 The package does not publish `starters/`, `examples/`, `scripts/`, `assets/`,
 or internal `docs/`. Runtime imports are constrained by `package.json` `exports`.
+Architecture notes under `docs/architecture/` are repository documentation only.
 
 ## Ownership Rules
 
@@ -60,6 +65,43 @@ or internal `docs/`. Runtime imports are constrained by `package.json` `exports`
   core SDK modules cannot depend on the starter.
 - Root `scripts/` are development tooling only. Production source cannot import
   BDD, smoke, audit, or script modules.
+- `docs/architecture` contains curated, versioned design notes. Generated
+  planning/spec documents stay under `docs/superpowers` and are not part of the
+  primary navigation surface.
 
 These boundaries are enforced by `pnpm audit:architecture`,
 `pnpm audit:responsibility`, `pnpm audit:loc`, and the package metadata BDD.
+
+## Starter Map
+
+`starters/voip-rtc` is organized by runtime responsibility first, then by
+feature or adapter family:
+
+```text
+starters/voip-rtc/
+├── server/
+│   ├── app/              Bootstrap and environment composition
+│   ├── builder/
+│   │   ├── domain/       Pure builder rules grouped by infra, database,
+│   │   │                 knowledge, prompt, research, drafts, tooling, shared
+│   │   ├── adapters/     LLM, Postgres, infra, documents, embeddings, sources
+│   │   ├── request/      HTTP input normalization
+│   │   ├── state/        Local draft/session state
+│   │   └── workflow-*    Builder orchestration entrypoints
+│   ├── http/             Route composition and guards
+│   ├── learning/         Post-session learning workflow and stores
+│   ├── runtime/          Compiled agent, prompt compiler, runtime tools
+│   └── voice/            Voice service composition and tenant/tool policies
+├── src/
+│   ├── features/         UI feature slices; each feature owns local styles/
+│   ├── components/       Shared UI/layout primitives and component styles/
+│   ├── domain/           UI-only app, builder, runtime, onboarding, shared
+│   │                    models and derived state
+│   ├── api/              Browser API clients
+│   └── styles/           Global CSS only
+└── scripts/
+    ├── dev/              Local dev server/database launchers
+    ├── infra/            Infra planning/apply helpers
+    ├── harnesses/        Scenario harnesses such as route-wines
+    └── tests/            BDD, integration, E2E, shared helpers, fixtures
+```

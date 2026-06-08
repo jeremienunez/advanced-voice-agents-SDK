@@ -9,7 +9,7 @@ import type {
   InfraActionResult,
   OnboardingDependency,
   OnboardingState,
-} from "../../domain/onboarding.js";
+} from "../../domain/onboarding/types.js";
 import { EnvironmentSlider } from "./EnvironmentSlider.js";
 import {
   configuredEnvCount,

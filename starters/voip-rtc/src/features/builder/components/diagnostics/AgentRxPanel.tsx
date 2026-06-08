@@ -1,5 +1,5 @@
 import type { AgentRxDiagnosticReport } from "@voiceagentsdk/core/sdk";
-import "./AgentRxPanel.css";
+import "../../styles/components/diagnostics/AgentRxPanel.css";
 
 export function AgentRxPanel({
   report,

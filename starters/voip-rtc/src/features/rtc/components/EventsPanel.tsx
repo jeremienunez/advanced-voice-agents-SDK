@@ -1,5 +1,5 @@
 import { Panel } from "../../../components/ui/Panel.js";
-import type { EventLogEntry } from "../../../domain/events.js";
+import type { EventLogEntry } from "../../../domain/runtime/events.js";
 
 export function EventsPanel({ events }: { events: EventLogEntry[] }) {
   return (

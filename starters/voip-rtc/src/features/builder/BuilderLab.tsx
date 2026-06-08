@@ -4,7 +4,7 @@ import { ProcessingLoader } from "../../components/ui/ProcessingLoader.js";
 import type {
   AgentBuildDraft,
   CompiledAgentSummary,
-} from "../../domain/builder.js";
+} from "../../domain/builder/types.js";
 import { useBuilderLab } from "../../hooks/useBuilderLab.js";
 import { AgentCreatedOverlay } from "./components/AgentCreatedOverlay.js";
 import { DatabaseInstancePanel } from "./components/DatabaseInstancePanel.js";

@@ -12,8 +12,9 @@ Rendre le tree plus lisible sans modifier la surface runtime du package npm.
 ### Journal
 
 - Deplacement des audits racine vers `scripts/audits`.
-- Deplacement des BDD racine vers `scripts/bdd`.
-- Deplacement du smoke test runtime vers `scripts/smoke`.
+- Deplacement des BDD racine vers `scripts/tests/bdd`.
+- Deplacement du smoke test runtime vers `scripts/tests/smoke`.
+- Deplacement des checks de types publics vers `scripts/tests/type-contracts`.
 - Ajout de `REPO_STRUCTURE.md` comme carte publique des dossiers et des
   boundaries de publication.
 - Les scripts npm racine pointent vers les nouveaux chemins.

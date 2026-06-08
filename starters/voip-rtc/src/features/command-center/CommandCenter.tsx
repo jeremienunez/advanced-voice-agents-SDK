@@ -3,7 +3,7 @@ import { Button } from "../../components/ui/Button.js";
 import type {
   AgentBuildDraft,
   CompiledAgentSummary,
-} from "../../domain/builder.js";
+} from "../../domain/builder/types.js";
 import { useAgentBank } from "../../hooks/useAgentBank.js";
 import { CommandActionCard } from "./CommandActionCard.js";
 import { HealthRow } from "./HealthRow.js";

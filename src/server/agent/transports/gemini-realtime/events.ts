@@ -1,4 +1,4 @@
-import type { AgentLogger } from "../../utils/index.js";
+import type { AgentLogger } from "../../utils/logger.js";
 import type { AudioBuffer } from "../../utils/audio.js";
 import {
   decodeAudioBase64,

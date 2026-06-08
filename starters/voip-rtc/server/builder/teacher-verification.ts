@@ -8,7 +8,7 @@ import type {
 import {
   capResearchIntentQueries,
   remainingResearchBudget,
-} from "./domain/research-budget-scope.js";
+} from "./domain/research/budget-scope.js";
 import type { BuilderWorkflowDependencies } from "./types.js";
 
 export interface TeacherVerificationInput {

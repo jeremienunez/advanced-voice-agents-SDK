@@ -1,4 +1,4 @@
-import type { RuntimeConfig } from "../domain/runtime.js";
+import type { RuntimeConfig } from "../domain/runtime/config.js";
 import { fetchWithNetworkError } from "./http.js";
 
 export async function fetchRuntimeConfig(

@@ -1,5 +1,5 @@
 import WebSocket, { RawData } from "ws";
-import { createAgentLogger } from "../../utils/index.js";
+import { createAgentLogger } from "../../utils/logger.js";
 import type {
   AudioChunk,
   IRealtimeProvider,

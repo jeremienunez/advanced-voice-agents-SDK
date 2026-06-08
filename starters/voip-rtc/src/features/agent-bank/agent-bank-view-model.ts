@@ -1,4 +1,4 @@
-import type { AgentBankItem } from "../../domain/builder.js";
+import type { AgentBankItem } from "../../domain/builder/types.js";
 
 export type AgentStatusFilter = "all" | "compiled" | "draft" | "ready" | "warning";
 

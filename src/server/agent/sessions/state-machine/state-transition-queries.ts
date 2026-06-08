@@ -1,4 +1,4 @@
-import type { SessionState } from "../../types/index.js";
+import type { SessionState } from "../../types/session.types.js";
 import { STATE_TRANSITIONS } from "./state-transition-table.js";
 
 export function isValidTransition(

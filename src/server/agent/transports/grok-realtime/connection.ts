@@ -1,6 +1,6 @@
 import WebSocket, { type RawData } from "ws";
 import { AgentError, ERROR_CODES } from "../../types/error.types.js";
-import type { AgentLogger } from "../../utils/index.js";
+import type { AgentLogger } from "../../utils/logger.js";
 import { buildGrokSessionUpdatePayload } from "./session.js";
 import type { GrokRealtimeConfig } from "./types.js";
 

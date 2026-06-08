@@ -1,11 +1,11 @@
 import type { BrowserVoiceAudioMode } from "@voiceagentsdk/core/client/browser";
 import { Metric } from "../../../components/ui/Metric.js";
 import { Panel } from "../../../components/ui/Panel.js";
-import { formatKhz } from "../../../domain/formatters.js";
+import { formatKhz } from "../../../domain/shared/formatters.js";
 import type {
   RuntimeConfig,
   RuntimeProviderConfig,
-} from "../../../domain/runtime.js";
+} from "../../../domain/runtime/config.js";
 
 export function AudioContractPanel({
   audioMode,

@@ -2,7 +2,7 @@ import type {
   InfraAction,
   InfraActionResult,
   OnboardingState,
-} from "../domain/onboarding.js";
+} from "../domain/onboarding/types.js";
 import { fetchWithNetworkError, postJson, readError } from "./http.js";
 
 export async function fetchOnboardingState(

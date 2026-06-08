@@ -2,7 +2,7 @@ import type {
   SessionContext,
   SessionState,
   VoiceSessionConfig,
-} from "../types/index.js";
+} from "../types/session.types.js";
 
 export function createSessionContext(
   config: VoiceSessionConfig,

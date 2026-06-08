@@ -1,4 +1,4 @@
-import type { SessionState } from "../../types/index.js";
+import type { SessionState } from "../../types/session.types.js";
 import { STATE_METADATA } from "./session-state-metadata.js";
 
 export function isTerminal(state: SessionState): boolean {

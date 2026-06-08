@@ -1,5 +1,5 @@
 import { useEffect, useRef, type CSSProperties } from "react";
-import "./VoiceOrb.css";
+import "../styles/components/VoiceOrb.css";
 
 interface VoiceParticle {
   x: number;
