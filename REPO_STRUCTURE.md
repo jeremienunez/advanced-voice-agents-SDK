@@ -7,6 +7,7 @@ starter and development tooling.
 .
 ├── src/
 │   ├── sdk/              Public SDK contracts, builders, stores, learning loop
+│   │   └── types/        SDK contracts with broad domains nested as folders
 │   ├── server/           Runtime orchestration, providers, media, adapters
 │   └── client/browser/   Browser voice client
 ├── starters/
@@ -71,8 +72,8 @@ Architecture notes under `docs/architecture/` are repository documentation only.
   but they are not tracked or part of the primary navigation surface.
 
 These boundaries are enforced by `pnpm audit:architecture`,
-`pnpm audit:public-api`, `pnpm audit:responsibility`, `pnpm audit:loc`, and the
-package metadata BDD.
+`pnpm audit:public-api`, `pnpm audit:sdk-type-domains`,
+`pnpm audit:responsibility`, `pnpm audit:loc`, and the package metadata BDD.
 
 ## Starter Map
 

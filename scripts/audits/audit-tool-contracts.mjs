@@ -51,7 +51,7 @@ function auditSourceInvariants() {
   const compile = readSource("starters/voip-rtc/server/builder/domain/tooling/compile.ts");
   const actionTools = readSource("starters/voip-rtc/server/runtime/tools/action-tools.ts");
   const promptTemplates = readSource("starters/voip-rtc/server/builder/prompts/template.ts");
-  const coreTypes = readSource("src/sdk/types/core.ts");
+  const corePackTypes = readSource("src/sdk/types/core/pack.ts");
 
   if (/unknown\./.test(contracts)) {
     issues.push("source: builder tool contracts must not create unknown.* handler fallbacks");
@@ -68,7 +68,7 @@ function auditSourceInvariants() {
   if (!actionTools.includes("registry.execute({ tool, args, context })")) {
     issues.push("source: runtime action tools must execute through ToolRegistryAdapterPort.execute");
   }
-  if (!coreTypes.includes("tools: ToolManifest[]")) {
+  if (!corePackTypes.includes("tools: ToolManifest[]")) {
     issues.push("source: SDK definitions must store serializable ToolManifest[]");
   }
   if (promptTemplates.includes("toolPlan") || toolPlanTemplateExists()) {

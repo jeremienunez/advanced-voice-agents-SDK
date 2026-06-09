@@ -18,5 +18,7 @@ understand the repository without digging through implementation files first.
   guardrails.
 - [Server runtime manifest](server-runtime-manifest.md): server runtime
   responsibilities and adapter boundaries.
+- [SDK type domains](sdk-type-domains.md): type facade nesting and contract
+  ownership rules.
 - [SDK developer README](sdk/README.md): developer-facing SDK notes.
 - [Audits](audits/): dated architecture and boundary audit notes.
