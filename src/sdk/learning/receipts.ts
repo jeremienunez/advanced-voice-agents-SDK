@@ -2,9 +2,9 @@ import type {
   EvaluationResult,
   LearningReceipt,
   LearningRunDecision,
-  LearningSessionInput,
   SessionLearningSignals,
-} from "../types.js";
+} from "../types/learning-loop/index.js";
+import type { LearningSessionInput } from "../types/learning/index.js";
 
 export function createLearningReceipt(input: {
   runId: string;

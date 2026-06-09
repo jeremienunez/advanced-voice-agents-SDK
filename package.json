@@ -136,6 +136,7 @@
     "test:rtc-e2e": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:rtc-e2e",
     "audit:public-api": "bun run scripts/audits/audit-public-api.ts",
     "audit:sdk-type-domains": "bun run scripts/audits/audit-sdk-type-domains.ts",
+    "audit:sdk-type-imports": "bun run scripts/audits/audit-sdk-type-imports.ts",
     "audit:sdk-boundary": "node scripts/audits/audit-sdk-boundary.mjs",
     "audit:imports": "node scripts/audits/audit-core-imports.mjs",
     "audit:tool-contracts": "node scripts/audits/audit-tool-contracts.mjs",

@@ -1,8 +1,10 @@
 import type {
   DatabaseDefinition,
   DomainDataAdapter,
+} from "../types/core/index.js";
+import type {
   StoreDefinition,
-} from "../types.js";
+} from "../types/store.js";
 import { createSafeRepository } from "./repository.js";
 import { assertStoreAdapterContract } from "./adapter-contracts.js";
 import type { StoreAdapterBinding } from "./adapter-bindings.js";

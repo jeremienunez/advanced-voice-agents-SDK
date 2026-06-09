@@ -1,4 +1,4 @@
-import type { JsonValue } from "../types.js";
+import type { JsonValue } from "../types/json.js";
 
 export function jsonDefault(value: JsonValue): JsonValue {
   return value;

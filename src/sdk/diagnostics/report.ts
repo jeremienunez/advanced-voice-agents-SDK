@@ -3,7 +3,7 @@ import type {
   AgentRxDiagnosticReport,
   AgentRxTrajectory,
   AgentRxViolation,
-} from "../types.js";
+} from "../types/diagnostics.js";
 import {
   agentRxStructuralConstraints,
   agentRxStructuralViolations,

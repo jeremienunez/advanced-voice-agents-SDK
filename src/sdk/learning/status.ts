@@ -1,9 +1,11 @@
 import type {
+  LearningRunStatus,
+} from "../types/learning/index.js";
+import type {
   LearningRunRecord,
   LearningRunRepositoryPort,
-  LearningRunStatus,
   LearningRunStatusUpdate,
-} from "../types.js";
+} from "../types/learning-loop/index.js";
 
 export async function publishLearningRunStatus(
   repository: LearningRunRepositoryPort,

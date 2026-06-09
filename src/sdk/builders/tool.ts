@@ -1,8 +1,5 @@
-import type {
-  JsonSchema,
-  ToolDefinition,
-  ToolRuntimeContext,
-} from "../types.js";
+import type { ToolDefinition, ToolRuntimeContext } from "../types/core/index.js";
+import type { JsonSchema } from "../types/json.js";
 
 export class ToolBuilder<TInput = unknown, TOutput = unknown> {
   private definition: Partial<ToolDefinition<TInput, TOutput>>;

@@ -4,12 +4,11 @@ import type {
   PlanDefinition,
   PromptSection,
   ProviderDefinition,
-  StoreDefinition,
-  StoreEntityDefinition,
   TenantDefinition,
   ToolManifest,
   VoiceAgentSdkDefinition,
-} from "./types.js";
+} from "./types/core/index.js";
+import type { StoreDefinition, StoreEntityDefinition } from "./types/store.js";
 
 export interface PromptRenderInput {
   channel: AgentChannel;

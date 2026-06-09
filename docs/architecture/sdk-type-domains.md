@@ -21,3 +21,5 @@ as compatibility facades for existing imports like `./types/core.js`.
 
 `pnpm audit:sdk-type-domains` keeps the broad root domains as short facades and
 prevents individual contract files from growing back into mixed catch-all files.
+`pnpm audit:sdk-type-imports` keeps SDK implementation files pointed at the
+specific domain files instead of the broad `src/sdk/types.ts` facade.

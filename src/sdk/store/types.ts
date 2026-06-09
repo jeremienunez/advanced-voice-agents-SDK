@@ -1,4 +1,4 @@
-import type { StoreEntityDefinition } from "../types.js";
+import type { StoreEntityDefinition } from "../types/store.js";
 
 export interface StoreRuntimeContext {
   tenantId?: string;

@@ -1,7 +1,7 @@
 import type {
   AgentLearningPolicyPort,
   LearningRunDecision,
-} from "../types.js";
+} from "../types/learning-loop/index.js";
 
 export function createDefaultLearningPolicy(): AgentLearningPolicyPort {
   return {

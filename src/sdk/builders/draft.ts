@@ -1,17 +1,14 @@
 import type {
   AgentBuilderIdentity,
-  AgentBuildDraft,
   AgentBuildDraftStatus,
-  CompiledAgentArtifact,
-  DatabaseBuildPlan,
-  AgentInfraPlan,
-  KnowledgeBuildPlan,
   PromptBuildPlan,
-  ToolBuildPlan,
-  ToolName,
-  ToolRegistryItem,
-  ToolValidationReport,
-} from "../types.js";
+} from "../types/builder.js";
+import type { ToolName } from "../types/core/index.js";
+import type { DatabaseBuildPlan } from "../types/database.js";
+import type { AgentBuildDraft, CompiledAgentArtifact, ToolRegistryItem } from "../types/draft.js";
+import type { AgentInfraPlan } from "../types/infra/index.js";
+import type { KnowledgeBuildPlan } from "../types/knowledge.js";
+import type { ToolBuildPlan, ToolValidationReport } from "../types/tooling.js";
 import { assertUnique, copy } from "./builder-values.js";
 
 export class AgentBuildDraftBuilder {

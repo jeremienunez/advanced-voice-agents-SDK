@@ -1,4 +1,4 @@
-import type { StoreEntityDefinition } from "../types.js";
+import type { StoreEntityDefinition } from "../types/store.js";
 
 export function cloneStoreEntity(
   entity: StoreEntityDefinition,

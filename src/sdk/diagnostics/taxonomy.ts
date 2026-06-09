@@ -1,4 +1,4 @@
-import type { AgentRxFailureCategory } from "../types.js";
+import type { AgentRxFailureCategory } from "../types/diagnostics.js";
 
 export const AGENTRX_TAXONOMY_VERSION = "agentrx-2026-02";
 

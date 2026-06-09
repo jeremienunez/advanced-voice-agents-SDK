@@ -4,7 +4,7 @@ import type {
   DatabaseResourceId,
   DatabaseTableDefinition,
   DatabaseVectorIndexDefinition,
-} from "../types.js";
+} from "../types/core/index.js";
 import { assertUnique, copy } from "./builder-values.js";
 
 export class DatabaseBuilder {

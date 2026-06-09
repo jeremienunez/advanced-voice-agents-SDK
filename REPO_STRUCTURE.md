@@ -73,7 +73,8 @@ Architecture notes under `docs/architecture/` are repository documentation only.
 
 These boundaries are enforced by `pnpm audit:architecture`,
 `pnpm audit:public-api`, `pnpm audit:sdk-type-domains`,
-`pnpm audit:responsibility`, `pnpm audit:loc`, and the package metadata BDD.
+`pnpm audit:sdk-type-imports`, `pnpm audit:responsibility`, `pnpm audit:loc`,
+and the package metadata BDD.
 
 ## Starter Map
 

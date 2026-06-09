@@ -1,4 +1,4 @@
-import type { StoreDefinition, StoreEntityDefinition } from "../types.js";
+import type { StoreDefinition, StoreEntityDefinition } from "../types/store.js";
 
 export type StoreAdapterContractKind = "sql" | "document" | "vector";
 

@@ -1,4 +1,4 @@
-import type { ToolManifest } from "../types.js";
+import type { ToolManifest } from "../types/core/index.js";
 import { copy } from "./builder-values.js";
 
 export function toToolManifest(tool: ToolManifest): ToolManifest {

@@ -1,14 +1,16 @@
 import type {
   AgentEvolutionInput,
+  LearningRunStatus,
+  LearningSessionInput,
+  TemporalMemoryRecord,
+} from "../types/learning/index.js";
+import type {
   AgentLearningLoopOptions,
   AgentLearningLoopPort,
   LearningLoopEnqueueOptions,
   LearningRunRecord,
-  LearningRunStatus,
-  LearningSessionInput,
   SessionLearningSignals,
-  TemporalMemoryRecord,
-} from "../types.js";
+} from "../types/learning-loop/index.js";
 import { normalizeLearningLoopProfile } from "./in-memory-run-repository.js";
 import { createNoopEvaluationHarness } from "./noop-evaluation-harness.js";
 import { createLearningReceipt } from "./receipts.js";

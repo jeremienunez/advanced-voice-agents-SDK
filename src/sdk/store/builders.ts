@@ -6,7 +6,7 @@ import type {
   StoreIndexDefinition,
   StoreOperation,
   StoreSearchDefinition,
-} from "../types.js";
+} from "../types/store.js";
 import {
   clone,
   defaultPolicy,

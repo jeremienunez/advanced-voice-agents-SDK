@@ -4,7 +4,7 @@ import type {
   AgentRxTrajectory,
   AgentRxTrajectoryStep,
   AgentRxViolation,
-} from "../types.js";
+} from "../types/diagnostics.js";
 
 const acyclicConstraintId = "agentrx_trajectory_acyclic";
 const parentConstraintId = "agentrx_parent_step_exists";

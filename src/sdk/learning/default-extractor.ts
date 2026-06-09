@@ -1,11 +1,13 @@
 import type {
   GraphMemoryEdge,
   GraphMemoryNode,
+  LearningSessionInput,
+} from "../types/learning/index.js";
+import type {
   LearningDelta,
   LearningMemorySignal,
-  LearningSessionInput,
   SessionLearningSignals,
-} from "../types.js";
+} from "../types/learning-loop/index.js";
 
 export function extractDefaultSessionLearningSignals(
   input: LearningSessionInput,

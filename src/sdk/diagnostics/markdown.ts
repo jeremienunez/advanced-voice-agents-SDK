@@ -1,4 +1,4 @@
-import type { AgentRxDiagnosticReport } from "../types.js";
+import type { AgentRxDiagnosticReport } from "../types/diagnostics.js";
 
 export function renderAgentRxReportMarkdown(
   report: AgentRxDiagnosticReport,

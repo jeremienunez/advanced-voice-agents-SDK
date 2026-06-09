@@ -1,4 +1,4 @@
-import type { EvaluationHarnessPort } from "../types.js";
+import type { EvaluationHarnessPort } from "../types/learning-loop/index.js";
 
 export function createNoopEvaluationHarness(): EvaluationHarnessPort {
   return {

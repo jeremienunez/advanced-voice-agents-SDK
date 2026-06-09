@@ -17,4 +17,6 @@ The SDK side is provider-agnostic. It should not depend on starter code or concr
 - `protocols/` contains SDK-level protocol descriptions for A2A and MCP compatibility.
 
 When adding functionality, prefer a focused nested file plus a small facade export instead of adding more logic to the top-level facade files.
-`pnpm audit:sdk-type-domains` enforces this for the broad SDK type domains.
+`pnpm audit:sdk-type-domains` enforces this for the broad SDK type domains, and
+`pnpm audit:sdk-type-imports` keeps SDK implementation files on specific type
+domains instead of the broad `types.ts` facade.

@@ -1,4 +1,4 @@
-import type { AgentBuilderIdentity } from "../types.js";
+import type { AgentBuilderIdentity } from "../types/builder.js";
 import { AgentBuildDraftBuilder } from "./draft.js";
 
 export function createAgentBuildDraftBuilder(

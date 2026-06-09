@@ -6,11 +6,11 @@ import type {
   PlanDefinition,
   PromptSection,
   ProviderDefinition,
-  StoreDefinition,
   TenantDefinition,
   ToolManifest,
   VoiceAgentSdkDefinition,
-} from "../types.js";
+} from "../types/core/index.js";
+import type { StoreDefinition } from "../types/store.js";
 import { assertUnique, copy } from "./builder-values.js";
 import { toToolManifest } from "./tool-manifest.js";
 

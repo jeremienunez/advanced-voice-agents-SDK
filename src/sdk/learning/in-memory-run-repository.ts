@@ -1,8 +1,8 @@
+import type { LearningLoopProfile } from "../types/learning/index.js";
 import type {
-  LearningLoopProfile,
   LearningRunRecord,
   LearningRunRepositoryPort,
-} from "../types.js";
+} from "../types/learning-loop/index.js";
 
 export function createInMemoryLearningRunRepository(): LearningRunRepositoryPort {
   const runs = new Map<string, LearningRunRecord>();

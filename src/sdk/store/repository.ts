@@ -1,4 +1,8 @@
-import type { StoreEntityDefinition, StoreOperation, StoreScopeMode } from "../types.js";
+import type {
+  StoreEntityDefinition,
+  StoreOperation,
+  StoreScopeMode,
+} from "../types/store.js";
 import type {
   SafeRepository,
   StoreAdapter,

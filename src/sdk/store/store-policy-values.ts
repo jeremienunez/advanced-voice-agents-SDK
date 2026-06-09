@@ -1,4 +1,4 @@
-import type { StoreOperation, StorePolicyDefinition } from "../types.js";
+import type { StoreOperation, StorePolicyDefinition } from "../types/store.js";
 
 const DEFAULT_OPERATIONS: StoreOperation[] = [
   "get",
