@@ -25,6 +25,8 @@ import type {
   TenantResolverPort,
 } from "@voiceagentsdk/core/sdk";
 
+import { publicApiEntries } from "../../public-api/manifest.js";
+
 type PackageModule = Record<string, unknown>;
 
 const results = [
@@ -199,22 +201,11 @@ async function scenarioBrowserProtocolParserIsPublicAndStable(): Promise<string>
 }
 
 async function scenarioDeclaredPackageEntrypointsResolve(): Promise<string> {
-  const entrypoints: Array<[string, string]> = [
-    ["@voiceagentsdk/core", "compileVoiceAgentSdk"],
-    ["@voiceagentsdk/core/sdk", "createAgentBuilder"],
-    ["@voiceagentsdk/core/server", "createRealtimeVoiceSession"],
-    ["@voiceagentsdk/core/server/browser", "createBrowserVoiceService"],
-    ["@voiceagentsdk/core/server/adapters/fastify", "createFastifyVoiceAdapter"],
-    ["@voiceagentsdk/core/server/media", "createBrowserMediaHandler"],
-    ["@voiceagentsdk/core/server/providers", "createOpenAIRealtimeTransport"],
-    ["@voiceagentsdk/core/client/browser", "createVoiceWSClient"],
-  ];
-
-  for (const [specifier, exportName] of entrypoints) {
+  for (const { specifier, runtimeProbe } of publicApiEntries) {
     const module = await import(specifier) as PackageModule;
     assert(
-      typeof module[exportName] === "function",
-      `${specifier} must expose ${exportName}`,
+      typeof module[runtimeProbe] === "function",
+      `${specifier} must expose ${runtimeProbe}`,
     );
   }
 

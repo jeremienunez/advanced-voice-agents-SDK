@@ -1,5 +1,8 @@
 import type { JsonValue } from "./json.js";
 import type {
+  PromptBuildPlan,
+} from "./builder.js";
+import type {
   KnowledgeBuildPlan,
   KnowledgeChunk,
   KnowledgeDocument,
@@ -7,8 +10,7 @@ import type {
   KnowledgeResearchIntent,
   KnowledgeResearchResult,
   KnowledgeVerificationVerdict,
-  PromptBuildPlan,
-} from "./builder.js";
+} from "./knowledge.js";
 import type { DatabaseBuildPlan } from "./database.js";
 import type { ToolManifest, ToolName } from "./core.js";
 import type {

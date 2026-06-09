@@ -3,6 +3,7 @@
 Root scripts validate the published package and repository boundaries. They are development tooling only and must not be imported by production source.
 
 - `audits/` contains architecture, dependency, responsibility, LOC, SDK-boundary, tool-contract, and secret-hygiene audits.
+- `public-api/` contains the public npm entrypoint manifest consumed by API audits and BDD.
 - `tests/bdd/` contains root BDD scenarios for public package and runtime contracts.
 - `tests/smoke/` contains focused runtime smoke checks.
 - `tests/type-contracts/` contains compile-only contract checks.

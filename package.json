@@ -134,6 +134,7 @@
     "test:knowledge-tool": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:knowledge-tool",
     "test:runtime-tool-call": "bun run scripts/tests/smoke/test-runtime-tool-call.ts",
     "test:rtc-e2e": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:rtc-e2e",
+    "audit:public-api": "bun run scripts/audits/audit-public-api.ts",
     "audit:sdk-boundary": "node scripts/audits/audit-sdk-boundary.mjs",
     "audit:imports": "node scripts/audits/audit-core-imports.mjs",
     "audit:tool-contracts": "node scripts/audits/audit-tool-contracts.mjs",

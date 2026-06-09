@@ -18,6 +18,7 @@ export const qualityMatrix: Record<QualityGroup, string[]> = {
     "audit:responsibility",
     "audit:loc",
     "audit:secrets",
+    "audit:public-api",
     "audit:sdk-boundary",
     "audit:imports",
     "audit:tool-contracts",

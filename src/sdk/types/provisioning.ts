@@ -1,5 +1,5 @@
 import type { AgentInfraPlan, InfraResourceRef } from "./infra.js";
-import type { KnowledgeDocument } from "./builder.js";
+import type { KnowledgeDocument } from "./knowledge.js";
 import type { DatabaseBuildPlan, DatabaseBuildStatus } from "./database.js";
 import type { AgentBuildDraft } from "./draft.js";
 

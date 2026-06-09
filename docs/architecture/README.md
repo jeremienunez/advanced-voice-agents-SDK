@@ -14,6 +14,8 @@ understand the repository without digging through implementation files first.
   the current builder-oriented SDK shape.
 - [A2A and MCP protocol compatibility](protocol-compatibility-a2a-mcp.md):
   protocol mapping and compatibility notes.
+- [Public API boundary](public-api.md): npm entrypoints, ownership, and audit
+  guardrails.
 - [Server runtime manifest](server-runtime-manifest.md): server runtime
   responsibilities and adapter boundaries.
 - [SDK developer README](sdk/README.md): developer-facing SDK notes.

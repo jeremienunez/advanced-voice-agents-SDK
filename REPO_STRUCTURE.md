@@ -15,6 +15,7 @@ starter and development tooling.
 │   └── packs/            Optional example packs kept outside the core package
 ├── scripts/
 │   ├── audits/           Static architecture, boundary, LOC, and secret audits
+│   ├── public-api/       Manifest for npm entrypoints and public facades
 │   ├── tests/
 │   │   ├── bdd/          Root SDK BDD scenarios
 │   │   ├── smoke/        Focused runtime smoke checks
@@ -70,7 +71,8 @@ Architecture notes under `docs/architecture/` are repository documentation only.
   but they are not tracked or part of the primary navigation surface.
 
 These boundaries are enforced by `pnpm audit:architecture`,
-`pnpm audit:responsibility`, `pnpm audit:loc`, and the package metadata BDD.
+`pnpm audit:public-api`, `pnpm audit:responsibility`, `pnpm audit:loc`, and the
+package metadata BDD.
 
 ## Starter Map
 

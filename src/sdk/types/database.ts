@@ -4,7 +4,7 @@ import type { StoreOperation } from "./store.js";
 import type {
   KnowledgeChunkingPlan,
   KnowledgeGraphPlan,
-} from "./builder.js";
+} from "./knowledge.js";
 
 export type DatabaseBuildStatus =
   | "planned"
