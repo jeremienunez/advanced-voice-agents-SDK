@@ -6,6 +6,7 @@ Root scripts validate the published package and repository boundaries. They are 
 - `tests/bdd/` contains root BDD scenarios for public package and runtime contracts.
 - `tests/smoke/` contains focused runtime smoke checks.
 - `tests/type-contracts/` contains compile-only contract checks.
+- `quality/` contains the grouped quality matrix and runner used by `pnpm audit:solid`.
 - `secret-hygiene/` contains the reusable secret-audit implementation.
 - `agentrx-diagnostics/` contains shared AgentRx diagnostic metadata for tests and reports.
 

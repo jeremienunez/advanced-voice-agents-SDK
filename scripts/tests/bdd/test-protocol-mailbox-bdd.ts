@@ -1,17 +1,17 @@
 import {
-  createA2AAgentCard,
   createInMemoryAgentMailbox,
+} from "@voiceagentsdk/core/server";
+import {
+  createA2AAgentCard,
   mailboxMessageToA2ATask,
   toMcpToolDescriptor,
   toMcpToolDescriptors,
   type A2ATask,
   type AgentMailboxMessage,
   type AgentMailboxPort,
+  type AgentMailboxSendInput,
   type McpToolDescriptor,
-} from "@voiceagentsdk/core/server";
-import type {
-  AgentMailboxSendInput,
-  ProtocolCompatibilityProfile,
+  type ProtocolCompatibilityProfile,
 } from "@voiceagentsdk/core/sdk";
 
 const results = [

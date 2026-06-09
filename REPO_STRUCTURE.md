@@ -20,13 +20,13 @@ starter and development tooling.
 │   │   ├── smoke/        Focused runtime smoke checks
 │   │   └── type-contracts/
 │   │       └── *.ts      Compile-only public contract tests
+│   ├── quality/          Grouped quality matrix and solid gate runner
 │   ├── secret-hygiene/   Shared secret-scanning implementation
 │   └── agentrx-diagnostics/
 │       └── manifest.ts   Shared AGENTRX diagnostic metadata
 ├── assets/screenshots/   README screenshots
 └── docs/
-    ├── architecture/     Curated architecture notes and audit records
-    └── superpowers/      Generated plans/specs, kept outside normal navigation
+    └── architecture/     Curated architecture notes and audit records
 ```
 
 ## Published Package Boundary
@@ -66,8 +66,8 @@ Architecture notes under `docs/architecture/` are repository documentation only.
 - Root `scripts/` are development tooling only. Production source cannot import
   BDD, smoke, audit, or script modules.
 - `docs/architecture` contains curated, versioned design notes. Generated
-  planning/spec documents stay under `docs/superpowers` and are not part of the
-  primary navigation surface.
+  planning/spec documents may exist locally under ignored `docs/superpowers/`,
+  but they are not tracked or part of the primary navigation surface.
 
 These boundaries are enforced by `pnpm audit:architecture`,
 `pnpm audit:responsibility`, `pnpm audit:loc`, and the package metadata BDD.

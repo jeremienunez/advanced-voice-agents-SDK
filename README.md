@@ -499,14 +499,17 @@ To keep this guide concise, the comprehensive technical tables are grouped below
 When integrating the SDK into custom applications, import components through dedicated entrypoints:
 
 ```ts
-import { ... } from "@voiceagentsdk/core";                 // Main facade SDK export
-import { ... } from "@voiceagentsdk/core/sdk";             // Builders, ports, stores, compilers
+import { ... } from "@voiceagentsdk/core";                 // Compact SDK facade: builders + compiler
+import { ... } from "@voiceagentsdk/core/sdk";             // Full SDK: builders, ports, stores, protocols
 import { ... } from "@voiceagentsdk/core/server";          // Session runners, engines, memory ports
 import { ... } from "@voiceagentsdk/core/server/browser";  // WebSocket server-side adapter
 import { ... } from "@voiceagentsdk/core/server/providers";// Facade real-time provider transports
 import { ... } from "@voiceagentsdk/core/server/media";    // Media captures & audio helper algorithms
 import { ... } from "@voiceagentsdk/core/client/browser";  // Browser PCM recorder client SDK
 ```
+
+Protocol-neutral MCP/A2A helpers live under `@voiceagentsdk/core/sdk`.
+Server entrypoints expose runtime adapters and transports only.
 
 Additional integration docs:
 

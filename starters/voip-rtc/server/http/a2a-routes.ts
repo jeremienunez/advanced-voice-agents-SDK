@@ -1,8 +1,10 @@
 import {
-  createA2AAgentCard,
   createA2AJsonRpcMailboxAdapter,
 } from "@voiceagentsdk/core/server";
-import type { JsonValue } from "@voiceagentsdk/core/sdk";
+import {
+  createA2AAgentCard,
+  type JsonValue,
+} from "@voiceagentsdk/core/sdk";
 import type { BuilderRequestContext } from "../builder/types.js";
 import { corsHeadersFor } from "./cors.js";
 import { readBodyString } from "./draft-id.js";

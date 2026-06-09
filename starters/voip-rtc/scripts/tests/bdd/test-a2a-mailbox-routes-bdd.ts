@@ -1,8 +1,8 @@
 import {
   createA2AMailboxTaskRouter,
   createInMemoryAgentMailbox,
-  type A2ATask,
 } from "@voiceagentsdk/core/server";
+import type { A2ATask } from "@voiceagentsdk/core/sdk";
 import { createDevAuthTicketVerifier } from "../../../server/auth/dev-ticket-verifier.js";
 import { a2aAgentCardResponse } from "../../../server/http/a2a-routes.js";
 import { createFetchHandler } from "../../../server/http/routes.js";

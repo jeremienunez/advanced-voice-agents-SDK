@@ -1,46 +1,27 @@
 import type {
-  A2AJsonRpcRequest,
-  A2AJsonRpcResponse,
-  A2AJsonRpcMailboxAdapter,
-  A2AMailboxMcpToolsOptions,
-  A2AMailboxTaskRouter,
-  AgentMailboxWorker,
-  AgentMailboxWorkerOptions,
-  AgentMailboxWorkerRunResult,
-  McpJsonRpcToolAdapter,
-  McpJsonRpcRequest,
-  McpJsonRpcResponse,
-  McpStreamableHttpToolHandler,
+  A2AJsonRpcMailboxAdapter, A2AJsonRpcRequest,
+  A2AJsonRpcResponse, A2AMailboxMcpToolsOptions,
+  A2AMailboxTaskRouter, AgentMailboxWorker,
+  AgentMailboxWorkerOptions, AgentMailboxWorkerRunResult,
+  McpJsonRpcRequest, McpJsonRpcResponse,
+  McpJsonRpcToolAdapter, McpStreamableHttpToolHandler,
   McpToolRegistryAdapter,
 } from "@voiceagentsdk/core/server";
 
 import type {
-  ActiveAgentAssignmentPort,
-  ActiveAgentScope,
-  A2AAgentCard,
-  A2ATask,
-  AgentLearningLoopPort,
-  AgentLearningPolicyPort,
-  AgentMailboxMessage,
-  AgentMailboxPort,
-  AgentSkillArtifact,
-  EvaluationHarnessPort,
-  EventSinkPort,
-  LearningDelta,
-  LearningLoopProfile,
-  LearningPromotionState,
-  LearningReceipt,
-  LearningReceiptSinkPort,
-  LearningRunRecord,
-  LearningRunRepositoryPort,
-  LearningRunStatus,
-  LearningWorkflowDriverPort,
-  MemoryStorePort,
-  McpToolDescriptor,
-  PendingActionPort,
-  PendingActionRecord,
-  ProtocolCompatibilityProfile,
-  RuntimeEventRecord,
+  ActiveAgentAssignmentPort, ActiveAgentScope,
+  A2AAgentCard, A2ATask,
+  AgentLearningLoopPort, AgentLearningPolicyPort,
+  AgentMailboxMessage, AgentMailboxPort,
+  AgentSkillArtifact, EvaluationHarnessPort,
+  EventSinkPort, LearningDelta,
+  LearningLoopProfile, LearningPromotionState,
+  LearningReceipt, LearningReceiptSinkPort,
+  LearningRunRecord, LearningRunRepositoryPort,
+  LearningRunStatus, LearningWorkflowDriverPort,
+  MemoryStorePort, McpToolDescriptor,
+  PendingActionPort, PendingActionRecord,
+  ProtocolCompatibilityProfile, RuntimeEventRecord,
   TenantResolverPort,
 } from "@voiceagentsdk/core/sdk";
 
@@ -48,9 +29,11 @@ type PackageModule = Record<string, unknown>;
 
 const results = [
   await scenarioSdkCompilesThroughPublicExports(),
+  await scenarioRootFacadeIsCompact(),
   await scenarioRuntimePortsArePublicTypes(),
   await scenarioLearningLoopPortsArePublicTypes(),
   await scenarioProtocolCompatibilityPortsArePublic(),
+  await scenarioServerDoesNotReexportSdkProtocolHelpers(),
   await scenarioBrowserProtocolParserIsPublicAndStable(),
   await scenarioDeclaredPackageEntrypointsResolve(),
 ];
@@ -76,6 +59,17 @@ async function scenarioSdkCompilesThroughPublicExports(): Promise<string> {
   );
 
   return "sdk-compiles-through-public-exports";
+}
+
+async function scenarioRootFacadeIsCompact(): Promise<string> {
+  const root = await import("@voiceagentsdk/core") as PackageModule;
+
+  assert(typeof root.compileVoiceAgentSdk === "function", "root export must expose compiler");
+  assert(typeof root.createAgentBuilder === "function", "root export must expose builder factory");
+  assert(!hasExport(root, "toMcpToolDescriptor"), "root export must not expose protocol helpers");
+  assert(!hasExport(root, "createAgentLearningLoop"), "root export must not expose learning internals");
+
+  return "root-facade-is-compact";
 }
 
 async function scenarioRuntimePortsArePublicTypes(): Promise<string> {
@@ -154,6 +148,29 @@ async function scenarioProtocolCompatibilityPortsArePublic(): Promise<string> {
   assert(compileOnly === null, "protocol compatibility and mailbox types must be public");
 
   return "protocol-compatibility-ports-are-public";
+}
+
+async function scenarioServerDoesNotReexportSdkProtocolHelpers(): Promise<string> {
+  const server = await import("@voiceagentsdk/core/server") as PackageModule;
+
+  assert(
+    !hasExport(server, "toMcpToolDescriptor"),
+    "server export must not expose SDK protocol-neutral MCP helpers",
+  );
+  assert(
+    !hasExport(server, "toMcpToolDescriptors"),
+    "server export must not expose SDK protocol-neutral MCP helper lists",
+  );
+  assert(
+    !hasExport(server, "mailboxMessageToA2ATask"),
+    "server export must not expose SDK protocol-neutral A2A mappers",
+  );
+  assert(
+    !hasExport(server, "createA2AAgentCard"),
+    "server export must not expose SDK protocol-neutral card builders",
+  );
+
+  return "server-does-not-reexport-sdk-protocol-helpers";
 }
 
 async function scenarioBrowserProtocolParserIsPublicAndStable(): Promise<string> {
@@ -259,6 +276,10 @@ function runtimeFunction(
   const value = module[name];
   assert(typeof value === "function", `missing public function ${name}`);
   return value as (...args: unknown[]) => unknown;
+}
+
+function hasExport(module: PackageModule, name: string): boolean {
+  return Object.prototype.hasOwnProperty.call(module, name);
 }
 
 function assert(condition: unknown, message: string): asserts condition {
