@@ -51,7 +51,7 @@ export interface PendingToolCall {
   toolName: string;
   arguments: Record<string, unknown>;
   startedAt: number;
-  status: "pending" | "executing" | "completed" | "failed";
+  status: "pending" | "executing" | "awaiting_confirmation" | "completed" | "failed";
   result?: unknown;
   error?: string;
 }

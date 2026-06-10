@@ -47,6 +47,8 @@
     "test:runtime-tool-authorization:bdd": "bun run scripts/tests/bdd/test-runtime-tool-authorization-bdd.ts",
     "test:tool-contracts:bdd": "bun run scripts/tests/bdd/test-tool-contracts-bdd.ts",
     "test:tool-registry-adapter:bdd": "bun run scripts/tests/bdd/test-tool-registry-adapter-bdd.ts",
+    "test:voice-orb-geometry:bdd": "bun run scripts/tests/bdd/test-voice-orb-geometry-bdd.ts",
+    "test:agent-bank-view-model:bdd": "bun run scripts/tests/bdd/test-agent-bank-view-model-bdd.ts",
     "test:runtime-db-credentials:bdd": "bun run scripts/tests/bdd/test-runtime-db-credentials-bdd.ts",
     "test:secret-resolver:bdd": "bun run scripts/tests/bdd/test-secret-resolver-bdd.ts",
     "test:store-adapter-contracts:bdd": "bun run scripts/tests/bdd/test-store-adapter-contracts-bdd.ts",

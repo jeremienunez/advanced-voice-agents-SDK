@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { HologramBust } from "../../components/hologram/HologramBust.js";
 import { Button } from "../../components/ui/Button.js";
 import type {
   AgentBuildDraft,
@@ -55,7 +56,7 @@ export function CommandCenter({
       <div className="commandHero">
         <div className="commandHeroCopy">
           <p className="commandKicker">Command Center</p>
-          <h2>Run, build, and operate your voice agents from one place.</h2>
+          <h2>Run, build, and operate your <em>voice agents</em> from one place.</h2>
           <p>
             Start a live voice test, continue a draft, or review the agent fleet
             without leaving the studio context.
@@ -181,8 +182,8 @@ export function CommandCenter({
 
         <aside className="commandSide">
           <section className="commandPanel voicePreview">
-            <div className="previewOrb" aria-hidden="true">
-              <span />
+            <div className="previewStage" aria-hidden="true">
+              <HologramBust />
             </div>
             <p className="commandKicker">Voice preview</p>
             <h3>{agentSummary.name}</h3>

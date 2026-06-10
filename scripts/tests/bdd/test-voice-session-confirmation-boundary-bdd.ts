@@ -1,5 +1,7 @@
 import {
+  createInMemoryPendingActionPort,
   createRealtimeVoiceSession,
+  ToolExecutionPolicyEngine,
   type AudioChunk,
   type IRealtimeProvider,
   type ProviderError,
@@ -7,52 +9,51 @@ import {
   type RealtimeSessionUpdate,
   type TransportState,
   type VoiceSessionTool,
-} from "@voiceagentsdk/core/server";
-import { assert } from "../shared/assertions.js";
+} from "../../../src/server/index.js";
 
 const results = [
-  await scenarioModelConfirmedArgumentCannotExecuteWriteTool(),
+  await scenarioConfirmationRequiredDoesNotBecomeModelVisibleToolResult(),
+  await scenarioDomainStatusConfirmationRequiredStillSubmitsForAutomaticTool(),
 ];
 
 console.log(JSON.stringify({ status: "ok", results }, null, 2));
 
-async function scenarioModelConfirmedArgumentCannotExecuteWriteTool() {
-  const provider = new FakeRealtimeProvider();
-  const calls: unknown[] = [];
+async function scenarioConfirmationRequiredDoesNotBecomeModelVisibleToolResult() {
+  const provider = new RecordingRealtimeProvider();
+  const handlerCalls: unknown[] = [];
   const toolEvents: string[] = [];
-  let awaitingConfirmationResult: unknown;
+  const pendingActions = createInMemoryPendingActionPort({
+    idFactory: () => "pending-confirmation-boundary",
+  });
+  const policy = new ToolExecutionPolicyEngine({ pendingActions });
   const session = createRealtimeVoiceSession(
     {
-      sessionId: "session-self-confirm-bdd",
+      sessionId: "session-confirmation-boundary-bdd",
       tenantId: "tenant-a",
       userId: "user-a",
+      agentId: "agent-a",
       channel: "voice",
       providerId: "fake",
     },
     {
       provider,
-      tools: [writeTool(calls)],
+      toolPolicyEngine: policy,
+      tools: [writeTool(handlerCalls)],
     },
     {
       onToolCall: (call) => {
         toolEvents.push(call.status);
-        if (call.status === "awaiting_confirmation") {
-          awaitingConfirmationResult = call.result;
-        }
       },
     },
   );
 
   await session.start();
   provider.emitFunctionCall({
-    callId: "call-self-confirm",
+    callId: "call-needs-confirmation",
     name: "schedule_follow_up",
-    arguments: JSON.stringify({
-      topic: "Call the customer",
-      dueAt: "2026-06-01T10:00:00Z",
-      confirmed: true,
-    }),
+    arguments: JSON.stringify({ topic: "Call the customer" }),
   });
+
   await waitFor(() =>
     provider.submittedResults.length > 0 ||
     toolEvents.includes("awaiting_confirmation") ||
@@ -61,30 +62,87 @@ async function scenarioModelConfirmedArgumentCannotExecuteWriteTool() {
   );
   await session.end();
 
+  const pending = await pendingActions.get?.("pending-confirmation-boundary");
   assert(
-    calls.length === 0,
-    "model-supplied confirmed=true must not execute the write handler",
+    handlerCalls.length === 0,
+    "confirmation-required tool handler must not execute before approval",
+  );
+  assert(
+    pending?.status === "confirmation_required",
+    "voice session must leave the action in the pending approval store",
   );
   assert(
     provider.submittedResults.length === 0,
-    `confirmation_required must not be returned to the model, got ${JSON.stringify(provider.submittedResults)}`,
-  );
-  const result = awaitingConfirmationResult as Record<string, unknown>;
-  assert(
-    result.status === "confirmation_required",
-    `write tool callback must expose confirmation_required, got ${JSON.stringify(result)}`,
-  );
-  assert(
-    typeof result.pendingActionId === "string" &&
-      result.pendingActionId.length > 0,
-    "confirmation_required result must expose a server pending action id",
+    `confirmation_required must not be submitted as a model-visible tool result, got ${
+      JSON.stringify(provider.submittedResults)
+    }`,
   );
   assert(
     toolEvents.join(",") === "pending,executing,awaiting_confirmation",
-    `write tool must remain awaiting confirmation, got ${toolEvents.join(",")}`,
+    `confirmation-required tool must remain awaiting approval, got ${toolEvents.join(",")}`,
   );
 
-  return "model-confirmed-argument-cannot-execute-write-tool";
+  return "confirmation-required-is-not-submitted-to-model";
+}
+
+async function scenarioDomainStatusConfirmationRequiredStillSubmitsForAutomaticTool() {
+  const provider = new RecordingRealtimeProvider();
+  const toolEvents: string[] = [];
+  const session = createRealtimeVoiceSession(
+    {
+      sessionId: "session-domain-status-bdd",
+      tenantId: "tenant-a",
+      userId: "user-a",
+      channel: "voice",
+      providerId: "fake",
+    },
+    {
+      provider,
+      tools: [
+        {
+          type: "function",
+          name: "lookup_status",
+          description: "Look up a domain status.",
+          parameters: { type: "object" },
+          policy: { sideEffect: "read", executionMode: "automatic" },
+          execute: async () => ({
+            status: "confirmation_required",
+            source: "domain-data",
+          }),
+        },
+      ],
+    },
+    {
+      onToolCall: (call) => {
+        toolEvents.push(call.status);
+      },
+    },
+  );
+
+  await session.start();
+  provider.emitFunctionCall({
+    callId: "call-domain-status",
+    name: "lookup_status",
+    arguments: "{}",
+  });
+
+  await waitFor(() => provider.submittedResults.length > 0);
+  await session.end();
+
+  assert(
+    provider.submittedResults.length === 1,
+    "automatic tool domain status must still be submitted as a normal result",
+  );
+  assert(
+    JSON.stringify(provider.submittedResults[0]?.result).includes("domain-data"),
+    "automatic tool domain result must be preserved",
+  );
+  assert(
+    toolEvents.join(",") === "pending,executing,completed",
+    `automatic tool must complete normally, got ${toolEvents.join(",")}`,
+  );
+
+  return "domain-status-confirmation-required-submits-for-automatic-tool";
 }
 
 function writeTool(calls: unknown[]): VoiceSessionTool {
@@ -96,7 +154,6 @@ function writeTool(calls: unknown[]): VoiceSessionTool {
       type: "object",
       properties: {
         topic: { type: "string" },
-        dueAt: { type: "string" },
       },
       required: ["topic"],
     },
@@ -112,14 +169,13 @@ function writeTool(calls: unknown[]): VoiceSessionTool {
   };
 }
 
-class FakeRealtimeProvider implements IRealtimeProvider {
-  readonly providerId = "fake-self-confirm";
+class RecordingRealtimeProvider implements IRealtimeProvider {
+  readonly providerId = "fake-confirmation-boundary";
   state: TransportState = "disconnected";
   lastSpeechEndMs: number | null = null;
   currentResponseItemId: string | null = null;
   readonly submittedResults: Array<{ callId: string; result: unknown; triggerResponse?: boolean }> = [];
   private functionHandler: ((call: ProviderFunctionCall) => void) | null = null;
-  private resultResolver: ((value: unknown) => void) | null = null;
 
   get isConnected(): boolean {
     return this.state === "connected";
@@ -154,7 +210,6 @@ class FakeRealtimeProvider implements IRealtimeProvider {
     triggerResponse?: boolean,
   ): Promise<void> {
     this.submittedResults.push({ callId, result, triggerResponse });
-    this.resultResolver?.(result);
   }
 
   onFunctionCall(handler: (call: ProviderFunctionCall) => void): void {
@@ -170,12 +225,6 @@ class FakeRealtimeProvider implements IRealtimeProvider {
 
   emitFunctionCall(call: ProviderFunctionCall): void {
     this.functionHandler?.(call);
-  }
-
-  waitForResult(): Promise<unknown> {
-    return new Promise((resolve) => {
-      this.resultResolver = resolve;
-    });
   }
 }
 
@@ -194,4 +243,11 @@ async function waitFor(
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function assert(condition: unknown, message: string): asserts condition {
+  if (!condition) {
+    console.error(JSON.stringify({ status: "error", error: message }, null, 2));
+    process.exit(1);
+  }
 }

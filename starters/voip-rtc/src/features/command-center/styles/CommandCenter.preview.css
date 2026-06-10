@@ -2,38 +2,18 @@
   overflow: hidden;
 }
 
-.previewOrb {
+/* The preview is a miniature of the RTC stage: the hologram lives on a
+   dark void whatever the theme, like a screen showing a feed. */
+.previewStage {
   position: relative;
-  display: grid;
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 20px;
-  place-items: center;
-  border-radius: 999px;
+  height: 240px;
+  margin: 0 0 18px;
+  border: 1px solid var(--studio-border-soft);
+  border-radius: 12px;
+  overflow: hidden;
   background:
-    radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.88), transparent 28%),
-    linear-gradient(135deg, #2563eb, #14b8a6 58%, #22c55e);
-  box-shadow: 0 18px 44px rgba(37, 99, 235, 0.22);
-}
-
-.previewOrb span {
-  width: 54px;
-  height: 54px;
-  border: 1px solid rgba(255, 255, 255, 0.68);
-  border-radius: inherit;
-  background: rgba(255, 255, 255, 0.24);
-  animation: orbSubtleWave 3s ease-in-out infinite alternate;
-}
-
-@keyframes orbSubtleWave {
-  from {
-    transform: scale(0.9);
-    opacity: 0.8;
-  }
-  to {
-    transform: scale(1.1);
-    opacity: 1.1;
-  }
+    radial-gradient(60% 50% at 50% 58%, rgba(76, 195, 255, 0.1), transparent 72%),
+    linear-gradient(180deg, #0a101c 0%, #05070d 100%);
 }
 
 .voicePreview > p:not(.commandKicker) {
@@ -58,11 +38,12 @@
 
 .previewSummary dt,
 .healthRow span {
-  color: var(--studio-muted);
-  font-size: 10px;
-  font-weight: 855;
+  color: var(--studio-subtle);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.16em;
 }
 
 .previewSummary dd,
@@ -70,8 +51,9 @@
   margin: 0;
   overflow-wrap: anywhere;
   color: var(--studio-text-strong);
-  font-size: 13px;
-  font-weight: 750;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 500;
 }
 
 .healthRow.ready {

@@ -164,7 +164,7 @@
 
 .studioCard--outlined:hover {
   border-color: var(--studio-action-border);
-  background: rgba(11, 87, 208, 0.02);
+  background: rgba(var(--studio-action-rgb), 0.02);
 }
 
 /* Card inner layout */

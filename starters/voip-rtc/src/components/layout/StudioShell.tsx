@@ -46,14 +46,17 @@ export function StudioShell({
     return true;
   });
 
-  // ─── Theme toggle (dark/light) ───
-  const [dark, setDark] = useState(() =>
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches,
-  );
+  // ─── Theme toggle (dark/light), persisted like studio_mode ───
+  const [dark, setDark] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const stored = localStorage.getItem("studio_theme");
+    if (stored === "dark" || stored === "light") return stored === "dark";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  });
 
   useEffect(() => {
     document.documentElement.classList.toggle("studio-dark", dark);
+    localStorage.setItem("studio_theme", dark ? "dark" : "light");
   }, [dark]);
 
   const toggleTheme = useCallback(() => setDark((d) => !d), []);

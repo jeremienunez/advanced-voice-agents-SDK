@@ -34,7 +34,7 @@ export function RtcLab({
             {rtc.snapshot.state}
           </p>
         </div>
-        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+        <div className="rtcHeaderActions">
           <button
             className="openDiagBtn"
             onClick={() => setIsDiagnosticsOpen(true)}
@@ -48,8 +48,42 @@ export function RtcLab({
         </div>
       </header>
 
-      <main className="rtcImmersiveStage">
-        <aside className="rtcSidePanel">
+      <div className="rtcConsoleBar">
+        <RtcControlPanel
+          wsUrl={rtc.wsUrl}
+          setWsUrl={rtc.setWsUrl}
+          provider={rtc.provider}
+          setProvider={rtc.setProvider}
+          model={rtc.model}
+          setModel={rtc.setModel}
+          voice={rtc.voice}
+          setVoice={rtc.setVoice}
+          audioMode={rtc.audioMode}
+          setAudioMode={rtc.setAudioMode}
+          providerOptions={rtc.providerOptions}
+          selectedProvider={rtc.selectedProvider}
+          isActive={rtc.isActive}
+          canStart={rtc.canStart}
+          isMuted={rtc.snapshot.isMuted}
+          onDiagnose={rtc.runMicrophoneDiagnostic}
+          onStart={rtc.startRtc}
+          onStop={() => rtc.client.disconnect()}
+          onToggleMute={() => rtc.client.toggleMute()}
+        />
+      </div>
+
+      <main
+        className={`rtcOrbStage ${rtc.snapshot.state} ${rtc.snapshot.isMuted ? "muted" : ""}`}
+        aria-label="Voice state"
+      >
+        <div className="rtcStageFloor" aria-hidden="true" />
+        <VoiceOrb
+          state={rtc.snapshot.state}
+          isMuted={rtc.snapshot.isMuted}
+          outputLevel={rtc.snapshot.outputLevel}
+        />
+
+        <aside className="rtcHud rtcHudLeft">
           <h2>Session</h2>
           <dl>
             <div>
@@ -72,15 +106,7 @@ export function RtcLab({
           <LearningTimeline learning={rtc.snapshot.learning} />
         </aside>
 
-        <section className={`rtcOrbStage ${rtc.snapshot.state} ${rtc.snapshot.isMuted ? "muted" : ""}`} aria-label="Voice state">
-          <VoiceOrb
-            state={rtc.snapshot.state}
-            isMuted={rtc.snapshot.isMuted}
-            outputLevel={rtc.snapshot.outputLevel}
-          />
-        </section>
-
-        <aside className="rtcSidePanel">
+        <aside className="rtcHud rtcHudRight">
           <h2>Live transcript</h2>
           {latestTranscript ? (
             <div className={`rtcLiveTranscript ${isAgent ? "agent" : "user"}`}>
@@ -94,30 +120,6 @@ export function RtcLab({
           )}
         </aside>
       </main>
-
-      <footer className="rtcControlDock">
-        <RtcControlPanel
-          wsUrl={rtc.wsUrl}
-          setWsUrl={rtc.setWsUrl}
-          provider={rtc.provider}
-          setProvider={rtc.setProvider}
-          model={rtc.model}
-          setModel={rtc.setModel}
-          voice={rtc.voice}
-          setVoice={rtc.setVoice}
-          audioMode={rtc.audioMode}
-          setAudioMode={rtc.setAudioMode}
-          providerOptions={rtc.providerOptions}
-          selectedProvider={rtc.selectedProvider}
-          isActive={rtc.isActive}
-          canStart={rtc.canStart}
-          isMuted={rtc.snapshot.isMuted}
-          onDiagnose={rtc.runMicrophoneDiagnostic}
-          onStart={rtc.startRtc}
-          onStop={() => rtc.client.disconnect()}
-          onToggleMute={() => rtc.client.toggleMute()}
-        />
-      </footer>
 
       <RtcDiagnosticsDrawer
         isOpen={isDiagnosticsOpen}

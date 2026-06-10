@@ -31,7 +31,6 @@ export function AgentBank({
   const [filter, setFilter] = useState<AgentStatusFilter>("all");
   const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"carousel" | "grid">("carousel");
-  const [activeIndex, setActiveIndex] = useState(0);
 
   const bank = useAgentBank({
     apiBase,
@@ -49,38 +48,32 @@ export function AgentBank({
     defaultSelectedAgent(visibleAgents);
   const bankBusy = Boolean(bank.busyDraftId);
 
+  /* Selection is the single source of truth; the carousel index derives
+     from it. Two state copies synced by effects used to oscillate forever
+     whenever a filter change reordered the visible list. */
+  const activeIndex = selectedAgent
+    ? Math.max(
+        0,
+        visibleAgents.findIndex((a) => a.draftId === selectedAgent.draftId),
+      )
+    : 0;
+
   useEffect(() => {
     if (!selectedDraftId && selectedAgent) {
       setSelectedDraftId(selectedAgent.draftId);
     }
   }, [selectedDraftId, selectedAgent]);
 
-  // Sync activeIndex with selectedAgent
-  useEffect(() => {
-    if (selectedDraftId && visibleAgents.length > 0) {
-      const idx = visibleAgents.findIndex((a) => a.draftId === selectedDraftId);
-      if (idx !== -1 && idx !== activeIndex) {
-        setActiveIndex(idx);
-      }
-    }
-  }, [selectedDraftId, visibleAgents]);
-
-  // Bidirectional sync: slide sets selection
-  useEffect(() => {
-    if (visibleAgents.length > 0 && activeIndex < visibleAgents.length) {
-      const activeAgent = visibleAgents[activeIndex];
-      if (activeAgent.draftId !== selectedDraftId) {
-        setSelectedDraftId(activeAgent.draftId);
-      }
-    }
-  }, [activeIndex, visibleAgents, selectedDraftId]);
-
   const handlePrev = () => {
-    setActiveIndex((prev) => (prev > 0 ? prev - 1 : visibleAgents.length - 1));
+    if (visibleAgents.length === 0) return;
+    const next = (activeIndex - 1 + visibleAgents.length) % visibleAgents.length;
+    setSelectedDraftId(visibleAgents[next].draftId);
   };
 
   const handleNext = () => {
-    setActiveIndex((prev) => (prev < visibleAgents.length - 1 ? prev + 1 : 0));
+    if (visibleAgents.length === 0) return;
+    const next = (activeIndex + 1) % visibleAgents.length;
+    setSelectedDraftId(visibleAgents[next].draftId);
   };
 
   return (
@@ -131,7 +124,7 @@ export function AgentBank({
               onClick={() => setViewMode("carousel")}
               title="Carousel 3D"
             >
-              🎠 Carousel
+              carousel
             </button>
             <button
               type="button"
@@ -139,7 +132,7 @@ export function AgentBank({
               onClick={() => setViewMode("grid")}
               title="Grid Layout"
             >
-              ⊞ Grid
+              grid
             </button>
           </div>
         </div>
@@ -210,10 +203,7 @@ export function AgentBank({
                       <div
                         key={agent.draftId}
                         className={slideClass}
-                        onClick={() => {
-                          setActiveIndex(index);
-                          setSelectedDraftId(agent.draftId);
-                        }}
+                        onClick={() => setSelectedDraftId(agent.draftId)}
                       >
                         <AgentCard
                           agent={agent}

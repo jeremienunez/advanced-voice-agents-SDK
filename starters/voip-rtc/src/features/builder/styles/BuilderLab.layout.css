@@ -6,7 +6,7 @@
   isolation: isolate;
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr) 300px;
-  gap: 18px;
+  gap: 20px;
   align-items: start;
 }
 
@@ -42,7 +42,7 @@
 
 .builderStepPanel {
   min-width: 0;
-  padding: 24px 28px;
+  padding: 28px 32px;
 }
 
 .builderStepHeader {
@@ -56,6 +56,9 @@
 
 .builderStepHeader h1 {
   margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .builderStepHeader p {
@@ -71,6 +74,25 @@
 .builderStepContent {
   display: grid;
   gap: 16px;
+  animation: stepArrive 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* each step earns a quiet entrance — progress should feel like reward */
+@keyframes stepArrive {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .builderStepContent {
+    animation: none;
+  }
 }
 
 .builderInspector {
@@ -86,38 +108,59 @@
 
 .builderInspectorPanel button {
   width: 100%;
-  padding: 10px 16px;
-  border: 1px solid var(--studio-border);
-  border-radius: 9999px; /* Material 3 capsule pills */
-  background: var(--studio-surface);
-  color: var(--studio-text);
-  font-family: var(--font-sans);
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--studio-muted);
+  font-family: var(--font-mono);
   font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  text-align: center;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+  text-align: left;
   cursor: pointer;
-  box-shadow: var(--studio-shadow-sm);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: color 0.2s, background 0.2s, border-color 0.2s;
 }
 
 .builderInspectorPanel button:hover:not(:disabled) {
-  transform: translateY(-1.5px);
-  box-shadow: 0 4px 12px rgba(11, 87, 208, 0.06);
-  border-color: var(--studio-action);
+  background: var(--studio-action-soft);
   color: var(--studio-action);
-  background: var(--studio-surface);
 }
 
 .builderInspectorPanel button:active:not(:disabled) {
-  transform: translateY(0.5px);
-  box-shadow: var(--studio-shadow-sm);
+  border-color: var(--studio-action-border);
 }
 
 .builderInspectorPanel button:disabled {
   cursor: not-allowed;
   opacity: 0.4;
+}
+
+/* The agent materializes here as steps complete: a scattered cloud at
+   step one, a figure by compile time. Ownership grows with progress. */
+.builderHoloStage {
+  position: relative;
+  height: 230px;
+  border: 1px solid var(--studio-border-soft);
+  border-radius: 12px;
+  overflow: hidden;
+  background:
+    radial-gradient(60% 50% at 50% 58%, rgba(76, 195, 255, 0.09), transparent 72%),
+    linear-gradient(180deg, #0a101c 0%, #05070d 100%);
+}
+
+.builderHoloCaption {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  color: rgba(190, 205, 230, 0.5);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 .builderPreviewList {
@@ -130,17 +173,23 @@
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px;
-  border-radius: var(--studio-radius);
+  padding: 10px 12px;
+  border-radius: 10px;
   background: var(--studio-surface-muted);
 }
 
 .builderPreviewList dt {
-  color: var(--studio-muted);
+  color: var(--studio-subtle);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .builderPreviewList dd {
   margin: 0;
   color: var(--studio-text-strong);
-  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
 }

@@ -87,12 +87,18 @@ export function createBrowserSessionCallbacks(
         else activeSession.toolCalls.push(record);
       }
 
-      if (call.status === "executing" || call.status === "pending") {
+      if (
+        call.status === "executing" ||
+        call.status === "pending" ||
+        call.status === "awaiting_confirmation"
+      ) {
         deps.emitControl(deps.socket, {
           type: "tool.call",
           tool: {
+            callId: call.callId,
             name: call.toolName,
             arguments: call.arguments,
+            status: call.status,
           },
         });
         return;
@@ -101,8 +107,10 @@ export function createBrowserSessionCallbacks(
       deps.emitControl(deps.socket, {
         type: "tool.result",
         tool: {
+          callId: call.callId,
           name: call.toolName,
           result: call.result ?? call.error ?? null,
+          status: call.status,
         },
       });
       if (activeSession) activeSession.toolCallCount++;

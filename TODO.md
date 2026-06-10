@@ -316,3 +316,53 @@ Puis verifier dans le navigateur:
 - `session.started`, `session.ended`, `learning.status applied`;
 - Environment charge;
 - pas d'erreurs console.
+
+## Front starter - refonte et hologramme (2026-06-10)
+
+- [x] Refonte tokens: typo Bricolage Grotesque / Spline Sans / Spline Sans
+      Mono, palette de-Googlisee, tokens RGB-triplet themes, purge des
+      couleurs hardcodees, persistance du theme.
+- [x] Hologramme: buste SDF procedural dans VoiceOrb (yeux/iris,
+      clignement, machoire audio-reactive, moods par etat de session,
+      fade projecteur). Test `test:voice-orb-geometry:bdd`.
+- [x] Refonte home (Command Center): kickers mono, hero Bricolage avec
+      accent, metric cards mono, hologramme partage en preview
+      (`components/hologram/` + HologramBust), purge des derniers litteraux.
+- [x] Refonte builder (immersion/psychologie): materialisation de l'agent
+      (uniform uPresence — nuage disperse a l'etape 1, figure assemblee au
+      compile), StepRail et inspector en langage mono, entree animee par
+      etape (avec prefers-reduced-motion), preview list mono.
+- [x] Refonte agents (Agent library): theatre hologramme dans le panneau
+      detail (presence par statut — compile incarne, draft a moitie
+      materialise), cartes/toolbar/carousel tokenises dark-safe, purge
+      emojis et CSS mort, fix boucle infinie carousel (index derive de la
+      selection). Test `test:agent-bank-view-model:bdd`.
+- [x] Passe dimensionnement contemplatif: rythme de page 28, display 30px
+      partout, theatres hologramme agrandis (home 240 / builder 230 /
+      agents 280), paddings premium 28-32. Verifie light+dark, 1540+1280.
+- [x] Refonte RTC lab (3d/magie): console de config remontee au-dessus de
+      la scene, scene hero pleine largeur avec HUDs de verre inclines en
+      3D, sol holographique en grille perspective, reflet WebGL du buste
+      au sol, regard qui suit le pointeur (gazeTarget pur + BDD). Fix
+      racine fade-in/forwards qui piegait les overlays fixed (drawer
+      visible sous la page). Split holo-motion.ts (LOC 300).
+- [x] Refonte hologramme style scan structure (reference user): lattice
+      spherique/cylindrique hybride raymarche sur le SDF (anneaux
+      ordonnes type scan 3D), tete flottante, relief peint (orbites
+      sombres compactes, arete du nez/arcades en lumiere), lumiere
+      alignee camera, perspective rapprochee, points uniformes brillants.
+      Outil dev scripts/dev-face-preview.ts (rendu PNG offline pour
+      iterer). BDD mis a jour sur la nouvelle spec (7 scenarios).
+- [x] Micro-expressions par etat (lattice morphing): moodExpression pur
+      dans holo-motion (idle neutre / listening tilt attentif + yeux
+      ouverts / speaking sourire / muted tete baissee + coins tombes),
+      uniform uExpr ease dans le renderer (jamais de snap). BDD
+      mood-expressions-distinct-and-bounded.
+- [x] Hologramme verifie en session live (Gemini reel, mode E2E silence):
+      listening 33s (tilt + teinte verte), mute 78s (bow + retrait +
+      liseré rouge), stop propre vers idle.
+- [x] Refonte environment (OnboardingConfig): hero tokenise 30px (glass
+      blanc purge), metrics/pills/kickers/steps en mono, focus ring
+      tokenise, terminal infra en font-mono sur dark fixe, entree animee
+      des etapes (stepArrive), classes onboarding* mortes purgees,
+      poids 850 calmes. Verifie light + dark.

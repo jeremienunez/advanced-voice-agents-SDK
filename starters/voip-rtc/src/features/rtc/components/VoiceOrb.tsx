@@ -1,14 +1,8 @@
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { gazeTarget } from "../../../components/hologram/holo-motion.js";
+import { HoloRenderer } from "../../../components/hologram/holo-renderer.js";
+import { getSharedFaceGeometry } from "../../../components/hologram/shared-geometry.js";
 import "../styles/components/VoiceOrb.css";
-
-interface VoiceParticle {
-  x: number;
-  y: number;
-  z: number;
-  size: number;
-  phase: number;
-  color: [number, number, number];
-}
 
 interface VoiceSignal {
   isListening: boolean;
@@ -33,6 +27,7 @@ export function VoiceOrb({
     isSpeaking: false,
     level: 0,
   });
+  const [renderError, setRenderError] = useState<string | null>(null);
   const level = Math.min(1, Math.max(0, outputLevel));
   const isListening = state === "listening";
   const isSpeaking = state === "speaking";
@@ -51,72 +46,51 @@ export function VoiceOrb({
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (!canvas || !ctx) return undefined;
+    if (!canvas) return undefined;
 
-    const particles = createVoiceParticles(520);
+    const renderer = new HoloRenderer(canvas, getSharedFaceGeometry(), setRenderError);
+    if (!renderer.available) return undefined;
+
     let frameId = 0;
-    let ratio = 1;
-    let viewWidth = 1;
-    let viewHeight = 1;
+    let smoothedLevel = 0;
+    const gaze = { x: 0, y: 0 };
+    const wantedGaze = { x: 0, y: 0 };
 
-    const resize = () => {
+    /* the bust follows the pointer anywhere over the lab, eased so the
+       head turns like attention rather than tracking */
+    const onPointerMove = (event: PointerEvent) => {
       const rect = canvas.getBoundingClientRect();
-      ratio = Math.min(window.devicePixelRatio || 1, 2);
-      viewWidth = Math.max(1, rect.width);
-      viewHeight = Math.max(1, rect.height);
-      canvas.width = Math.floor(viewWidth * ratio);
-      canvas.height = Math.floor(viewHeight * ratio);
-      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      const spread = 2.6; /* respond across the lab, not just the canvas */
+      const region = {
+        left: rect.left + rect.width * (1 - spread) * 0.5,
+        top: rect.top + rect.height * (1 - spread) * 0.5,
+        width: rect.width * spread,
+        height: rect.height * spread,
+      };
+      const target = gazeTarget(event.clientX, event.clientY, region);
+      wantedGaze.x = target.x;
+      wantedGaze.y = target.y * 0.6;
     };
-
-    const observer = new ResizeObserver(resize);
-    observer.observe(canvas);
-    resize();
+    window.addEventListener("pointermove", onPointerMove);
 
     const animate = (stamp: number) => {
       const signal = signalRef.current;
-      const audioLevel = signal.isMuted
+      const target = signal.isMuted
         ? 0
-        : Math.max(signal.level, signal.isListening ? 0.12 : 0);
-      const time = stamp * 0.001;
-      const cx = viewWidth / 2;
-      const cy = viewHeight / 2;
-      const radius = Math.min(viewWidth, viewHeight) * (0.43 + audioLevel * 0.06);
-      const rotY = time * (0.34 + audioLevel * 0.84);
-      const rotX = Math.sin(time * 0.38) * (0.28 + audioLevel * 0.14);
-      const pulse = Math.sin(time * (2.2 + audioLevel * 6.2)) * audioLevel;
+        : Math.max(signal.level, signal.isListening ? 0.1 : 0);
+      smoothedLevel += (target - smoothedLevel) * (target > smoothedLevel ? 0.16 : 0.05);
+      gaze.x += (wantedGaze.x - gaze.x) * 0.045;
+      gaze.y += (wantedGaze.y - gaze.y) * 0.045;
 
-      ctx.clearRect(0, 0, viewWidth, viewHeight);
-      renderHologramCore(ctx, cx, cy, radius, audioLevel, signal);
-
-      for (const particle of particles) {
-        const rotated = rotatePoint(particle, rotX, rotY);
-        const depth = (rotated.z + 1) / 2;
-        const voicePush =
-          Math.sin(time * 7.5 + particle.phase) * audioLevel * 13 +
-          pulse * depth * 11;
-        const projection = 0.72 + depth * 0.38;
-        const x = cx + rotated.x * (radius + voicePush) * projection;
-        const y = cy + rotated.y * (radius * 0.92 + voicePush) * projection;
-        const size = particle.size * (0.68 + depth * 1.18 + audioLevel * 0.72);
-        const alpha =
-          (0.26 + depth * 0.54 + audioLevel * 0.22) *
-          (signal.isMuted ? 0.36 : 1);
-
-        ctx.beginPath();
-        ctx.arc(x, y, size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${particle.color[0]}, ${particle.color[1]}, ${particle.color[2]}, ${alpha})`;
-        ctx.fill();
-      }
-
+      const mood = signal.isMuted ? 3 : signal.isSpeaking ? 2 : signal.isListening ? 1 : 0;
+      renderer.render({ timeMs: stamp, level: smoothedLevel, mood, gaze, mirror: true });
       frameId = requestAnimationFrame(animate);
     };
 
     frameId = requestAnimationFrame(animate);
     return () => {
+      window.removeEventListener("pointermove", onPointerMove);
       cancelAnimationFrame(frameId);
-      observer.disconnect();
     };
   }, []);
 
@@ -133,6 +107,9 @@ export function VoiceOrb({
             className="voice-orb-canvas"
             aria-hidden="true"
           />
+          {renderError ? (
+            <div className="voice-orb-fallback">{renderError}</div>
+          ) : null}
         </div>
       </div>
       <div className="voice-orb-caption">
@@ -140,56 +117,6 @@ export function VoiceOrb({
       </div>
     </div>
   );
-}
-
-function createVoiceParticles(count: number): VoiceParticle[] {
-  const colors: Array<[number, number, number]> = [
-    [66, 133, 244],
-    [52, 168, 83],
-    [251, 188, 5],
-    [14, 165, 233],
-  ];
-
-  return Array.from({ length: count }, (_, index) => {
-    const phi = Math.acos(1 - (2 * (index + 0.5)) / count);
-    const theta = Math.PI * (1 + Math.sqrt(5)) * (index + 0.5);
-    return {
-      x: Math.sin(phi) * Math.cos(theta),
-      y: Math.sin(phi) * Math.sin(theta),
-      z: Math.cos(phi),
-      size: 1.05 + ((index * 17) % 9) * 0.08,
-      phase: index * 0.71,
-      color: colors[index % colors.length],
-    };
-  });
-}
-
-function renderHologramCore(
-  ctx: CanvasRenderingContext2D,
-  cx: number,
-  cy: number,
-  radius: number,
-  level: number,
-  signal: VoiceSignal,
-) {
-  const alpha = signal.isMuted ? 0.08 : 0.15 + level * 0.22;
-  const gradient = ctx.createRadialGradient(cx, cy, radius * 0.05, cx, cy, radius);
-  gradient.addColorStop(0, `rgba(255, 255, 255, ${0.52 + level * 0.2})`);
-  gradient.addColorStop(0.42, `rgba(66, 133, 244, ${alpha})`);
-  gradient.addColorStop(0.72, `rgba(52, 168, 83, ${alpha * 0.64})`);
-  gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
-
-  ctx.beginPath();
-  ctx.arc(cx, cy, radius * (0.74 + level * 0.1), 0, Math.PI * 2);
-  ctx.fillStyle = gradient;
-  ctx.fill();
-}
-
-function rotatePoint(particle: VoiceParticle, rotX: number, rotY: number) {
-  const rx = particle.x * Math.cos(rotY) - particle.z * Math.sin(rotY);
-  const rz = particle.x * Math.sin(rotY) + particle.z * Math.cos(rotY);
-  const ry = particle.y * Math.cos(rotX) - rz * Math.sin(rotX);
-  return { x: rx, y: ry, z: particle.y * Math.sin(rotX) + rz * Math.cos(rotX) };
 }
 
 function captionForState(input: {

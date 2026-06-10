@@ -19,10 +19,11 @@ export interface TranscriptEntry {
 
 export interface ToolCallEntry {
   id: string;
+  callId?: string;
   name: string;
   arguments: unknown;
   result: unknown;
-  status: "pending" | "completed";
+  status: "pending" | "executing" | "awaiting_confirmation" | "completed" | "failed";
   timestamp: number;
 }
 

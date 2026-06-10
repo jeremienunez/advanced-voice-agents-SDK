@@ -20,6 +20,7 @@
 @import "./features/agent-bank/styles/AgentBank.carousel.css";
 @import "./features/agent-bank/styles/AgentCard.css";
 @import "./features/rtc/styles/RtcLab.css";
+@import "./features/rtc/styles/RtcLab.stage.css";
 @import "./features/rtc/styles/RtcLab.effects.css";
 @import "./features/rtc/styles/components/RtcPanels.css";
 @import "./features/onboarding/styles/OnboardingConfig.css";

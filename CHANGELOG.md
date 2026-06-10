@@ -1,5 +1,129 @@
 # Changelog
 
+## feat: refonte du front starter + hologramme voice orb
+
+Status: implemented locally
+Date: 2026-06-10
+
+### Intent
+
+Refonte visuelle du studio (starter voip-rtc) au niveau tokens, sans
+toucher a l'architecture feature-slices, puis remplacement du rendu de
+VoiceOrb par un buste hologramme procedural.
+
+### Journal
+
+- `src/styles/design-system.css`: typo Bricolage Grotesque (display) +
+  Spline Sans (body) + Spline Sans Mono (token `--font-mono` ajoute);
+  palette de-Googlisee (action #155fd4 light / #4cc3ff dark, surfaces navy
+  profond en dark); nouveaux tokens RGB-triplet (`--studio-*-rgb`) pour les
+  rgba() composes — appliques aux 3 blocs (light, media query, .studio-dark).
+- Purge des couleurs Google hardcodees dans VoiceOrb, SelectSpace,
+  BuilderLab, StepRail, RtcLab(+effects), RtcPanels, CommandCenter.preview,
+  loader, rtc.css, ui-components — remplacees par tokens ou nouvelle palette.
+- `StudioShell.tsx`: persistance du theme (`studio_theme` en localStorage,
+  meme pattern que `studio_mode`).
+- `features/rtc/components/voice-orb/`: `face-geometry.ts` (buste SDF —
+  crane, arcades, joues, nez arete/pointe/ailes, levres sup/inf, machoire,
+  menton, oreilles, cou, epaules; globes oculaires avec iris; shading
+  lambert precompute; fade projecteur a la base; deterministe par seed) et
+  `holo-renderer.ts` (WebGL points additifs, clignement periodique,
+  machoire pilotee par le niveau audio, moods idle/listening/speaking/muted,
+  scan, glitch, echo). `VoiceOrb.tsx` modifie en place — contrat de props
+  inchange, fallback visible si WebGL indisponible.
+- BDD: `test:voice-orb-geometry:bdd` (starter + racine) — seed-stable,
+  points sur la surface SDF, masques anatomiques coherents, yeux/fade.
+- `audit:architecture`: cible `examples` retiree (dossier supprime).
+  Etat: depcruise OK (714 modules), typecheck starter OK.
+- Refonte home (Command Center): hologramme promu en primitive partagee
+  `components/hologram/` (face-geometry, holo-renderer, shared-geometry,
+  HologramBust) — utilise par VoiceOrb (rtc) et la voice preview du home
+  (mini-stage sombre). Hero en font-display avec accent, kickers et data
+  en `--font-mono`, metric cards, hover des cartes apaise, derniers
+  litteraux (#3b82f6, rgba 37/99/235) convertis en tokens. Verifie light
+  + dark; depcruise OK (717 modules); test geometrie relocalise et vert.
+- Refonte builder (immersion): uniform `uPresence` dans le holo-renderer —
+  sous 1.0 le nuage se disperse et converge a mesure que l'agent prend
+  forme; le Live preview du builder materialise l'agent etape par etape
+  (presence = etapes debloquees / 6, easing doux). StepRail en mono
+  lowercase (rail tokenise), inspector en liste discrete, eyebrow global
+  en mono, entree animee du contenu d'etape (desactivee en
+  prefers-reduced-motion). Verifie light + dark; typecheck + depcruise OK.
+- Refonte agents (Agent library): theatre hologramme en tete du panneau
+  detail — la presence reflete le statut (compile/ready incarne a 1.0,
+  compile casse 0.78, draft 0.45 a moitie materialise, etat vide 0.08 en
+  poussiere). Cartes, toolbar, badges, toggle layout et carousel coverflow
+  retokenises dark-safe (purge des blancs/bleus hardcodes et des emojis,
+  CSS mort retire); stats de la bank en metric cards mono. Fix d'une
+  boucle infinie React preexistante (deux useEffect en sync
+  bidirectionnelle activeIndex/selection qui oscillaient au changement de
+  filtre) — l'index du carousel derive desormais de la selection, source
+  de verite unique. BDD: `test:agent-bank-view-model:bdd` (filtres,
+  selection par defaut, labels readiness). Verifie light + dark
+  (carousel + grid); typecheck + depcruise OK (718 modules).
+- Refonte RTC lab (3d/magie): la console de config (ws/provider/model/
+  voice/input + actions) remonte au-dessus de la scene en barre mono — le
+  dock du bas disparait; la scene devient le hero pleine largeur (64vh)
+  avec HUDs de verre sombres (Session+Learning a gauche, Live transcript
+  a droite) inclines en perspective vers la figure et qui s'aplanissent
+  au survol; sol holographique en grille perspective animee (coupee en
+  prefers-reduced-motion). WebGL: reflet du buste sur le sol (uniform
+  uMirror, passe miroir fade exp) et regard qui suit le pointeur (uniform
+  uGaze — yaw/pitch du buste + les yeux qui menent, easing attention
+  0.045); fonctions pures extraites dans components/hologram/
+  holo-motion.ts (gazeTarget, blinkAmount) pour rester sous les 300 LOC.
+  BDD etendu: gaze-is-centered-and-clamped, blink-is-periodic-and-bounded
+  (6 scenarios verts). Fix racine: fadeIn en fill forwards retenait un
+  transform identity et faisait de chaque section .fade-in un containing
+  block — le drawer diagnostics (position fixed) apparaissait dans le
+  flux sous la page; le fill est retire (etat final = etat naturel),
+  drawer verifie ouvert/ferme. Halo rectangulaire du wrapper voice-orb
+  retire (le spotlight de scene porte la lumiere). Verifie light + dark;
+  typecheck OK, depcruise OK (720 modules), LOC OK.
+- Micro-expressions + verification live + refonte environment (fin de la
+  passe hologramme): `moodExpression` pur dans holo-motion (listening =
+  tilt attentif + paupieres ouvertes, speaking = sourire des coins,
+  muted = tete baissee + coins tombes, idle neutre) — cible easee dans
+  le renderer (uniform uExpr vec4, 0.04/frame, les changements d'etat
+  morphent sans snap); deformations dans le vertex shader via les
+  canaux jaw/eye existants + pitch/roll du buste. Verifie en session
+  RTC LIVE (Gemini, entree E2E silence): listening reel 33s (tilt,
+  teinte verte), mute 78s (bow, figure en retrait), retour idle au stop.
+  Refonte environment: hero tokenise (30px display, glass blanc light-
+  only purge), summary metrics / pills statut / kickers d'etape /
+  numeros du rail en mono, focus ring sur token, terminal infra en
+  --font-mono sur dark fixe, entree stepArrive des panneaux d'etape
+  (reduced-motion ok), classes onboarding{Page,Hero,Status,Summary,
+  Grid} mortes purgees, poids 850 ramenes a 600. BDD: 8 scenarios orb
+  verts (+mood-expressions-distinct-and-bounded), bank vert; typecheck
+  OK; depcruise OK (722 modules); verifie light + dark.
+- Refonte hologramme "scan structure" (reference fournie par l'user — le
+  stipple aleatoire faisait peur): le nuage devient un lattice ordonne
+  type scan 3D — calotte spherique sur le crane + anneaux horizontaux
+  reguliers raymarches sur le SDF (les rayons frappent le plan du visage
+  perpendiculairement, espacement constant sur les traits). Tete
+  flottante (epaules retirees), orbites profondes et levres dans le SDF,
+  relief peint dans le canal shade (puits sombres compacts aux orbites/
+  ligne de bouche, arete et pointe du nez, arcades, joues et menton en
+  lumiere), lumiere alignee camera (le front lit uniforme, les flancs
+  tombent par courbure), camera rapprochee (la perspective courbe les
+  rangees autour des traits — c'est elle qui fait lire la 3D), points
+  uniformes brillants sans strobe par point, glints d'iris. Echelle/
+  miroir recalibres (tete seule). Nouvel outil dev
+  scripts/dev-face-preview.ts (rendu PNG offline du nuage, zoom + mode
+  diagnostic shade) pour iterer sans navigateur. face-math.ts extrait
+  (LOC). BDD reecrit sur la nouvelle spec: lattice ordonne haut-bas,
+  points sur surface (tous), relief orbites vs front, iris en petit
+  cluster, fade du cou — 7 scenarios verts. Verifie navigateur RTC +
+  bank; typecheck OK; depcruise OK (722 modules).
+- Passe dimensionnement (contemplatif premium): un seul rythme de page
+  (gap 28) et une echelle display unique (h1 30px) sur home/builder/agents;
+  les theatres hologramme gagnent en hauteur — home 240px, builder 230px,
+  agents 280px (sujet de l'ecran) — pour donner a l'oeil un point de
+  contemplation; panneaux detail/step en padding 28-32, metric cards de la
+  bank alignees sur le home (valeur 21px). CSS uniquement; verifie light +
+  dark a 1540 et 1280.
+
 ## chore: organize repository tooling
 
 Status: implemented locally

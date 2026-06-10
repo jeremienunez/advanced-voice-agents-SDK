@@ -101,6 +101,7 @@ export interface CascadedTransportConfig {
   ttsModel?: string;
   ttsVoice?: string;
   ttsInstructions?: string;
+  toolResultTimeoutMs?: number;
   // VAD
   vadSilenceDurationMs?: number;
   vadSpeechThresholdRms?: number;

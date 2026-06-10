@@ -1,8 +1,10 @@
 /* AgentBank Component Styles - Precision Studio */
 
+/* Sizing follows the home rhythm: 28px page beats, 30px display scale.
+   The screen breathes around one contemplative anchor — the theater. */
 .agentsPage {
   display: grid;
-  gap: 24px;
+  gap: 28px;
 }
 
 .agentsHeader {
@@ -10,7 +12,7 @@
   justify-content: space-between;
   gap: 24px;
   align-items: center;
-  padding: 24px 32px;
+  padding: 28px 36px;
   border: 1px solid var(--studio-border-soft);
   border-radius: var(--studio-radius);
   background: var(--studio-surface);
@@ -21,18 +23,46 @@
   font-family: var(--font-display, var(--font-sans));
   margin: 0;
   color: var(--studio-text-strong);
-  font-size: 26px;
-  font-weight: 850;
-  letter-spacing: -0.03em;
+  font-size: 30px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.18;
 }
 
-.agentsTopbar {
-  border-radius: var(--studio-radius) var(--studio-radius) 0 0;
+.agentsHeader p.muted {
+  max-width: 52ch;
 }
 
 .bankStats {
   display: flex;
-  gap: 16px;
+  gap: 12px;
+}
+
+/* roster size reads like instrumentation, same dialect as the home stats */
+.bankStats .metric {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 108px;
+  padding: 14px 18px;
+  border: 1px solid var(--studio-border-soft);
+  border-bottom: 1px solid var(--studio-border-soft);
+  border-radius: 12px;
+  background: var(--studio-surface-muted);
+}
+
+.bankStats .metric span {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+}
+
+.bankStats .metric strong {
+  font-family: var(--font-mono);
+  font-size: 21px;
+  font-weight: 500;
+  text-align: left;
 }
 
 .agentsToolbar {
@@ -52,11 +82,12 @@
 .agentsToolbar label {
   display: grid;
   gap: 6px;
-  color: var(--studio-muted);
-  font-size: 11px;
-  font-weight: 800;
+  color: var(--studio-subtle);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.14em;
 }
 
 .agentsToolbar input,
@@ -70,7 +101,8 @@
   font: inherit;
   padding: 0 14px;
   text-transform: none;
-  font-weight: 600;
+  font-weight: 500;
+  letter-spacing: normal;
   transition: all var(--studio-transition-fast);
 }
 
@@ -79,22 +111,6 @@
   border-color: var(--studio-action);
   box-shadow: 0 0 0 3px var(--studio-action-focus);
   outline: none;
-}
-
-.agentsToolbar button {
-  letter-spacing: 0.5px;
-}
-
-.agentBankToolbar {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin: 28px 0;
-  padding: 16px 24px;
-  background: var(--studio-surface);
-  border: 1px solid var(--studio-border-soft);
-  border-radius: var(--studio-radius);
-  box-shadow: var(--studio-shadow-sm);
 }
 
 .agentsLayout {
@@ -107,14 +123,7 @@
 .agentCards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 18px;
-}
-
-.agent-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-  gap: 28px;
-  margin-top: 28px;
+  gap: 20px;
 }
 
 .agentDetailPanel {
@@ -123,7 +132,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: 24px;
+  padding: 28px;
   border: 1px solid var(--studio-border-soft);
   border-radius: var(--studio-radius);
   background: var(--studio-surface);
@@ -141,11 +150,11 @@
   background: transparent;
 }
 .agentDetailPanel::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.08);
+  background: var(--studio-border);
   border-radius: 9999px;
 }
 .agentDetailPanel::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.18);
+  background: var(--studio-subtle);
 }
 
 .agentDetailPanel:hover {
@@ -158,6 +167,33 @@
   background: var(--studio-surface-muted);
 }
 
+/* The selected agent stands here in person. Compiled agents arrive whole;
+   drafts hover half-formed — unfinished work asks to be resumed. */
+.agentDetailStage {
+  position: relative;
+  height: 280px;
+  flex: none;
+  border: 1px solid var(--studio-border-soft);
+  border-radius: 12px;
+  overflow: hidden;
+  background:
+    radial-gradient(60% 50% at 50% 58%, rgba(76, 195, 255, 0.09), transparent 72%),
+    linear-gradient(180deg, #0a101c 0%, #05070d 100%);
+}
+
+.agentDetailStageTag {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  color: rgba(190, 205, 230, 0.5);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
 .agentDetailPanel h2,
 .agentDetailPanel h3,
 .agentDetailPanel p {
@@ -167,8 +203,9 @@
 .agentDetailPanel h2 {
   font-family: var(--font-display, var(--font-sans));
   color: var(--studio-text-strong);
-  font-size: 20px;
-  font-weight: 850;
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
   line-height: 1.2;
 }
 
@@ -204,18 +241,20 @@
 }
 
 .agentDetailStats dt {
-  color: var(--studio-muted);
-  font-size: 10px;
-  font-weight: 850;
+  color: var(--studio-subtle);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.12em;
 }
 
 .agentDetailStats dd {
   margin: 4px 0 0;
   color: var(--studio-text-strong);
-  font-size: 14px;
-  font-weight: 800;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
   overflow-wrap: anywhere;
 }
 
@@ -228,7 +267,7 @@
   font-family: var(--font-display, var(--font-sans));
   color: var(--studio-text-strong);
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .agentDetailActions {
@@ -243,5 +282,5 @@
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.02em;
 }

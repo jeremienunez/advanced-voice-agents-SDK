@@ -54,7 +54,7 @@
 
 .infraModeSwitch span {
   font-size: 13px;
-  font-weight: 850;
+  font-weight: 600;
 }
 
 .infraModeSwitch small {
@@ -116,7 +116,7 @@
   color: var(--studio-text-alt);
   cursor: pointer;
   font-size: 12px;
-  font-weight: 850;
+  font-weight: 600;
   text-transform: uppercase;
 }
 

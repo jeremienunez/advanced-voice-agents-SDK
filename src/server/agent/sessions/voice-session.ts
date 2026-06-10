@@ -173,6 +173,17 @@ export class RealtimeVoiceSession implements IVoiceSession {
         providerId: this.config.providerId,
       };
       const result = await this.toolPolicyEngine.execute({ tool, args, context });
+      if (isConfirmationRequiredResult(result)) {
+        const awaitingConfirmation: PendingToolCall = {
+          ...executing,
+          status: "awaiting_confirmation",
+          result,
+        };
+        this.context = updatePendingToolCall(this.context, awaitingConfirmation);
+        this.callbacks.onToolCall?.(awaitingConfirmation);
+        this.transitionTo("active");
+        return;
+      }
       await this.provider.submitFunctionResult(call.callId, result, true);
       const completed: PendingToolCall = {
         ...executing,
@@ -249,6 +260,18 @@ function parseToolArguments(value: string): Record<string, unknown> {
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
+}
+
+function isConfirmationRequiredResult(result: unknown): boolean {
+  if (!result || typeof result !== "object") return false;
+  const envelope = result as {
+    pendingActionId?: unknown;
+    status?: unknown;
+    toolName?: unknown;
+  };
+  return envelope.status === "confirmation_required" &&
+    typeof envelope.pendingActionId === "string" &&
+    typeof envelope.toolName === "string";
 }
 
 export function createRealtimeVoiceSession(

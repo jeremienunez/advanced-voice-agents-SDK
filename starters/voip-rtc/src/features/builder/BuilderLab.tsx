@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { HologramBust } from "../../components/hologram/HologramBust.js";
 import { Button } from "../../components/ui/Button.js";
 import { ProcessingLoader } from "../../components/ui/ProcessingLoader.js";
 import type {
@@ -210,6 +211,14 @@ export function BuilderLab({
         </section>
         <section className="builderInspectorPanel">
           <h2>Live preview</h2>
+          <div className="builderHoloStage" aria-hidden="true">
+            <HologramBust
+              presence={(Math.min(builder.unlockedStep, 5) + 1) / 6}
+            />
+            <span className="builderHoloCaption">
+              {builder.draft?.identity.publicAgentName ?? "awaiting identity"}
+            </span>
+          </div>
           <dl className="builderPreviewList">
             <div><dt>Agent</dt><dd>{builder.draft?.identity.publicAgentName ?? "Not created"}</dd></div>
             <div><dt>Status</dt><dd>{builder.draft?.status ?? "Idle"}</dd></div>

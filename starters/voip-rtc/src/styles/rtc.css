@@ -32,7 +32,7 @@
   justify-content: space-between;
   gap: 14px;
   padding-bottom: 8px;
-  border-bottom: 1px dashed rgba(11, 87, 208, 0.15);
+  border-bottom: 1px dashed rgba(var(--studio-action-rgb), 0.15);
 }
 
 .diagnosticBox dt {

@@ -199,11 +199,12 @@
 
 .studioEyebrow {
   margin: 0 0 4px;
-  color: var(--studio-muted);
+  color: var(--studio-subtle);
+  font-family: var(--font-mono);
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.16em;
 }
 
 /* ─── Search command palette ─── */

@@ -31,8 +31,24 @@ export type ServerVoiceMessage =
   | { type: "learning.status"; learning: VoiceLearningSummary }
   | { type: "session.error"; error: { code: string; message: string } }
   | { type: "state.change"; state: BrowserVoiceState }
-  | { type: "tool.call"; tool: { name: string; arguments: unknown } }
-  | { type: "tool.result"; tool: { name: string; result: unknown } }
+  | {
+      type: "tool.call";
+      tool: {
+        callId?: string;
+        name: string;
+        arguments: unknown;
+        status?: "pending" | "executing" | "awaiting_confirmation";
+      };
+    }
+  | {
+      type: "tool.result";
+      tool: {
+        callId?: string;
+        name: string;
+        result: unknown;
+        status?: "completed" | "failed";
+      };
+    }
   | {
       type: "transcript";
       text: string;

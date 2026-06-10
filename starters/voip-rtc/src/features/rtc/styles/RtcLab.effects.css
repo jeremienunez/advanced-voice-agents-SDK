@@ -5,7 +5,7 @@
   position: absolute;
   width: 320px;
   height: 320px;
-  background: radial-gradient(circle, rgba(11, 87, 208, 0.45) 0%, rgba(19, 115, 51, 0.18) 50%, transparent 100%);
+  background: radial-gradient(circle, rgba(76, 195, 255, 0.45) 0%, rgba(139, 123, 255, 0.18) 50%, transparent 100%);
   filter: blur(44px);
   z-index: 0;
   pointer-events: none;
@@ -14,15 +14,15 @@
 }
 
 .rtcOrbStage.speaking::before {
-  background: radial-gradient(circle, rgba(11, 87, 208, 0.55) 0%, rgba(14, 165, 233, 0.22) 50%, transparent 100%);
+  background: radial-gradient(circle, rgba(var(--studio-action-rgb), 0.55) 0%, rgba(var(--studio-action-rgb), 0.22) 50%, transparent 100%);
 }
 
 .rtcOrbStage.listening::before {
-  background: radial-gradient(circle, rgba(19, 115, 51, 0.55) 0%, rgba(52, 168, 83, 0.22) 50%, transparent 100%);
+  background: radial-gradient(circle, rgba(58, 210, 155, 0.55) 0%, rgba(58, 210, 155, 0.22) 50%, transparent 100%);
 }
 
 .rtcOrbStage.muted::before {
-  background: radial-gradient(circle, rgba(197, 34, 31, 0.45) 0%, rgba(176, 96, 0, 0.18) 50%, transparent 100%);
+  background: radial-gradient(circle, rgba(244, 88, 124, 0.45) 0%, rgba(245, 176, 76, 0.18) 50%, transparent 100%);
 }
 
 @keyframes orbSpotlightPulse {
@@ -33,6 +33,12 @@
   to {
     transform: scale(1.1);
     opacity: 1.2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rtcOrbStage::before {
+    animation: none;
   }
 }
 
@@ -93,17 +99,19 @@
 
 .rtcDrawerTitleBlock h2 {
   margin: 0;
+  font-family: var(--font-display, var(--font-sans));
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 650;
   color: var(--studio-text-strong);
 }
 
 .rtcDrawerEventCount {
-  font-size: 11px;
-  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
   color: var(--studio-muted);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.12em;
 }
 
 .rtcDrawerCloseBtn {
@@ -126,168 +134,25 @@
   padding: 24px;
 }
 
-.rtcTopbar {
-  border-radius: var(--studio-radius);
-}
-
-.rtcCentralStage {
-  display: flex;
-  min-height: clamp(480px, 58vh, 620px);
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  isolation: isolate;
-}
-
-.rtcCentralStage::before {
-  content: "";
-  position: absolute;
-  inset: 8% 14%;
-  z-index: -1;
-  border-radius: 999px;
-  background:
-    radial-gradient(circle at 42% 28%, rgba(255, 255, 255, 0.9), transparent 20%),
-    radial-gradient(circle, rgba(66, 133, 244, 0.055), rgba(52, 168, 83, 0.035) 45%, transparent 72%);
-  filter: blur(34px);
-}
-
-.rtcDrawerDeck,
-.rtcDrawerGrid,
 .rtcDiagnosticsGrid {
   display: grid;
   gap: 16px;
-}
-
-.rtcDrawerGrid,
-.rtcDiagnosticsGrid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.rtcDrawer {
-  overflow: hidden;
-  border: 1px solid var(--studio-glass-border);
-  border-radius: var(--studio-radius);
-  background: var(--studio-glass-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: var(--studio-shadow-sm);
-}
-
-.rtcDrawer[open] {
-  box-shadow: var(--studio-shadow-md);
-}
-
-.rtcDrawer summary {
-  display: flex;
-  min-height: 50px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 0 16px;
-  cursor: pointer;
-  list-style: none;
-  position: relative;
-}
-
-.rtcDrawer summary::-webkit-details-marker {
-  display: none;
-}
-
-.rtcDrawer summary::after {
-  content: "+";
-  display: grid;
-  width: 22px;
-  height: 22px;
-  flex: 0 0 auto;
-  place-items: center;
-  border: 1px solid var(--studio-glass-border);
-  border-radius: 999px;
-  color: var(--studio-muted);
-  font-size: 14px;
-  font-weight: 900;
-}
-
-.rtcDrawer[open] > summary::after {
-  content: "-";
-}
-
-.rtcDrawer summary span {
-  color: var(--studio-text);
-  font-size: 12px;
-  font-weight: 850;
-  letter-spacing: 0.7px;
-  text-transform: uppercase;
-}
-
-.rtcDrawer summary small {
-  margin-left: auto;
-  overflow: hidden;
-  color: var(--studio-muted);
-  font-size: 11px;
-  font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.rtcDrawerBody {
-  padding: 16px;
-  border-top: 1px solid var(--studio-surface-muted);
-}
-
-.rtcDrawerBody > .panel,
-.rtcDrawerBody > .controlPanel {
-  min-height: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-.rtcDrawerBody > .panel > h2 {
-  display: none;
-}
-
-.rtcDrawerBody > .controlPanel {
-  grid-template-columns: minmax(260px, 1.2fr) minmax(140px, 0.6fr) minmax(220px, 0.9fr) minmax(120px, 0.45fr);
-}
-
 @media (max-width: 1200px) {
-  .rtcControlDock > .controlPanel,
-  .rtcDrawerBody > .controlPanel {
+  .rtcConsoleBar > .controlPanel {
     grid-template-columns: repeat(2, minmax(220px, 1fr));
   }
 }
 
 @media (max-width: 860px) {
-  .rtcLab {
-    gap: 14px;
-  }
-
-  .rtcCentralStage {
-    min-height: clamp(360px, 54vh, 500px);
-  }
-
-  .rtcDrawerGrid,
-  .rtcControlDock > .controlPanel,
-  .rtcDrawerBody > .controlPanel {
+  .rtcDiagnosticsGrid,
+  .rtcConsoleBar > .controlPanel {
     grid-template-columns: 1fr;
   }
 
-  .rtcDrawer summary {
-    min-height: 62px;
-    align-items: flex-start;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .rtcDrawer summary::after {
-    position: absolute;
-    right: 16px;
-  }
-
-  .rtcDrawer summary small {
-    max-width: calc(100% - 36px);
-    margin-left: 0;
+  .rtcOrbStage {
+    min-height: clamp(420px, 56vh, 560px);
   }
 }

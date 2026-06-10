@@ -18,6 +18,7 @@ import {
   cloneSnapshot,
   completeToolCall,
   INITIAL_SNAPSHOT,
+  upsertToolCall,
 } from "./snapshot.js";
 
 export class BrowserVoiceSessionClient {
@@ -197,24 +198,13 @@ export class BrowserVoiceSessionClient {
         break;
       case "tool.call":
         this.updateSnapshot({
-          ...this.snapshot,
+          ...upsertToolCall(this.snapshot, message),
           state: "processing",
-          toolCalls: [
-            ...this.snapshot.toolCalls,
-            {
-              id: `tool_${Date.now()}`,
-              name: message.tool.name,
-              arguments: message.tool.arguments,
-              result: null,
-              status: "pending",
-              timestamp: Date.now(),
-            },
-          ],
         });
         break;
       case "tool.result":
         this.updateSnapshot(
-          completeToolCall(this.snapshot, message.tool.name, message.tool.result),
+          completeToolCall(this.snapshot, message.tool),
         );
         break;
     }

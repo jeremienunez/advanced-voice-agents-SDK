@@ -49,6 +49,7 @@ export class CascadedRealtimeTransport implements IRealtimeProvider {
       activeAborts: new Set<AbortController>(),
       pendingToolResults: new Map<string, (result: unknown) => void>(),
       currentResponseItemId: null,
+      toolResultTimeoutMs: config.toolResultTimeoutMs,
       logger: cascadedLogger,
     };
   }

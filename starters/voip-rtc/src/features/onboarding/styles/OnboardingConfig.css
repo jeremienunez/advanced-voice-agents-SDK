@@ -1,78 +1,19 @@
-.onboardingPage {
-  display: grid;
-  gap: 24px;
-}
-
-.onboardingHero {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 28px;
-  border: 1px solid var(--studio-border);
-  border-radius: 16px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.8) 100%);
-  backdrop-filter: blur(20px);
-  box-shadow: var(--studio-shadow-md);
-}
-
-.onboardingHero p:not(.eyebrow) {
-  max-width: 720px;
-  margin-top: 8px;
-  color: var(--studio-muted);
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.onboardingStatus {
-  display: inline-flex;
-  align-items: center;
-  min-width: max-content;
-  gap: 8px;
-  color: var(--studio-muted);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.onboardingStatus span,
-.pill::before {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--studio-danger);
-  content: "";
-}
-
-.onboardingStatus span.ready,
-.pill.ok::before {
-  background: var(--studio-success);
-}
-
-.onboardingSummary {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-}
+/* Onboarding panels — Precision Studio */
 
 .onboardingMetric {
   min-width: 0;
-  padding: 18px;
+  padding: 16px 18px;
   border: 1px solid var(--studio-border-soft);
   border-radius: 12px;
   background: var(--studio-surface);
   box-shadow: var(--studio-shadow-sm);
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease;
 }
 
 .onboardingMetric:hover {
   border-color: var(--studio-action-border);
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
 }
 
-.onboardingMetric span,
-.panelHeader span,
 .envField small {
   color: var(--studio-muted);
   font-size: 11px;
@@ -81,8 +22,11 @@
 .onboardingMetric span {
   display: block;
   margin-bottom: 6px;
-  font-weight: 800;
-  letter-spacing: 0.05em;
+  color: var(--studio-subtle);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
@@ -90,8 +34,9 @@
   display: block;
   overflow: hidden;
   color: var(--studio-text-strong);
-  font-size: 14px;
-  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -103,7 +48,7 @@
   background: var(--studio-action-soft);
   color: var(--studio-action);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.5;
 }
 
@@ -111,13 +56,6 @@
   border-color: var(--studio-danger-border);
   background: var(--studio-danger-soft);
   color: var(--studio-danger);
-}
-
-.onboardingGrid {
-  display: grid;
-  grid-template-columns: minmax(320px, 0.9fr) minmax(420px, 1.1fr);
-  gap: 24px;
-  align-items: start;
 }
 
 .onboardingPanel {
@@ -139,12 +77,18 @@
   padding-bottom: 14px;
 }
 
+.panelHeader span {
+  color: var(--studio-muted);
+  font-size: 11px;
+}
+
 .panelHeader h2 {
   margin: 0;
-  color: var(--studio-text-strong);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  color: var(--studio-subtle);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
@@ -184,11 +128,12 @@
 
 .dependencyActions a {
   color: var(--studio-action);
-  font-size: 11px;
-  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
   text-decoration: none;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   transition: color 0.2s ease;
 }
 
@@ -207,10 +152,23 @@
   border-radius: 999px;
   background: var(--studio-surface-muted);
   color: var(--studio-muted);
-  font-size: 10px;
-  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.1em;
+}
+
+.pill::before {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--studio-danger);
+  content: "";
+}
+
+.pill.ok::before {
+  background: var(--studio-success);
 }
 
 .pill.missing,

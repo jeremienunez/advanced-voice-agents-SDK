@@ -34,7 +34,7 @@
 .hub-sphere.blue {
   width: 450px;
   height: 450px;
-  background: #4285f4;
+  background: var(--studio-action);
   top: -180px;
   left: -210px;
   animation: hubFloatOrb1 25s ease-in-out infinite alternate;
@@ -43,7 +43,7 @@
 .hub-sphere.green {
   width: 500px;
   height: 500px;
-  background: #34a853;
+  background: var(--studio-success);
   bottom: -220px;
   right: -230px;
   animation: hubFloatOrb2 30s ease-in-out infinite alternate;
@@ -52,7 +52,7 @@
 .hub-sphere.yellow {
   width: 350px;
   height: 350px;
-  background: #fbbc05;
+  background: var(--studio-warning);
   top: 34%;
   left: calc(42vw - 175px);
   animation: hubFloatOrb3 20s ease-in-out infinite alternate;

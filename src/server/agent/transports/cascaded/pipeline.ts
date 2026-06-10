@@ -19,8 +19,11 @@ export interface CascadedPipelineState {
   activeAborts: Set<AbortController>;
   pendingToolResults: Map<string, (result: unknown) => void>;
   currentResponseItemId: string | null;
+  toolResultTimeoutMs?: number;
   logger: AgentLogger;
 }
+
+const DEFAULT_TOOL_RESULT_TIMEOUT_MS = 120_000;
 
 export async function processCascadedTurn(
   state: CascadedPipelineState,
@@ -274,6 +277,32 @@ function waitForToolResult(
   callId: string,
 ): Promise<unknown> {
   return new Promise((resolve) => {
-    state.pendingToolResults.set(callId, resolve);
+    const timeoutMs = toolResultTimeoutMs(state);
+    let timeout: ReturnType<typeof setTimeout> | null = setTimeout(() => {
+      timeout = null;
+      if (!state.pendingToolResults.has(callId)) return;
+      state.pendingToolResults.delete(callId);
+      state.logger.warn("Tool result timed out", { callId, timeoutMs });
+      resolve({
+        error: "tool_result_timeout",
+        message: `Tool result for "${callId}" timed out after ${timeoutMs}ms.`,
+      });
+    }, timeoutMs);
+
+    state.pendingToolResults.set(callId, (result) => {
+      if (timeout) {
+        clearTimeout(timeout);
+        timeout = null;
+      }
+      resolve(result);
+    });
   });
+}
+
+function toolResultTimeoutMs(state: CascadedPipelineState): number {
+  const timeoutMs = state.toolResultTimeoutMs;
+  if (!Number.isFinite(timeoutMs) || !timeoutMs || timeoutMs < 1) {
+    return DEFAULT_TOOL_RESULT_TIMEOUT_MS;
+  }
+  return timeoutMs;
 }

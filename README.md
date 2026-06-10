@@ -378,6 +378,9 @@ To keep this guide concise, the comprehensive technical tables are grouped below
 | `pnpm test:prompt-policy:bdd` | Ensures final system prompts contain immutable validation instructions. |
 | `pnpm test:learning-preserves-server-policy:bdd` | Ensures learned memory is inserted before the final server-owned policy suffix. |
 | `pnpm test:model-cannot-self-confirm-tool:bdd` | Verifies model-supplied arguments cannot self-confirm write or external tools. |
+| `pnpm test:voice-session-confirmation-boundary:bdd` | Verifies confirmation-required tool calls are not submitted back to the model as tool results. |
+| `pnpm test:cascaded-tool-timeout:bdd` | Verifies cascaded tool callbacks time out instead of hanging the session forever. |
+| `pnpm test:browser-tool-call-state:bdd` | Verifies browser voice snapshots upsert tool-call state by provider call ID. |
 | `pnpm test:pending-action-expiry-quota:bdd` | Verifies pending tool confirmations expire and enforce per-session open-action quotas. |
 | `pnpm test:tool-execution-policy-engine:bdd` | Checks runtime schema validation, authorization, call limits, timeouts, audit, and redaction. |
 | `pnpm test:starter-production-mode:bdd` | Verifies production starter mode refuses local-only fallbacks. |
@@ -387,6 +390,7 @@ To keep this guide concise, the comprehensive technical tables are grouped below
 | `pnpm test:fastify-voice-adapter:bdd` | Asserts Fastify and HTTP templates configure paths and WebSocket handshakes cleanly. |
 | `pnpm test:tool-contracts:bdd` | Verifies executable tool definitions remain separate from serializable manifests. |
 | `pnpm test:tool-registry-adapter:bdd` | Validates runtime tool execution maps to registered client/server actions. |
+| `pnpm test:voice-orb-geometry:bdd` | Verifies the RTC hologram bust geometry is deterministic and anatomically coherent. |
 | `pnpm test:runtime-tool-authorization:bdd` | Asserts that agents can only execute tools explicitly allowlisted by their current schema. |
 | `pnpm test:learning-active-assignment-scope:bdd` | Verifies rollback and infra approval keep active agent assignment scoped to the draft owner. |
 | `pnpm test:builder-draft-ownership:bdd` | Confirms builder routes restrict draft modifications to authenticated authors only. |

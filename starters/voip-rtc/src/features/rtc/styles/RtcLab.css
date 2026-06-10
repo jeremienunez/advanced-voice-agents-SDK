@@ -1,12 +1,9 @@
-.rtcLab {
-  display: grid;
-  gap: 18px;
-  padding-bottom: 40px;
-}
+/* RTC Lab — the agent's stage. Config rides on top as a console bar;
+   the hologram owns the rest of the viewport. */
 
 .rtcImmersive {
   display: grid;
-  gap: 18px;
+  gap: 20px;
   min-height: calc(100vh - 112px);
   padding-bottom: 40px;
   color: var(--studio-text);
@@ -14,11 +11,11 @@
 
 .rtcImmersiveHeader {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 20px;
-  border: 1px solid var(--studio-border);
+  padding: 24px 36px;
+  border: 1px solid var(--studio-border-soft);
   border-radius: var(--studio-radius);
   background: var(--studio-surface);
   box-shadow: var(--studio-shadow-sm);
@@ -26,183 +23,136 @@
 
 .rtcImmersiveHeader h1 {
   margin: 4px 0 6px;
+  font-family: var(--font-display, var(--font-sans));
   color: var(--studio-text-strong);
-  font-size: 28px;
-  line-height: 1.15;
-  letter-spacing: 0;
+  font-size: 30px;
+  font-weight: 650;
+  line-height: 1.18;
+  letter-spacing: -0.02em;
 }
 
+/* provider · model · state is instrumentation, so it speaks mono */
 .rtcImmersiveHeader p:not(.studioEyebrow) {
   margin: 0;
   color: var(--studio-muted);
-  font-size: 14px;
-  line-height: 1.5;
-  letter-spacing: 0;
-}
-
-.rtcImmersiveStage {
-  display: grid;
-  grid-template-columns: minmax(220px, 0.8fr) minmax(360px, 1.45fr) minmax(220px, 0.8fr);
-  align-items: stretch;
-  gap: 16px;
-}
-
-.rtcSidePanel,
-.rtcControlDock,
-.rtcDiagnostics {
-  border: 1px solid var(--studio-glass-border);
-  border-radius: var(--studio-radius);
-  background: var(--studio-glass-bg);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  box-shadow: var(--studio-shadow-sm);
-}
-
-.rtcSidePanel {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  min-height: 320px;
-  padding: 24px;
-}
-
-.rtcSidePanel h2 {
-  font-family: var(--font-display, var(--font-sans));
-  margin: 0;
-  color: var(--studio-text-strong);
-  font-size: 14px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-
-.rtcSidePanel dl {
-  display: grid;
-  gap: 12px;
-  margin: 0;
-}
-
-.rtcSidePanel dl > div {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding-bottom: 12px;
-  border-bottom: 1px dashed var(--studio-border-soft);
-}
-
-.rtcSidePanel dt {
-  color: var(--studio-muted);
-  font-family: var(--font-sans);
-  font-size: 11px;
-  font-weight: 750;
+  font-family: var(--font-mono);
+  font-size: 12px;
   letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
-.rtcSidePanel dd {
-  margin: 0;
-  color: var(--studio-text-strong);
-  font-size: 13px;
-  font-weight: 750;
-  letter-spacing: 0;
-  text-align: right;
-}
-
-.rtcOrbStage {
-  display: grid;
-  min-height: clamp(460px, 58vh, 640px);
-  place-items: center;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid rgba(15, 23, 42, 0.8);
-  border-radius: var(--studio-radius);
-  background: 
-    radial-gradient(circle at 50% 50%, rgba(11, 87, 208, 0.15) 0%, transparent 65%),
-    linear-gradient(135deg, #020617 0%, #09090b 100%);
-  box-shadow: 
-    inset 0 0 50px rgba(0, 0, 0, 0.85),
-    0 12px 36px rgba(15, 23, 42, 0.12);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.rtcOrbStage.speaking {
-  border-color: rgba(11, 87, 208, 0.4);
-  box-shadow: 
-    inset 0 0 50px rgba(11, 87, 208, 0.18),
-    inset 0 0 20px rgba(11, 87, 208, 0.08),
-    0 12px 36px rgba(11, 87, 208, 0.06);
-}
-
-.rtcOrbStage.listening {
-  border-color: rgba(19, 115, 51, 0.4);
-  box-shadow: 
-    inset 0 0 50px rgba(19, 115, 51, 0.18),
-    inset 0 0 20px rgba(19, 115, 51, 0.08),
-    0 12px 36px rgba(19, 115, 51, 0.06);
-}
-
-.rtcOrbStage.muted {
-  border-color: rgba(197, 34, 31, 0.4);
-  box-shadow: 
-    inset 0 0 50px rgba(197, 34, 31, 0.18),
-    inset 0 0 20px rgba(197, 34, 31, 0.08),
-    0 12px 36px rgba(197, 34, 31, 0.06);
-}
-
-.rtcLiveTranscript {
+.rtcHeaderActions {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 16px;
-  border: 1px solid rgba(11, 87, 208, 0.15);
-  border-radius: 16px;
-  border-bottom-right-radius: 4px;
-  background: rgba(11, 87, 208, 0.05);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 12px rgba(11, 87, 208, 0.04);
-  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  gap: 12px;
+  align-items: center;
 }
 
-.rtcLiveTranscript.agent {
-  border-color: rgba(19, 115, 51, 0.15);
-  border-radius: 16px;
-  border-bottom-left-radius: 4px;
-  background: rgba(19, 115, 51, 0.05);
-  box-shadow: 0 4px 12px rgba(19, 115, 51, 0.04);
+/* The console bar: every pre-flight decision lives above the stage. */
+.rtcConsoleBar {
+  border: 1px solid var(--studio-border-soft);
+  border-radius: var(--studio-radius);
+  background: var(--studio-surface);
+  box-shadow: var(--studio-shadow-sm);
+  padding: 18px 24px;
 }
 
-.rtcLiveTranscript strong {
-  color: var(--studio-action);
-  font-size: 11px;
-  font-weight: 850;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.rtcLiveTranscript.agent strong {
-  color: var(--studio-success);
-}
-
-.rtcLiveTranscript span {
-  color: var(--studio-text-strong);
-  font-size: 13.5px;
-  line-height: 1.5;
-  font-weight: 500;
-}
-
-.rtcControlDock {
-  padding: 20px 24px;
-}
-
-.rtcControlDock > .controlPanel {
+.rtcConsoleBar > .controlPanel {
   min-height: 0;
   padding: 0;
   border: 0;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
-  grid-template-columns: minmax(260px, 1.2fr) minmax(140px, 0.6fr) minmax(220px, 0.9fr) minmax(120px, 0.45fr);
+  grid-template-columns: minmax(240px, 1.3fr) minmax(130px, 0.6fr) minmax(190px, 0.9fr) minmax(120px, 0.5fr);
+}
+
+.rtcConsoleBar .field span,
+.rtcConsoleBar .inlineControl span {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: var(--studio-subtle);
+}
+
+/* The stage: a fixed dark void whatever the theme — the projector room. */
+.rtcOrbStage {
+  display: grid;
+  min-height: clamp(540px, 64vh, 760px);
+  place-items: center;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.8);
+  border-radius: var(--studio-radius);
+  background:
+    radial-gradient(circle at 50% 46%, rgba(var(--studio-action-rgb), 0.14) 0%, transparent 62%),
+    linear-gradient(180deg, #060a14 0%, #04060c 100%);
+  box-shadow:
+    inset 0 0 50px rgba(0, 0, 0, 0.85),
+    0 12px 36px rgba(15, 23, 42, 0.12);
+  transition: border-color 0.4s, box-shadow 0.4s;
+}
+
+.rtcOrbStage.speaking {
+  border-color: rgba(var(--studio-action-rgb), 0.4);
+  box-shadow:
+    inset 0 0 50px rgba(var(--studio-action-rgb), 0.18),
+    inset 0 0 20px rgba(var(--studio-action-rgb), 0.08),
+    0 12px 36px rgba(var(--studio-action-rgb), 0.06);
+}
+
+.rtcOrbStage.listening {
+  border-color: rgba(var(--studio-success-rgb), 0.4);
+  box-shadow:
+    inset 0 0 50px rgba(var(--studio-success-rgb), 0.18),
+    inset 0 0 20px rgba(var(--studio-success-rgb), 0.08),
+    0 12px 36px rgba(var(--studio-success-rgb), 0.06);
+}
+
+.rtcOrbStage.muted {
+  border-color: rgba(var(--studio-danger-rgb), 0.4);
+  box-shadow:
+    inset 0 0 50px rgba(var(--studio-danger-rgb), 0.18),
+    inset 0 0 20px rgba(var(--studio-danger-rgb), 0.08),
+    0 12px 36px rgba(var(--studio-danger-rgb), 0.06);
+}
+
+.rtcLiveTranscript {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid rgba(var(--studio-action-rgb), 0.22);
+  border-radius: 14px;
+  border-bottom-right-radius: 4px;
+  background: rgba(var(--studio-action-rgb), 0.07);
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.rtcLiveTranscript.agent {
+  border-color: rgba(var(--studio-success-rgb), 0.22);
+  border-radius: 14px;
+  border-bottom-left-radius: 4px;
+  background: rgba(var(--studio-success-rgb), 0.07);
+}
+
+.rtcLiveTranscript strong {
+  color: #4cc3ff;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.rtcLiveTranscript.agent strong {
+  color: #3ad29b;
+}
+
+.rtcLiveTranscript span {
+  color: #e8f0ff;
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 500;
 }
 
 /* Open Diagnostics Button */
@@ -217,7 +167,7 @@
   border-radius: 9999px;
   color: var(--studio-text-strong);
   font-size: 13px;
-  font-weight: 750;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: var(--studio-shadow-sm);
@@ -225,10 +175,10 @@
 
 .openDiagBtn:hover {
   border-color: var(--studio-action);
-  background: rgba(11, 87, 208, 0.04);
+  background: rgba(var(--studio-action-rgb), 0.04);
   color: var(--studio-action);
   transform: translateY(-1.5px);
-  box-shadow: 0 4px 12px rgba(11, 87, 208, 0.08);
+  box-shadow: 0 4px 12px rgba(var(--studio-action-rgb), 0.08);
 }
 
 .diagBadge {
@@ -240,8 +190,9 @@
   background: var(--studio-action);
   color: #ffffff;
   border-radius: 9999px;
+  font-family: var(--font-mono);
   font-size: 11px;
-  font-weight: 850;
+  font-weight: 500;
   transition: background 0.2s ease;
 }
 
