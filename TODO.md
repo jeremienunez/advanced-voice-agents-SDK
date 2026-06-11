@@ -317,6 +317,32 @@ Puis verifier dans le navigateur:
 - Environment charge;
 - pas d'erreurs console.
 
+## Front starter - command deck 3D / three.js (2026-06-11)
+
+- [x] Fondation: three 0.184.0 pin exact + postprocessing + @types/three
+      (starter only), lockfile regenere pour le frozen-lockfile CI.
+- [x] Scene engine: 2 canvases persistants (backdrop z-1, stage scisse
+      z2), 1 rAF, vues trackees par rect (BDD scissor), theme tokens au
+      runtime, prefers-reduced-motion qui stoppe les boucles (nouveau).
+- [x] Portage hologramme three.js a parite pixel (gate screenshots),
+      geometrie GPU partagee, holo-renderer.ts supprime, modules purs
+      et BDD intouches.
+- [x] Atmosphere deck persistante: dust field + volume wash (backdrop
+      demi-resolution), pans eases entre modes (~700ms), intensite
+      builder par etape, 2D boids morts supprimes.
+- [x] RTC flagship: sol WebGL unifie au reflet, cone projecteur, post
+      pmndrs une passe (bloom/aberration/grain/vignette), verifie live
+      (arc listening/mute/idle complet, zero warning).
+- [x] Hardening: reduced-motion sur VoiceOrb, fuite contextes WebGL
+      sous churn corrigee (forceContextLoss au teardown), context-loss,
+      fallback no-WebGL 5 modes, sweep 5 modes x 2 themes x 2 largeurs.
+- [ ] Perf: ~25fps page-wide constate sur poste Linux/Mesa (ANGLE),
+      borne presentation (2 swapchains alpha plein ecran) — re-mesurer
+      sur d'autres GPU/OS; si confirme, envisager la fusion des deux
+      canvases engine en un seul contexte (backdrop + stage scisse).
+- [ ] Phase 2 (plus tard): migration WebGPU/TSL une fois le GLSL porte
+      en TSL; OffscreenCanvas si jank main-thread.
+
 ## Front starter - refonte et hologramme (2026-06-10)
 
 - [x] Refonte tokens: typo Bricolage Grotesque / Spline Sans / Spline Sans

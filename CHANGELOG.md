@@ -1,5 +1,67 @@
 # Changelog
 
+## feat: command deck 3d — portage three.js + atmosphere persistante
+
+Status: implemented locally
+Date: 2026-06-11
+
+### Intent
+
+Porter le rendu hologramme main-WebGL vers three.js derriere un scene
+engine unifie, puis donner aux cinq modes studio une atmosphere de pont
+de commandement persistante, avec une scene RTC flagship post-processee.
+
+### Journal
+
+- Dependances starter-only: three@0.184.0 (pin exact), postprocessing
+  (pmndrs), @types/three. Lockfile regenere (CI frozen-lockfile).
+- `components/scene/`: SceneEngine (2 canvases persistants — backdrop
+  z-1 + stage scisse z2 dans StudioShell, 1 rAF, DPR<=2, context-loss),
+  view-registry (mapping rect->scissor BDD-teste), scene-theme (tokens
+  --studio-*-rgb lus au runtime, observer .studio-dark), mode-director
+  (signatures deck par mode, pans eases ~700ms), scene-motion-policy
+  (prefers-reduced-motion stoppe reellement les boucles — nouveau),
+  atmosphere-field/volume + deck-backdrop (poussiere parallaxe pointer,
+  glow ancre par mode, shafts, restraint light-theme). Le backdrop rend
+  en demi-resolution upscalee CSS (cout fragment /4, invisible a l'oeil).
+- Portage hologramme a parite pixel: holo-shaders (GLSL verbatim), holo-
+  points (BufferGeometry partagee 1 upload GPU, CustomBlending ONE/ONE
+  premultiplie, depth off), holo-figure (easing uExpr + LCG glitch par
+  instance). holo-renderer.ts supprime. Modules purs et BDD voice-orb
+  intouches.
+- HologramBust devient une vue de stage partagee (contrat de props
+  inchange); VoiceOrb garde un renderer dedie (3 contextes max).
+- RTC flagship: sol grille WebGL (remplace .rtcStageFloor CSS) + reflet
+  dans le meme espace pseudo-camera, cone projecteur volumetrique, trio
+  mirror/echo/main en une scene pour la RenderPass, post pmndrs en une
+  passe (bloom seuil .45 / intensite .5 / demi-resolution, aberration
+  chromatique, grain, vignette — tune live contre le blowout du visage).
+  Verifie en session live (E2E silence): listening 35s, mute 62s,
+  unmute, stop -> idle propre, zero warning console.
+- Hardening: VoiceOrb respecte prefers-reduced-motion (une pose statique
+  par changement d'etat, reprise live au flip); fuite de contextes WebGL
+  sous churn de modes corrigee (canvas par mount + forceContextLoss au
+  teardown — Chrome evincait les contextes apres ~16 visites RTC);
+  glowPulse nav/health stoppe sous reduced motion (page pixel-statique);
+  context-loss recovery et fallback no-WebGL verifies sur les 5 modes.
+- 2D boids components/atmosphere/ (palette Google, jamais monte)
+  supprime; ancres par mode reprises dans mode-director.
+- BDD: test:scene-deck:bdd (scissor mapping, deck targets/easing, motion
+  policy, parsing triplets RGB) integre a audit:solid.
+
+### Validation
+
+- `pnpm audit:solid` OK / `pnpm pack:dry-run` OK
+- Sweep navigateur 5 modes x light/dark x 1540/1280: zero erreur
+  console, zero scrollbar horizontale, overlays (drawer diagnostics,
+  loaders builder, carousel agents) au-dessus du stage canvas.
+- Session RTC live OK; reduced-motion, context-loss, no-WebGL, churn
+  20 cycles sans fuite OK.
+- Note perf: ~25fps page-wide sur ce poste Linux/Mesa (ANGLE) — borne
+  par la presentation de deux swapchains alpha plein ecran, invariant
+  au cout fragment; scripting sous budget (zero long task). A re-mesurer
+  sur d'autres GPU/OS avant d'optimiser davantage.
+
 ## feat(rtc): visage photo-fidele pour l'hologramme — pipeline face-scan
 
 Status: implemented locally

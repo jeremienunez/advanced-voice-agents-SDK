@@ -74,3 +74,34 @@ Rules:
 - When a shared constant changes (shader camera), grep for every other
   GLSL/code that duplicates it (stage props had their own copy at the
   old z and silently de-synced).
+
+## 2026-06-11 — read the CI before writing a line (user correction)
+- This repo has a WRITTEN definition of done: `pnpm audit:solid` (the
+  quality matrix in scripts/quality/matrix.ts = what .github/workflows/ci.yml
+  runs). Running "my BDD file + tsc" is NOT done. Read the CI and the
+  audit scripts at session start, before producing code.
+- Hard rules I violated today and the user had to fix by hand:
+  audit:loc = 300 LOC max per handwritten file INCLUDING scripts/
+  (pack-face-scan.ts ~430); audit:responsibility = max 5 runtime exports
+  per module (face-geometry.ts had 8+) → his face-masks/face-sdf/orb-rng
+  and pack-face-scan-* splits are conformity fixes of MY code.
+- Other standing rules: no concrete inheritance (ports/composition),
+  layer purity (UI≠node runtime, domain pure, core product-agnostic),
+  no cycles, no vague filenames, barrel-only for index/state/routing,
+  one component per tsx, generated files named *.generated.* for audit
+  exemption (face-scan.ts should be renamed).
+
+## 2026-06-11 — shared working tree: other agents/the user edit concurrently
+
+Jeremie ran another LLM on the hologram while I executed the deck plan
+("j'ai mis un autre llm sur la correction, attend la passe" then "touche
+pas"). A runtime error appeared in a file I'm forbidden to modify
+(face-geometry.ts beardMask) — it was a mid-save snapshot of THEIR work,
+not a regression to fix.
+- `git status` before every verification batch and before every commit:
+  unexpected modified files = concurrent work in flight. Never "fix" an
+  error originating in a file someone else is editing; report and wait.
+- NEVER `git add -A` in this repo. Stage explicit paths only, and
+  `git diff <paths>` first to confirm only my changes are in them.
+- When told to wait, stop ALL repo writes (code, git, browser reloads can
+  also race their dev loop) and state plainly what was already committed.
