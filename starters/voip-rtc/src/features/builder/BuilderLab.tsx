@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { HologramBust } from "../../components/hologram/HologramBust.js";
+import { getSceneEngine } from "../../components/scene/scene-engine.js";
 import { Button } from "../../components/ui/Button.js";
 import { ProcessingLoader } from "../../components/ui/ProcessingLoader.js";
 import type {
@@ -57,6 +58,12 @@ export function BuilderLab({
   useEffect(() => {
     setCurrentStep((prev) => Math.max(prev, builder.activeStep));
   }, [builder.activeStep]);
+
+  // Le deck se réchauffe à mesure que l'agent prend forme (forge)
+  useEffect(() => {
+    getSceneEngine().setDeckIntensity(Math.min(builder.unlockedStep, 5) / 5);
+    return () => getSceneEngine().setDeckIntensity(0);
+  }, [builder.unlockedStep]);
 
   const busy = Boolean(builder.busy);
   const promptNeedsConfirmation = Boolean(builder.draft?.promptPlan?.questions.length);

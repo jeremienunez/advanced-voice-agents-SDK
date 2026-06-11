@@ -146,7 +146,6 @@ export class SceneEngine {
     const rate = deckTransitionRate(this.reduced);
     this.deck = rate >= 1 ? this.deckTarget : easeDeck(this.deck, this.deckTarget);
 
-    backdropRenderer.setClearColor(0x06204a, 0.18); /* TEMP placeholder — removed in Task 14 */
     if (this.backdrop && this.palette) {
       this.backdrop.update(timeMs, this.deck, this.palette, this.pointer);
       backdropRenderer.setViewport(0, 0, window.innerWidth, window.innerHeight);

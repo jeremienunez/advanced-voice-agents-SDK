@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { createDeckBackdrop } from "./deck-backdrop.js";
 import { getSceneEngine } from "./scene-engine.js";
 import "./styles/SceneLayer.css";
 
@@ -14,7 +15,12 @@ export function SceneLayer({ mode }: { mode: string }) {
     if (!backdropHost || !stageHost) return undefined;
     const engine = getSceneEngine();
     if (!engine.available) return undefined;
-    return engine.attach(backdropHost, stageHost);
+    engine.setBackdrop(createDeckBackdrop());
+    const detach = engine.attach(backdropHost, stageHost);
+    return () => {
+      engine.setBackdrop(null);
+      detach();
+    };
   }, []);
 
   useEffect(() => {
