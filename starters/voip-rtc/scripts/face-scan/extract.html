@@ -1,0 +1,204 @@
+<!doctype html>
+<!-- One-shot scan page: runs MediaPipe FaceLandmarker on ref/front.png,
+     densifies the face region on a jittered hex grid with IDW depth from
+     the 478 landmarks, and samples photo luminance per point. The result
+     lands on window.__SCAN for the driver (Playwright) to collect.
+     This page never ships: it exists so the committed face-scan asset
+     can be rebuilt from the reference photos. -->
+<html lang="en">
+<head><meta charset="utf-8" /><title>face-scan extract</title></head>
+<body style="background:#111;color:#9cf;font-family:monospace">
+<div id="status">loading…</div>
+<script type="module">
+const status = (m) => { document.getElementById("status").textContent = m; console.log("[scan]", m); };
+window.__SCAN = null;
+try {
+  const vision = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/+esm");
+  const { FaceLandmarker, FilesetResolver } = vision;
+  status("resolving wasm…");
+  const fileset = await FilesetResolver.forVisionTasks(
+    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm",
+  );
+  status("loading model…");
+  const landmarker = await FaceLandmarker.createFromOptions(fileset, {
+    baseOptions: {
+      modelAssetPath:
+        "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+    },
+    runningMode: "IMAGE",
+    numFaces: 1,
+  });
+
+  status("loading image…");
+  const img = new Image();
+  img.src = "./ref/front.png";
+  await img.decode();
+  const W = img.naturalWidth, H = img.naturalHeight;
+  const canvas = document.createElement("canvas");
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  ctx.drawImage(img, 0, 0);
+  const pixels = ctx.getImageData(0, 0, W, H).data;
+  const lumAt = (x, y) => {
+    let sum = 0, n = 0;
+    for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) {
+      const px = Math.round(x) + dx, py = Math.round(y) + dy;
+      if (px < 0 || py < 0 || px >= W || py >= H) continue;
+      const i = (py * W + px) * 4;
+      sum += 0.299 * pixels[i] + 0.587 * pixels[i + 1] + 0.114 * pixels[i + 2];
+      n++;
+    }
+    return sum / n / 255;
+  };
+
+  status("detecting…");
+  const result = landmarker.detect(img);
+  const lm = result.faceLandmarks?.[0];
+  if (!lm || lm.length < 478) throw new Error(`landmarks missing: ${lm?.length ?? 0}`);
+  /* pixel space: x,y in px; z is x-normalized by mediapipe — scale by W */
+  const pts = lm.map((p) => [p.x * W, p.y * H, p.z * W]);
+
+  /* ordered face-oval polygon from the connection list */
+  const ovalEdges = FaceLandmarker.FACE_LANDMARKS_FACE_OVAL.map((c) => [c.start, c.end]);
+  const nextOf = new Map(ovalEdges);
+  const oval = [ovalEdges[0][0]];
+  while (oval.length < ovalEdges.length) {
+    const nxt = nextOf.get(oval[oval.length - 1]);
+    if (nxt === undefined || nxt === oval[0]) break;
+    oval.push(nxt);
+  }
+  const poly = oval.map((i) => pts[i]);
+  const inPoly = (x, y) => {
+    let inside = false;
+    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+      const [xi, yi] = poly[i], [xj, yj] = poly[j];
+      if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+    }
+    return inside;
+  };
+
+  /* jittered hex grid over the oval, IDW depth from the landmarks */
+  status("densifying…");
+  const xs = poly.map((p) => p[0]), ys = poly.map((p) => p[1]);
+  const minX = Math.min(...xs), maxX = Math.max(...xs);
+  const minY = Math.min(...ys), maxY = Math.max(...ys);
+  const TARGET = 12500;
+  const area = (maxX - minX) * (maxY - minY) * 0.62; /* oval fill ratio */
+  const spacing = Math.sqrt(area / (TARGET * 0.866));
+  const mulberry = (seed) => () => {
+    seed = (seed + 0x6d2b79f5) >>> 0;
+    let t = Math.imul(seed ^ (seed >>> 15), seed | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const rnd = mulberry(1337);
+  const idwZ = (x, y) => {
+    /* nearest landmarks weighted 1/d² — smooth depth without topology */
+    let best = [];
+    for (let i = 0; i < pts.length; i++) {
+      const d2 = (pts[i][0] - x) ** 2 + (pts[i][1] - y) ** 2;
+      if (best.length < 6) { best.push([d2, pts[i][2]]); best.sort((a, b) => a[0] - b[0]); }
+      else if (d2 < best[5][0]) { best[5] = [d2, pts[i][2]]; best.sort((a, b) => a[0] - b[0]); }
+    }
+    if (best[0][0] < 1) return best[0][1];
+    let wsum = 0, zsum = 0;
+    for (const [d2, z] of best) { const w = 1 / d2; wsum += w; zsum += z * w; }
+    return zsum / wsum;
+  };
+  const samples = [];
+  for (let row = 0; minY + row * spacing * 0.866 < maxY; row++) {
+    const y = minY + row * spacing * 0.866;
+    for (let col = 0; minX + col * spacing < maxX; col++) {
+      const x = minX + col * spacing + (row % 2) * spacing * 0.5;
+      const jx = x + (rnd() - 0.5) * spacing * 0.4;
+      const jy = y + (rnd() - 0.5) * spacing * 0.4;
+      if (!inPoly(jx, jy)) continue;
+      samples.push([
+        Math.round(jx * 10) / 10,
+        Math.round(jy * 10) / 10,
+        Math.round(idwZ(jx, jy) * 10) / 10,
+        Math.round(lumAt(jx, jy) * 1000) / 1000,
+      ]);
+    }
+  }
+
+  /* head-outline extraction: walk each row inward from both sides until
+     the studio backdrop gives way to the subject — the two-view hull
+     makes the hair silhouette photo-exact */
+  status("tracing outlines…");
+  /* inside-out trace: the subject is contiguous from the head's center
+     column, so walking outward until a sustained backdrop run is immune
+     to studio clutter and panel borders that edge-inward scans catch */
+  const traceOutline = async (src, centerX) => {
+    const im = new Image();
+    im.src = src;
+    await im.decode();
+    const w = im.naturalWidth, h = im.naturalHeight;
+    const c = document.createElement("canvas");
+    c.width = w; c.height = h;
+    const cx = c.getContext("2d", { willReadFrequently: true });
+    cx.drawImage(im, 0, 0);
+    const px = cx.getImageData(0, 0, w, h).data;
+    const at = (x, y) => {
+      const i = (y * w + x) * 4;
+      return [px[i], px[i + 1], px[i + 2]];
+    };
+    const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+    const THRESH = 30, BG_RUN = 9;
+    const medianBand = (x0, x1, y) => {
+      const ch = [[], [], []];
+      for (let x = Math.max(0, x0); x <= Math.min(w - 1, x1); x += 2) {
+        const c2 = at(x, y);
+        ch[0].push(c2[0]); ch[1].push(c2[1]); ch[2].push(c2[2]);
+      }
+      return ch.map((vals) => vals.sort((a, b) => a - b)[Math.floor(vals.length / 2)]);
+    };
+    const isBgRun = (x, y, bg, step) => {
+      for (let k = 0; k < BG_RUN; k++) {
+        const xx = Math.min(w - 1, Math.max(0, x + k * step));
+        if (dist(at(xx, y), bg) > THRESH) return false;
+      }
+      return true;
+    };
+    const left = [], right = [];
+    for (let y = 6; y < h; y += 3) {
+      const bgL = medianBand(20, 44, y);
+      const bgR = medianBand(w - 44, w - 20, y);
+      /* the row counts only if the subject is present at its center */
+      if (isBgRun(centerX - 4, y, bgL, 1) && isBgRun(centerX - 4, y, bgR, 1)) continue;
+      let xl = -1, xr = -1;
+      for (let x = centerX; x > 20; x--) {
+        if (isBgRun(x - BG_RUN, y, bgL, 1)) { xl = x; break; }
+      }
+      for (let x = centerX; x < w - 20; x++) {
+        if (isBgRun(x + 1, y, bgR, 1)) { xr = x; break; }
+      }
+      if (xl > 24 && xr > xl) { left.push([xl, y]); right.push([xr, y]); }
+    }
+    return { w, h, left, right };
+  };
+  /* head centers: the face landmarks give the front center; the profile
+     head sits left of panel center, nose pointing right */
+  const outlineFront = await traceOutline("./ref/front.png", Math.round(mid0()));
+  const outlineSide = await traceOutline("./ref/profile-right.png", Math.round(0.42 * 770));
+  function mid0() {
+    return (pts[468][0] + pts[473][0]) / 2;
+  }
+
+  window.__SCAN = {
+    w: W, h: H,
+    landmarks: pts.map((p) => p.map((v) => Math.round(v * 10) / 10)),
+    oval,
+    samples,
+    outlineFront,
+    outlineSide,
+  };
+  status(`done: ${samples.length} samples, ${pts.length} landmarks, outlines ${outlineFront.left.length}/${outlineSide.left.length}`);
+  document.title = "SCAN_DONE";
+} catch (err) {
+  status(`error: ${err?.message ?? err}`);
+  document.title = "SCAN_ERROR";
+}
+</script>
+</body>
+</html>

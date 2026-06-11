@@ -4,7 +4,7 @@
     unused, which is what keeps the port pixel-identical. */
 
 export const HOLO_VERTEX_SHADER = `
-attribute vec4 aAux; attribute vec4 aAux2;
+attribute vec4 aAux; attribute vec4 aAux2; attribute float aScale;
 uniform vec2 uRes;
 uniform vec2 uGaze;
 uniform vec4 uExpr; /* smile, widen, bow, tilt — eased mood expression */
@@ -87,8 +87,9 @@ void main(){
   vec2 scr = q.xy * persp;
   scr.x *= uRes.y/uRes.x;
   gl_Position = vec4(scr, 0., 1.);
-  /* uniform lattice dots: size barely varies, the order is the point */
-  gl_PointSize = (2.0 + 3.0*persp) * (1. + .1*rnd) * (1. + .25*iris);
+  /* uniform lattice dots: size barely varies, the order is the point —
+     the dense scan layer renders finer (aScale) so it doesn't blow out */
+  gl_PointSize = (2.0 + 3.0*persp) * (1. + .1*rnd) * (1. + .25*iris) * aScale;
 
   /* scan sweep */
   float scanY = fract(uTime*.05)*3.4-1.9;
@@ -106,6 +107,9 @@ void main(){
   /* calm breathing, no per-point strobe: a lattice should feel stable */
   float fl=.85+.15*sin(uTime*1.7+rnd*6.28);
   float a=(.62+.2*fl)*(.78+.22*talk);
+  /* the scan layer is ~16x denser than the lattice: rein in additive
+     accumulation so the face glows instead of blowing out */
+  a *= mix(.27, 1., step(.99, aScale));
   a = max(a, iris*.5);
   a *= mix(1.,.25,uEcho);
   a *= bust;                       /* projector fade at the base   */

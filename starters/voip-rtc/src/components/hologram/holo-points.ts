@@ -17,6 +17,7 @@ export function getSharedHoloGeometry(): THREE.BufferGeometry {
     sharedGeometry.setAttribute("position", new THREE.BufferAttribute(face.positions, 3));
     sharedGeometry.setAttribute("aAux", new THREE.BufferAttribute(face.aux, 4));
     sharedGeometry.setAttribute("aAux2", new THREE.BufferAttribute(face.aux2, 4));
+    sharedGeometry.setAttribute("aScale", new THREE.BufferAttribute(face.scale, 1));
   }
   return sharedGeometry;
 }

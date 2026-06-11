@@ -1,5 +1,48 @@
 # Changelog
 
+## feat(rtc): visage photo-fidele pour l'hologramme — pipeline face-scan
+
+Status: implemented locally
+Date: 2026-06-11
+
+### Intent
+
+Reproduire fidelement le visage de reference (photos face/profils/arriere)
+dans l'hologramme du voice orb, en remplacant le sculpt SDF approximatif
+par un pipeline d'extraction photo + design par calques.
+
+### Journal
+
+- `scripts/face-scan/` (nouveau): pipeline one-shot d'extraction —
+  `extract.html` (MediaPipe FaceLandmarker dans Chrome: 478 landmarks 3D,
+  densification hex-grid + profondeur IDW, luminance photo par point),
+  `serve.ts` (serveur statique), `pack-face-scan.ts` (recalage dans le
+  repere facial du shader — yeux ±0.2/0.12, bouche 0/-0.345 —, lissage de
+  profondeur par voisinage, couture sur le SDF crane, hull silhouette
+  trace a la main depuis la photo de face, quantization Int16/Uint8).
+- `src/components/hologram/face-scan.ts` (genere, commite): asset ~16.8k
+  points du visage du sujet, luminance photo bakee en canal shade.
+- `face-geometry.ts`: builder par calques — calque SCAN (la ressemblance)
+  + calque LATTICE (crane/cheveux/oreilles/cou, fenetre visage exclue,
+  cap de resolution leve 56→120 anneaux, ~28.5k points total, tri
+  couronne→cou); `skullCoreDistance` (cheveux genereux volontairement) +
+  `skullDistance` = core ∩ hull photo (silhouette cheveux exacte);
+  `beardMask` (barbe taillee + moustache), hairline du sujet (tempes
+  degagees, nuque effilee), meches sombres balayees vers le haut.
+- `holo-shaders.ts` / `holo-points.ts`: attribut `aScale` — le calque
+  scan rend des points plus fins (x0.58) et freine l'accumulation
+  additive (x0.27) pour eviter le blowout sous bloom.
+- BDD `test-voice-orb-geometry-bdd.ts`: scenarios re-ecrits pour le
+  design par calques (points sur SDF *ou* fenetre scan, ancrage du scan
+  sur le repere facial, masque barbe) — 9/9 verts; tsc clean.
+- Verification visuelle: previews 0/±90/180° vs crops de reference +
+  passe navigateur in-app (glow maitrise, visage reconnaissable).
+
+### Next
+
+- Articulations de la bouche pilotees par video de reference (a venir).
+- Hull profil (occiput/nuque) si besoin apres revue visuelle.
+
 ## feat: refonte du front starter + hologramme voice orb
 
 Status: implemented locally

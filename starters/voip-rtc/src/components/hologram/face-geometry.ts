@@ -1,15 +1,22 @@
 /**
- * Procedural hologram head for the RTC voice orb.
+ * Procedural hologram head for the RTC voice orb — layered scan design.
  *
- * Structured-scan style: points sit on an ordered spherical lattice
- * (rings x segments) raymarched onto a smooth-min SDF head, like the
- * vertex grid of a 3D scan. The face reads through the deformation of
- * the lattice — eye sockets, nose, lips — not through painted strokes.
- * Deterministic for a given rng (sub-point jitter only) — verified in
- * the BDD harness.
+ * Two layers compose the bust:
+ *  - the SCAN layer: a dense point cloud of the reference subject's face,
+ *    extracted from photos (MediaPipe landmarks + photo luminance) and
+ *    committed as a quantized asset. The likeness lives here.
+ *  - the LATTICE layer: ordered spherical rings raymarched onto a
+ *    smooth-min SDF (skull, hair, ears, neck) for everything the photo
+ *    scan cannot cover. The face window is culled from the lattice so
+ *    the scan slots in seamlessly.
+ *
+ * The merged cloud is sorted crown-to-neck so it still reads as a
+ * structured scan. Deterministic for a given rng — verified in BDD.
  */
 
-import { ell, smax, smin, sph } from "./face-math.js";
+import { decodeFaceScan, insideFaceWindow } from "./face-scan-decode.js";
+import { FACE_SCAN } from "./face-scan.js";
+import { ell, smin, sph } from "./face-math.js";
 import { clamp, dot, normalize, type Vec3 } from "./vector-math.js";
 
 export interface OrbRng {
@@ -24,6 +31,8 @@ export interface FaceGeometry {
   readonly aux: Float32Array;
   /** per point: eyeMask, shade, bustFade, irisMask. */
   readonly aux2: Float32Array;
+  /** per point: dot-size factor (the scan layer is finer grained). */
+  readonly scale: Float32Array;
   readonly count: number;
 }
 
@@ -51,20 +60,30 @@ const EYE_CENTERS: ReadonlyArray<Vec3> = [
 /* viewer-aligned light: the front reads uniformly bright, the sides
    fall off by curvature alone — like a scan lit from the camera */
 const LIGHT_DIR: Vec3 = normalize([0.08, 0.18, 0.98]);
+/** Share of the point budget given to the scan layer when present. */
+const SCAN_SHARE = 0.55;
+/** The scan layer renders finer dots than the structural lattice. */
+const SCAN_DOT_SCALE = 0.58;
+
+interface PointRecord {
+  p: Vec3;
+  aux: [number, number, number, number];
+  aux2: [number, number, number, number];
+  scale: number;
+}
 
 export function buildFaceGeometry(rng: OrbRng, targetPoints = 30000): FaceGeometry {
-  /* the lattice must stay readable as a dot grid: cap its resolution */
-  const rings = Math.max(36, Math.min(56, Math.round(Math.sqrt(targetPoints / 1.5))));
+  const scan = decodeFaceScan(FACE_SCAN);
+  const scanTake = scan.count > 0 ? Math.min(scan.count, Math.round(targetPoints * SCAN_SHARE)) : 0;
+  const latticeBudget = Math.max(2000, targetPoints - scanTake);
+
+  const records: PointRecord[] = [];
+
+  /* ---- LATTICE layer: skull, hair, ears, neck ---- */
+  const rings = Math.max(36, Math.min(120, Math.round(Math.sqrt(latticeBudget / 1.5))));
   const segments = Math.round(rings * 1.5);
-
-  const capacity = rings * segments;
-  const positions = new Float32Array(capacity * 3);
-  const aux = new Float32Array(capacity * 4);
-  const aux2 = new Float32Array(capacity * 4);
-  let count = 0;
-
   /* hybrid lattice: a spherical cap crowns the skull, then evenly
-     spaced horizontal rings hug the face — rays hit the face plane
+     spaced horizontal rings hug the head — rays hit the face plane
      square-on, so the grid never stretches over the features */
   const capRows = Math.round(rings * 0.3);
   for (let r = 0; r < rings; r++) {
@@ -88,6 +107,8 @@ export function buildFaceGeometry(rng: OrbRng, targetPoints = 30000): FaceGeomet
       ];
       const p = castToSurface(origin, dir);
       if (!p) continue;
+      /* the face window belongs to the scan layer */
+      if (scanTake > 0 && p[2] > 0.08 && insideFaceWindow(p[0], p[1], scan.window)) continue;
 
       /* sub-point jitter: invisible, but it keys the cloud to the seed */
       p[0] += (rng.next() - 0.5) * 0.003;
@@ -96,27 +117,66 @@ export function buildFaceGeometry(rng: OrbRng, targetPoints = 30000): FaceGeomet
 
       const random = rng.next();
       const hair = hairMask(p);
-      const warm = clamp((p[2] + 0.05) * 1.6, 0, 1) * (1 - hair * 0.7);
-      const eye = eyeSocketMask(p);
-      const iris = irisMask(p);
+      const beard = beardMask(p);
+      const warm = clamp((p[2] + 0.05) * 1.6, 0, 1) * (1 - hair * 0.7) * (1 - beard * 0.55);
       const normal = gradient(p);
       const lambert = clamp(dot(normal, LIGHT_DIR) * 0.5 + 0.5, 0, 1);
-      const shade = reliefShade(p, lambert);
-      const bust = clamp((p[1] + 0.98) / 0.3, 0, 1);
+      let shade = reliefShade(p, lambert);
+      /* dark swept-up hair: streaks follow the strand direction */
+      const strand = 0.5 + 0.5 * Math.sin(Math.atan2(p[0], p[2] + 0.06) * 22 + p[1] * 4);
+      shade *= 1 - hair * (0.58 - 0.3 * strand);
+      /* trimmed beard: darker than skin, stubble speckle from the seed */
+      shade *= 1 - beard * (0.5 - 0.14 * random);
 
-      positions.set(p, count * 3);
-      aux.set([jawMask(p), 0, warm, random], count * 4);
-      aux2.set([eye, shade, bust, iris], count * 4);
-      count += 1;
+      records.push({
+        p,
+        aux: [jawMask(p), hair, warm, random],
+        aux2: [eyeSocketMask(p), shade, clamp((p[1] + 0.98) / 0.3, 0, 1), irisMask(p)],
+        scale: 1,
+      });
     }
   }
 
-  return {
-    positions: positions.subarray(0, count * 3),
-    aux: aux.subarray(0, count * 4),
-    aux2: aux2.subarray(0, count * 4),
-    count,
-  };
+  /* ---- SCAN layer: the subject's face, photo shade baked in ---- */
+  for (let k = 0; k < scanTake; k++) {
+    const i = scanTake === scan.count ? k : Math.floor((k * scan.count) / scanTake);
+    const p: Vec3 = [
+      scan.positions[i * 3] + (rng.next() - 0.5) * 0.003,
+      scan.positions[i * 3 + 1] + (rng.next() - 0.5) * 0.003,
+      scan.positions[i * 3 + 2] + (rng.next() - 0.5) * 0.003,
+    ];
+    const random = rng.next();
+    const beard = beardMask(p);
+    const warm = clamp((p[2] + 0.05) * 1.6, 0, 1) * (1 - beard * 0.45);
+    records.push({
+      p,
+      aux: [jawMask(p), 0, warm, random],
+      aux2: [
+        eyeSocketMask(p),
+        scan.shade[i],
+        clamp((p[1] + 0.98) / 0.3, 0, 1),
+        irisMask(p),
+      ],
+      scale: SCAN_DOT_SCALE,
+    });
+  }
+
+  /* crown-to-neck order: the merged cloud still reads as a scan sweep */
+  records.sort((a, b) => b.p[1] - a.p[1]);
+
+  const count = records.length;
+  const positions = new Float32Array(count * 3);
+  const aux = new Float32Array(count * 4);
+  const aux2 = new Float32Array(count * 4);
+  const scale = new Float32Array(count);
+  for (let i = 0; i < count; i++) {
+    positions.set(records[i].p, i * 3);
+    aux.set(records[i].aux, i * 4);
+    aux2.set(records[i].aux2, i * 4);
+    scale[i] = records[i].scale;
+  }
+
+  return { positions, aux, aux2, scale, count };
 }
 
 /* march outward from inside the head to the first surface crossing */
@@ -130,7 +190,7 @@ function castToSurface(origin: Vec3, dir: Vec3): Vec3 | null {
   let hi = 0;
   let found = false;
   for (let t = 0.02; t < 2.1; t += 0.03) {
-    if (bustDistance(at(t)) >= 0) {
+    if (skullDistance(at(t)) >= 0) {
       hi = t;
       lo = t - 0.03;
       found = true;
@@ -140,7 +200,7 @@ function castToSurface(origin: Vec3, dir: Vec3): Vec3 | null {
   if (!found) return null;
   for (let i = 0; i < 11; i++) {
     const mid = (lo + hi) / 2;
-    if (bustDistance(at(mid)) >= 0) hi = mid;
+    if (skullDistance(at(mid)) >= 0) hi = mid;
     else lo = mid;
   }
   return at((lo + hi) / 2);
@@ -161,27 +221,19 @@ function jawMask(p: Vec3): number {
   );
 }
 
-/* Painted relief over the lambert: in a frontal hologram the features
-   read through value, not depth — sockets sleep, ridges catch light. */
+/* Painted relief over the lambert, for the lattice layer only — the
+   scan layer carries real photo luminance instead. */
 function reliefShade(p: Vec3, lambert: number): number {
   const g = (cx: number, cy: number, cz: number, rx: number, ry: number, rz: number): number =>
     Math.exp(-(((p[0] - cx) / rx) ** 2 + ((p[1] - cy) / ry) ** 2 + ((p[2] - cz) / rz) ** 2));
 
-  /* compact dark wells only — broad shadows would dim the whole face */
+  /* compact dark wells only — broad shadows would dim the whole head */
   let dark = Math.min(eyeSocketMask(p) * 1.3, 1) * 0.85;
   dark = Math.max(dark, g(0, -0.345, 0.5, 0.1, 0.02, 0.08) * 0.6); /* mouth line */
-  dark = Math.max(dark, g(0, -0.19, 0.54, 0.045, 0.025, 0.08) * 0.35); /* philtrum */
 
-  /* the face plane itself glows: the front is the bright side */
-  let bright = g(0, -0.05, 0.52, 0.45, 0.55, 0.28) * 0.3;
-  bright = Math.max(bright, g(0, -0.02, 0.58, 0.05, 0.2, 0.12) * 0.8); /* nose ridge */
-  bright = Math.max(bright, g(0, -0.12, 0.64, 0.07, 0.06, 0.08)); /* nose tip */
-  bright = Math.max(bright, g(0.21, 0.275, 0.52, 0.13, 0.035, 0.12) * 0.85); /* brow R */
-  bright = Math.max(bright, g(-0.21, 0.275, 0.52, 0.13, 0.035, 0.12) * 0.85); /* brow L */
-  bright = Math.max(bright, g(0, -0.3, 0.47, 0.1, 0.03, 0.08) * 0.6); /* lip bow */
-  bright = Math.max(bright, g(0, -0.555, 0.36, 0.1, 0.05, 0.1) * 0.5); /* chin */
-  bright = Math.max(bright, g(0.27, -0.06, 0.44, 0.1, 0.08, 0.1) * 0.5); /* cheek R */
-  bright = Math.max(bright, g(-0.27, -0.06, 0.44, 0.1, 0.08, 0.1) * 0.5); /* cheek L */
+  let bright = g(0, -0.05, 0.52, 0.45, 0.55, 0.28) * 0.3; /* face glow */
+  bright = Math.max(bright, g(0, 0.42, 0.44, 0.3, 0.16, 0.2) * 0.5); /* forehead */
+  bright = Math.max(bright, g(0, -0.555, 0.36, 0.1, 0.05, 0.1) * 0.4); /* chin */
 
   return clamp(lambert * (1 - dark * 0.85) + bright * 0.55, 0, 1);
 }
@@ -205,37 +257,95 @@ function irisMask(p: Vec3): number {
 
 export function hairMask(p: Vec3): number {
   if (p[1] < -0.62) return 0; /* the face and neck are never hair */
-  const back = clamp((0.18 - p[2]) * 1.5, 0, 1);
-  const line = 0.5 - back * 0.58; /* hairline up front, nape low behind */
-  return clamp((p[1] - line) * 3.0, 0, 1);
+  /* theta walks around the head: 0 faces the viewer, ±π is the nape */
+  const theta = Math.atan2(p[0], p[2]);
+  const around = Math.abs(theta) / Math.PI;
+  /* the subject's hairline: high front, receded temples, short sides
+     over the ears, tapered low at the nape */
+  const temple = Math.exp(-(((Math.abs(theta) - 0.62) / 0.22) ** 2));
+  const line =
+    0.44 + temple * 0.09 - smooth01(0.12, 0.5, around) * 0.42 - smooth01(0.5, 1, around) * 0.62;
+  return clamp((p[1] - line) * 4.0, 0, 1);
+}
+
+/** Short boxed beard + mustache: chin, jawline, sideburn link. */
+export function beardMask(p: Vec3): number {
+  if (p[1] > 0 || p[1] < -0.75) return 0;
+  const g = (cx: number, cy: number, cz: number, rx: number, ry: number, rz: number): number =>
+    Math.exp(-(((p[0] - cx) / rx) ** 2 + ((p[1] - cy) / ry) ** 2 + ((p[2] - cz) / rz) ** 2));
+  let m = g(0, -0.52, 0.3, 0.2, 0.17, 0.2); /* chin patch */
+  m = Math.max(m, g(0.29, -0.4, 0.16, 0.16, 0.18, 0.24)); /* jawline R */
+  m = Math.max(m, g(-0.29, -0.4, 0.16, 0.16, 0.18, 0.24)); /* jawline L */
+  m = Math.max(m, g(0, -0.295, 0.5, 0.13, 0.045, 0.1)); /* mustache */
+  m = Math.max(m, g(0.44, -0.14, 0.04, 0.09, 0.24, 0.18)); /* sideburn R */
+  m = Math.max(m, g(-0.44, -0.14, 0.04, 0.09, 0.24, 0.18)); /* sideburn L */
+  /* the lower lip stays bare inside the beard frame */
+  m *= 1 - Math.min(1, g(0, -0.385, 0.48, 0.09, 0.04, 0.09) * 1.4);
+  return clamp(m * 1.25, 0, 1);
+}
+
+function smooth01(a: number, b: number, x: number): number {
+  const t = clamp((x - a) / (b - a), 0, 1);
+  return t * t * (3 - 2 * t);
 }
 
 /* ============================ sdf ============================ */
 
-export function bustDistance(p: Vec3): number {
+/** Core head SDF, before the photo hull. The hair volumes deliberately
+    overshoot the subject's silhouette: the front-photo hull is the one
+    that carves them down to the exact contour. */
+export function skullCoreDistance(p: Vec3): number {
   let d = ell(p, 0, 0.3, -0.06, 0.56, 0.55, 0.6); /* cranium */
   d = smin(d, ell(p, 0, 0.05, 0.28, 0.5, 0.44, 0.3), 0.16); /* face plane */
-  d = smin(d, ell(p, 0, -0.2, 0.2, 0.44, 0.36, 0.32), 0.14); /* midface */
-  d = smin(d, ell(p, 0, -0.4, 0.1, 0.34, 0.26, 0.3), 0.12); /* jaw */
-  d = smin(d, ell(p, 0, -0.54, 0.26, 0.15, 0.11, 0.12), 0.08); /* chin */
-  d = smin(d, ell(p, 0.24, -0.04, 0.36, 0.14, 0.16, 0.14), 0.1); /* cheek R */
-  d = smin(d, ell(p, -0.24, -0.04, 0.36, 0.14, 0.16, 0.14), 0.1); /* cheek L */
-  /* relief is exaggerated: the lattice only shows what really dents */
-  d = smin(d, ell(p, 0, 0.04, 0.54, 0.085, 0.2, 0.13), 0.07); /* nose bridge */
-  d = smin(d, sph(p, 0, -0.12, 0.62, 0.095), 0.06); /* nose tip */
-  d = smin(d, sph(p, 0.085, -0.15, 0.55, 0.055), 0.04); /* wing R */
-  d = smin(d, sph(p, -0.085, -0.15, 0.55, 0.055), 0.04); /* wing L */
-  d = smin(d, ell(p, 0, -0.3, 0.45, 0.18, 0.05, 0.1), 0.05); /* upper lip */
-  d = smin(d, ell(p, 0, -0.38, 0.44, 0.16, 0.055, 0.11), 0.05); /* lower lip */
+  d = smin(d, ell(p, 0, -0.2, 0.2, 0.42, 0.36, 0.32), 0.14); /* midface */
+  d = smin(d, ell(p, 0, -0.4, 0.1, 0.33, 0.26, 0.3), 0.12); /* jaw */
+  d = smin(d, ell(p, 0, -0.55, 0.26, 0.15, 0.12, 0.13), 0.08); /* chin */
+  d = smin(d, ell(p, 0.26, 0.0, 0.34, 0.13, 0.15, 0.14), 0.1); /* cheekbone R */
+  d = smin(d, ell(p, -0.26, 0.0, 0.34, 0.13, 0.15, 0.14), 0.1); /* cheekbone L */
+  /* the subject's hair: tall swept-up volume — generous on purpose,
+     the photo hull trims it to the real quiff and temples */
+  d = smin(d, ell(p, 0, 0.58, -0.04, 0.55, 0.5, 0.58), 0.08); /* hair crown */
+  d = smin(d, ell(p, 0, 0.8, 0.18, 0.34, 0.3, 0.26), 0.09); /* front quiff */
+  d = smin(d, ell(p, 0, 0.3, -0.26, 0.5, 0.42, 0.46), 0.07); /* occiput */
   d = smin(d, ell(p, 0.56, 0.04, -0.05, 0.045, 0.1, 0.08), 0.04); /* ear R */
   d = smin(d, ell(p, -0.56, 0.04, -0.05, 0.045, 0.1, 0.08), 0.04); /* ear L */
   d = smin(d, ell(p, 0, -0.85, -0.04, 0.26, 0.38, 0.25), 0.1); /* neck stub */
-  /* deep sockets: the lattice dives in and the gaze appears */
-  d = smax(d, -ell(p, 0.2, 0.12, 0.6, 0.15, 0.075, 0.12), 0.05); /* socket R */
-  d = smax(d, -ell(p, -0.2, 0.12, 0.6, 0.15, 0.075, 0.12), 0.05); /* socket L */
-  /* the mouth line parts the lips */
-  d = smax(d, -ell(p, 0, -0.345, 0.52, 0.13, 0.018, 0.06), 0.02);
+  d = smin(d, sph(p, 0, -0.12, 0.6, 0.07), 0.09); /* nose root, seam aid */
+  /* the trimmed beard pads the jaw and chin outward */
+  d -= beardMask(p) * 0.018;
   return d;
+}
+
+/** Structural head SDF: the core sculpt intersected with the photo
+    hull, so the hair contour matches the reference subject exactly. */
+export function skullDistance(p: Vec3): number {
+  let d = skullCoreDistance(p);
+  /* visual hull: the front-photo silhouette carves the hair contour —
+     gated above the neck so the closed polygon never crops the bust */
+  const hull = FACE_SCAN.hullFront;
+  if (hull && hull.length >= 6 && p[1] > -0.6) {
+    const gate = smooth01(-0.55, -0.42, p[1]);
+    const pd = polygonSignedDistance(p[0], p[1], hull);
+    d = d + (Math.max(d, pd) - d) * gate;
+  }
+  return d;
+}
+
+/** Signed distance to a flat-pair polygon in head-frame xy (negative
+    inside). Drives the photo-true silhouette hull of the skull. */
+function polygonSignedDistance(x: number, y: number, v: ReadonlyArray<number>): number {
+  const n = v.length / 2;
+  let dist = Infinity;
+  let inside = false;
+  for (let i = 0, j = n - 1; i < n; j = i++) {
+    const xi = v[i * 2], yi = v[i * 2 + 1];
+    const xj = v[j * 2], yj = v[j * 2 + 1];
+    const ex = xj - xi, ey = yj - yi;
+    const t = Math.max(0, Math.min(1, ((x - xi) * ex + (y - yi) * ey) / (ex * ex + ey * ey || 1)));
+    dist = Math.min(dist, Math.hypot(x - xi - ex * t, y - yi - ey * t));
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside ? -dist : dist;
 }
 
 function gradient(p: Vec3): Vec3 {
@@ -244,9 +354,9 @@ function gradient(p: Vec3): Vec3 {
   const q: Vec3 = [...p];
   for (let i = 0; i < 3; i++) {
     q[i] = p[i] + e;
-    const a = bustDistance(q);
+    const a = skullDistance(q);
     q[i] = p[i] - e;
-    const b = bustDistance(q);
+    const b = skullDistance(q);
     q[i] = p[i];
     g[i] = (a - b) / (2 * e);
   }

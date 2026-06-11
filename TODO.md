@@ -361,6 +361,15 @@ Puis verifier dans le navigateur:
 - [x] Hologramme verifie en session live (Gemini reel, mode E2E silence):
       listening 33s (tilt + teinte verte), mute 78s (bow + retrait +
       liseré rouge), stop propre vers idle.
+- [x] Visage photo-fidele (2026-06-11): pipeline face-scan (MediaPipe
+      landmarks + luminance photo dans Chrome → asset quantise commite),
+      builder par calques (scan 16.8k pts + lattice 120 anneaux), hull
+      silhouette cheveux trace depuis la photo de face, beardMask,
+      aScale anti-blowout. BDD 9/9, tsc clean, verifie in-app.
+- [ ] Articulations de la bouche pilotees par la video de reference
+      (l'utilisateur fournit la video — mapper visemes/keyframes sur le
+      calque scan via les masques bouche existants).
+- [ ] Hull profil (occiput/nuque) si la revue visuelle le demande.
 - [x] Refonte environment (OnboardingConfig): hero tokenise 30px (glass
       blanc purge), metrics/pills/kickers/steps en mono, focus ring
       tokenise, terminal infra en font-mono sur dark fixe, entree animee

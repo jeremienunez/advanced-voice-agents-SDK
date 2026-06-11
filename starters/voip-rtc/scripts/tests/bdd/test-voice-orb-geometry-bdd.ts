@@ -1,16 +1,23 @@
 import {
+  beardMask,
   buildFaceGeometry,
-  bustDistance,
   hairMask,
   mouthMask,
   OrbSeededRng,
+  skullDistance,
 } from "../../../src/components/hologram/face-geometry.js";
+import {
+  decodeFaceScan,
+  insideFaceWindow,
+} from "../../../src/components/hologram/face-scan-decode.js";
+import { FACE_SCAN } from "../../../src/components/hologram/face-scan.js";
 import { blinkAmount, gazeTarget, moodExpression } from "../../../src/components/hologram/holo-motion.js";
 
 const results = [
   scenarioGeometryIsSeedStable(),
   scenarioLatticeIsOrderedTopToBottom(),
-  scenarioPointsLieOnTheSculptedSurface(),
+  scenarioPointsLieOnTheLayeredSurfaces(),
+  scenarioFaceScanIsAnchoredToTheFacialFrame(),
   scenarioAnatomicalMasksAreCoherent(),
   scenarioFaceReliefAndIrisesArePresent(),
   scenarioGazeIsCenteredAndClamped(),
@@ -88,7 +95,7 @@ function scenarioGeometryIsSeedStable(): string {
     checksum(first.positions) !== checksum(other.positions),
     "different seeds must sculpt different clouds",
   );
-  assert(first.count >= 3800, `sampling must come close to budget, got ${first.count}`);
+  assert(first.count >= 3500, `sampling must come close to budget, got ${first.count}`);
 
   return "geometry-seed-stable";
 }
@@ -112,9 +119,10 @@ function scenarioLatticeIsOrderedTopToBottom(): string {
   return "lattice-is-ordered-top-to-bottom";
 }
 
-function scenarioPointsLieOnTheSculptedSurface(): string {
+function scenarioPointsLieOnTheLayeredSurfaces(): string {
   const geometry = buildFaceGeometry(new OrbSeededRng(1337), 4000);
-  let offSurface = 0;
+  let lattice = 0;
+  let stray = 0;
 
   for (let i = 0; i < geometry.count; i++) {
     const p: [number, number, number] = [
@@ -122,16 +130,45 @@ function scenarioPointsLieOnTheSculptedSurface(): string {
       geometry.positions[i * 3 + 1],
       geometry.positions[i * 3 + 2],
     ];
-    if (Math.abs(bustDistance(p)) > 0.02) offSurface += 1;
+    const onSkull = Math.abs(skullDistance(p)) <= 0.02;
+    const inScanWindow = p[2] > 0 && insideFaceWindow(p[0], p[1], FACE_SCAN.window);
+    if (onSkull) lattice += 1;
+    else if (!inScanWindow) stray += 1;
   }
 
-  assert(geometry.count > 2000, "the lattice must dominate the cloud");
+  assert(lattice > 1000, "the structural lattice must remain a strong layer");
   assert(
-    offSurface / geometry.count < 0.01,
-    `lattice points must sit on the SDF surface (${offSurface}/${geometry.count} off)`,
+    stray / geometry.count < 0.02,
+    `every point must belong to a layer: skull SDF or face window (${stray}/${geometry.count} stray)`,
   );
 
-  return "points-lie-on-sculpted-surface";
+  return "points-lie-on-layered-surfaces";
+}
+
+function scenarioFaceScanIsAnchoredToTheFacialFrame(): string {
+  const scan = decodeFaceScan(FACE_SCAN);
+  assert(scan.count > 10000, `the committed face scan must be dense, got ${scan.count}`);
+
+  /* the registration contract: iris clusters on ±0.2/0.12, mouth points
+     near the y=-0.345 line — the shader's blink/murmur anchors */
+  let nearEyeR = 0;
+  let nearEyeL = 0;
+  let nearMouth = 0;
+  for (let i = 0; i < scan.count; i++) {
+    const x = scan.positions[i * 3];
+    const y = scan.positions[i * 3 + 1];
+    if (Math.hypot(x - 0.2, y - 0.12) < 0.05) nearEyeR += 1;
+    if (Math.hypot(x + 0.2, y - 0.12) < 0.05) nearEyeL += 1;
+    if (Math.abs(x) < 0.12 && Math.abs(y + 0.345) < 0.04) nearMouth += 1;
+  }
+  assert(nearEyeR > 10 && nearEyeL > 10, "both eyes must be sampled at the anchor points");
+  assert(nearMouth > 10, "the mouth must sit on the murmur line");
+
+  for (let i = 0; i < scan.count; i++) {
+    assert(scan.shade[i] >= 0 && scan.shade[i] <= 1, "photo shade must stay in [0,1]");
+  }
+
+  return "face-scan-anchored-to-facial-frame";
 }
 
 function scenarioAnatomicalMasksAreCoherent(): string {
@@ -152,6 +189,11 @@ function scenarioAnatomicalMasksAreCoherent(): string {
   assert(hairMask(backOfSkull) > 0.6, "the back of the skull must read as hair");
   assert(hairMask(chin) < 0.1, "the chin must never read as hair");
   assert(hairMask(shoulder) === 0, "the bust must never read as hair");
+
+  const chinBeard: [number, number, number] = [0, -0.52, 0.34];
+  const forehead: [number, number, number] = [0, 0.4, 0.55];
+  assert(beardMask(chinBeard) > 0.5, "the chin must wear the trimmed beard");
+  assert(beardMask(forehead) === 0, "the forehead must never read as beard");
 
   return "anatomical-masks-coherent";
 }

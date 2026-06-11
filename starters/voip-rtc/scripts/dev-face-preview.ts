@@ -41,9 +41,15 @@ for (let i = 0; i < geo.count; i++) {
 
   /* diagnostic mode: paint the raw shade channel, full alpha */
   if (process.argv[5] === "shade") {
-    const v = 0.06 + shade * 0.94;
-    const idx = (py * W + px) * 3;
-    buf[idx] += v; buf[idx + 1] += v; buf[idx + 2] += v;
+    for (let dy = 0; dy <= 1; dy++) {
+      for (let dx = 0; dx <= 1; dx++) {
+        const qx = px + dx; const qy = py + dy;
+        if (qx >= W || qy >= H) continue;
+        const v = (0.06 + shade * 0.94) * (dx === 0 && dy === 0 ? 1 : 0.6);
+        const idx = (qy * W + qx) * 3;
+        buf[idx] += v; buf[idx + 1] += v; buf[idx + 2] += v;
+      }
+    }
     continue;
   }
 
@@ -62,6 +68,7 @@ for (let i = 0; i < geo.count; i++) {
   let a = (0.5 + 0.25 * 0.85) * 0.69;
   a = Math.max(a, iris * 0.5);
   a *= bust;
+  a *= geo.scale[i] < 0.99 ? 0.38 : 1; /* scan-layer density rein-in */
 
   /* splat 2x2 like a GL point sprite */
   for (let dy = 0; dy <= 1; dy++) {
@@ -82,9 +89,9 @@ for (let y = 0; y < H; y++) {
   for (let x = 0; x < W; x++) {
     const s = (y * W + x) * 3;
     const d = y * (W * 3 + 1) + 1 + x * 3;
-    raw[d] = Math.min(255, Math.round((1 - Math.exp(-buf[s] * 2.6)) * 290) + 6);
-    raw[d + 1] = Math.min(255, Math.round((1 - Math.exp(-buf[s + 1] * 2.6)) * 290) + 8);
-    raw[d + 2] = Math.min(255, Math.round((1 - Math.exp(-buf[s + 2] * 2.6)) * 290) + 16);
+    raw[d] = Math.min(255, Math.round((1 - Math.exp(-buf[s] * 4.4)) * 290) + 6);
+    raw[d + 1] = Math.min(255, Math.round((1 - Math.exp(-buf[s + 1] * 4.4)) * 290) + 8);
+    raw[d + 2] = Math.min(255, Math.round((1 - Math.exp(-buf[s + 2] * 4.4)) * 290) + 16);
   }
 }
 
