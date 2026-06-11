@@ -125,10 +125,22 @@ try {
   /* head-outline extraction: walk each row inward from both sides until
      the studio backdrop gives way to the subject — the two-view hull
      makes the hair silhouette photo-exact */
-  status("tracing outlines…");
-  /* inside-out trace: the subject is contiguous from the head's center
-     column, so walking outward until a sustained backdrop run is immune
-     to studio clutter and panel borders that edge-inward scans catch */
+  status("loading segmenter…");
+  /* Dense silhouette extraction with MediaPipe ImageSegmenter (selfie
+     model): a person/background confidence mask per view, then per-row
+     mask bounds — the run containing the head's center column, so the
+     blurred second person and studio props never pollute the chains.
+     Also emits a downsampled grayscale of the head region so the packer
+     can sample photo luminance for any 3D hull point (triplanar). */
+  const { ImageSegmenter } = vision;
+  const segmenter = await ImageSegmenter.createFromOptions(fileset, {
+    baseOptions: {
+      modelAssetPath:
+        "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/latest/selfie_segmenter.tflite",
+    },
+    runningMode: "IMAGE",
+    outputConfidenceMasks: true,
+  });
   const traceOutline = async (src, centerX) => {
     const im = new Image();
     im.src = src;
@@ -139,51 +151,63 @@ try {
     const cx = c.getContext("2d", { willReadFrequently: true });
     cx.drawImage(im, 0, 0);
     const px = cx.getImageData(0, 0, w, h).data;
-    const at = (x, y) => {
-      const i = (y * w + x) * 4;
-      return [px[i], px[i + 1], px[i + 2]];
+    const lumAtPx = (x, y) => {
+      const i = (Math.max(0, Math.min(h - 1, y)) * w + Math.max(0, Math.min(w - 1, x))) * 4;
+      return 0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2];
     };
-    const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
-    const THRESH = 30, BG_RUN = 9;
-    const medianBand = (x0, x1, y) => {
-      const ch = [[], [], []];
-      for (let x = Math.max(0, x0); x <= Math.min(w - 1, x1); x += 2) {
-        const c2 = at(x, y);
-        ch[0].push(c2[0]); ch[1].push(c2[1]); ch[2].push(c2[2]);
-      }
-      return ch.map((vals) => vals.sort((a, b) => a - b)[Math.floor(vals.length / 2)]);
+
+    const seg = segmenter.segment(im);
+    const mask = seg.confidenceMasks[0];
+    const mw = mask.width, mh = mask.height;
+    let conf = mask.getAsFloat32Array();
+    /* orientation: the model may report person or background as class 0 —
+       the head center must be "person" */
+    const sampleAt = (x, y) =>
+      conf[Math.round((y / h) * (mh - 1)) * mw + Math.round((x / w) * (mw - 1))];
+    let headProbe = 0;
+    for (let dy = -20; dy <= 20; dy += 10) headProbe += sampleAt(centerX, h * 0.35 + dy);
+    const inv = headProbe / 5 < 0.5;
+    const personAt = (x, y) => {
+      const v = sampleAt(x, y);
+      return (inv ? 1 - v : v) > 0.5;
     };
-    const isBgRun = (x, y, bg, step) => {
-      for (let k = 0; k < BG_RUN; k++) {
-        const xx = Math.min(w - 1, Math.max(0, x + k * step));
-        if (dist(at(xx, y), bg) > THRESH) return false;
-      }
-      return true;
-    };
+
     const left = [], right = [];
-    for (let y = 6; y < h; y += 3) {
-      const bgL = medianBand(20, 44, y);
-      const bgR = medianBand(w - 44, w - 20, y);
-      /* the row counts only if the subject is present at its center */
-      if (isBgRun(centerX - 4, y, bgL, 1) && isBgRun(centerX - 4, y, bgR, 1)) continue;
-      let xl = -1, xr = -1;
-      for (let x = centerX; x > 20; x--) {
-        if (isBgRun(x - BG_RUN, y, bgL, 1)) { xl = x; break; }
-      }
-      for (let x = centerX; x < w - 20; x++) {
-        if (isBgRun(x + 1, y, bgR, 1)) { xr = x; break; }
-      }
-      if (xl > 24 && xr > xl) { left.push([xl, y]); right.push([xr, y]); }
+    for (let y = 2; y < h; y += 2) {
+      /* the person run that contains (or is nearest to) the center column */
+      if (!personAt(centerX, y)) continue;
+      let xl = centerX, xr = centerX;
+      while (xl > 1 && personAt(xl - 1, y)) xl--;
+      while (xr < w - 2 && personAt(xr + 1, y)) xr++;
+      if (xr - xl < 8) continue;
+      left.push([xl, y]);
+      right.push([xr, y]);
     }
-    return { w, h, left, right };
+    seg.close();
+    /* luminance map of the head region for triplanar sampling */
+    const ys2 = left.map((p) => p[1]);
+    const xs2 = left.map((p) => p[0]).concat(right.map((p) => p[0]));
+    const bx0 = Math.max(0, Math.min(...xs2) - 10);
+    const bx1 = Math.min(w - 1, Math.max(...xs2) + 10);
+    const by0 = Math.max(0, Math.min(...ys2) - 10);
+    const by1 = Math.min(h - 1, Math.max(...ys2) + 10);
+    const LUM_STEP = 2;
+    const lw = Math.floor((bx1 - bx0) / LUM_STEP);
+    const lh = Math.floor((by1 - by0) / LUM_STEP);
+    const lum = new Array(lw * lh);
+    for (let j = 0; j < lh; j++) {
+      for (let i2 = 0; i2 < lw; i2++) {
+        lum[j * lw + i2] = Math.round(lumAtPx(bx0 + i2 * LUM_STEP, by0 + j * LUM_STEP));
+      }
+    }
+    return { w, h, left, right, lum: { x0: bx0, y0: by0, step: LUM_STEP, lw, lh, data: lum } };
   };
   /* head centers: the face landmarks give the front center; the profile
-     head sits left of panel center, nose pointing right */
-  const outlineFront = await traceOutline("./ref/front.png", Math.round(mid0()));
+     head sits left of panel center (nose pointing right); the back head
+     sits near the panel center */
+  const outlineFront = await traceOutline("./ref/front.png", Math.round((pts[468][0] + pts[473][0]) / 2));
   const outlineSide = await traceOutline("./ref/profile-right.png", Math.round(0.42 * 770));
-  function mid0() {
-    return (pts[468][0] + pts[473][0]) / 2;
-  }
+  const outlineBack = await traceOutline("./ref/back.png", Math.round(760 * 0.5));
 
   window.__SCAN = {
     w: W, h: H,
@@ -192,8 +216,9 @@ try {
     samples,
     outlineFront,
     outlineSide,
+    outlineBack,
   };
-  status(`done: ${samples.length} samples, ${pts.length} landmarks, outlines ${outlineFront.left.length}/${outlineSide.left.length}`);
+  status(`done: ${samples.length} samples, outlines F${outlineFront.left.length}/S${outlineSide.left.length}/B${outlineBack.left.length}`);
   document.title = "SCAN_DONE";
 } catch (err) {
   status(`error: ${err?.message ?? err}`);

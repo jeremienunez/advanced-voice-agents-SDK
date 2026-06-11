@@ -121,8 +121,24 @@ function scenarioLatticeIsOrderedTopToBottom(): string {
 
 function scenarioPointsLieOnTheLayeredSurfaces(): string {
   const geometry = buildFaceGeometry(new OrbSeededRng(1337), 4000);
-  let lattice = 0;
+  let structural = 0;
   let stray = 0;
+
+  /* signed distance to a flat-pair polygon (negative inside) */
+  const polySdf = (x: number, y: number, v: ReadonlyArray<number>): number => {
+    const n = v.length / 2;
+    let dist = Infinity;
+    let inside = false;
+    for (let i = 0, j = n - 1; i < n; j = i++) {
+      const xi = v[i * 2], yi = v[i * 2 + 1];
+      const xj = v[j * 2], yj = v[j * 2 + 1];
+      const ex = xj - xi, ey = yj - yi;
+      const t = Math.max(0, Math.min(1, ((x - xi) * ex + (y - yi) * ey) / (ex * ex + ey * ey || 1)));
+      dist = Math.min(dist, Math.hypot(x - xi - ex * t, y - yi - ey * t));
+      if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+    }
+    return inside ? -dist : dist;
+  };
 
   for (let i = 0; i < geometry.count; i++) {
     const p: [number, number, number] = [
@@ -130,16 +146,20 @@ function scenarioPointsLieOnTheLayeredSurfaces(): string {
       geometry.positions[i * 3 + 1],
       geometry.positions[i * 3 + 2],
     ];
-    const onSkull = Math.abs(skullDistance(p)) <= 0.02;
+    const onNeckLattice = Math.abs(skullDistance(p)) <= 0.02;
     const inScanWindow = p[2] > 0 && insideFaceWindow(p[0], p[1], FACE_SCAN.window);
-    if (onSkull) lattice += 1;
-    else if (!inScanWindow) stray += 1;
+    /* the skull layer lives on/inside the two photo silhouettes */
+    const inHulls =
+      polySdf(p[0], p[1], FACE_SCAN.hullFront ?? []) < 0.05 &&
+      polySdf(p[2], p[1], FACE_SCAN.hullSide ?? []) < 0.05;
+    if (inHulls && !inScanWindow) structural += 1;
+    if (!onNeckLattice && !inScanWindow && !inHulls) stray += 1;
   }
 
-  assert(lattice > 1000, "the structural lattice must remain a strong layer");
+  assert(structural > 800, `the photo-hull skull layer must be strong, got ${structural}`);
   assert(
     stray / geometry.count < 0.02,
-    `every point must belong to a layer: skull SDF or face window (${stray}/${geometry.count} stray)`,
+    `every point must belong to a layer: neck SDF, photo hulls or face window (${stray}/${geometry.count} stray)`,
   );
 
   return "points-lie-on-layered-surfaces";

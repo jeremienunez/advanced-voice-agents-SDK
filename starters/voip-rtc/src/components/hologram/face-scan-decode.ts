@@ -22,6 +22,13 @@ export interface FaceScanData {
       quiff overhang. Scan points are pre-clamped inside it at pack time.
       Empty = unconstrained. */
   readonly hullSide?: ReadonlyArray<number>;
+  /** points in the baked skull/hair layer (hull-surface rings with
+      triplanar photo luminance). 0 = fall back to the SDF lattice. */
+  readonly skullCount?: number;
+  /** base64 Int16 xyz triplets for the skull layer. */
+  readonly skullPos?: string;
+  /** base64 Uint8 luminance per skull point. */
+  readonly skullShade?: string;
 }
 
 export interface FaceScan {
@@ -31,6 +38,9 @@ export interface FaceScan {
   readonly window: ReadonlyArray<number>;
   readonly hullFront: ReadonlyArray<number>;
   readonly hullSide: ReadonlyArray<number>;
+  readonly skullCount: number;
+  readonly skullPositions: Float32Array;
+  readonly skullShade: Float32Array;
 }
 
 export const POS_SCALE = 8000;
@@ -44,22 +54,31 @@ function b64ToBytes(b64: string): Uint8Array {
 }
 
 export function decodeFaceScan(data: FaceScanData): FaceScan {
-  const positions = new Float32Array(data.count * 3);
-  const shade = new Float32Array(data.count);
-  if (data.count > 0) {
-    const posBytes = b64ToBytes(data.pos);
-    const posInts = new Int16Array(posBytes.buffer, posBytes.byteOffset, data.count * 3);
-    for (let i = 0; i < posInts.length; i++) positions[i] = posInts[i] / POS_SCALE;
-    const shadeBytes = b64ToBytes(data.shade);
-    for (let i = 0; i < data.count; i++) shade[i] = shadeBytes[i] / 255;
-  }
+  const decodeLayer = (count: number, posB64: string, shadeB64: string) => {
+    const positions = new Float32Array(count * 3);
+    const shade = new Float32Array(count);
+    if (count > 0) {
+      const posBytes = b64ToBytes(posB64);
+      const posInts = new Int16Array(posBytes.buffer, posBytes.byteOffset, count * 3);
+      for (let i = 0; i < posInts.length; i++) positions[i] = posInts[i] / POS_SCALE;
+      const shadeBytes = b64ToBytes(shadeB64);
+      for (let i = 0; i < count; i++) shade[i] = shadeBytes[i] / 255;
+    }
+    return { positions, shade };
+  };
+  const face = decodeLayer(data.count, data.pos, data.shade);
+  const skullCount = data.skullCount ?? 0;
+  const skull = decodeLayer(skullCount, data.skullPos ?? "", data.skullShade ?? "");
   return {
     count: data.count,
-    positions,
-    shade,
+    positions: face.positions,
+    shade: face.shade,
     window: data.window,
     hullFront: data.hullFront ?? [],
     hullSide: data.hullSide ?? [],
+    skullCount,
+    skullPositions: skull.positions,
+    skullShade: skull.shade,
   };
 }
 

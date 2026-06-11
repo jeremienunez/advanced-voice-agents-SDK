@@ -1,23 +1,37 @@
 /* Packs the raw browser scan (scan-raw.json, produced by extract.html)
    into the committed face-scan asset.
 
-   Registration anchors the photo cloud onto the shader's facial frame:
-   iris centers land on (±0.2, 0.12), the mouth line on (0, -0.345) — so
-   blink, murmur and mood expressions keep working untouched. Depth comes
-   from MediaPipe's relative z (Z_GAIN env tunes the profile projection).
-   The face-oval boundary is blended onto the skull SDF so the scan layer
-   meets the lattice without a seam. */
+   FACE layer — MediaPipe landmarks + photo luminance, registered onto
+   the shader's facial frame (iris centers ±0.2/0.12, mouth 0/-0.345) so
+   blink/murmur/mood keep working. Depth = relative z (Z_GAIN), smoothed,
+   clamped against the profile silhouette (MediaPipe bulges at the rim).
+
+   SKULL layer — the rest of the head is a visual-hull surface: per
+   y-row, the cross-section is an ellipse spanning the segmenter-traced
+   front silhouette (x extent) and right-profile silhouette (z extent).
+   Each ring point samples photo luminance triplanar-style from the
+   front / profile / back views. No hand-drawn polygons anywhere: the
+   silhouettes come from MediaPipe ImageSegmenter at pixel resolution. */
 
 import { readFileSync, writeFileSync } from "node:fs";
-import { skullCoreDistance } from "../../src/components/hologram/face-geometry.js";
-import { POS_SCALE } from "../../src/components/hologram/face-scan-decode.js";
+import { insideFaceWindow, POS_SCALE } from "../../src/components/hologram/face-scan-decode.js";
 import type { Vec3 } from "../../src/components/hologram/vector-math.js";
+
+interface LumMap {
+  x0: number;
+  y0: number;
+  step: number;
+  lw: number;
+  lh: number;
+  data: number[];
+}
 
 interface OutlineTrace {
   w: number;
   h: number;
   left: number[][];
   right: number[][];
+  lum: LumMap;
 }
 
 interface RawScan {
@@ -26,16 +40,17 @@ interface RawScan {
   landmarks: number[][];
   oval: number[];
   samples: number[][];
-  outlineFront?: OutlineTrace;
-  outlineSide?: OutlineTrace;
+  outlineFront: OutlineTrace;
+  outlineSide: OutlineTrace;
+  outlineBack: OutlineTrace;
 }
 
 const here = new URL(".", import.meta.url).pathname;
 const raw: RawScan = JSON.parse(readFileSync(`${here}scan-raw.json`, "utf8"));
-const Z_GAIN = Number(process.env.Z_GAIN ?? 1.0);
+const Z_GAIN = Number(process.env.Z_GAIN ?? 0.9);
 const Z_EYE = 0.52; /* head-frame depth of the eye plane */
 
-/* ---------- registration ---------- */
+/* ================= face registration (landmarks) ================= */
 
 const lm = raw.landmarks;
 const mean = (ids: number[]): number[] =>
@@ -67,45 +82,133 @@ function toHead(x: number, y: number, z: number): Vec3 {
   const [rx, ry] = rot(x, y);
   return [rx * sx, 0.12 - ry * sy, Z_EYE + (mid[2] - z) * sz];
 }
+/* inverse, for luminance sampling (roll is <1° — ignored) */
+const frontPx = (x: number, y: number): [number, number] => [
+  mid[0] + x / sx,
+  mid[1] + (0.12 - y) / sy,
+];
 
-/* ---------- seam blend onto the skull SDF ---------- */
+/* ================= silhouettes (segmenter chains) ================= */
 
-const ovalHead = raw.oval.map((i) => toHead(lm[i][0], lm[i][1], lm[i][2]));
-
-function distToOvalEdge(x: number, y: number): number {
-  let best = Infinity;
-  for (let i = 0, j = ovalHead.length - 1; i < ovalHead.length; j = i++) {
-    const [x1, y1] = [ovalHead[j][0], ovalHead[j][1]];
-    const [x2, y2] = [ovalHead[i][0], ovalHead[i][1]];
-    const dx = x2 - x1, dy = y2 - y1;
-    const t = Math.max(0, Math.min(1, ((x - x1) * dx + (y - y1) * dy) / (dx * dx + dy * dy)));
-    best = Math.min(best, Math.hypot(x - x1 - dx * t, y - y1 - dy * t));
-  }
-  return best;
-}
-
-function projectOnSkull(p: Vec3): Vec3 {
-  const q: Vec3 = [...p];
-  for (let iter = 0; iter < 3; iter++) {
-    const d = skullCoreDistance(q);
-    const e = 0.011;
-    const g: Vec3 = [0, 0, 0];
-    for (let i = 0; i < 3; i++) {
-      const a: Vec3 = [...q]; a[i] += e;
-      const b: Vec3 = [...q]; b[i] -= e;
-      g[i] = (skullCoreDistance(a) - skullCoreDistance(b)) / (2 * e);
+/** Box-smooth a chain's x values and return a y→x linear interpolator. */
+function chainInterp(chain: number[][], toUnits: (x: number, y: number) => [number, number]) {
+  const pts = chain
+    .map(([x, y]) => toUnits(x, y))
+    .sort((a, b) => b[1] - a[1]); /* y desc */
+  const xs = pts.map((p) => p[0]);
+  const smooth = xs.map((_, i) => {
+    let sum = 0;
+    let n = 0;
+    for (let j = Math.max(0, i - 3); j <= Math.min(xs.length - 1, i + 3); j++) {
+      sum += xs[j];
+      n++;
     }
-    const len = Math.hypot(g[0], g[1], g[2]) || 1;
-    q[0] -= (g[0] / len) * d;
-    q[1] -= (g[1] / len) * d;
-    q[2] -= (g[2] / len) * d;
-  }
-  return q;
+    return sum / n;
+  });
+  const ys = pts.map((p) => p[1]);
+  return (y: number): number | null => {
+    if (y > ys[0] || y < ys[ys.length - 1]) return null;
+    let lo = 0;
+    let hi = ys.length - 1;
+    while (hi - lo > 1) {
+      const m = (lo + hi) >> 1;
+      if (ys[m] >= y) lo = m;
+      else hi = m;
+    }
+    const t = (ys[lo] - y) / (ys[lo] - ys[hi] || 1);
+    return smooth[lo] + (smooth[hi] - smooth[lo]) * t;
+  };
 }
 
-const SEAM_BAND = Number(process.env.SEAM_BAND ?? 0.2);
+/* front chains → x extents (units via the landmark registration) */
+const frontUnits = (x: number, y: number): [number, number] => {
+  const p = toHead(x, y, mid[2]);
+  return [p[0], p[1]];
+};
+const XL = chainInterp(raw.outlineFront.left, frontUnits);
+const XR = chainInterp(raw.outlineFront.right, frontUnits);
+const topUnits = Math.max(
+  ...raw.outlineFront.left.map(([x, y]) => frontUnits(x, y)[1]),
+);
 
-/* ---------- transform, blend, normalize ---------- */
+/* side registration: crown top + nose tip anchor the scale */
+const sideRows = raw.outlineSide.left.map((p) => p[1]);
+const sideTopRow = Math.min(...sideRows);
+const sideBottomRow = Math.max(...sideRows);
+let noseRowPx = sideTopRow;
+let noseColPx = 0;
+for (const [x, y] of raw.outlineSide.right) {
+  if (y < sideTopRow + (sideBottomRow - sideTopRow) * 0.65 && x > noseColPx) {
+    noseColPx = x;
+    noseRowPx = y;
+  }
+}
+const noseTipUnitsY = toHead(lm[1][0], lm[1][1], lm[1][2])[1];
+const sideScale = (topUnits - noseTipUnitsY) / (noseRowPx - sideTopRow);
+
+/* face depth max — the side z anchor (computed before any clamping) */
+const faceZRaw = raw.samples.map(([x, y, z]) => toHead(x, y, z)[2]);
+const noseTipZ = Math.max(...faceZRaw);
+
+const sideUnits = (x: number, y: number): [number, number] => [
+  noseTipZ - (noseColPx - x) * sideScale,
+  topUnits - (y - sideTopRow) * sideScale,
+];
+const ZB = chainInterp(raw.outlineSide.left, sideUnits);
+const ZF = chainInterp(raw.outlineSide.right, sideUnits);
+const sidePx = (z: number, y: number): [number, number] => [
+  noseColPx - (noseTipZ - z) / sideScale,
+  sideTopRow + (topUnits - y) / sideScale,
+];
+
+/* back registration: crown top + head-width match against the front */
+const backRows = raw.outlineBack.left.map((p) => p[1]);
+const backTopRow = Math.min(...backRows);
+const backBottomRow = Math.max(...backRows);
+let backWidthPx = 0;
+let backCenterPx = raw.outlineBack.w / 2;
+for (let i = 0; i < raw.outlineBack.left.length; i++) {
+  const [xl, y] = raw.outlineBack.left[i];
+  const [xr] = raw.outlineBack.right[i];
+  if (y < backTopRow + (backBottomRow - backTopRow) * 0.45 && xr - xl > backWidthPx) {
+    backWidthPx = xr - xl;
+    backCenterPx = (xl + xr) / 2;
+  }
+}
+let frontWidthUnits = 0;
+for (let y = topUnits; y > -0.3; y -= 0.01) {
+  const l = XL(y);
+  const r = XR(y);
+  if (l !== null && r !== null) frontWidthUnits = Math.max(frontWidthUnits, r - l);
+}
+const backScale = frontWidthUnits / backWidthPx;
+/* seen from behind, the subject's screen-left is the front view's
+   screen-right: x is mirrored */
+const backPx = (x: number, y: number): [number, number] => [
+  backCenterPx - x / backScale,
+  backTopRow + (topUnits - y) / backScale,
+];
+
+/* ================= luminance sampling (triplanar) ================= */
+
+function sampleLum(map: LumMap, px: number, py: number): number | null {
+  const fi = (px - map.x0) / map.step;
+  const fj = (py - map.y0) / map.step;
+  const i = Math.floor(fi);
+  const j = Math.floor(fj);
+  if (i < 0 || j < 0 || i >= map.lw - 1 || j >= map.lh - 1) return null;
+  const tx = fi - i;
+  const ty = fj - j;
+  const at = (ii: number, jj: number): number => map.data[jj * map.lw + ii] / 255;
+  return (
+    at(i, j) * (1 - tx) * (1 - ty) +
+    at(i + 1, j) * tx * (1 - ty) +
+    at(i, j + 1) * (1 - tx) * ty +
+    at(i + 1, j + 1) * tx * ty
+  );
+}
+
+/* ================= face layer ================= */
 
 const headPts: Vec3[] = [];
 const lums: number[] = [];
@@ -115,24 +218,21 @@ for (const [x, y, z, lum] of raw.samples) {
 }
 
 /* depth smoothing: IDW depth carries per-sample noise that reads as
-   froth in profile — relax z toward the neighborhood mean (xy radius)
-   while keeping the sharp luminance untouched */
+   froth in profile — relax z toward the neighborhood mean */
 const SMOOTH_R = 0.035;
-const SMOOTH_PASSES = 2;
-for (let pass = 0; pass < SMOOTH_PASSES; pass++) {
-  const cell = SMOOTH_R;
+for (let pass = 0; pass < 2; pass++) {
   const grid = new Map<string, number[]>();
   const keyOf = (x: number, y: number): string =>
-    `${Math.floor(x / cell)},${Math.floor(y / cell)}`;
+    `${Math.floor(x / SMOOTH_R)},${Math.floor(y / SMOOTH_R)}`;
   headPts.forEach((p, i) => {
     const k = keyOf(p[0], p[1]);
     (grid.get(k) ?? grid.set(k, []).get(k))!.push(i);
   });
-  const nextZ = headPts.map((p, i) => {
+  const nextZ = headPts.map((p) => {
     let sum = 0;
     let n = 0;
-    const gx = Math.floor(p[0] / cell);
-    const gy = Math.floor(p[1] / cell);
+    const gx = Math.floor(p[0] / SMOOTH_R);
+    const gy = Math.floor(p[1] / SMOOTH_R);
     for (let dx = -1; dx <= 1; dx++) {
       for (let dy = -1; dy <= 1; dy++) {
         for (const j of grid.get(`${gx + dx},${gy + dy}`) ?? []) {
@@ -151,29 +251,68 @@ for (let pass = 0; pass < SMOOTH_PASSES; pass++) {
   });
 }
 
-/* seam blend after smoothing so the boundary lands exactly on the SDF */
+/* clamp face depth against the profile silhouette: MediaPipe bulges at
+   the oval rim (forehead) — the photo is the authority */
+let clamped = 0;
+for (const p of headPts) {
+  const zf = ZF(p[1]);
+  if (zf !== null && p[2] > zf + 0.005) {
+    p[2] = zf + 0.005;
+    clamped += 1;
+  }
+}
+
+/* seam: blend the oval boundary onto the hull ellipse cross-section so
+   the face meets the skull layer without a step */
+const ovalHead = raw.oval.map((i) => toHead(lm[i][0], lm[i][1], lm[i][2]));
+function distToOvalEdge(x: number, y: number): number {
+  let best = Infinity;
+  for (let i = 0, j = ovalHead.length - 1; i < ovalHead.length; j = i++) {
+    const [x1, y1] = [ovalHead[j][0], ovalHead[j][1]];
+    const [x2, y2] = [ovalHead[i][0], ovalHead[i][1]];
+    const dx = x2 - x1, dy = y2 - y1;
+    const t = Math.max(0, Math.min(1, ((x - x1) * dx + (y - y1) * dy) / (dx * dx + dy * dy)));
+    best = Math.min(best, Math.hypot(x - x1 - dx * t, y - y1 - dy * t));
+  }
+  return best;
+}
+
+function ellipseAt(y: number): { xc: number; a: number; zc: number; b: number } | null {
+  const l = XL(y);
+  const r = XR(y);
+  const zb = ZB(y);
+  const zf = ZF(y);
+  if (l === null || r === null || zb === null || zf === null) return null;
+  const a = Math.max(0.02, (r - l) / 2);
+  const b = Math.max(0.02, (zf - zb) / 2);
+  return { xc: (l + r) / 2, a, zc: (zb + zf) / 2, b };
+}
+
+const SEAM_BAND = 0.2;
 for (const p of headPts) {
   const edge = distToOvalEdge(p[0], p[1]);
   if (edge >= SEAM_BAND) continue;
+  const e = ellipseAt(p[1]);
+  if (!e) continue;
+  const sin = Math.max(-1, Math.min(1, (p[0] - e.xc) / e.a));
+  const zEll = e.zc + e.b * Math.sqrt(1 - sin * sin); /* front half */
   const w = edge / SEAM_BAND;
   const s = w * w * (3 - 2 * w);
-  const proj = projectOnSkull(p);
-  p[0] = p[0] * s + proj[0] * (1 - s);
-  p[1] = p[1] * s + proj[1] * (1 - s);
-  p[2] = p[2] * s + proj[2] * (1 - s);
+  p[2] = p[2] * s + zEll * (1 - s);
 }
 
-/* luminance → shade: percentile-normalized so the face uses the full
-   value range of the hologram palette */
+/* luminance → shade (percentile-normalized on the face; the skull layer
+   reuses the same mapping so hair stays dark relative to skin) */
 const sorted = [...lums].sort((a, b) => a - b);
 const p5 = sorted[Math.floor(sorted.length * 0.05)];
 const p95 = sorted[Math.floor(sorted.length * 0.95)];
-const shade = lums.map((l) => {
+const lumToShade = (l: number): number => {
   const v = (l - p5) / (p95 - p5);
   return Math.max(0.04, Math.min(1, 0.04 + v * 0.96));
-});
+};
+const shade = lums.map(lumToShade);
 
-/* ---------- face window for lattice culling (shrunk oval) ---------- */
+/* ================= face window (lattice/skull culling) ================= */
 
 const cx = ovalHead.reduce((a, p) => a + p[0], 0) / ovalHead.length;
 const cy = ovalHead.reduce((a, p) => a + p[1], 0) / ovalHead.length;
@@ -185,131 +324,142 @@ for (const p of ovalHead) {
   );
 }
 
-/* ---------- front silhouette hull (photo-true hair contour) ---------- */
+/* ================= skull layer: hull-surface rings ================= */
 
-/* Hand-traced head silhouette from ref/front.png (source-image pixels).
-   Automatic tracing is unreliable here — dark hair against a dark
-   backdrop — so the contour was read off a coordinate grid overlay.
-   Order: crown → screen-right side → jaw → chin → screen-left side →
-   back to crown. The quiff peak, receded temples, ear bumps and jaw
-   taper are the subject's. */
-const FRONT_OUTLINE_PX: ReadonlyArray<[number, number]> = [
-  [330, 26], [360, 28], [400, 42], [440, 66], [465, 96], [478, 130],
-  [484, 170], [486, 215], [483, 260], [486, 300], [490, 335], [480, 370],
-  [458, 420], [420, 464], [372, 490], [330, 498],
-  [288, 492], [243, 467], [205, 418], [182, 362], [170, 330], [172, 295],
-  [178, 255], [180, 210], [182, 165], [192, 118], [212, 78], [248, 46],
-  [290, 28],
-];
-
-const hullFront: number[] = [];
-for (const [x, y] of FRONT_OUTLINE_PX) {
-  const p = toHead(x, y, mid[2]);
-  hullFront.push(Math.round(p[0] * 1e4) / 1e4, Math.round(p[1] * 1e4) / 1e4);
-}
-
-/* Hand-traced head silhouette from ref/profile-right.png (source-image
-   pixels, nose pointing right). Same grid-overlay method as the front.
-   The nose/lips arc is deliberately bulged outward: the scan owns the
-   face profile, the hull only reins in gross depth errors (the
-   MediaPipe forehead bulge) and shapes occiput, nape and quiff.
-   Order: clockwise from the nape — back of head up, over the crown,
-   down the quiff and face, under the chin, back along the throat. */
-const SIDE_OUTLINE_PX: ReadonlyArray<[number, number]> = [
-  [190, 520], [160, 460], [138, 380], [128, 300], [126, 240], [132, 180],
-  [150, 130], [185, 95], [240, 68], [300, 56], [360, 62], [395, 78],
-  [420, 105], [432, 140], [445, 185], [458, 235], [462, 275], [458, 295],
-  [525, 340], [525, 360], [480, 375], [478, 395], [492, 418], [470, 445],
-  [462, 462], [440, 488], [380, 515], [300, 540],
-];
-/* profile registration: the panel zoom differs from the front view —
-   scale from crown-to-chin height, anchors on the crown top (shared
-   with the front hull) and the scan's nose tip depth */
-const SIDE_SCALE = 1.735 / (468 - 57); /* head height px → head units */
-const SIDE_TOP_PX = 57; /* crown top row ↔ y = 1.065 (front hull) */
-const SIDE_NOSE_PX = 508; /* nose tip column ↔ scan nose tip z */
-const sideNoseZ = Math.max(...headPts.map((p) => p[2]));
-const toHeadSide = (x: number, y: number): [number, number] => [
-  sideNoseZ - (SIDE_NOSE_PX - x) * SIDE_SCALE,
-  1.065 - (y - SIDE_TOP_PX) * SIDE_SCALE,
-];
-
-const hullSide: number[] = [];
-for (const [x, y] of SIDE_OUTLINE_PX) {
-  const [z, yh] = toHeadSide(x, y);
-  hullSide.push(Math.round(z * 1e4) / 1e4, Math.round(yh * 1e4) / 1e4);
-}
-
-/* clamp scan points into the side hull: MediaPipe's relative depth
-   bulges at the oval rim (forehead reads ~0.14 too far forward) — the
-   profile photo is the authority, so points outside the silhouette are
-   pushed back along z */
-function sideHullDistance(z: number, y: number): number {
-  const n = hullSide.length / 2;
-  let dist = Infinity;
-  let inside = false;
-  for (let i = 0, j = n - 1; i < n; j = i++) {
-    const zi = hullSide[i * 2], yi = hullSide[i * 2 + 1];
-    const zj = hullSide[j * 2], yj = hullSide[j * 2 + 1];
-    const ez = zj - zi, ey = yj - yi;
-    const t = Math.max(0, Math.min(1, ((z - zi) * ez + (y - yi) * ey) / (ez * ez + ey * ey || 1)));
-    dist = Math.min(dist, Math.hypot(z - zi - ez * t, y - yi - ey * t));
-    if (yi > y !== yj > y && z < ((zj - zi) * (y - yi)) / (yj - yi) + zi) inside = !inside;
+const RING_STEP = 0.021;
+const NECK_CUT = -0.85; /* the projector fade owns everything below */
+/* the segmenter slightly erodes wispy hair edges — breathe back out */
+const HULL_INFLATE = 0.012;
+const skullPts: Vec3[] = [];
+const skullLum: number[] = [];
+let ringIndex = 0;
+for (let y = topUnits - 0.006; y > NECK_CUT; y -= RING_STEP, ringIndex++) {
+  const e = ellipseAt(y);
+  if (!e) continue;
+  e.a += HULL_INFLATE;
+  e.b += HULL_INFLATE;
+  /* neck rows: the silhouettes wobble (chin, shoulders) — blend the
+     cross-section toward a stable neck cylinder instead */
+  if (y < -0.6) {
+    const t = Math.min(1, (-0.6 - y) / 0.18);
+    e.xc *= 1 - t;
+    e.zc += (-0.02 - e.zc) * t;
+    e.a += (Math.min(e.a, 0.25) - e.a) * t;
+    e.b += (Math.min(e.b, 0.28) - e.b) * t;
   }
-  return inside ? -dist : dist;
-}
-
-let clamped = 0;
-for (const p of headPts) {
-  const sd = sideHullDistance(p[2], p[1]);
-  if (sd > 0.005) {
-    p[2] -= Math.min(sd - 0.005, 0.16);
-    clamped += 1;
+  /* Ramanujan perimeter — constant dot spacing along the ring */
+  const per = Math.PI * (3 * (e.a + e.b) - Math.sqrt((3 * e.a + e.b) * (e.a + 3 * e.b)));
+  const n = Math.max(8, Math.round(per / RING_STEP));
+  for (let k = 0; k < n; k++) {
+    const theta = ((k + (ringIndex % 2) * 0.5) / n) * Math.PI * 2;
+    const x = e.xc + e.a * Math.sin(theta);
+    const z = e.zc + e.b * Math.cos(theta);
+    /* the face window belongs to the scan layer */
+    if (z > 0.05 && insideFaceWindow(x, y, windowPoly)) continue;
+    /* between mid-face and chin the whole front belongs to the scan
+       (jaw, beard) — front rings there would double it as a spike;
+       below the chin the rings own the throat again */
+    if (y < -0.35 && y > -0.64 && z > 0.12) continue;
+    /* triplanar luminance: blend the three views by facing direction */
+    const nx = Math.sin(theta) / e.a;
+    const nz = Math.cos(theta) / e.b;
+    const nl = Math.hypot(nx, nz) || 1;
+    const fx = nx / nl, fz = nz / nl;
+    let wsum = 0;
+    let lsum = 0;
+    const views: Array<[number, LumMap, [number, number]]> = [
+      [Math.max(0, fz) ** 2, raw.outlineFront.lum, frontPx(x, y)],
+      [fx * fx, raw.outlineSide.lum, sidePx(z, y)],
+      [Math.max(0, -fz) ** 2, raw.outlineBack.lum, backPx(x, y)],
+    ];
+    for (const [w, map, [px, py]] of views) {
+      if (w < 0.02) continue;
+      const l = sampleLum(map, px, py);
+      if (l === null) continue;
+      wsum += w;
+      lsum += l * w;
+    }
+    if (wsum < 0.02) continue;
+    skullPts.push([x, y, z]);
+    skullLum.push(lsum / wsum);
   }
 }
+/* hair is honestly dark in the photos, but a hologram needs the back
+   of the skull to stay legible — gentle floor under the photo shade */
+const skullShadeArr = skullLum.map((l) => Math.max(0.13, lumToShade(l)));
 
-/* ---------- quantize + emit ---------- */
+/* ================= dense hulls (kept for the neck SDF + BDD) ================= */
 
-const count = headPts.length;
-const posInts = new Int16Array(count * 3);
-const shadeBytes = new Uint8Array(count);
-for (let i = 0; i < count; i++) {
-  posInts[i * 3] = Math.round(headPts[i][0] * POS_SCALE);
-  posInts[i * 3 + 1] = Math.round(headPts[i][1] * POS_SCALE);
-  posInts[i * 3 + 2] = Math.round(headPts[i][2] * POS_SCALE);
-  shadeBytes[i] = Math.round(shade[i] * 255);
+function buildHull(
+  rightChain: number[][],
+  leftChain: number[][],
+  toUnits: (x: number, y: number) => [number, number],
+  yMin: number,
+): number[] {
+  const out: number[] = [];
+  const push = ([u, v]: [number, number]): void => {
+    out.push(Math.round(u * 1e4) / 1e4, Math.round(v * 1e4) / 1e4);
+  };
+  const right = rightChain.map(([x, y]) => toUnits(x, y)).filter((p) => p[1] > yMin);
+  const left = leftChain.map(([x, y]) => toUnits(x, y)).filter((p) => p[1] > yMin);
+  for (let i = 0; i < right.length; i += 3) push(right[i]);
+  for (let i = left.length - 1; i >= 0; i -= 3) push(left[i]);
+  return out;
 }
 
-const posB64 = Buffer.from(posInts.buffer).toString("base64");
-const shadeB64 = Buffer.from(shadeBytes).toString("base64");
+const hullFront = buildHull(raw.outlineFront.right, raw.outlineFront.left, frontUnits, -0.7);
+const hullSide = buildHull(raw.outlineSide.right, raw.outlineSide.left, sideUnits, -0.7);
+
+/* ================= quantize + emit ================= */
+
+function quantize(pts: Vec3[], shades: number[]): { pos: string; shade: string } {
+  const posInts = new Int16Array(pts.length * 3);
+  const shadeBytes = new Uint8Array(pts.length);
+  for (let i = 0; i < pts.length; i++) {
+    posInts[i * 3] = Math.round(pts[i][0] * POS_SCALE);
+    posInts[i * 3 + 1] = Math.round(pts[i][1] * POS_SCALE);
+    posInts[i * 3 + 2] = Math.round(pts[i][2] * POS_SCALE);
+    shadeBytes[i] = Math.round(shades[i] * 255);
+  }
+  return {
+    pos: Buffer.from(posInts.buffer).toString("base64"),
+    shade: Buffer.from(shadeBytes).toString("base64"),
+  };
+}
+
+const face = quantize(headPts, shade);
+const skull = quantize(skullPts, skullShadeArr);
 
 const out = `/* AUTO-GENERATED by scripts/face-scan/pack-face-scan.ts — do not edit.
    Source: reference photos in scripts/face-scan/ref/ (not committed).
-   Registration: eyes ±0.2/0.12, mouth 0/-0.345, Z_GAIN=${Z_GAIN}. */
+   Face: landmarks registered on eyes ±0.2/0.12, mouth 0/-0.345, Z_GAIN=${Z_GAIN}.
+   Skull: visual-hull rings from segmenter silhouettes, triplanar photo
+   luminance (front/profile/back). */
 import type { FaceScanData } from "./face-scan-decode.js";
 
 export const FACE_SCAN: FaceScanData = {
-  count: ${count},
-  pos: "${posB64}",
-  shade: "${shadeB64}",
+  count: ${headPts.length},
+  pos: "${face.pos}",
+  shade: "${face.shade}",
   window: [${windowPoly.join(", ")}],
   hullFront: [${hullFront.join(", ")}],
   hullSide: [${hullSide.join(", ")}],
+  skullCount: ${skullPts.length},
+  skullPos: "${skull.pos}",
+  skullShade: "${skull.shade}",
 };
 `;
 
 writeFileSync(`${here}../../src/components/hologram/face-scan.ts`, out);
 
-const zs = headPts.map((p) => p[2]);
 console.log(JSON.stringify({
   status: "ok",
-  count,
+  faceCount: headPts.length,
+  skullCount: skullPts.length,
+  faceClampedToProfile: clamped,
+  topUnits: Math.round(topUnits * 1e3) / 1e3,
+  noseTipZ: Math.round(noseTipZ * 1e3) / 1e3,
+  occiputZ: Math.round(Math.min(...skullPts.map((p) => p[2])) * 1e3) / 1e3,
   hullFrontVerts: hullFront.length / 2,
   hullSideVerts: hullSide.length / 2,
-  scanPointsClampedBySideHull: clamped,
-  zGain: Z_GAIN,
-  noseTipZ: Math.max(...zs),
-  zRange: [Math.min(...zs), Math.max(...zs)],
-  yRange: [Math.min(...headPts.map((p) => p[1])), Math.max(...headPts.map((p) => p[1]))],
-  xRange: [Math.min(...headPts.map((p) => p[0])), Math.max(...headPts.map((p) => p[0]))],
 }));

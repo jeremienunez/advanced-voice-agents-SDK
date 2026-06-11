@@ -370,6 +370,11 @@ Puis verifier dans le navigateur:
       intersection deux vues dans skullDistance, scan pre-clampe dans le
       hull au packing (front MediaPipe degonfle 0.64→0.50, occiput
       photo-exact -0.87, nuque effilee).
+- [x] Crane photo-driven (2026-06-11): segmentation MediaPipe
+      ImageSegmenter pixel-pres sur les 3 vues, calque crane bake
+      (anneaux elliptiques silhouette-frontale × profil, luminance
+      triplanaire face/profil/arriere, 10.9k pts), lattice SDF reduit a
+      la base du cou. Plus aucun polygone trace a la main.
 - [ ] Articulations de la bouche pilotees par la video de reference
       (l'utilisateur fournit la video — mapper visemes/keyframes sur le
       calque scan via les masques bouche existants).

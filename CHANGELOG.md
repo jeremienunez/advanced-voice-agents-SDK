@@ -49,6 +49,25 @@ par un pipeline d'extraction photo + design par calques.
   uniformement genereux (occiput ry 0.55/rz 0.6, quiff rz 0.32) pour
   que le hull taille tout. BDD 9/9, tsc clean, verifie in-app.
 
+### Addendum 2 — crane photo-driven (meme jour)
+
+- Fini les polygones traces a la main: MediaPipe ImageSegmenter (selfie
+  model) segmente personne/fond au pixel sur les 3 vues (face, profil
+  droit, arriere) dans extract.html; silhouettes denses = bornes du
+  masque par ligne (300+ lignes/vue), verifiees visuellement superposees
+  aux photos.
+- Le crane/cheveux est un calque bake dans l'asset (10.9k points):
+  sections elliptiques par ligne tendues entre silhouette frontale
+  (etendue x) et profil (etendue z), luminance photo triplanaire
+  (face/profil/arriere ponderee par l'orientation) par point, plancher
+  0.13 pour la lisibilite hologramme. Le lattice SDF ne garde que la
+  base du cou (sous -0.85, fondu projecteur), blend cylindre stable
+  sous -0.6 (les silhouettes oscillent au cou).
+- Clamp du visage contre le profil segmente (2176 points, front
+  MediaPipe degonfle), couture du bord d'ovale sur l'ellipse de
+  section. BDD layered-surfaces reecrit (appartenance: SDF cou, hulls
+  photo, fenetre visage). 9/9 verts, tsc clean, verifie in-app.
+
 ### Next
 
 - Articulations de la bouche pilotees par video de reference (a venir).

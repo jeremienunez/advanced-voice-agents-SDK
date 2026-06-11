@@ -60,10 +60,14 @@ const EYE_CENTERS: ReadonlyArray<Vec3> = [
 /* viewer-aligned light: the front reads uniformly bright, the sides
    fall off by curvature alone — like a scan lit from the camera */
 const LIGHT_DIR: Vec3 = normalize([0.08, 0.18, 0.98]);
-/** Share of the point budget given to the scan layer when present. */
+/** Share of the point budget given to the face-scan layer when present. */
 const SCAN_SHARE = 0.55;
-/** The scan layer renders finer dots than the structural lattice. */
+/** Share of the point budget given to the baked skull layer. */
+const SKULL_SHARE = 0.36;
+/** The scan layer renders finer dots than the structural rings. */
 const SCAN_DOT_SCALE = 0.58;
+/** Below this line the SDF lattice still owns the bust (neck base). */
+const NECK_CUT = -0.85;
 
 interface PointRecord {
   p: Vec3;
@@ -75,16 +79,17 @@ interface PointRecord {
 export function buildFaceGeometry(rng: OrbRng, targetPoints = 30000): FaceGeometry {
   const scan = decodeFaceScan(FACE_SCAN);
   const scanTake = scan.count > 0 ? Math.min(scan.count, Math.round(targetPoints * SCAN_SHARE)) : 0;
-  const latticeBudget = Math.max(2000, targetPoints - scanTake);
+  const skullTake = scan.skullCount > 0
+    ? Math.min(scan.skullCount, Math.round(targetPoints * SKULL_SHARE))
+    : 0;
+  const latticeBudget = Math.max(skullTake > 0 ? 600 : 2000, targetPoints - scanTake - skullTake);
 
   const records: PointRecord[] = [];
 
-  /* ---- LATTICE layer: skull, hair, ears, neck ---- */
+  /* ---- LATTICE layer: SDF rings — the neck only, once the baked
+     skull layer exists (everything above NECK_CUT is photo-driven) ---- */
   const rings = Math.max(36, Math.min(120, Math.round(Math.sqrt(latticeBudget / 1.5))));
   const segments = Math.round(rings * 1.5);
-  /* hybrid lattice: a spherical cap crowns the skull, then evenly
-     spaced horizontal rings hug the head — rays hit the face plane
-     square-on, so the grid never stretches over the features */
   const capRows = Math.round(rings * 0.3);
   for (let r = 0; r < rings; r++) {
     let origin: Vec3;
@@ -112,6 +117,8 @@ export function buildFaceGeometry(rng: OrbRng, targetPoints = 30000): FaceGeomet
       ];
       const p = castToSurface(origin, dir);
       if (!p) continue;
+      /* the baked skull layer owns the head above the neck line */
+      if (skullTake > 0 && p[1] > NECK_CUT + 0.01) continue;
       /* the face window belongs to the scan layer */
       if (scanTake > 0 && p[2] > 0.08 && insideFaceWindow(p[0], p[1], scan.window)) continue;
 
@@ -140,6 +147,31 @@ export function buildFaceGeometry(rng: OrbRng, targetPoints = 30000): FaceGeomet
         scale: 1,
       });
     }
+  }
+
+  /* ---- SKULL layer: visual-hull rings, triplanar photo shade ---- */
+  for (let k = 0; k < skullTake; k++) {
+    const i = skullTake === scan.skullCount ? k : Math.floor((k * scan.skullCount) / skullTake);
+    const p: Vec3 = [
+      scan.skullPositions[i * 3] + (rng.next() - 0.5) * 0.003,
+      scan.skullPositions[i * 3 + 1] + (rng.next() - 0.5) * 0.003,
+      scan.skullPositions[i * 3 + 2] + (rng.next() - 0.5) * 0.003,
+    ];
+    const random = rng.next();
+    const hair = hairMask(p);
+    const beard = beardMask(p);
+    const warm = clamp((p[2] + 0.05) * 1.6, 0, 1) * (1 - hair * 0.7) * (1 - beard * 0.55);
+    records.push({
+      p,
+      aux: [jawMask(p), hair, warm, random],
+      aux2: [
+        eyeSocketMask(p),
+        scan.skullShade[i],
+        clamp((p[1] + 0.98) / 0.3, 0, 1),
+        0,
+      ],
+      scale: 1,
+    });
   }
 
   /* ---- SCAN layer: the subject's face, photo shade baked in ---- */
