@@ -8,6 +8,12 @@ import type {
   LlmToolDefinition,
 } from "./types.js";
 import type { CascadedHandlers } from "./handlers.js";
+import {
+  cancelPendingToolResults,
+  waitForToolResult,
+} from "./tool-results.js";
+
+export { submitCascadedToolResult } from "./tool-results.js";
 
 export interface CascadedPipelineState {
   stt: ISTT | null;
@@ -22,8 +28,6 @@ export interface CascadedPipelineState {
   toolResultTimeoutMs?: number;
   logger: AgentLogger;
 }
-
-const DEFAULT_TOOL_RESULT_TIMEOUT_MS = 120_000;
 
 export async function processCascadedTurn(
   state: CascadedPipelineState,
@@ -156,28 +160,13 @@ export async function runCascadedLlmWithTts(
   state.handlers.onResponseCompleted?.(responseId);
 }
 
-export function submitCascadedToolResult(
-  state: CascadedPipelineState,
-  callId: string,
-  result: unknown,
-): boolean {
-  const resolver = state.pendingToolResults.get(callId);
-  if (!resolver) return false;
-  resolver(result);
-  state.pendingToolResults.delete(callId);
-  return true;
-}
-
 export function cancelCascadedInFlight(state: CascadedPipelineState): void {
   for (const abort of state.activeAborts) {
     abort.abort();
   }
   state.activeAborts.clear();
 
-  for (const [, resolver] of state.pendingToolResults) {
-    resolver({ error: "cancelled" });
-  }
-  state.pendingToolResults.clear();
+  cancelPendingToolResults(state);
 }
 
 function createAbort(state: CascadedPipelineState): AbortController {
@@ -270,39 +259,4 @@ async function handleToolCalls(
   }
 
   await runCascadedLlmWithTts(state, responseId, iteration + 1);
-}
-
-function waitForToolResult(
-  state: CascadedPipelineState,
-  callId: string,
-): Promise<unknown> {
-  return new Promise((resolve) => {
-    const timeoutMs = toolResultTimeoutMs(state);
-    let timeout: ReturnType<typeof setTimeout> | null = setTimeout(() => {
-      timeout = null;
-      if (!state.pendingToolResults.has(callId)) return;
-      state.pendingToolResults.delete(callId);
-      state.logger.warn("Tool result timed out", { callId, timeoutMs });
-      resolve({
-        error: "tool_result_timeout",
-        message: `Tool result for "${callId}" timed out after ${timeoutMs}ms.`,
-      });
-    }, timeoutMs);
-
-    state.pendingToolResults.set(callId, (result) => {
-      if (timeout) {
-        clearTimeout(timeout);
-        timeout = null;
-      }
-      resolve(result);
-    });
-  });
-}
-
-function toolResultTimeoutMs(state: CascadedPipelineState): number {
-  const timeoutMs = state.toolResultTimeoutMs;
-  if (!Number.isFinite(timeoutMs) || !timeoutMs || timeoutMs < 1) {
-    return DEFAULT_TOOL_RESULT_TIMEOUT_MS;
-  }
-  return timeoutMs;
 }

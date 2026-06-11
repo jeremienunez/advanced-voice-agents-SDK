@@ -9,7 +9,8 @@
  * the BDD harness.
  */
 
-import { clamp, dot, ell, normalize, smax, smin, sph, type Vec3 } from "./face-math.js";
+import { ell, smax, smin, sph } from "./face-math.js";
+import { clamp, dot, normalize, type Vec3 } from "./vector-math.js";
 
 export interface OrbRng {
   /** Uniform float in [0, 1). */
