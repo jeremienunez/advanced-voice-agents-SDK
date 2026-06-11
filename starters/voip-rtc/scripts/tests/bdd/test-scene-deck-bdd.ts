@@ -1,7 +1,10 @@
+import { deckTargetFor, easeDeck, type DeckState } from "../../../src/components/scene/mode-director.js";
 import { scissorFor } from "../../../src/components/scene/view-registry.js";
 
 const results = [
   scenarioScissorMapsRectsAndCullsOffscreen(),
+  scenarioDeckTargetsAreBoundedAndDistinct(),
+  scenarioDeckEasingConverges(),
 ];
 
 console.log(JSON.stringify({ status: "ok", results }, null, 2));
@@ -26,6 +29,42 @@ function scenarioScissorMapsRectsAndCullsOffscreen(): string {
   assert(scissorFor({ left: -50, top: 60, width: 200, height: 100 }, 1000, 800) !== null, "a partially visible rect must be kept");
 
   return "scissor-maps-rects-and-culls-offscreen";
+}
+
+function scenarioDeckTargetsAreBoundedAndDistinct(): string {
+  const modes = ["command", "builder", "agents", "rtc", "environment"];
+  const states = modes.map((m) => deckTargetFor(m, 0));
+  for (const s of states) {
+    for (const v of [s.energy, s.anchorX, s.anchorY, s.hue, s.drift]) {
+      assert(v >= 0 && v <= 1, `deck channels must stay in [0,1], got ${v}`);
+    }
+  }
+  const keys = states.map((s) => `${s.energy}|${s.anchorX}|${s.anchorY}`);
+  assert(new Set(keys).size === modes.length, "every mode must have its own deck signature");
+  /* rtc dims the backdrop behind its opaque stage */
+  assert(deckTargetFor("rtc", 0).energy < deckTargetFor("environment", 0).energy, "rtc backdrop must be dimmer than environment");
+  /* builder intensity ramps energy monotonically and stays bounded */
+  const cold = deckTargetFor("builder", 0).energy;
+  const hot = deckTargetFor("builder", 1).energy;
+  assert(hot > cold && hot <= 1, "builder energy must ramp with intensity and stay bounded");
+  /* unknown mode falls back to a sane default, not NaN */
+  const fallback = deckTargetFor("unknown", 0);
+  assert(Number.isFinite(fallback.energy), "unknown modes must fall back safely");
+  return "deck-targets-are-bounded-and-distinct";
+}
+
+function scenarioDeckEasingConverges(): string {
+  let current: DeckState = { energy: 0, anchorX: 0, anchorY: 0, hue: 0, drift: 0 };
+  const target = deckTargetFor("environment", 0);
+  let previousDistance = Infinity;
+  for (let i = 0; i < 600; i++) {
+    current = easeDeck(current, target);
+    const distance = Math.abs(current.energy - target.energy) + Math.abs(current.anchorX - target.anchorX);
+    assert(distance <= previousDistance + 1e-9, "easing must approach the target monotonically");
+    previousDistance = distance;
+  }
+  assert(previousDistance < 0.01, `600 frames (~10s) must converge, residual ${previousDistance}`);
+  return "deck-easing-converges";
 }
 
 function assert(condition: boolean, message: string): void {
