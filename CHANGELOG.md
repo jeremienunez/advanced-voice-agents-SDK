@@ -11,6 +11,13 @@ Reproduire fidelement le visage de reference (photos face/profils/arriere)
 dans l'hologramme du voice orb, en remplacant le sculpt SDF approximatif
 par un pipeline d'extraction photo + design par calques.
 
+### Methode
+
+La methode complete (commandes, calculs de recalage, hull deux vues,
+luminance triplanaire, verification) est documentee dans
+`starters/voip-rtc/scripts/face-scan/README.md` — l'asset est
+regenerable depuis les photos de reference en deux commandes.
+
 ### Journal
 
 - `scripts/face-scan/` (nouveau): pipeline one-shot d'extraction —
