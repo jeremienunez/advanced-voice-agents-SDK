@@ -76,7 +76,6 @@ export function RtcLab({
         className={`rtcOrbStage ${rtc.snapshot.state} ${rtc.snapshot.isMuted ? "muted" : ""}`}
         aria-label="Voice state"
       >
-        <div className="rtcStageFloor" aria-hidden="true" />
         <VoiceOrb
           state={rtc.snapshot.state}
           isMuted={rtc.snapshot.isMuted}

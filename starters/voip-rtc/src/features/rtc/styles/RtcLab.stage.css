@@ -1,33 +1,7 @@
-/* RTC stage furniture: the perspective floor the hologram stands on and
-   the glass HUD panels angled toward it like a cockpit. The stage is a
+/* RTC stage furniture: the glass HUD panels angled toward the figure
+   like a cockpit. The floor grid is now WebGL (rtc-stage-props.ts) so
+   the reflection and the grid share one projected space. The stage is a
    fixed dark void, so every color here is deliberate, not themed. */
-
-.rtcStageFloor {
-  position: absolute;
-  left: -22%;
-  right: -22%;
-  bottom: -4%;
-  height: 46%;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    repeating-linear-gradient(90deg, rgba(76, 195, 255, 0.13) 0 1px, transparent 1px 64px),
-    repeating-linear-gradient(0deg, rgba(76, 195, 255, 0.1) 0 1px, transparent 1px 48px);
-  transform: perspective(640px) rotateX(63deg);
-  transform-origin: top center;
-  mask-image: radial-gradient(58% 96% at 50% 0%, rgba(0, 0, 0, 0.85), transparent 74%);
-  -webkit-mask-image: radial-gradient(58% 96% at 50% 0%, rgba(0, 0, 0, 0.85), transparent 74%);
-  animation: rtcFloorFlow 16s linear infinite;
-}
-
-@keyframes rtcFloorFlow {
-  from {
-    background-position: 0 0, 0 0;
-  }
-  to {
-    background-position: 0 0, 0 48px;
-  }
-}
 
 /* Glass HUD panels floating on the stage, angled toward the figure */
 .rtcHud {
@@ -144,10 +118,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rtcStageFloor {
-    animation: none;
-  }
-
   .rtcHud,
   .rtcHudLeft,
   .rtcHudRight {

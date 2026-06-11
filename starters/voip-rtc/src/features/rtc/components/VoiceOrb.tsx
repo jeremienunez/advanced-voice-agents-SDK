@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { gazeTarget } from "../../../components/hologram/holo-motion.js";
-import { createHoloView } from "../../../components/hologram/holo-points.js";
 import { createRtcStageRenderer, syncRendererSize } from "./rtc-stage-renderer.js";
+import { createRtcStageScene } from "./rtc-stage-scene.js";
 import "../styles/components/VoiceOrb.css";
 
 interface VoiceSignal {
@@ -53,7 +53,7 @@ export function VoiceOrb({
       setRenderError("webgl unavailable");
       return undefined;
     }
-    const view = createHoloView();
+    const stage = createRtcStageScene();
 
     let frameId = 0;
     let smoothedLevel = 0;
@@ -89,10 +89,11 @@ export function VoiceOrb({
       const mood = signal.isMuted ? 3 : signal.isSpeaking ? 2 : signal.isListening ? 1 : 0;
       syncRendererSize(renderer);
       renderer.clear();
-      view.draw(
-        { renderer, timeMs: stamp, size: { width: canvas.width, height: canvas.height } },
+      stage.update(
         { timeMs: stamp, level: smoothedLevel, mood, gaze, mirror: true },
+        { width: canvas.width, height: canvas.height },
       );
+      renderer.render(stage.scene, stage.camera);
       frameId = requestAnimationFrame(animate);
     };
 
@@ -100,7 +101,7 @@ export function VoiceOrb({
     return () => {
       window.removeEventListener("pointermove", onPointerMove);
       cancelAnimationFrame(frameId);
-      view.dispose();
+      stage.dispose();
       renderer.dispose();
     };
   }, []);
