@@ -327,42 +327,62 @@ for (const p of ovalHead) {
 /* ================= skull layer: hull-surface rings ================= */
 
 const RING_STEP = 0.021;
-const NECK_CUT = -0.85; /* the projector fade owns everything below */
+const BUST_CUT = -1.25; /* the projector fade owns everything below */
 /* the segmenter slightly erodes wispy hair edges — breathe back out */
 const HULL_INFLATE = 0.012;
 const skullPts: Vec3[] = [];
 const skullLum: number[] = [];
+/* adaptive descent: where the silhouette widens fast (shoulders) the
+   surface is near-horizontal — tighten the ring spacing so the shell
+   stays a surface instead of a stack of plates */
+const stepAt = (yv: number): number => {
+  const eHere = ellipseAt(yv);
+  const eNext = ellipseAt(yv - 0.012);
+  if (!eHere || !eNext) return RING_STEP;
+  const slope =
+    Math.max(Math.abs(eNext.a - eHere.a), Math.abs(eNext.b - eHere.b)) / 0.012;
+  return RING_STEP / Math.min(4, Math.sqrt(1 + slope * slope));
+};
+/* torso cross-sections flatten from head-ellipse toward a rounded
+   rectangle (the true two-view visual hull is the superellipse) */
+const exponentAt = (yv: number): number =>
+  2 + 1.7 * Math.max(0, Math.min(1, (-0.84 - yv) / 0.2));
+
 let ringIndex = 0;
-for (let y = topUnits - 0.006; y > NECK_CUT; y -= RING_STEP, ringIndex++) {
+for (let y = topUnits - 0.006; y > BUST_CUT; y -= stepAt(y), ringIndex++) {
   const e = ellipseAt(y);
   if (!e) continue;
   e.a += HULL_INFLATE;
   e.b += HULL_INFLATE;
-  /* neck rows: the silhouettes wobble (chin, shoulders) — blend the
-     cross-section toward a stable neck cylinder instead */
-  if (y < -0.6) {
-    const t = Math.min(1, (-0.6 - y) / 0.18);
-    e.xc *= 1 - t;
-    e.zc += (-0.02 - e.zc) * t;
-    e.a += (Math.min(e.a, 0.25) - e.a) * t;
-    e.b += (Math.min(e.b, 0.28) - e.b) * t;
-  }
-  /* Ramanujan perimeter — constant dot spacing along the ring */
-  const per = Math.PI * (3 * (e.a + e.b) - Math.sqrt((3 * e.a + e.b) * (e.a + 3 * e.b)));
-  const n = Math.max(8, Math.round(per / RING_STEP));
-  for (let k = 0; k < n; k++) {
-    const theta = ((k + (ringIndex % 2) * 0.5) / n) * Math.PI * 2;
-    const x = e.xc + e.a * Math.sin(theta);
-    const z = e.zc + e.b * Math.cos(theta);
+  const exp = exponentAt(y);
+  /* walk the superellipse and place dots at equal arc spacing — flat
+     sides would otherwise starve and corners cluster */
+  const su = (t: number): [number, number] => {
+    const st = Math.sin(t);
+    const ct = Math.cos(t);
+    return [
+      e.xc + e.a * Math.sign(st) * Math.abs(st) ** (2 / exp),
+      e.zc + e.b * Math.sign(ct) * Math.abs(ct) ** (2 / exp),
+    ];
+  };
+  let [px2, pz2] = su(0);
+  let acc = (ringIndex % 2) * RING_STEP * 0.5;
+  for (let t = 0.003; t <= Math.PI * 2; t += 0.003) {
+    const [x, z] = su(t);
+    acc += Math.hypot(x - px2, z - pz2);
+    px2 = x;
+    pz2 = z;
+    if (acc < RING_STEP) continue;
+    acc = 0;
     /* the face window belongs to the scan layer */
     if (z > 0.05 && insideFaceWindow(x, y, windowPoly)) continue;
-    /* between mid-face and chin the whole front belongs to the scan
-       (jaw, beard) — front rings there would double it as a spike;
-       below the chin the rings own the throat again */
-    if (y < -0.35 && y > -0.64 && z > 0.12) continue;
+    /* from mid-face to under the chin the front belongs to the scan
+       (jaw, beard) or to honest shadow — in the profile photo the chin
+       occludes the throat, so the hull has no real data there */
+    if (y < -0.35 && y > -0.8 && z > 0.12) continue;
     /* triplanar luminance: blend the three views by facing direction */
-    const nx = Math.sin(theta) / e.a;
-    const nz = Math.cos(theta) / e.b;
+    const nx = (x - e.xc) / (e.a * e.a);
+    const nz = (z - e.zc) / (e.b * e.b);
     const nl = Math.hypot(nx, nz) || 1;
     const fx = nx / nl, fz = nz / nl;
     let wsum = 0;
@@ -407,8 +427,8 @@ function buildHull(
   return out;
 }
 
-const hullFront = buildHull(raw.outlineFront.right, raw.outlineFront.left, frontUnits, -0.7);
-const hullSide = buildHull(raw.outlineSide.right, raw.outlineSide.left, sideUnits, -0.7);
+const hullFront = buildHull(raw.outlineFront.right, raw.outlineFront.left, frontUnits, -1.32);
+const hullSide = buildHull(raw.outlineSide.right, raw.outlineSide.left, sideUnits, -1.32);
 
 /* ================= quantize + emit ================= */
 

@@ -68,6 +68,22 @@ par un pipeline d'extraction photo + design par calques.
   section. BDD layered-surfaces reecrit (appartenance: SDF cou, hulls
   photo, fenetre visage). 9/9 verts, tsc clean, verifie in-app.
 
+### Addendum 3 — cou et epaules photo-driven (meme jour)
+
+- Meme methode etendue au buste: les anneaux descendent jusqu'a -1.25
+  (epaules/pull), largeurs depuis la silhouette frontale, profondeurs
+  depuis le profil, luminance triplanaire du pull comprise. Zero
+  heuristique a la main: le blend cylindre de cou et les caps d'epaules
+  sont supprimes — sections en superellipse (exposant 2 tete → 3.7
+  torse, le vrai hull a deux vues) echantillonnees a arc constant, pas
+  de y adaptatif dans les pentes (epaules = coque, pas pile d'assiettes).
+- Bande sous-menton laissee en ombre honnete: dans le profil photo le
+  menton occulte la gorge — le hull n'a aucune donnee reelle la.
+- Plan miroir et sol descendus sous le buste (-1.28); camera GLSL des
+  props resynchronisee sur celle du hologramme (z 3.1 — elle etait
+  restee a 2.15 apres le recul anti-fisheye). Fade projecteur -1.0→-1.3.
+- BDD 9/9, tsc clean, verifie in-app.
+
 ### Next
 
 - Articulations de la bouche pilotees par video de reference (a venir).

@@ -43,3 +43,34 @@ Rules:
   exposure) before trusting it for tuning decisions.
 - Frontal point-cloud relief reads through VALUE (dark wells, lit ridges) and
   perspective row curvature, not through depth or lambert with frontal light.
+
+## 2026-06-11 — face-scan fidelity pass
+- When the user asks for FIDELITY to a reference, hand-sculpted SDF
+  ellipsoids cap out fast: extract real data from the reference instead
+  (landmarks via lib, photo luminance as the value map) and keep math
+  layers only for what the photo cannot cover (skull, hair, neck).
+- Automatic silhouette tracing against a low-contrast backdrop (dark
+  hair / dark studio wall) is unreliable from both directions
+  (edge-inward catches clutter, center-outward stops early on shadows).
+  Reading the contour visually off a grid overlay and hard-coding the
+  point list was faster and exact — document it as hand-traced.
+- Keep the shader's facial anchors (eyes ±0.2/0.12, mouth -0.345) as the
+  registration target so every existing animation (blink, murmur, mood)
+  keeps working on imported geometry.
+
+## 2026-06-11 — bust extension (the "growth book" entry, per user)
+- THE METHOD: when a data-driven pass works for one part (face), apply
+  the SAME pass to adjacent parts (skull, then neck/shoulders) instead
+  of keeping hand-crafted geometry next to computed geometry. The user
+  considers applying a proven method consistently to be the definition
+  of working intelligently — reach for it before being asked.
+- Never bolt hand heuristics (cylinder blends, dimension caps) on top of
+  measured data to fix an artifact. Find why the data reads wrong first:
+  the "wobbly neck" was chin occlusion in the profile view (a real
+  visual-hull limit), and the "plate-stack shoulders" was constant-y
+  ring sampling on a near-horizontal surface. Both had data-respecting
+  fixes (honest shadow gap; arc-length/adaptive sampling, superellipse
+  sections = the true two-view hull).
+- When a shared constant changes (shader camera), grep for every other
+  GLSL/code that duplicates it (stage props had their own copy at the
+  old z and silently de-synced).

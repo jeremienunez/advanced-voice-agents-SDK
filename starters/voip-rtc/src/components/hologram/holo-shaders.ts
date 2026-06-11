@@ -69,11 +69,11 @@ void main(){
   p = vec3(p.x*cl - py0*sl, p.x*sl + py0*cl + .26, p.z);
   p.x += uEcho*.018;
 
-  /* glass-floor reflection: flip below the head base, fade with height */
+  /* glass-floor reflection: flip below the bust base, fade with height */
   float mirrorFade = 1.;
   if(uMirror > .5){
-    float h = max(p.y + .78, 0.);
-    p.y = -1.56 - p.y;
+    float h = max(p.y + 1.28, 0.);
+    p.y = -2.56 - p.y;
     mirrorFade = .30*exp(-h*2.4);
   }
 

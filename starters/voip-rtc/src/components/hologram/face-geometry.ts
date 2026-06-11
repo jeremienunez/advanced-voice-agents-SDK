@@ -62,12 +62,12 @@ const EYE_CENTERS: ReadonlyArray<Vec3> = [
 const LIGHT_DIR: Vec3 = normalize([0.08, 0.18, 0.98]);
 /** Share of the point budget given to the face-scan layer when present. */
 const SCAN_SHARE = 0.55;
-/** Share of the point budget given to the baked skull layer. */
-const SKULL_SHARE = 0.36;
+/** Share of the point budget given to the baked skull/bust layer. */
+const SKULL_SHARE = 0.42;
 /** The scan layer renders finer dots than the structural rings. */
 const SCAN_DOT_SCALE = 0.58;
 /** Below this line the SDF lattice still owns the bust (neck base). */
-const NECK_CUT = -0.85;
+const NECK_CUT = -1.24;
 
 interface PointRecord {
   p: Vec3;
@@ -143,7 +143,7 @@ export function buildFaceGeometry(rng: OrbRng, targetPoints = 30000): FaceGeomet
       records.push({
         p,
         aux: [jawMask(p), hair, warm, random],
-        aux2: [eyeSocketMask(p), shade, clamp((p[1] + 0.98) / 0.3, 0, 1), irisMask(p)],
+        aux2: [eyeSocketMask(p), shade, clamp((p[1] + 1.3) / 0.3, 0, 1), irisMask(p)],
         scale: 1,
       });
     }
@@ -160,14 +160,17 @@ export function buildFaceGeometry(rng: OrbRng, targetPoints = 30000): FaceGeomet
     const random = rng.next();
     const hair = hairMask(p);
     const beard = beardMask(p);
-    const warm = clamp((p[2] + 0.05) * 1.6, 0, 1) * (1 - hair * 0.7) * (1 - beard * 0.55);
+    /* below the collar the bust is sweater, not skin — keep it cool */
+    const collar = clamp((p[1] + 1.02) / 0.25, 0, 1);
+    const warm =
+      clamp((p[2] + 0.05) * 1.6, 0, 1) * (1 - hair * 0.7) * (1 - beard * 0.55) * collar;
     records.push({
       p,
       aux: [jawMask(p), hair, warm, random],
       aux2: [
         eyeSocketMask(p),
         scan.skullShade[i],
-        clamp((p[1] + 0.98) / 0.3, 0, 1),
+        clamp((p[1] + 1.3) / 0.3, 0, 1),
         0,
       ],
       scale: 1,
@@ -191,7 +194,7 @@ export function buildFaceGeometry(rng: OrbRng, targetPoints = 30000): FaceGeomet
       aux2: [
         eyeSocketMask(p),
         scan.shade[i],
-        clamp((p[1] + 0.98) / 0.3, 0, 1),
+        clamp((p[1] + 1.3) / 0.3, 0, 1),
         irisMask(p),
       ],
       scale: SCAN_DOT_SCALE,

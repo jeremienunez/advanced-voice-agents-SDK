@@ -375,6 +375,10 @@ Puis verifier dans le navigateur:
       (anneaux elliptiques silhouette-frontale × profil, luminance
       triplanaire face/profil/arriere, 10.9k pts), lattice SDF reduit a
       la base du cou. Plus aucun polygone trace a la main.
+- [x] Buste photo-driven (2026-06-11): cou + epaules calcules des images
+      (superellipse = vrai hull deux vues, arc constant, occlusion
+      menton = ombre honnete), miroir/sol descendus sous le buste,
+      camera des props resynchronisee. Zero heuristique main.
 - [ ] Articulations de la bouche pilotees par la video de reference
       (l'utilisateur fournit la video — mapper visemes/keyframes sur le
       calque scan via les masques bouche existants).

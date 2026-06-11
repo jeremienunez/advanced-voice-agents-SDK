@@ -10,9 +10,10 @@ import * as THREE from "three";
 const PROJECT_GLSL = `
 uniform vec2 uRes;
 vec4 stageProject(vec3 p){
-  vec3 q = p - vec3(0., .06, 2.15);
+  /* must mirror the hologram camera in holo-shaders.ts exactly */
+  vec3 q = p - vec3(0., .06, 3.1);
   float w = -q.z;
-  return vec4(q.x*1.5*(uRes.y/uRes.x), q.y*1.5, 0., w);
+  return vec4(q.x*2.25*(uRes.y/uRes.x), q.y*2.25, 0., w);
 }`;
 
 const FLOOR_VERTEX = `
@@ -20,7 +21,7 @@ varying vec2 vWorld;
 ${PROJECT_GLSL}
 void main(){
   vWorld = position.xz;
-  gl_Position = stageProject(vec3(position.x, -0.78, position.z));
+  gl_Position = stageProject(vec3(position.x, -1.28, position.z));
 }`;
 
 const FLOOR_FRAGMENT = `
@@ -45,7 +46,7 @@ void main(){
   vUv = uv;
   /* a trapezoid from a tight apex above the head to a wide base under it */
   float spread = mix(.08, .95, 1.-uv.y);
-  vec3 world = vec3((uv.x-.5)*2.*spread, mix(-.78, 1.5, uv.y), 0.);
+  vec3 world = vec3((uv.x-.5)*2.*spread, mix(-1.28, 1.5, uv.y), 0.);
   gl_Position = stageProject(world);
 }`;
 
