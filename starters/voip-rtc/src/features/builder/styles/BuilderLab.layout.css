@@ -3,7 +3,9 @@
    ========================================== */
 .builderStudio {
   position: relative;
-  isolation: isolate;
+  /* no isolation: fixed overlays inside (document viewer z80) must join
+     the shell stacking context to paint above the deck stage canvas (z2);
+     internal rail z-indexes (1-3) stay below the topbar (z9) regardless */
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr) 300px;
   gap: 20px;

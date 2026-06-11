@@ -82,7 +82,10 @@ export function BuilderLab({
   }, [builder, busy, currentStep, promptNeedsConfirmation]);
 
   return (
-    <section className="builderStudio fade-in" aria-busy={busy}>
+    <>
+      {/* fixed fullscreen overlays live OUTSIDE the isolated section so
+          their z-index escapes .builderStudio (isolation:isolate) and
+          stays above the deck stage canvas (z2) */}
       {builder.busyState ? <ProcessingLoader state={builder.busyState} /> : null}
       {builder.createdAgent ? (
         <AgentCreatedOverlay
@@ -91,6 +94,7 @@ export function BuilderLab({
         />
       ) : null}
 
+    <section className="builderStudio fade-in" aria-busy={busy}>
       <aside className="builderPath">
         <div>
           <p className="studioEyebrow">Guided build</p>
@@ -235,5 +239,6 @@ export function BuilderLab({
         </section>
       </aside>
     </section>
+    </>
   );
 }
