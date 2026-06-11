@@ -1,10 +1,12 @@
 import { deckTargetFor, easeDeck, type DeckState } from "../../../src/components/scene/mode-director.js";
+import { deckTransitionRate, staticFrameTimeMs } from "../../../src/components/scene/scene-motion-policy.js";
 import { scissorFor } from "../../../src/components/scene/view-registry.js";
 
 const results = [
   scenarioScissorMapsRectsAndCullsOffscreen(),
   scenarioDeckTargetsAreBoundedAndDistinct(),
   scenarioDeckEasingConverges(),
+  scenarioMotionPolicyGatesAnimation(),
 ];
 
 console.log(JSON.stringify({ status: "ok", results }, null, 2));
@@ -65,6 +67,16 @@ function scenarioDeckEasingConverges(): string {
   }
   assert(previousDistance < 0.01, `600 frames (~10s) must converge, residual ${previousDistance}`);
   return "deck-easing-converges";
+}
+
+function scenarioMotionPolicyGatesAnimation(): string {
+  assert(deckTransitionRate(true) === 1, "reduced motion must snap transitions (rate 1)");
+  const animated = deckTransitionRate(false);
+  assert(animated > 0 && animated < 0.1, "animated transitions must ease gently");
+  const frozen = staticFrameTimeMs();
+  assert(Number.isFinite(frozen) && frozen > 0, "static renders need a fixed, pleasant pose time");
+  assert(staticFrameTimeMs() === frozen, "the frozen pose must be deterministic");
+  return "motion-policy-gates-animation";
 }
 
 function assert(condition: boolean, message: string): void {
