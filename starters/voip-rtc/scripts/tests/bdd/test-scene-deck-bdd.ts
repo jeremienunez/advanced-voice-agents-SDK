@@ -1,5 +1,6 @@
 import { deckTargetFor, easeDeck, type DeckState } from "../../../src/components/scene/mode-director.js";
 import { deckTransitionRate, staticFrameTimeMs } from "../../../src/components/scene/scene-motion-policy.js";
+import { parseRgbTriplet } from "../../../src/components/scene/scene-theme.js";
 import { scissorFor } from "../../../src/components/scene/view-registry.js";
 
 const results = [
@@ -7,6 +8,7 @@ const results = [
   scenarioDeckTargetsAreBoundedAndDistinct(),
   scenarioDeckEasingConverges(),
   scenarioMotionPolicyGatesAnimation(),
+  scenarioRgbTripletParsingIsStrict(),
 ];
 
 console.log(JSON.stringify({ status: "ok", results }, null, 2));
@@ -77,6 +79,19 @@ function scenarioMotionPolicyGatesAnimation(): string {
   assert(Number.isFinite(frozen) && frozen > 0, "static renders need a fixed, pleasant pose time");
   assert(staticFrameTimeMs() === frozen, "the frozen pose must be deterministic");
   return "motion-policy-gates-animation";
+}
+
+function scenarioRgbTripletParsingIsStrict(): string {
+  /* the design-system tokens are bare "r, g, b" triplets */
+  const cyan = parseRgbTriplet("76,195,255");
+  assert(cyan !== null && cyan[0] === 76 / 255 && cyan[2] === 1, "triplets must normalize to 0..1");
+  const spaced = parseRgbTriplet(" 21, 95, 212 ");
+  assert(spaced !== null && Math.abs(spaced[1] - 95 / 255) < 1e-9, "whitespace around components must be tolerated");
+  assert(parseRgbTriplet("") === null, "empty values must be rejected");
+  assert(parseRgbTriplet("a,b,c") === null, "non-numeric values must be rejected");
+  assert(parseRgbTriplet("1,2") === null, "two components are not a triplet");
+  assert(parseRgbTriplet("300,0,0") === null, "components above 255 must be rejected");
+  return "rgb-triplet-parsing-is-strict";
 }
 
 function assert(condition: boolean, message: string): void {
