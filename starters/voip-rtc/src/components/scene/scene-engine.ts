@@ -33,7 +33,10 @@ export class SceneEngine {
   constructor() {
     try {
       this.stage = makeRenderer();
-      this.backdropRenderer = makeRenderer();
+      /* the backdrop is soft dust and gradient washes: half-resolution
+         render upscaled by CSS is indistinguishable and roughly quarters
+         its fragment cost (it dominates the GPU frame on iGPUs) */
+      this.backdropRenderer = makeRenderer(0.5);
       this.available = true;
       this.failureReason = null;
     } catch (error) {
@@ -174,13 +177,13 @@ export class SceneEngine {
   }
 }
 
-function makeRenderer(): THREE.WebGLRenderer {
+function makeRenderer(resolutionScale = 1): THREE.WebGLRenderer {
   const renderer = new THREE.WebGLRenderer({
     alpha: true,
     antialias: false,
     premultipliedAlpha: true,
   });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2) * resolutionScale);
   renderer.setClearColor(0x000000, 0);
   renderer.autoClear = false;
   return renderer;

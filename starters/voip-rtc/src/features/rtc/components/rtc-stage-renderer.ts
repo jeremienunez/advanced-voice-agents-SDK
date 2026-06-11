@@ -22,6 +22,14 @@ export function createRtcStageRenderer(
   }
 }
 
+/** Releases the GL context immediately on teardown — dispose() alone
+    leaves it alive until the detached canvas is GC'd, and Chrome evicts
+    the oldest context after ~16 live ones under mode churn. */
+export function disposeRtcStageRenderer(renderer: THREE.WebGLRenderer): void {
+  renderer.dispose();
+  renderer.forceContextLoss();
+}
+
 /** Keeps the drawing buffer matched to the element's CSS size. */
 export function syncRendererSize(renderer: THREE.WebGLRenderer): void {
   const canvas = renderer.domElement;

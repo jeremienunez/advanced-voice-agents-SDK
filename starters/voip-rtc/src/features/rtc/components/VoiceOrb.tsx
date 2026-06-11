@@ -1,7 +1,16 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { gazeTarget } from "../../../components/hologram/holo-motion.js";
+import {
+  prefersStaticMotion,
+  staticFrameTimeMs,
+  watchMotionPreference,
+} from "../../../components/scene/scene-motion-policy.js";
 import { createRtcStagePost } from "./rtc-stage-post.js";
-import { createRtcStageRenderer, syncRendererSize } from "./rtc-stage-renderer.js";
+import {
+  createRtcStageRenderer,
+  disposeRtcStageRenderer,
+  syncRendererSize,
+} from "./rtc-stage-renderer.js";
 import { createRtcStageScene } from "./rtc-stage-scene.js";
 import "../styles/components/VoiceOrb.css";
 
@@ -21,7 +30,7 @@ export function VoiceOrb({
   isMuted: boolean;
   outputLevel: number;
 }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fieldRef = useRef<HTMLDivElement>(null);
   const signalRef = useRef<VoiceSignal>({
     isListening: false,
     isMuted: false,
@@ -29,6 +38,8 @@ export function VoiceOrb({
     level: 0,
   });
   const [renderError, setRenderError] = useState<string | null>(null);
+  const [reducedMotion, setReducedMotion] = useState(prefersStaticMotion);
+  const staticRenderRef = useRef<(() => void) | null>(null);
   const level = Math.min(1, Math.max(0, outputLevel));
   const isListening = state === "listening";
   const isSpeaking = state === "speaking";
@@ -43,14 +54,26 @@ export function VoiceOrb({
 
   useEffect(() => {
     signalRef.current = { isListening, isMuted, isSpeaking, level };
+    staticRenderRef.current?.(); /* reduced motion: one frame per state change */
   }, [isListening, isMuted, isSpeaking, level]);
 
+  useEffect(() => watchMotionPreference(setReducedMotion), []);
+
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return undefined;
+    const field = fieldRef.current;
+    if (!field) return undefined;
+
+    /* a fresh canvas per mount: forceContextLoss on teardown frees the
+       GL context immediately, and a remount (StrictMode, motion flip)
+       must not inherit that dead context */
+    const canvas = document.createElement("canvas");
+    canvas.className = "voice-orb-canvas";
+    canvas.setAttribute("aria-hidden", "true");
+    field.prepend(canvas);
 
     const renderer = createRtcStageRenderer(canvas);
     if (!renderer) {
+      canvas.remove();
       setRenderError("webgl unavailable");
       return undefined;
     }
@@ -64,6 +87,32 @@ export function VoiceOrb({
     let smoothedLevel = 0;
     const gaze = { x: 0, y: 0 };
     const wantedGaze = { x: 0, y: 0 };
+
+    if (reducedMotion) {
+      /* no continuous loop: one calm static pose per state change */
+      const renderStatic = () => {
+        const signal = signalRef.current;
+        const staticLevel = signal.isMuted ? 0 : signal.isListening ? 0.1 : 0;
+        const mood = signal.isMuted ? 3 : signal.isSpeaking ? 2 : signal.isListening ? 1 : 0;
+        syncRendererSize(renderer);
+        post.setSize(canvas.clientWidth, canvas.clientHeight);
+        stage.update(
+          { timeMs: staticFrameTimeMs(), level: staticLevel, mood, gaze, mirror: true },
+          { width: canvas.width, height: canvas.height },
+        );
+        post.render(0.016);
+      };
+      frameId = requestAnimationFrame(renderStatic);
+      staticRenderRef.current = renderStatic;
+      return () => {
+        staticRenderRef.current = null;
+        cancelAnimationFrame(frameId);
+        post.dispose();
+        stage.dispose();
+        disposeRtcStageRenderer(renderer);
+        canvas.remove();
+      };
+    }
 
     /* the bust follows the pointer anywhere over the lab, eased so the
        head turns like attention rather than tracking */
@@ -113,9 +162,10 @@ export function VoiceOrb({
       cancelAnimationFrame(frameId);
       post.dispose();
       stage.dispose();
-      renderer.dispose();
+      disposeRtcStageRenderer(renderer);
+      canvas.remove();
     };
-  }, []);
+  }, [reducedMotion]);
 
   return (
     <div
@@ -124,12 +174,7 @@ export function VoiceOrb({
       aria-label={`Agent voice visualizer: ${state}`}
     >
       <div className="voice-orb-stage">
-        <div className="voice-orb-field">
-          <canvas
-            ref={canvasRef}
-            className="voice-orb-canvas"
-            aria-hidden="true"
-          />
+        <div className="voice-orb-field" ref={fieldRef}>
           {renderError ? (
             <div className="voice-orb-fallback">{renderError}</div>
           ) : null}

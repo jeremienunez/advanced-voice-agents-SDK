@@ -265,3 +265,9 @@
     margin-bottom: 0;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .studioHealth.ready::before {
+    animation: none;
+  }
+}

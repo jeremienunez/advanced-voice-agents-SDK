@@ -181,6 +181,10 @@
     opacity: 1;
     transform: none;
   }
+
+  .ambientDot {
+    animation: none;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════
