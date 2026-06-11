@@ -38,10 +38,20 @@ par un pipeline d'extraction photo + design par calques.
 - Verification visuelle: previews 0/±90/180° vs crops de reference +
   passe navigateur in-app (glow maitrise, visage reconnaissable).
 
+### Addendum (meme jour)
+
+- Hull profil ajoute (`hullSide`, trace a la main depuis profil droit,
+  meme methode grille): intersection visual-hull a deux vues dans
+  `skullDistance` — occiput photo-exact (z -0.87), nuque effilee,
+  surplomb de la houppette. Les points scan sont pre-clampes dans le
+  hull au packing (4471 points recales — corrige le front bombe du z
+  MediaPipe, 0.64 → 0.50 conforme au profil photo). Core SDF rendu
+  uniformement genereux (occiput ry 0.55/rz 0.6, quiff rz 0.32) pour
+  que le hull taille tout. BDD 9/9, tsc clean, verifie in-app.
+
 ### Next
 
 - Articulations de la bouche pilotees par video de reference (a venir).
-- Hull profil (occiput/nuque) si besoin apres revue visuelle.
 
 ## feat: refonte du front starter + hologramme voice orb
 

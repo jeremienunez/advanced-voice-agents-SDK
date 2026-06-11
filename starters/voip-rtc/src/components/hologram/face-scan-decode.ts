@@ -17,6 +17,11 @@ export interface FaceScanData {
       pairs, crown to jaw) — the skull SDF is hulled against it so the
       hair contour is photo-exact. Empty = unconstrained. */
   readonly hullFront?: ReadonlyArray<number>;
+  /** head silhouette traced from the right-profile photo (head-frame zy
+      flat pairs) — second visual-hull view: occiput depth, nape taper,
+      quiff overhang. Scan points are pre-clamped inside it at pack time.
+      Empty = unconstrained. */
+  readonly hullSide?: ReadonlyArray<number>;
 }
 
 export interface FaceScan {
@@ -25,6 +30,7 @@ export interface FaceScan {
   readonly shade: Float32Array;
   readonly window: ReadonlyArray<number>;
   readonly hullFront: ReadonlyArray<number>;
+  readonly hullSide: ReadonlyArray<number>;
 }
 
 export const POS_SCALE = 8000;
@@ -53,6 +59,7 @@ export function decodeFaceScan(data: FaceScanData): FaceScan {
     shade,
     window: data.window,
     hullFront: data.hullFront ?? [],
+    hullSide: data.hullSide ?? [],
   };
 }
 

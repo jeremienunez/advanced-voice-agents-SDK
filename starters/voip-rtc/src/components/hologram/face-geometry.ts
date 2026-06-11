@@ -305,8 +305,8 @@ export function skullCoreDistance(p: Vec3): number {
   /* the subject's hair: tall swept-up volume — generous on purpose,
      the photo hull trims it to the real quiff and temples */
   d = smin(d, ell(p, 0, 0.58, -0.04, 0.55, 0.5, 0.58), 0.08); /* hair crown */
-  d = smin(d, ell(p, 0, 0.8, 0.18, 0.34, 0.3, 0.26), 0.09); /* front quiff */
-  d = smin(d, ell(p, 0, 0.3, -0.26, 0.5, 0.42, 0.46), 0.07); /* occiput */
+  d = smin(d, ell(p, 0, 0.78, 0.2, 0.34, 0.3, 0.32), 0.09); /* front quiff */
+  d = smin(d, ell(p, 0, 0.4, -0.3, 0.5, 0.55, 0.6), 0.07); /* occiput */
   d = smin(d, ell(p, 0.56, 0.04, -0.05, 0.045, 0.1, 0.08), 0.04); /* ear R */
   d = smin(d, ell(p, -0.56, 0.04, -0.05, 0.045, 0.1, 0.08), 0.04); /* ear L */
   d = smin(d, ell(p, 0, -0.85, -0.04, 0.26, 0.38, 0.25), 0.1); /* neck stub */
@@ -316,17 +316,25 @@ export function skullCoreDistance(p: Vec3): number {
   return d;
 }
 
-/** Structural head SDF: the core sculpt intersected with the photo
-    hull, so the hair contour matches the reference subject exactly. */
+/** Structural head SDF: the core sculpt intersected with the two-view
+    photo hull (front xy + right-profile zy), so the hair contour and
+    the occiput/nape depth match the reference subject exactly. */
 export function skullDistance(p: Vec3): number {
   let d = skullCoreDistance(p);
-  /* visual hull: the front-photo silhouette carves the hair contour —
-     gated above the neck so the closed polygon never crops the bust */
-  const hull = FACE_SCAN.hullFront;
-  if (hull && hull.length >= 6 && p[1] > -0.6) {
+  /* visual hull: the photo silhouettes carve the head — gated above
+     the neck so the closed polygons never crop the bust */
+  if (p[1] > -0.6) {
     const gate = smooth01(-0.55, -0.42, p[1]);
-    const pd = polygonSignedDistance(p[0], p[1], hull);
-    d = d + (Math.max(d, pd) - d) * gate;
+    const front = FACE_SCAN.hullFront;
+    if (front && front.length >= 6) {
+      const pd = polygonSignedDistance(p[0], p[1], front);
+      d = d + (Math.max(d, pd) - d) * gate;
+    }
+    const side = FACE_SCAN.hullSide;
+    if (side && side.length >= 6) {
+      const pd = polygonSignedDistance(p[2], p[1], side);
+      d = d + (Math.max(d, pd) - d) * gate;
+    }
   }
   return d;
 }

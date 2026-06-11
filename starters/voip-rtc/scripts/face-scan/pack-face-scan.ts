@@ -208,6 +208,66 @@ for (const [x, y] of FRONT_OUTLINE_PX) {
   hullFront.push(Math.round(p[0] * 1e4) / 1e4, Math.round(p[1] * 1e4) / 1e4);
 }
 
+/* Hand-traced head silhouette from ref/profile-right.png (source-image
+   pixels, nose pointing right). Same grid-overlay method as the front.
+   The nose/lips arc is deliberately bulged outward: the scan owns the
+   face profile, the hull only reins in gross depth errors (the
+   MediaPipe forehead bulge) and shapes occiput, nape and quiff.
+   Order: clockwise from the nape — back of head up, over the crown,
+   down the quiff and face, under the chin, back along the throat. */
+const SIDE_OUTLINE_PX: ReadonlyArray<[number, number]> = [
+  [190, 520], [160, 460], [138, 380], [128, 300], [126, 240], [132, 180],
+  [150, 130], [185, 95], [240, 68], [300, 56], [360, 62], [395, 78],
+  [420, 105], [432, 140], [445, 185], [458, 235], [462, 275], [458, 295],
+  [525, 340], [525, 360], [480, 375], [478, 395], [492, 418], [470, 445],
+  [462, 462], [440, 488], [380, 515], [300, 540],
+];
+/* profile registration: the panel zoom differs from the front view —
+   scale from crown-to-chin height, anchors on the crown top (shared
+   with the front hull) and the scan's nose tip depth */
+const SIDE_SCALE = 1.735 / (468 - 57); /* head height px → head units */
+const SIDE_TOP_PX = 57; /* crown top row ↔ y = 1.065 (front hull) */
+const SIDE_NOSE_PX = 508; /* nose tip column ↔ scan nose tip z */
+const sideNoseZ = Math.max(...headPts.map((p) => p[2]));
+const toHeadSide = (x: number, y: number): [number, number] => [
+  sideNoseZ - (SIDE_NOSE_PX - x) * SIDE_SCALE,
+  1.065 - (y - SIDE_TOP_PX) * SIDE_SCALE,
+];
+
+const hullSide: number[] = [];
+for (const [x, y] of SIDE_OUTLINE_PX) {
+  const [z, yh] = toHeadSide(x, y);
+  hullSide.push(Math.round(z * 1e4) / 1e4, Math.round(yh * 1e4) / 1e4);
+}
+
+/* clamp scan points into the side hull: MediaPipe's relative depth
+   bulges at the oval rim (forehead reads ~0.14 too far forward) — the
+   profile photo is the authority, so points outside the silhouette are
+   pushed back along z */
+function sideHullDistance(z: number, y: number): number {
+  const n = hullSide.length / 2;
+  let dist = Infinity;
+  let inside = false;
+  for (let i = 0, j = n - 1; i < n; j = i++) {
+    const zi = hullSide[i * 2], yi = hullSide[i * 2 + 1];
+    const zj = hullSide[j * 2], yj = hullSide[j * 2 + 1];
+    const ez = zj - zi, ey = yj - yi;
+    const t = Math.max(0, Math.min(1, ((z - zi) * ez + (y - yi) * ey) / (ez * ez + ey * ey || 1)));
+    dist = Math.min(dist, Math.hypot(z - zi - ez * t, y - yi - ey * t));
+    if (yi > y !== yj > y && z < ((zj - zi) * (y - yi)) / (yj - yi) + zi) inside = !inside;
+  }
+  return inside ? -dist : dist;
+}
+
+let clamped = 0;
+for (const p of headPts) {
+  const sd = sideHullDistance(p[2], p[1]);
+  if (sd > 0.005) {
+    p[2] -= Math.min(sd - 0.005, 0.16);
+    clamped += 1;
+  }
+}
+
 /* ---------- quantize + emit ---------- */
 
 const count = headPts.length;
@@ -234,6 +294,7 @@ export const FACE_SCAN: FaceScanData = {
   shade: "${shadeB64}",
   window: [${windowPoly.join(", ")}],
   hullFront: [${hullFront.join(", ")}],
+  hullSide: [${hullSide.join(", ")}],
 };
 `;
 
@@ -244,6 +305,8 @@ console.log(JSON.stringify({
   status: "ok",
   count,
   hullFrontVerts: hullFront.length / 2,
+  hullSideVerts: hullSide.length / 2,
+  scanPointsClampedBySideHull: clamped,
   zGain: Z_GAIN,
   noseTipZ: Math.max(...zs),
   zRange: [Math.min(...zs), Math.max(...zs)],

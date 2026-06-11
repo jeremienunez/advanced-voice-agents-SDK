@@ -366,10 +366,13 @@ Puis verifier dans le navigateur:
       builder par calques (scan 16.8k pts + lattice 120 anneaux), hull
       silhouette cheveux trace depuis la photo de face, beardMask,
       aScale anti-blowout. BDD 9/9, tsc clean, verifie in-app.
+- [x] Hull profil (2026-06-11): hullSide trace main depuis profil droit,
+      intersection deux vues dans skullDistance, scan pre-clampe dans le
+      hull au packing (front MediaPipe degonfle 0.64→0.50, occiput
+      photo-exact -0.87, nuque effilee).
 - [ ] Articulations de la bouche pilotees par la video de reference
       (l'utilisateur fournit la video — mapper visemes/keyframes sur le
       calque scan via les masques bouche existants).
-- [ ] Hull profil (occiput/nuque) si la revue visuelle le demande.
 - [x] Refonte environment (OnboardingConfig): hero tokenise 30px (glass
       blanc purge), metrics/pills/kickers/steps en mono, focus ring
       tokenise, terminal infra en font-mono sur dark fixe, entree animee
