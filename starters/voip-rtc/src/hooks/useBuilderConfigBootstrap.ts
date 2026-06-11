@@ -2,8 +2,8 @@ import { useEffect, type Dispatch, type SetStateAction } from "react";
 import { fetchBuilderConfig } from "../api/builderApi.js";
 import type {
   BuilderConfig,
-  BuilderIdentity,
   BuilderResearchSettings,
+  BuilderSystemConfig,
 } from "../domain/builder/types.js";
 import type {
   KnowledgeResearchBudget,
@@ -13,17 +13,17 @@ export function useBuilderConfigBootstrap({
   apiBase,
   setConfig,
   setConfigError,
-  setForm,
   setResearchBudget,
   setResearchSettings,
+  setBuilderSystem,
   setSelectedTools,
 }: {
   apiBase: string;
   setConfig: Dispatch<SetStateAction<BuilderConfig | null>>;
   setConfigError: Dispatch<SetStateAction<string | null>>;
-  setForm: Dispatch<SetStateAction<BuilderIdentity>>;
   setResearchBudget: Dispatch<SetStateAction<KnowledgeResearchBudget>>;
   setResearchSettings: Dispatch<SetStateAction<BuilderResearchSettings>>;
+  setBuilderSystem: Dispatch<SetStateAction<BuilderSystemConfig>>;
   setSelectedTools: Dispatch<SetStateAction<string[]>>;
 }) {
   useEffect(() => {
@@ -32,11 +32,7 @@ export function useBuilderConfigBootstrap({
       try {
         const nextConfig = await fetchBuilderConfig(apiBase, controller.signal);
         setConfig(nextConfig);
-        setForm((current) => ({
-          ...current,
-          llmProvider: current.llmProvider || nextConfig.defaults.promptProvider,
-          llmModel: current.llmModel || nextConfig.defaults.promptModel,
-        }));
+        setBuilderSystem(defaultBuilderSystem(nextConfig));
         setResearchSettings({
           provider: nextConfig.defaults.researchProvider,
           model: nextConfig.defaults.researchModel,
@@ -52,11 +48,6 @@ export function useBuilderConfigBootstrap({
         );
       } catch (error) {
         if (controller.signal.aborted) return;
-        setForm((current) => ({
-          ...current,
-          llmProvider: current.llmProvider,
-          llmModel: current.llmModel,
-        }));
         setConfigError(
           error instanceof Error ? error.message : "Failed to load builder config",
         );
@@ -68,9 +59,32 @@ export function useBuilderConfigBootstrap({
     apiBase,
     setConfig,
     setConfigError,
-    setForm,
     setResearchBudget,
     setResearchSettings,
+    setBuilderSystem,
     setSelectedTools,
   ]);
+}
+
+function defaultBuilderSystem(config: BuilderConfig): BuilderSystemConfig {
+  const planner = {
+    provider: config.defaults.promptProvider,
+    model: config.defaults.promptModel,
+  };
+  return {
+    modelSelections: {
+      "builder.planner": planner,
+      "builder.prompt_composer": planner,
+      "builder.database_planner": planner,
+      "builder.tool_planner": planner,
+      "builder.researcher": {
+        provider: config.defaults.researchProvider,
+        model: config.defaults.researchModel,
+      },
+      "builder.verifier": {
+        provider: config.defaults.knowledgeVerificationProvider,
+        model: config.defaults.knowledgeVerificationModel,
+      },
+    },
+  };
 }

@@ -16,13 +16,10 @@
 
 import { decodeFaceScan, insideFaceWindow } from "./face-scan-decode.js";
 import { FACE_SCAN } from "./face-scan.js";
-import { ell, smin, sph } from "./face-math.js";
+import { beardMask, hairMask, mouthMask } from "./face-masks.js";
+import { skullDistance } from "./face-sdf.js";
+import type { OrbRng } from "./orb-rng.js";
 import { clamp, dot, normalize, type Vec3 } from "./vector-math.js";
-
-export interface OrbRng {
-  /** Uniform float in [0, 1). */
-  next(): number;
-}
 
 export interface FaceGeometry {
   /** xyz triplets in head space (y up, z toward the viewer). */
@@ -34,23 +31,6 @@ export interface FaceGeometry {
   /** per point: dot-size factor (the scan layer is finer grained). */
   readonly scale: Float32Array;
   readonly count: number;
-}
-
-/** Deterministic mulberry32 — the default seed is part of the design. */
-export class OrbSeededRng implements OrbRng {
-  private state: number;
-
-  constructor(seed: number) {
-    this.state = seed >>> 0;
-  }
-
-  next(): number {
-    this.state = (this.state + 0x6d2b79f5) >>> 0;
-    let t = this.state;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  }
 }
 
 const EYE_CENTERS: ReadonlyArray<Vec3> = [
@@ -246,14 +226,6 @@ function castToSurface(origin: Vec3, dir: Vec3): Vec3 | null {
   return at((lo + hi) / 2);
 }
 
-/* ============================ masks ============================ */
-
-export function mouthMask(p: Vec3): number {
-  return Math.exp(
-    -((p[0] / 0.24) ** 2 + ((p[1] + 0.33) / 0.12) ** 2 + ((p[2] - 0.45) / 0.26) ** 2),
-  );
-}
-
 function jawMask(p: Vec3): number {
   const lower = clamp(-(p[1] + 0.26) * 5, 0, 1);
   return mouthMask(p) * lower + 0.35 * Math.exp(
@@ -295,107 +267,6 @@ function irisMask(p: Vec3): number {
     if (p[2] > 0.4 && Math.hypot(p[0] - c[0], p[1] - c[1]) < 0.028) return 1;
   }
   return 0;
-}
-
-export function hairMask(p: Vec3): number {
-  if (p[1] < -0.62) return 0; /* the face and neck are never hair */
-  /* theta walks around the head: 0 faces the viewer, ±π is the nape */
-  const theta = Math.atan2(p[0], p[2]);
-  const around = Math.abs(theta) / Math.PI;
-  /* the subject's hairline: high front, receded temples, short sides
-     over the ears, tapered low at the nape */
-  const temple = Math.exp(-(((Math.abs(theta) - 0.62) / 0.22) ** 2));
-  const line =
-    0.44 + temple * 0.09 - smooth01(0.12, 0.5, around) * 0.42 - smooth01(0.5, 1, around) * 0.62;
-  return clamp((p[1] - line) * 4.0, 0, 1);
-}
-
-/** Short boxed beard + mustache: chin, jawline, sideburn link. */
-export function beardMask(p: Vec3): number {
-  if (p[1] > 0 || p[1] < -0.75) return 0;
-  const g = (cx: number, cy: number, cz: number, rx: number, ry: number, rz: number): number =>
-    Math.exp(-(((p[0] - cx) / rx) ** 2 + ((p[1] - cy) / ry) ** 2 + ((p[2] - cz) / rz) ** 2));
-  let m = g(0, -0.52, 0.3, 0.2, 0.17, 0.2); /* chin patch */
-  m = Math.max(m, g(0.29, -0.4, 0.16, 0.16, 0.18, 0.24)); /* jawline R */
-  m = Math.max(m, g(-0.29, -0.4, 0.16, 0.16, 0.18, 0.24)); /* jawline L */
-  m = Math.max(m, g(0, -0.295, 0.5, 0.13, 0.045, 0.1)); /* mustache */
-  m = Math.max(m, g(0.44, -0.14, 0.04, 0.09, 0.24, 0.18)); /* sideburn R */
-  m = Math.max(m, g(-0.44, -0.14, 0.04, 0.09, 0.24, 0.18)); /* sideburn L */
-  /* the lower lip stays bare inside the beard frame */
-  m *= 1 - Math.min(1, g(0, -0.385, 0.48, 0.09, 0.04, 0.09) * 1.4);
-  return clamp(m * 1.25, 0, 1);
-}
-
-function smooth01(a: number, b: number, x: number): number {
-  const t = clamp((x - a) / (b - a), 0, 1);
-  return t * t * (3 - 2 * t);
-}
-
-/* ============================ sdf ============================ */
-
-/** Core head SDF, before the photo hull. The hair volumes deliberately
-    overshoot the subject's silhouette: the front-photo hull is the one
-    that carves them down to the exact contour. */
-export function skullCoreDistance(p: Vec3): number {
-  let d = ell(p, 0, 0.3, -0.06, 0.56, 0.55, 0.6); /* cranium */
-  d = smin(d, ell(p, 0, 0.05, 0.28, 0.5, 0.44, 0.3), 0.16); /* face plane */
-  d = smin(d, ell(p, 0, -0.2, 0.2, 0.42, 0.36, 0.32), 0.14); /* midface */
-  d = smin(d, ell(p, 0, -0.4, 0.1, 0.33, 0.26, 0.3), 0.12); /* jaw */
-  d = smin(d, ell(p, 0, -0.55, 0.26, 0.15, 0.12, 0.13), 0.08); /* chin */
-  d = smin(d, ell(p, 0.26, 0.0, 0.34, 0.13, 0.15, 0.14), 0.1); /* cheekbone R */
-  d = smin(d, ell(p, -0.26, 0.0, 0.34, 0.13, 0.15, 0.14), 0.1); /* cheekbone L */
-  /* the subject's hair: tall swept-up volume — generous on purpose,
-     the photo hull trims it to the real quiff and temples */
-  d = smin(d, ell(p, 0, 0.58, -0.04, 0.55, 0.5, 0.58), 0.08); /* hair crown */
-  d = smin(d, ell(p, 0, 0.78, 0.2, 0.34, 0.3, 0.32), 0.09); /* front quiff */
-  d = smin(d, ell(p, 0, 0.4, -0.3, 0.5, 0.55, 0.6), 0.07); /* occiput */
-  d = smin(d, ell(p, 0.56, 0.04, -0.05, 0.045, 0.1, 0.08), 0.04); /* ear R */
-  d = smin(d, ell(p, -0.56, 0.04, -0.05, 0.045, 0.1, 0.08), 0.04); /* ear L */
-  d = smin(d, ell(p, 0, -0.85, -0.04, 0.26, 0.38, 0.25), 0.1); /* neck stub */
-  d = smin(d, sph(p, 0, -0.12, 0.6, 0.07), 0.09); /* nose root, seam aid */
-  /* the trimmed beard pads the jaw and chin outward */
-  d -= beardMask(p) * 0.018;
-  return d;
-}
-
-/** Structural head SDF: the core sculpt intersected with the two-view
-    photo hull (front xy + right-profile zy), so the hair contour and
-    the occiput/nape depth match the reference subject exactly. */
-export function skullDistance(p: Vec3): number {
-  let d = skullCoreDistance(p);
-  /* visual hull: the photo silhouettes carve the head — gated above
-     the neck so the closed polygons never crop the bust */
-  if (p[1] > -0.6) {
-    const gate = smooth01(-0.55, -0.42, p[1]);
-    const front = FACE_SCAN.hullFront;
-    if (front && front.length >= 6) {
-      const pd = polygonSignedDistance(p[0], p[1], front);
-      d = d + (Math.max(d, pd) - d) * gate;
-    }
-    const side = FACE_SCAN.hullSide;
-    if (side && side.length >= 6) {
-      const pd = polygonSignedDistance(p[2], p[1], side);
-      d = d + (Math.max(d, pd) - d) * gate;
-    }
-  }
-  return d;
-}
-
-/** Signed distance to a flat-pair polygon in head-frame xy (negative
-    inside). Drives the photo-true silhouette hull of the skull. */
-function polygonSignedDistance(x: number, y: number, v: ReadonlyArray<number>): number {
-  const n = v.length / 2;
-  let dist = Infinity;
-  let inside = false;
-  for (let i = 0, j = n - 1; i < n; j = i++) {
-    const xi = v[i * 2], yi = v[i * 2 + 1];
-    const xj = v[j * 2], yj = v[j * 2 + 1];
-    const ex = xj - xi, ey = yj - yi;
-    const t = Math.max(0, Math.min(1, ((x - xi) * ex + (y - yi) * ey) / (ex * ex + ey * ey || 1)));
-    dist = Math.min(dist, Math.hypot(x - xi - ex * t, y - yi - ey * t));
-    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
-  }
-  return inside ? -dist : dist;
 }
 
 function gradient(p: Vec3): Vec3 {

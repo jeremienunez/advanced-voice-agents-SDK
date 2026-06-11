@@ -1,5 +1,7 @@
 import type {
   AgentBuildDraft,
+  BuilderSystemConfig,
+  BuilderSystemRole,
   DatabaseBuildPlan,
   DatabaseBuildRequest,
   DatabasePlannerPort,
@@ -30,6 +32,7 @@ export class LlmPromptPlanner
   implements PromptPlannerPort, DatabasePlannerPort {
   constructor(
     private readonly config: {
+      defaultBuilderSystem?: BuilderSystemConfig;
       prompts: BuilderPromptLibrary;
       runner: LlmTaskRunnerPort;
     },
@@ -139,10 +142,11 @@ export class LlmPromptPlanner
         { role: "user", content: input.user },
       ],
       outputContract: { kind: "json_object" },
-      requestedModel: {
-        provider: input.draft.identity.llmProvider,
-        model: input.draft.identity.llmModel,
-      },
+      requestedModel: requestedModelFor(
+        input.draft,
+        input.role,
+        this.config.defaultBuilderSystem,
+      ),
       needs: {
         cost: "quality",
         latency: "batch",
@@ -162,6 +166,34 @@ export class LlmPromptPlanner
       return input.fallback;
     }
   }
+}
+
+function requestedModelFor(
+  draft: AgentBuildDraft,
+  role: LlmTask["role"],
+  defaults: BuilderSystemConfig | undefined,
+): LlmTask["requestedModel"] {
+  if (!isBuilderSystemRole(role)) return undefined;
+  const selections = draft.builderSystem?.modelSelections;
+  const defaultSelections = defaults?.modelSelections;
+  return selections?.[role] ??
+    plannerFallbackSelection(selections, role) ??
+    defaultSelections?.[role] ??
+    plannerFallbackSelection(defaultSelections, role);
+}
+
+function plannerFallbackSelection(
+  selections: BuilderSystemConfig["modelSelections"] | undefined,
+  role: BuilderSystemRole,
+): LlmTask["requestedModel"] {
+  if (role === "builder.prompt_composer" || role === "builder.database_planner" || role === "builder.tool_planner") {
+    return selections?.["builder.planner"];
+  }
+  return undefined;
+}
+
+function isBuilderSystemRole(role: LlmTask["role"]): role is BuilderSystemRole {
+  return role.startsWith("builder.");
 }
 
 function summarizeDocumentForDatabasePlanner(

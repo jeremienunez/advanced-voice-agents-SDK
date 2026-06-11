@@ -154,8 +154,6 @@ function draft(id: string, intent: string): AgentBuildDraft {
       intent,
       mustDo: [],
       mustNotDo: [],
-      llmProvider: "gemini",
-      llmModel: "gemini-test",
     },
     toolRegistry: [],
     selectedTools: [],

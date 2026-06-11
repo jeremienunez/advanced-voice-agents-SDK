@@ -94,8 +94,6 @@ function draftForLearningPolicy(id: string): AgentBuildDraft {
       intent: "Test learning policy preservation",
       mustDo: [],
       mustNotDo: [],
-      llmProvider: "gemini",
-      llmModel: "gemini-test",
     },
     promptPlan: {
       questions: [],

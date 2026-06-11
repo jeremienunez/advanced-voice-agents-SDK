@@ -211,8 +211,6 @@ function draftWithTools(id = "draft_prompt_policy_bdd"): AgentBuildDraft {
       intent: "Compile a safe prompt",
       mustDo: [],
       mustNotDo: [],
-      llmProvider: "gemini",
-      llmModel: "gemini-test",
     },
     promptPlan: {
       questions: [],

@@ -5,6 +5,9 @@ import type {
   BuilderConfig,
   BuilderIdentity,
   BuilderResearchSettings,
+  BuilderSystemConfig,
+  BuilderSystemModelSelection,
+  BuilderSystemRole,
   CompiledAgentSummary,
 } from "../domain/builder/types.js";
 import type {
@@ -12,7 +15,11 @@ import type {
   KnowledgeResearchBudget,
   KnowledgeResearchResult,
 } from "../domain/builder/knowledge.js";
-import { defaultResearchBudget, emptyIdentity } from "../domain/builder/defaults.js";
+import {
+  defaultResearchBudget,
+  emptyBuilderSystem,
+  emptyIdentity,
+} from "../domain/builder/defaults.js";
 import { keepLoaderVisible } from "../domain/builder/progress.js";
 import { deriveBuilderState } from "../domain/builder/derive-state.js";
 import { useBuilderConfigBootstrap } from "./useBuilderConfigBootstrap.js";
@@ -34,6 +41,8 @@ export function useBuilderLab({
   const [config, setConfig] = useState<BuilderConfig | null>(null);
   const [configError, setConfigError] = useState<string | null>(null);
   const [form, setForm] = useState<BuilderIdentity>(emptyIdentity);
+  const [builderSystem, setBuilderSystem] =
+    useState<BuilderSystemConfig>(emptyBuilderSystem);
   const [draft, setDraft] = useState<AgentBuildDraft | null>(null);
   const [documents, setDocuments] = useState<KnowledgeDocument[]>([]);
   const [researchBudget, setResearchBudget] =
@@ -58,9 +67,9 @@ export function useBuilderLab({
     apiBase,
     setConfig,
     setConfigError,
-    setForm,
     setResearchBudget,
     setResearchSettings,
+    setBuilderSystem,
     setSelectedTools,
   });
   useRestoredBuilderDraft({
@@ -69,6 +78,7 @@ export function useBuilderLab({
     setDocuments,
     setDraft,
     setForm,
+    setBuilderSystem,
     setMessage,
     setResearchReport,
     setSelectedTools,
@@ -98,8 +108,40 @@ export function useBuilderLab({
     setResearchSettings((current) => ({ ...current, ...patch }));
   };
 
+  const updateBuilderSystemSelection = (
+    role: BuilderSystemRole,
+    selection: BuilderSystemModelSelection,
+  ) => {
+    setBuilderSystem((current) => ({
+      modelSelections: {
+        ...current.modelSelections,
+        [role]: selection,
+        ...(role === "builder.planner"
+          ? {
+              "builder.prompt_composer": selection,
+              "builder.database_planner": selection,
+              "builder.tool_planner": selection,
+            }
+          : {}),
+      },
+    }));
+    if (role === "builder.researcher") {
+      updateResearchSettings({
+        provider: selection.provider,
+        model: selection.model,
+      });
+    }
+    if (role === "builder.verifier") {
+      updateResearchSettings({
+        verifierProvider: selection.provider,
+        verifierModel: selection.model,
+      });
+    }
+  };
+
   const promptPlanning = useBuilderPromptPlanning({
     apiBase,
+    builderSystem,
     form,
     draft,
     setDraft,
@@ -154,6 +196,7 @@ export function useBuilderLab({
   return {
     config,
     configError,
+    builderSystem,
     form,
     draft,
     documents,
@@ -167,6 +210,7 @@ export function useBuilderLab({
     createdAgent,
     ...derived,
     updateField,
+    updateBuilderSystemSelection,
     updateResearchBudget,
     updateResearchSettings,
     updatePromptAnswer: promptPlanning.updatePromptAnswer,

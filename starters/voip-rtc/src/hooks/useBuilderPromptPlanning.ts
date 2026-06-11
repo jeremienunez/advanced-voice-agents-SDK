@@ -6,11 +6,13 @@ import {
 import type {
   AgentBuildDraft,
   BuilderIdentity,
+  BuilderSystemConfig,
 } from "../domain/builder/types.js";
 import { keepLoaderVisible } from "../domain/builder/progress.js";
 
 export function useBuilderPromptPlanning({
   apiBase,
+  builderSystem,
   form,
   draft,
   setDraft,
@@ -19,6 +21,7 @@ export function useBuilderPromptPlanning({
   setMessage,
 }: {
   apiBase: string;
+  builderSystem: BuilderSystemConfig;
   form: BuilderIdentity;
   draft: AgentBuildDraft | null;
   setDraft: Dispatch<SetStateAction<AgentBuildDraft | null>>;
@@ -33,7 +36,7 @@ export function useBuilderPromptPlanning({
     setBusy("prompt");
     setMessage(null);
     try {
-      const response = await createPromptPlan(apiBase, form);
+      const response = await createPromptPlan(apiBase, form, builderSystem);
       setDraft(response.draft);
       setSelectedTools(response.draft.selectedTools);
       setPromptAnswers({});

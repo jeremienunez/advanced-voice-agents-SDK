@@ -17,13 +17,10 @@ import { PlanOnlyInfraIacGenerator } from "./domain/infra/iac-generator.js";
 import { createBuilderLlmCatalog } from "./llm/profiles.js";
 import { AdaptiveLlmModelResolver } from "./llm/resolver.js";
 import { BuilderLlmTaskRunner } from "./llm/task-runner.js";
+import { defaultPromptBuilderSystem } from "./default-builder-system.js";
 import { InMemoryDocumentIngestionQuota } from "./quotas/document-ingestion-quota.js";
 import { loadBuilderPromptLibrary } from "./prompts/template.js";
-import type {
-  AgentBuilderLlmProvider,
-  LlmModelProfile,
-  LlmTaskRole,
-} from "@voiceagentsdk/core/sdk";
+import type { AgentBuilderLlmProvider, LlmModelProfile, LlmTaskRole } from "@voiceagentsdk/core/sdk";
 import { runtimeToolHandlerRefs } from "../runtime/tools/handler-refs.js";
 import { createEnvSecretResolver } from "../secrets/env-secret-resolver.js";
 import type { BuilderConfig, BuilderServiceComposition } from "./types.js";
@@ -157,6 +154,10 @@ export function createBuilderServiceCompositionFromEnv(
     config,
     workflows: {
       planner: new LlmPromptPlanner({
+        defaultBuilderSystem: defaultPromptBuilderSystem({
+          provider: promptProvider,
+          model: promptModel,
+        }),
         runner: llmRunner,
         prompts: promptLibrary,
       }),

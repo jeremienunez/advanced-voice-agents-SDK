@@ -21,6 +21,27 @@ export type AgentBuilderLlmProvider =
   | "anthropic"
   | "custom";
 
+export type BuilderSystemRole =
+  | "builder.planner"
+  | "builder.researcher"
+  | "builder.verifier"
+  | "builder.prompt_composer"
+  | "builder.tool_planner"
+  | "builder.database_planner";
+
+export interface BuilderSystemModelSelection {
+  provider: AgentBuilderLlmProvider | string;
+  model: string;
+}
+
+export type BuilderSystemModelSelections = Partial<
+  Record<BuilderSystemRole, BuilderSystemModelSelection>
+>;
+
+export interface BuilderSystemConfig {
+  modelSelections: BuilderSystemModelSelections;
+}
+
 export type AgentBuildDraftStatus =
   | "draft"
   | "prompt-planned"
@@ -37,8 +58,6 @@ export interface AgentBuilderIdentity {
   intent: string;
   mustDo: string[];
   mustNotDo: string[];
-  llmProvider: AgentBuilderLlmProvider;
-  llmModel: string;
 }
 
 export interface PromptBuildQuestion {

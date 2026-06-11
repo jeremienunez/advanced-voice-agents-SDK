@@ -129,8 +129,6 @@ export function agentDraft(id: string): AgentBuildDraft {
       intent: "Validate seams",
       mustDo: [],
       mustNotDo: [],
-      llmProvider: "gemini",
-      llmModel: "gemini-test",
     },
     toolRegistry: [],
     selectedTools: ["lookup"],

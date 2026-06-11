@@ -2,11 +2,17 @@ import type {
   AgentBuildDraft,
   BuilderDraftResponse,
   BuilderIdentity,
+  BuilderSystemConfig,
 } from "../../domain/builder/types.js";
 import { postJson, readError } from "../http.js";
 
-export function createPromptPlan(apiBase: string, identity: BuilderIdentity) {
+export function createPromptPlan(
+  apiBase: string,
+  identity: BuilderIdentity,
+  builderSystem: BuilderSystemConfig,
+) {
   return postJson<{ draft: AgentBuildDraft }>(`${apiBase}/prompt-plan`, {
+    builderSystem,
     identity,
   });
 }

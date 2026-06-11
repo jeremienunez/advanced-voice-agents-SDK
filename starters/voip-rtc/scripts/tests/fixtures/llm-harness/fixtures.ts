@@ -63,8 +63,14 @@ export function draft(): AgentBuildDraft {
       intent: "Help users compare reliable source material",
       mustDo: ["cite sources"],
       mustNotDo: ["invent facts"],
-      llmProvider: "gemini",
-      llmModel: "gemini-requested",
+    },
+    builderSystem: {
+      modelSelections: {
+        "builder.planner": {
+          provider: "gemini",
+          model: "gemini-requested",
+        },
+      },
     },
     toolRegistry: [],
     selectedTools: [],

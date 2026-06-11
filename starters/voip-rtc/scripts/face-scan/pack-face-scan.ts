@@ -14,36 +14,16 @@
    silhouettes come from MediaPipe ImageSegmenter at pixel resolution. */
 
 import { readFileSync, writeFileSync } from "node:fs";
-import { insideFaceWindow, POS_SCALE } from "../../src/components/hologram/face-scan-decode.js";
 import type { Vec3 } from "../../src/components/hologram/vector-math.js";
-
-interface LumMap {
-  x0: number;
-  y0: number;
-  step: number;
-  lw: number;
-  lh: number;
-  data: number[];
-}
-
-interface OutlineTrace {
-  w: number;
-  h: number;
-  left: number[][];
-  right: number[][];
-  lum: LumMap;
-}
-
-interface RawScan {
-  w: number;
-  h: number;
-  landmarks: number[][];
-  oval: number[];
-  samples: number[][];
-  outlineFront: OutlineTrace;
-  outlineSide: OutlineTrace;
-  outlineBack: OutlineTrace;
-}
+import {
+  blendFaceSeam,
+  buildHull,
+  chainInterp,
+  meanLandmarks,
+  smoothFaceDepth,
+} from "./pack-face-scan-geometry.js";
+import { buildSkullLayer, quantize } from "./pack-face-scan-luminance.js";
+import type { EllipseSection, RawScan } from "./pack-face-scan-types.js";
 
 const here = new URL(".", import.meta.url).pathname;
 const raw: RawScan = JSON.parse(readFileSync(`${here}scan-raw.json`, "utf8"));
@@ -53,11 +33,7 @@ const Z_EYE = 0.52; /* head-frame depth of the eye plane */
 /* ================= face registration (landmarks) ================= */
 
 const lm = raw.landmarks;
-const mean = (ids: number[]): number[] =>
-  ids.reduce(
-    (acc, i) => [acc[0] + lm[i][0] / ids.length, acc[1] + lm[i][1] / ids.length, acc[2] + lm[i][2] / ids.length],
-    [0, 0, 0],
-  );
+const mean = (ids: number[]): number[] => meanLandmarks(lm, ids);
 const irisA = mean([468, 469, 470, 471, 472]);
 const irisB = mean([473, 474, 475, 476, 477]);
 const [eyeLeftPx, eyeRightPx] = irisA[0] < irisB[0] ? [irisA, irisB] : [irisB, irisA];
@@ -89,36 +65,6 @@ const frontPx = (x: number, y: number): [number, number] => [
 ];
 
 /* ================= silhouettes (segmenter chains) ================= */
-
-/** Box-smooth a chain's x values and return a y→x linear interpolator. */
-function chainInterp(chain: number[][], toUnits: (x: number, y: number) => [number, number]) {
-  const pts = chain
-    .map(([x, y]) => toUnits(x, y))
-    .sort((a, b) => b[1] - a[1]); /* y desc */
-  const xs = pts.map((p) => p[0]);
-  const smooth = xs.map((_, i) => {
-    let sum = 0;
-    let n = 0;
-    for (let j = Math.max(0, i - 3); j <= Math.min(xs.length - 1, i + 3); j++) {
-      sum += xs[j];
-      n++;
-    }
-    return sum / n;
-  });
-  const ys = pts.map((p) => p[1]);
-  return (y: number): number | null => {
-    if (y > ys[0] || y < ys[ys.length - 1]) return null;
-    let lo = 0;
-    let hi = ys.length - 1;
-    while (hi - lo > 1) {
-      const m = (lo + hi) >> 1;
-      if (ys[m] >= y) lo = m;
-      else hi = m;
-    }
-    const t = (ys[lo] - y) / (ys[lo] - ys[hi] || 1);
-    return smooth[lo] + (smooth[hi] - smooth[lo]) * t;
-  };
-}
 
 /* front chains → x extents (units via the landmark registration) */
 const frontUnits = (x: number, y: number): [number, number] => {
@@ -189,25 +135,6 @@ const backPx = (x: number, y: number): [number, number] => [
   backTopRow + (topUnits - y) / backScale,
 ];
 
-/* ================= luminance sampling (triplanar) ================= */
-
-function sampleLum(map: LumMap, px: number, py: number): number | null {
-  const fi = (px - map.x0) / map.step;
-  const fj = (py - map.y0) / map.step;
-  const i = Math.floor(fi);
-  const j = Math.floor(fj);
-  if (i < 0 || j < 0 || i >= map.lw - 1 || j >= map.lh - 1) return null;
-  const tx = fi - i;
-  const ty = fj - j;
-  const at = (ii: number, jj: number): number => map.data[jj * map.lw + ii] / 255;
-  return (
-    at(i, j) * (1 - tx) * (1 - ty) +
-    at(i + 1, j) * tx * (1 - ty) +
-    at(i, j + 1) * (1 - tx) * ty +
-    at(i + 1, j + 1) * tx * ty
-  );
-}
-
 /* ================= face layer ================= */
 
 const headPts: Vec3[] = [];
@@ -220,36 +147,7 @@ for (const [x, y, z, lum] of raw.samples) {
 /* depth smoothing: IDW depth carries per-sample noise that reads as
    froth in profile — relax z toward the neighborhood mean */
 const SMOOTH_R = 0.035;
-for (let pass = 0; pass < 2; pass++) {
-  const grid = new Map<string, number[]>();
-  const keyOf = (x: number, y: number): string =>
-    `${Math.floor(x / SMOOTH_R)},${Math.floor(y / SMOOTH_R)}`;
-  headPts.forEach((p, i) => {
-    const k = keyOf(p[0], p[1]);
-    (grid.get(k) ?? grid.set(k, []).get(k))!.push(i);
-  });
-  const nextZ = headPts.map((p) => {
-    let sum = 0;
-    let n = 0;
-    const gx = Math.floor(p[0] / SMOOTH_R);
-    const gy = Math.floor(p[1] / SMOOTH_R);
-    for (let dx = -1; dx <= 1; dx++) {
-      for (let dy = -1; dy <= 1; dy++) {
-        for (const j of grid.get(`${gx + dx},${gy + dy}`) ?? []) {
-          const q = headPts[j];
-          if (Math.hypot(q[0] - p[0], q[1] - p[1]) < SMOOTH_R) {
-            sum += q[2];
-            n++;
-          }
-        }
-      }
-    }
-    return n > 0 ? p[2] * 0.45 + (sum / n) * 0.55 : p[2];
-  });
-  nextZ.forEach((z, i) => {
-    headPts[i][2] = z;
-  });
-}
+smoothFaceDepth(headPts, SMOOTH_R, 2);
 
 /* clamp face depth against the profile silhouette: MediaPipe bulges at
    the oval rim (forehead) — the photo is the authority */
@@ -265,19 +163,8 @@ for (const p of headPts) {
 /* seam: blend the oval boundary onto the hull ellipse cross-section so
    the face meets the skull layer without a step */
 const ovalHead = raw.oval.map((i) => toHead(lm[i][0], lm[i][1], lm[i][2]));
-function distToOvalEdge(x: number, y: number): number {
-  let best = Infinity;
-  for (let i = 0, j = ovalHead.length - 1; i < ovalHead.length; j = i++) {
-    const [x1, y1] = [ovalHead[j][0], ovalHead[j][1]];
-    const [x2, y2] = [ovalHead[i][0], ovalHead[i][1]];
-    const dx = x2 - x1, dy = y2 - y1;
-    const t = Math.max(0, Math.min(1, ((x - x1) * dx + (y - y1) * dy) / (dx * dx + dy * dy)));
-    best = Math.min(best, Math.hypot(x - x1 - dx * t, y - y1 - dy * t));
-  }
-  return best;
-}
 
-function ellipseAt(y: number): { xc: number; a: number; zc: number; b: number } | null {
+function ellipseAt(y: number): EllipseSection | null {
   const l = XL(y);
   const r = XR(y);
   const zb = ZB(y);
@@ -289,17 +176,7 @@ function ellipseAt(y: number): { xc: number; a: number; zc: number; b: number } 
 }
 
 const SEAM_BAND = 0.2;
-for (const p of headPts) {
-  const edge = distToOvalEdge(p[0], p[1]);
-  if (edge >= SEAM_BAND) continue;
-  const e = ellipseAt(p[1]);
-  if (!e) continue;
-  const sin = Math.max(-1, Math.min(1, (p[0] - e.xc) / e.a));
-  const zEll = e.zc + e.b * Math.sqrt(1 - sin * sin); /* front half */
-  const w = edge / SEAM_BAND;
-  const s = w * w * (3 - 2 * w);
-  p[2] = p[2] * s + zEll * (1 - s);
-}
+blendFaceSeam(headPts, ovalHead, ellipseAt, SEAM_BAND);
 
 /* luminance → shade (percentile-normalized on the face; the skull layer
    reuses the same mapping so hair stays dark relative to skin) */
@@ -326,126 +203,23 @@ for (const p of ovalHead) {
 
 /* ================= skull layer: hull-surface rings ================= */
 
-const RING_STEP = 0.021;
-const BUST_CUT = -1.25; /* the projector fade owns everything below */
-/* the segmenter slightly erodes wispy hair edges — breathe back out */
-const HULL_INFLATE = 0.012;
-const skullPts: Vec3[] = [];
-const skullLum: number[] = [];
-/* adaptive descent: where the silhouette widens fast (shoulders) the
-   surface is near-horizontal — tighten the ring spacing so the shell
-   stays a surface instead of a stack of plates */
-const stepAt = (yv: number): number => {
-  const eHere = ellipseAt(yv);
-  const eNext = ellipseAt(yv - 0.012);
-  if (!eHere || !eNext) return RING_STEP;
-  const slope =
-    Math.max(Math.abs(eNext.a - eHere.a), Math.abs(eNext.b - eHere.b)) / 0.012;
-  return RING_STEP / Math.min(4, Math.sqrt(1 + slope * slope));
-};
-/* torso cross-sections flatten from head-ellipse toward a rounded
-   rectangle (the true two-view visual hull is the superellipse) */
-const exponentAt = (yv: number): number =>
-  2 + 1.7 * Math.max(0, Math.min(1, (-0.84 - yv) / 0.2));
-
-let ringIndex = 0;
-for (let y = topUnits - 0.006; y > BUST_CUT; y -= stepAt(y), ringIndex++) {
-  const e = ellipseAt(y);
-  if (!e) continue;
-  e.a += HULL_INFLATE;
-  e.b += HULL_INFLATE;
-  const exp = exponentAt(y);
-  /* walk the superellipse and place dots at equal arc spacing — flat
-     sides would otherwise starve and corners cluster */
-  const su = (t: number): [number, number] => {
-    const st = Math.sin(t);
-    const ct = Math.cos(t);
-    return [
-      e.xc + e.a * Math.sign(st) * Math.abs(st) ** (2 / exp),
-      e.zc + e.b * Math.sign(ct) * Math.abs(ct) ** (2 / exp),
-    ];
-  };
-  let [px2, pz2] = su(0);
-  let acc = (ringIndex % 2) * RING_STEP * 0.5;
-  for (let t = 0.003; t <= Math.PI * 2; t += 0.003) {
-    const [x, z] = su(t);
-    acc += Math.hypot(x - px2, z - pz2);
-    px2 = x;
-    pz2 = z;
-    if (acc < RING_STEP) continue;
-    acc = 0;
-    /* the face window belongs to the scan layer */
-    if (z > 0.05 && insideFaceWindow(x, y, windowPoly)) continue;
-    /* from mid-face to under the chin the front belongs to the scan
-       (jaw, beard) or to honest shadow — in the profile photo the chin
-       occludes the throat, so the hull has no real data there */
-    if (y < -0.35 && y > -0.8 && z > 0.12) continue;
-    /* triplanar luminance: blend the three views by facing direction */
-    const nx = (x - e.xc) / (e.a * e.a);
-    const nz = (z - e.zc) / (e.b * e.b);
-    const nl = Math.hypot(nx, nz) || 1;
-    const fx = nx / nl, fz = nz / nl;
-    let wsum = 0;
-    let lsum = 0;
-    const views: Array<[number, LumMap, [number, number]]> = [
-      [Math.max(0, fz) ** 2, raw.outlineFront.lum, frontPx(x, y)],
-      [fx * fx, raw.outlineSide.lum, sidePx(z, y)],
-      [Math.max(0, -fz) ** 2, raw.outlineBack.lum, backPx(x, y)],
-    ];
-    for (const [w, map, [px, py]] of views) {
-      if (w < 0.02) continue;
-      const l = sampleLum(map, px, py);
-      if (l === null) continue;
-      wsum += w;
-      lsum += l * w;
-    }
-    if (wsum < 0.02) continue;
-    skullPts.push([x, y, z]);
-    skullLum.push(lsum / wsum);
-  }
-}
-/* hair is honestly dark in the photos, but a hologram needs the back
-   of the skull to stay legible — gentle floor under the photo shade */
-const skullShadeArr = skullLum.map((l) => Math.max(0.13, lumToShade(l)));
+const { skullPts, skullShadeArr } = buildSkullLayer({
+  raw,
+  topUnits,
+  windowPoly,
+  ellipseAt,
+  frontPx,
+  sidePx,
+  backPx,
+  lumToShade,
+});
 
 /* ================= dense hulls (kept for the neck SDF + BDD) ================= */
-
-function buildHull(
-  rightChain: number[][],
-  leftChain: number[][],
-  toUnits: (x: number, y: number) => [number, number],
-  yMin: number,
-): number[] {
-  const out: number[] = [];
-  const push = ([u, v]: [number, number]): void => {
-    out.push(Math.round(u * 1e4) / 1e4, Math.round(v * 1e4) / 1e4);
-  };
-  const right = rightChain.map(([x, y]) => toUnits(x, y)).filter((p) => p[1] > yMin);
-  const left = leftChain.map(([x, y]) => toUnits(x, y)).filter((p) => p[1] > yMin);
-  for (let i = 0; i < right.length; i += 3) push(right[i]);
-  for (let i = left.length - 1; i >= 0; i -= 3) push(left[i]);
-  return out;
-}
 
 const hullFront = buildHull(raw.outlineFront.right, raw.outlineFront.left, frontUnits, -1.32);
 const hullSide = buildHull(raw.outlineSide.right, raw.outlineSide.left, sideUnits, -1.32);
 
 /* ================= quantize + emit ================= */
-
-function quantize(pts: Vec3[], shades: number[]): { pos: string; shade: string } {
-  const posInts = new Int16Array(pts.length * 3);
-  const shadeBytes = new Uint8Array(pts.length);
-  for (let i = 0; i < pts.length; i++) {
-    posInts[i * 3] = Math.round(pts[i][0] * POS_SCALE);
-    posInts[i * 3 + 1] = Math.round(pts[i][1] * POS_SCALE);
-    posInts[i * 3 + 2] = Math.round(pts[i][2] * POS_SCALE);
-    shadeBytes[i] = Math.round(shades[i] * 255);
-  }
-  return {
-    pos: Buffer.from(posInts.buffer).toString("base64"),
-    shade: Buffer.from(shadeBytes).toString("base64"),
-  };
-}
 
 const face = quantize(headPts, shade);
 const skull = quantize(skullPts, skullShadeArr);

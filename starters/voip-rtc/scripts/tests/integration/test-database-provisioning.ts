@@ -147,8 +147,6 @@ function agentDraft(): AgentBuildDraft {
       intent: "Validate database provisioning hardening",
       mustDo: [],
       mustNotDo: [],
-      llmProvider: "gemini",
-      llmModel: "gemini-test",
     },
     toolRegistry: [],
     selectedTools: [],

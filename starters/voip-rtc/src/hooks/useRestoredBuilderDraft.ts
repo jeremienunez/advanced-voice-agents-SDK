@@ -2,6 +2,7 @@ import { useEffect, type Dispatch, type SetStateAction } from "react";
 import type {
   AgentBuildDraft,
   BuilderIdentity,
+  BuilderSystemConfig,
 } from "../domain/builder/types.js";
 import type {
   KnowledgeDocument,
@@ -15,6 +16,7 @@ export function useRestoredBuilderDraft({
   setDocuments,
   setDraft,
   setForm,
+  setBuilderSystem,
   setMessage,
   setResearchReport,
   setSelectedTools,
@@ -24,6 +26,7 @@ export function useRestoredBuilderDraft({
   setDocuments: Dispatch<SetStateAction<KnowledgeDocument[]>>;
   setDraft: Dispatch<SetStateAction<AgentBuildDraft | null>>;
   setForm: Dispatch<SetStateAction<BuilderIdentity>>;
+  setBuilderSystem: Dispatch<SetStateAction<BuilderSystemConfig>>;
   setMessage: Dispatch<SetStateAction<string | null>>;
   setResearchReport: Dispatch<SetStateAction<KnowledgeResearchResult | null>>;
   setSelectedTools: Dispatch<SetStateAction<string[]>>;
@@ -32,10 +35,23 @@ export function useRestoredBuilderDraft({
     if (!restoredDraft) return;
     setDraft(restoredDraft);
     setForm({
-      ...emptyIdentity,
-      ...restoredDraft.identity,
-      llmProvider: restoredDraft.identity.llmProvider,
+      builderFirstName:
+        restoredDraft.identity.builderFirstName ?? emptyIdentity.builderFirstName,
+      builderLastName:
+        restoredDraft.identity.builderLastName ?? emptyIdentity.builderLastName,
+      publicAgentName:
+        restoredDraft.identity.publicAgentName ?? emptyIdentity.publicAgentName,
+      intent: restoredDraft.identity.intent ?? emptyIdentity.intent,
+      mustDo: Array.isArray(restoredDraft.identity.mustDo)
+        ? restoredDraft.identity.mustDo.join("\n")
+        : emptyIdentity.mustDo,
+      mustNotDo: Array.isArray(restoredDraft.identity.mustNotDo)
+        ? restoredDraft.identity.mustNotDo.join("\n")
+        : emptyIdentity.mustNotDo,
     });
+    if (restoredDraft.builderSystem) {
+      setBuilderSystem(restoredDraft.builderSystem);
+    }
     setDocuments(restoredDraft.knowledgePlan?.documents ?? []);
     setSelectedTools(restoredDraft.selectedTools);
     setResearchReport(null);
@@ -47,6 +63,7 @@ export function useRestoredBuilderDraft({
     setDocuments,
     setDraft,
     setForm,
+    setBuilderSystem,
     setMessage,
     setResearchReport,
     setSelectedTools,

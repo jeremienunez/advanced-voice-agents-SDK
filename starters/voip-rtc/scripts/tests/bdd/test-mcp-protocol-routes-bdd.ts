@@ -139,8 +139,6 @@ function compiledDraft(): AgentBuildDraft {
       intent: "Expose MCP protocol behavior.",
       mustDo: [],
       mustNotDo: [],
-      llmProvider: "gemini",
-      llmModel: "gemini-test",
     },
     toolRegistry: [],
     selectedTools: [],

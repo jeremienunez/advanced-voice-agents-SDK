@@ -20,6 +20,7 @@ export function mutateDraft(draft: AgentBuildDraft) {
   if (draft.promptParts.tools) builder.toolPrompt(draft.promptParts.tools);
   if (draft.promptParts.final) builder.finalPrompt(draft.promptParts.final);
   if (draft.compiled) builder.compiled(draft.compiled);
+  if (draft.builderSystem) builder.builderSystem(draft.builderSystem);
 
   return builder;
 }

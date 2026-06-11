@@ -1,44 +1,22 @@
 import { Button } from "../../../components/ui/Button.js";
 import { Panel } from "../../../components/ui/Panel.js";
-import { SelectField } from "../../../components/ui/SelectField.js";
 import { TextareaField } from "../../../components/ui/TextareaField.js";
 import { TextField } from "../../../components/ui/TextField.js";
-import type {
-  BuilderConfig,
-  BuilderIdentity,
-} from "../../../domain/builder/types.js";
+import type { BuilderIdentity } from "../../../domain/builder/types.js";
 
 export function IdentityIntentPanel({
   form,
-  config,
   busy,
   canAnalyze,
   updateField,
   analyzeIntent,
 }: {
   form: BuilderIdentity;
-  config: BuilderConfig | null;
   busy: string | null;
   canAnalyze: boolean;
   updateField: (key: keyof BuilderIdentity, value: string) => void;
   analyzeIntent: () => Promise<void>;
 }) {
-  const providerOptions = config?.providers.prompt.length
-    ? config.providers.prompt.map((provider) => ({
-        value: provider.id,
-        label: provider.configured
-          ? provider.label
-          : `${provider.label} - missing key`,
-        disabled: !provider.configured,
-      }))
-    : [
-        {
-          value: "",
-          label: "Waiting for builder config",
-          disabled: true,
-        },
-      ];
-
   return (
     <Panel title="1. Identity + Intent">
       <div className="formGrid">
@@ -62,26 +40,6 @@ export function IdentityIntentPanel({
           placeholder="Route des Vins Concierge"
           value={form.publicAgentName}
           onValueChange={(value) => updateField("publicAgentName", value)}
-        />
-        <SelectField
-          label="Builder provider"
-          name="llmProvider"
-          options={providerOptions}
-          value={form.llmProvider}
-          onValueChange={(value) => {
-            const provider = config?.providers.prompt.find((item) => {
-              return item.id === value;
-            });
-            updateField("llmProvider", value);
-            if (provider) updateField("llmModel", provider.defaultModel);
-          }}
-        />
-        <TextField
-          label="Builder LLM"
-          name="llmModel"
-          placeholder={config?.defaults.promptModel ?? "model from /config"}
-          value={form.llmModel}
-          onValueChange={(value) => updateField("llmModel", value)}
         />
       </div>
       <TextareaField

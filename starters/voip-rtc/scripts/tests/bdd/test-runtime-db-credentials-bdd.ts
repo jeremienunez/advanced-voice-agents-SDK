@@ -130,8 +130,6 @@ function draft(): AgentBuildDraft {
       intent: "Validate per-agent runtime database credentials",
       mustDo: [],
       mustNotDo: [],
-      llmProvider: "gemini",
-      llmModel: "gemini-test",
     },
     toolRegistry: [],
     selectedTools: ["search_knowledge"],

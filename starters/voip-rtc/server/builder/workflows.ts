@@ -1,11 +1,14 @@
 import { createAgentBuildDraftBuilder, type DatabaseBuildPlan, type EmbeddingInput } from "@voiceagentsdk/core/sdk";
+import type { AgentBuildDraft } from "@voiceagentsdk/core/sdk";
 import { chunkDocuments } from "./domain/knowledge/plan.js";
 import { promptPlanWithClarifications } from "./domain/prompt/plan.js";
 import { mutateDraft } from "./domain/drafts/mutations.js";
+import { normalizeBuilderSystem } from "./request/builder-system.js";
 import { normalizeIdentity } from "./request/identity.js";
 import { normalizeKnowledgeDocuments } from "./request/knowledge-documents.js";
 import { normalizeResearchSettings } from "./request/research-settings.js";
 import { normalizeResearchBudget } from "./domain/research/plan.js";
+import { builderSystemDefaults } from "./default-builder-system.js";
 import { saveDraft } from "./state/draft-store.js";
 import {
   requireOwnedDraft,
@@ -34,12 +37,11 @@ export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
     },
 
     async createPromptPlan(body: unknown, context: BuilderRequestContext = {}) {
-      const identity = normalizeIdentity(body, {
-        provider: deps.promptProvider,
-        model: deps.promptModel,
-      });
+      const identity = normalizeIdentity(body);
+      const builderSystem = normalizeBuilderSystem(body, builderSystemDefaults(deps));
       const draftId = readString(body, "draftId") || `draft_${crypto.randomUUID()}`;
       const draft = createAgentBuildDraftBuilder(draftId, identity)
+        .builderSystem(builderSystem)
         .registry(deps.toolRegistry)
         .selectTools(
           deps.toolRegistry
@@ -50,6 +52,7 @@ export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
 
       const plan = await deps.planner.createPromptPlan({ draft });
       const nextDraft = createAgentBuildDraftBuilder(draft.id, draft.identity)
+        .builderSystem(builderSystem)
         .registry(deps.toolRegistry)
         .selectTools(draft.selectedTools)
         .promptPlan(plan)
@@ -87,7 +90,7 @@ export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
     async runResearch(body: unknown, context: BuilderRequestContext = {}) {
       const draft = resolveOwnedDraft(body, context);
       const documents = normalizeKnowledgeDocuments(body);
-      const research = normalizeResearchSettings(body, researchDefaults(deps));
+      const research = normalizeResearchSettings(body, researchDefaults(deps, draft));
       if (!deps.research.isConfigured(research)) {
         return {
           status: "blocked",
@@ -110,12 +113,16 @@ export function createBuilderWorkflows(deps: BuilderWorkflowDependencies) {
     },
 
     async buildAutonomousKnowledge(body: unknown, context: BuilderRequestContext = {}) {
+      const draft = resolveOwnedDraft(body, context);
       const result = await buildEagerKnowledge({
         deps,
-        draft: resolveOwnedDraft(body, context),
+        draft,
         documents: normalizeKnowledgeDocuments(body),
         budget: normalizeResearchBudget(body),
-        research: normalizeResearchSettings(body, researchDefaults(deps)),
+        research: normalizeResearchSettings(
+          body,
+          researchDefaults(deps, draft),
+        ),
       });
       return { status: result.draft.status, ...result };
     },
@@ -255,12 +262,19 @@ async function setActiveAgent(
   });
 }
 
-function researchDefaults(deps: BuilderWorkflowDependencies) {
+function researchDefaults(
+  deps: BuilderWorkflowDependencies,
+  draft?: AgentBuildDraft,
+) {
+  const researcher = draft?.builderSystem?.modelSelections["builder.researcher"];
+  const verifier = draft?.builderSystem?.modelSelections["builder.verifier"];
   return {
-    provider: deps.researchProvider,
-    model: deps.researchModel,
-    verifierProvider: deps.knowledgeVerificationProvider,
-    verifierModel: deps.knowledgeVerificationModel,
+    provider: String(researcher?.provider ?? deps.researchProvider),
+    model: researcher?.model ?? deps.researchModel,
+    verifierProvider: String(
+      verifier?.provider ?? deps.knowledgeVerificationProvider,
+    ),
+    verifierModel: verifier?.model ?? deps.knowledgeVerificationModel,
   };
 }
 

@@ -14,6 +14,12 @@ pnpm version 0.1.0-alpha.1 --no-git-tag-version
 Increment the suffix for follow-up alpha builds: `0.1.0-alpha.1`,
 `0.1.0-alpha.2`, and so on.
 
+## Alpha Breaking Changes
+
+Before publishing, confirm builder drafts use the separated SDK contract:
+agent identity fields must not carry builder LLM provider/model choices.
+Creation-system model choices live under `builderSystem.modelSelections`.
+
 ## Required Checks
 
 Run the full local release gate before publishing:

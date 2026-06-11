@@ -100,8 +100,6 @@ function compiledDraft(id: string): AgentBuildDraft {
       intent: "Validate infra evolution approvals",
       mustDo: [],
       mustNotDo: [],
-      llmProvider: "gemini",
-      llmModel: "gemini-test",
     },
     infraPlan: infra,
     toolRegistry: [],

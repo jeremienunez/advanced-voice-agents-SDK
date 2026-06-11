@@ -19,8 +19,6 @@ export function createOnboardingDraft(input: {
         "Provision onboarding infrastructure for a reusable voice agent runtime.",
       mustDo: ["Keep generated artifacts actionable by the solution itself."],
       mustNotDo: ["Do not embed secret values in IaC artifacts."],
-      llmProvider: "gemini",
-      llmModel: "infra-onboarding",
     },
     toolRegistry: [],
     selectedTools: [],

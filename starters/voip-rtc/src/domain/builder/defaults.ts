@@ -1,5 +1,5 @@
 import type { KnowledgeResearchBudget } from "./knowledge.js";
-import type { BuilderIdentity } from "./types.js";
+import type { BuilderIdentity, BuilderSystemConfig } from "./types.js";
 
 export const emptyIdentity: BuilderIdentity = {
   builderFirstName: "",
@@ -8,8 +8,10 @@ export const emptyIdentity: BuilderIdentity = {
   intent: "",
   mustDo: "",
   mustNotDo: "",
-  llmProvider: "",
-  llmModel: "",
+};
+
+export const emptyBuilderSystem: BuilderSystemConfig = {
+  modelSelections: {},
 };
 
 export const defaultResearchBudget: KnowledgeResearchBudget = {

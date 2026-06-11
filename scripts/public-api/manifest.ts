@@ -65,6 +65,7 @@ export const publicApiEntries = [
       "AgentRxConstraint", "AgentRxConstraintType", "AgentRxDiagnosticReport", "AgentRxFailureCategory", "AgentRxIterationSummary", "AgentRxRepeatedActionSummary",
       "AgentRxReportInput", "AgentRxStepStatus", "AgentRxTrajectory", "AgentRxTrajectoryStep", "AgentRxValidationLog", "AgentRxViolation",
       "AgentRxViolationSeverity", "AgentSkillArtifact", "AgentStorePlan", "AuthTicketChannel", "AuthTicketIdentity", "AuthTicketInput",
+      "BuilderSystemConfig", "BuilderSystemModelSelection", "BuilderSystemModelSelections", "BuilderSystemRole",
       "AuthTicketPort", "BrowserVoiceState", "ClientVoiceMessage", "CompiledAgentArtifact", "CompiledVoiceAgentSdk", "CreateA2AAgentCardInput",
       "DatabaseBackendPlan", "DatabaseBackendResolverPort", "DatabaseBuildPlan", "DatabaseBuildRequest", "DatabaseBuildStatus", "DatabaseCollectionDefinition",
       "DatabaseCredentialResolverPort", "DatabaseDefinition", "DatabaseIndexPlan", "DatabasePlannerPort", "DatabaseProvisionInput", "DatabaseProvisionResult",

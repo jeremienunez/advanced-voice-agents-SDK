@@ -3,8 +3,6 @@ import "../styles/components/KnowledgeStrategyPanel.css";
 import { Panel } from "../../../components/ui/Panel.js";
 import type {
   AgentBuildDraft,
-  BuilderConfig,
-  BuilderResearchSettings,
 } from "../../../domain/builder/types.js";
 import type {
   KnowledgeDocument,
@@ -18,7 +16,6 @@ import { KnowledgeActionBar } from "./knowledge/KnowledgeActionBar.js";
 import { KnowledgePlanSummary } from "./knowledge/KnowledgePlanSummary.js";
 import { KnowledgeWarnings } from "./knowledge/KnowledgeWarnings.js";
 import { ResearchBudgetFields } from "./knowledge/ResearchBudgetFields.js";
-import { ResearchProviderFields } from "./knowledge/ResearchProviderFields.js";
 import { ResearchReportSummary } from "./knowledge/ResearchReportSummary.js";
 
 export function KnowledgeStrategyPanel({
@@ -27,8 +24,6 @@ export function KnowledgeStrategyPanel({
   documents,
   researchBudget,
   researchReport,
-  researchSettings,
-  config,
   busy,
   canRunResearch,
   canPlanKnowledge,
@@ -36,7 +31,6 @@ export function KnowledgeStrategyPanel({
   researchBlocked,
   databaseReady,
   updateResearchBudget,
-  updateResearchSettings,
   handleDocumentUpload,
   buildKnowledgeEagerly,
   runResearch,
@@ -48,8 +42,6 @@ export function KnowledgeStrategyPanel({
   documents: KnowledgeDocument[];
   researchBudget: KnowledgeResearchBudget;
   researchReport: KnowledgeResearchResult | null;
-  researchSettings: BuilderResearchSettings;
-  config: BuilderConfig | null;
   busy: string | null;
   canRunResearch: boolean;
   canPlanKnowledge: boolean;
@@ -57,7 +49,6 @@ export function KnowledgeStrategyPanel({
   researchBlocked: boolean;
   databaseReady: boolean;
   updateResearchBudget: (key: keyof KnowledgeResearchBudget, value: number) => void;
-  updateResearchSettings: (patch: Partial<BuilderResearchSettings>) => void;
   handleDocumentUpload: (event: ChangeEvent<HTMLInputElement>) => Promise<void>;
   buildKnowledgeEagerly: () => Promise<void>;
   runResearch: () => Promise<void>;
@@ -81,11 +72,6 @@ export function KnowledgeStrategyPanel({
       <ResearchBudgetFields
         budget={researchBudget}
         updateResearchBudget={updateResearchBudget}
-      />
-      <ResearchProviderFields
-        config={config}
-        settings={researchSettings}
-        updateResearchSettings={updateResearchSettings}
       />
       <KnowledgeActionBar
         busy={busy}

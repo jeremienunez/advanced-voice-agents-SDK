@@ -25,8 +25,27 @@ export interface BuilderIdentity {
   intent: string;
   mustDo: string;
   mustNotDo: string;
-  llmProvider: string;
-  llmModel: string;
+}
+
+export type BuilderSystemRole =
+  | "builder.planner"
+  | "builder.researcher"
+  | "builder.verifier"
+  | "builder.prompt_composer"
+  | "builder.tool_planner"
+  | "builder.database_planner";
+
+export interface BuilderSystemModelSelection {
+  provider: string;
+  model: string;
+}
+
+export type BuilderSystemModelSelections = Partial<
+  Record<BuilderSystemRole, BuilderSystemModelSelection>
+>;
+
+export interface BuilderSystemConfig {
+  modelSelections: BuilderSystemModelSelections;
 }
 
 export interface BuilderProviderOption {
@@ -103,6 +122,7 @@ export interface AgentBuildDraft {
     final?: string;
   };
   compiled?: CompiledAgentSummary;
+  builderSystem?: BuilderSystemConfig;
 }
 
 export interface CompiledAgentSummary {

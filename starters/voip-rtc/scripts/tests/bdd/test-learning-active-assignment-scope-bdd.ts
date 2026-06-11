@@ -77,8 +77,6 @@ function compiledDraft(id: string): AgentBuildDraft {
       intent: "Validate scoped active assignment",
       mustDo: [],
       mustNotDo: [],
-      llmProvider: "gemini",
-      llmModel: "gemini-test",
     },
     infraPlan: infraPlan(id, "baseline-plan", false),
     toolRegistry: [],

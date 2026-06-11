@@ -13,6 +13,8 @@ export type {
   AgentRxValidationLog, AgentRxViolation, AgentRxViolationSeverity, AgentSkillArtifact,
   AgentStorePlan, AuthTicketChannel, AuthTicketIdentity, AuthTicketInput,
   AuthTicketPort, BrowserVoiceState, ClientVoiceMessage, CompiledAgentArtifact,
+  BuilderSystemConfig, BuilderSystemModelSelection, BuilderSystemModelSelections,
+  BuilderSystemRole,
   DatabaseBackendPlan, DatabaseBackendResolverPort, DatabaseBuildPlan, DatabaseBuildRequest,
   DatabaseBuildStatus, DatabaseCollectionDefinition, DatabaseCredentialResolverPort, DatabaseDefinition,
   DatabaseIndexPlan, DatabasePlannerPort, DatabaseProvisionerPort, DatabaseProvisionInput,

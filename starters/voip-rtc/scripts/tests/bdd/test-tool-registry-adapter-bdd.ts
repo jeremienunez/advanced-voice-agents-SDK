@@ -193,8 +193,6 @@ function draft(): AgentBuildDraft {
       intent: "Validate handler registry adapters",
       mustDo: [],
       mustNotDo: [],
-      llmProvider: "gemini",
-      llmModel: "gemini-test",
     },
     toolRegistry: [],
     selectedTools: ["custom_echo"],

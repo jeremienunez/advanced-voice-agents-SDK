@@ -79,6 +79,58 @@
   animation: stepArrive 0.32s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.builderSystemDrawer {
+  border: 1px solid var(--studio-border-soft);
+  border-radius: 12px;
+  background: var(--studio-surface-muted);
+}
+
+.builderSystemSummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  color: var(--studio-text-strong);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.builderSystemSummary::-webkit-details-marker {
+  display: none;
+}
+
+.builderSystemSummary::after {
+  color: var(--studio-muted);
+  content: "+";
+  font-family: var(--font-mono);
+  font-size: 14px;
+}
+
+.builderSystemDrawer[open] .builderSystemSummary::after {
+  content: "-";
+}
+
+.builderSystemSummary small {
+  color: var(--studio-muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.builderSystemGrid {
+  display: grid;
+  gap: 14px;
+  padding: 0 16px 16px;
+}
+
+.builderSystemRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 14px;
+}
+
 /* each step earns a quiet entrance — progress should feel like reward */
 @keyframes stepArrive {
   from {

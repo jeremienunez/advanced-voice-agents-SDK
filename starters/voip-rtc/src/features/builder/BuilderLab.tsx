@@ -9,6 +9,7 @@ import type {
 } from "../../domain/builder/types.js";
 import { useBuilderLab } from "../../hooks/useBuilderLab.js";
 import { AgentCreatedOverlay } from "./components/AgentCreatedOverlay.js";
+import { BuilderSystemRolesDrawer } from "./components/BuilderSystemRolesDrawer.js";
 import { DatabaseInstancePanel } from "./components/DatabaseInstancePanel.js";
 import { IdentityIntentPanel } from "./components/IdentityIntentPanel.js";
 import { KnowledgeStrategyPanel } from "./components/KnowledgeStrategyPanel.js";
@@ -140,14 +141,20 @@ export function BuilderLab({
 
         <div className="builderStepContent" key={currentStep}>
           {currentStep === 0 && (
-            <IdentityIntentPanel
-              form={builder.form}
-              config={builder.config}
-              busy={builder.busy}
-              canAnalyze={builder.canAnalyze}
-              updateField={builder.updateField}
-              analyzeIntent={builder.analyzeIntent}
-            />
+            <>
+              <IdentityIntentPanel
+                form={builder.form}
+                busy={builder.busy}
+                canAnalyze={builder.canAnalyze}
+                updateField={builder.updateField}
+                analyzeIntent={builder.analyzeIntent}
+              />
+              <BuilderSystemRolesDrawer
+                config={builder.config}
+                value={builder.builderSystem}
+                onSelectionChange={builder.updateBuilderSystemSelection}
+              />
+            </>
           )}
 
           {currentStep === 1 && (
@@ -167,8 +174,6 @@ export function BuilderLab({
               documents={builder.documents}
               researchBudget={builder.researchBudget}
               researchReport={builder.researchReport}
-              researchSettings={builder.researchSettings}
-              config={builder.config}
               busy={builder.busy}
               canRunResearch={builder.canRunResearch}
               canPlanKnowledge={builder.canPlanKnowledge}
@@ -176,7 +181,6 @@ export function BuilderLab({
               researchBlocked={builder.researchBlocked}
               databaseReady={builder.databaseReady}
               updateResearchBudget={builder.updateResearchBudget}
-              updateResearchSettings={builder.updateResearchSettings}
               handleDocumentUpload={builder.handleDocumentUpload}
               buildKnowledgeEagerly={builder.buildKnowledgeEagerly}
               runResearch={builder.runResearch}

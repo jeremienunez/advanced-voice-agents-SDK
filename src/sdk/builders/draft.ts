@@ -1,6 +1,8 @@
 import type {
   AgentBuilderIdentity,
   AgentBuildDraftStatus,
+  BuilderSystemConfig,
+  BuilderSystemModelSelection,
   PromptBuildPlan,
 } from "../types/builder.js";
 import type { ToolName } from "../types/core/index.js";
@@ -19,7 +21,7 @@ export class AgentBuildDraftBuilder {
     this.draft = {
       id,
       status: "draft",
-      identity: copy(identity),
+      identity: copyIdentity(identity),
       toolRegistry: [],
       selectedTools: [],
       promptParts: {},
@@ -106,6 +108,12 @@ export class AgentBuildDraftBuilder {
     return this;
   }
 
+  builderSystem(config: BuilderSystemConfig): this {
+    this.draft.builderSystem = copyBuilderSystem(config);
+    this.touch();
+    return this;
+  }
+
   metadata(metadata: Record<string, unknown>): this {
     this.draft.metadata = { ...(this.draft.metadata ?? {}), ...metadata };
     this.touch();
@@ -126,7 +134,7 @@ export class AgentBuildDraftBuilder {
     );
     return {
       ...this.draft,
-      identity: copy(this.draft.identity),
+      identity: copyIdentity(this.draft.identity),
       promptPlan: this.draft.promptPlan ? copy(this.draft.promptPlan) : undefined,
       knowledgePlan: this.draft.knowledgePlan
         ? copy(this.draft.knowledgePlan)
@@ -145,6 +153,9 @@ export class AgentBuildDraftBuilder {
       selectedTools: [...this.draft.selectedTools],
       promptParts: { ...this.draft.promptParts },
       compiled: this.draft.compiled ? copy(this.draft.compiled) : undefined,
+      builderSystem: this.draft.builderSystem
+        ? copyBuilderSystem(this.draft.builderSystem)
+        : undefined,
       metadata: this.draft.metadata ? { ...this.draft.metadata } : undefined,
     };
   }
@@ -152,4 +163,30 @@ export class AgentBuildDraftBuilder {
   private touch(): void {
     this.draft.updatedAt = new Date().toISOString();
   }
+}
+
+function copyIdentity(identity: AgentBuilderIdentity): AgentBuilderIdentity {
+  return {
+    builderFirstName: identity.builderFirstName,
+    builderLastName: identity.builderLastName,
+    publicAgentName: identity.publicAgentName,
+    intent: identity.intent,
+    mustDo: [...identity.mustDo],
+    mustNotDo: [...identity.mustNotDo],
+  };
+}
+
+function copyBuilderSystem(config: BuilderSystemConfig): BuilderSystemConfig {
+  return {
+    modelSelections: Object.fromEntries(
+      Object.entries(config.modelSelections)
+        .filter((entry): entry is [string, BuilderSystemModelSelection] => {
+          return Boolean(entry[1]);
+        })
+        .map(([role, selection]) => [
+          role,
+          { ...selection },
+        ]),
+    ),
+  };
 }

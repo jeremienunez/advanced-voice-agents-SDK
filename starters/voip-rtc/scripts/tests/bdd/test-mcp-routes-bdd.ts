@@ -210,8 +210,6 @@ function compiledDraft(): AgentBuildDraft {
       intent: "Expose runtime tools over MCP.",
       mustDo: [],
       mustNotDo: [],
-      llmProvider: "gemini",
-      llmModel: "gemini-test",
     },
     toolRegistry: [],
     selectedTools: [tool.name],

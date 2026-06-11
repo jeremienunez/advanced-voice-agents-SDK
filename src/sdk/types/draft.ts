@@ -2,6 +2,7 @@ import type { SecretRef, ToolName, VoiceAgentSdkDefinition } from "./core.js";
 import type {
   AgentBuilderIdentity,
   AgentBuildDraftStatus,
+  BuilderSystemConfig,
   PromptBuildPlan,
 } from "./builder.js";
 import type { KnowledgeBuildPlan, KnowledgeStrategy } from "./knowledge.js";
@@ -40,6 +41,7 @@ export interface AgentBuildDraft {
     final?: string;
   };
   compiled?: CompiledAgentArtifact;
+  builderSystem?: BuilderSystemConfig;
   createdAt: string;
   updatedAt: string;
   metadata?: Record<string, unknown>;

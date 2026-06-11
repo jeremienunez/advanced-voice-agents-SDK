@@ -133,8 +133,6 @@ function draft(): AgentBuildDraft {
       intent: "Use Milvus vector retrieval and graph relationship traversal",
       mustDo: [],
       mustNotDo: [],
-      llmProvider: "gemini",
-      llmModel: "gemini-test",
     },
     toolRegistry: [],
     selectedTools: [],

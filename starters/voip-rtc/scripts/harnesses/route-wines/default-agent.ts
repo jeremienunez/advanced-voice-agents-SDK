@@ -25,6 +25,5 @@ export function routeWineAgentIdentity(
         "Depasser le budget de recherche",
         "Executer une action externe sans confirmation",
       ].join("\n"),
-    llmModel: source.DEEPSEEK_MODEL ?? "deepseek-v4-pro",
   };
 }

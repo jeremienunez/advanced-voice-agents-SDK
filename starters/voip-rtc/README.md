@@ -75,6 +75,12 @@ untrusted data blocks before they enter LLM prompts.
 Compiled final prompts are linted for required identity, safety, tool,
 confirmation, uncertainty, and success invariants before activation.
 
+Created agents and builder system roles are separate SDK concepts. Drafts and
+compiled artifacts represent agents that users create and operate. Planner,
+researcher, verifier, prompt-composer, database-planner, and tool-planner roles
+belong to `draft.builderSystem.modelSelections`; they configure the creation
+system and are not part of the public agent identity.
+
 | Role | Purpose | Providers |
 | --- | --- | --- |
 | `builder.planner` | prompt, knowledge, database, and final prompt planning | DeepSeek, Qwen, Kimi, Gemini |

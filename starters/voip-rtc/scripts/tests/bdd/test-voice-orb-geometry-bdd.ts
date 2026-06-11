@@ -1,11 +1,9 @@
 import {
-  beardMask,
   buildFaceGeometry,
-  hairMask,
-  mouthMask,
-  OrbSeededRng,
-  skullDistance,
 } from "../../../src/components/hologram/face-geometry.js";
+import { beardMask, hairMask, mouthMask } from "../../../src/components/hologram/face-masks.js";
+import { skullDistance } from "../../../src/components/hologram/face-sdf.js";
+import { OrbSeededRng } from "../../../src/components/hologram/orb-rng.js";
 import {
   decodeFaceScan,
   insideFaceWindow,

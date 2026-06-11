@@ -1,18 +1,11 @@
-import type {
-  AgentBuilderIdentity,
-  AgentBuilderLlmProvider,
-} from "@voiceagentsdk/core/sdk";
-import { normalizeLlmProvider } from "./llm-provider.js";
+import type { AgentBuilderIdentity } from "@voiceagentsdk/core/sdk";
 import {
   asRecord,
   listFromUnknown,
   readString,
 } from "../utils/record-readers.js";
 
-export function normalizeIdentity(
-  body: unknown,
-  defaults: { model: string; provider: AgentBuilderLlmProvider },
-): AgentBuilderIdentity {
+export function normalizeIdentity(body: unknown): AgentBuilderIdentity {
   const source = asRecord(body).identity
     ? asRecord(asRecord(body).identity)
     : asRecord(body);
@@ -39,10 +32,5 @@ export function normalizeIdentity(
     intent,
     mustDo: listFromUnknown(source.mustDo),
     mustNotDo: listFromUnknown(source.mustNotDo),
-    llmProvider: normalizeLlmProvider(
-      readString(source, "llmProvider"),
-      defaults.provider,
-    ),
-    llmModel: readString(source, "llmModel") || defaults.model,
   };
 }
