@@ -68,6 +68,14 @@ par un pipeline d'extraction photo + design par calques.
   section. BDD layered-surfaces reecrit (appartenance: SDF cou, hulls
   photo, fenetre visage). 9/9 verts, tsc clean, verifie in-app.
 
+### Addendum 2bis — lecture du crane de face (meme jour)
+
+- Camera du shader reculee z 2.15 → 3.1 a focale equivalente: la camera
+  proche grossissait le plan visage ~1.4x contre les cotes du crane
+  (effet "Hey Arnold" de face). Anneaux de calotte decimes
+  proportionnellement au rayon (hotspot additif au sommet), points
+  cheveux plus petits/sombres, peinture de relief du lattice calmee.
+
 ### Addendum 3 — cou et epaules photo-driven (meme jour)
 
 - Meme methode etendue au buste: les anneaux descendent jusqu'a -1.25
