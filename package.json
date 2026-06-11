@@ -125,6 +125,7 @@
     "test:tool-contracts:bdd": "tsc --noEmit --target ES2023 --module NodeNext --moduleResolution NodeNext --lib ES2023,DOM --strict --skipLibCheck scripts/tests/type-contracts/tool-contracts.ts && pnpm --filter @voiceagentsdk/starter-voip-rtc test:tool-contracts:bdd",
     "test:tool-registry-adapter:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:tool-registry-adapter:bdd",
     "test:voice-orb-geometry:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:voice-orb-geometry:bdd",
+    "test:scene-deck:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:scene-deck:bdd",
     "test:agent-bank-view-model:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:agent-bank-view-model:bdd",
     "test:builder-route-ownership:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:builder-route-ownership:bdd",
     "test:runtime-db-credentials:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:runtime-db-credentials:bdd",

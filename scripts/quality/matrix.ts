@@ -59,6 +59,7 @@ export const qualityMatrix: Record<QualityGroup, string[]> = {
     "test:tool-contracts:bdd",
     "test:tool-registry-adapter:bdd",
     "test:voice-orb-geometry:bdd",
+    "test:scene-deck:bdd",
     "test:prompt-policy:bdd",
     "test:learning-preserves-server-policy:bdd",
     "test:model-cannot-self-confirm-tool:bdd",
