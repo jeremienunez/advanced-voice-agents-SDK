@@ -4,6 +4,7 @@ import {
   studioNavItems,
   type StudioHealthSummary,
 } from "../../domain/app/studio.js";
+import { SceneLayer } from "../scene/SceneLayer.js";
 
 const iconsMap: Record<string, React.ReactNode> = {
   command: (
@@ -63,6 +64,7 @@ export function StudioShell({
 
   return (
     <div className="studioShell">
+      <SceneLayer mode={mode} />
       <aside className="studioSidebar" aria-label="Studio navigation">
         <div className="studioMark" aria-hidden="true">VA</div>
         <nav className="studioNav">

@@ -4,9 +4,11 @@
   display: grid;
   grid-template-columns: 100px minmax(0, 1fr);
   min-height: 100vh;
-  background: var(--studio-bg);
+  /* transparent so the fixed deck backdrop (z -1) shows through;
+     .appFrame keeps var(--studio-bg) as the no-WebGL fallback paint */
+  background: transparent;
   color: var(--studio-text);
-  transition: background var(--studio-transition-smooth), color var(--studio-transition-smooth);
+  transition: color var(--studio-transition-smooth);
 }
 
 /* ─── Sidebar: Glassmorphic premium ─── */
