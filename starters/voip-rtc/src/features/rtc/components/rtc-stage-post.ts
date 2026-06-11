@@ -31,6 +31,7 @@ export function createRtcStagePost(
     luminanceThreshold: 0.45,
     luminanceSmoothing: 0.18,
     mipmapBlur: true,
+    resolutionScale: 0.5,
   });
   const aberration = new ChromaticAberrationEffect();
   aberration.offset.set(0.0011, 0.0006);
