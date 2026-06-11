@@ -98,8 +98,13 @@ export function buildFaceGeometry(rng: OrbRng, targetPoints = 30000): FaceGeomet
       polar = Math.PI / 2;
     }
     const sinPolar = Math.sin(polar);
-    for (let c = 0; c < segments; c++) {
-      const theta = ((c + (r % 2) * 0.5) / segments) * Math.PI * 2;
+    /* cap rings shrink toward the pole: keep the angular dot spacing
+       constant or the crown packs into an additive hotspot */
+    const ringSegments = r < capRows
+      ? Math.max(10, Math.round(segments * sinPolar))
+      : segments;
+    for (let c = 0; c < ringSegments; c++) {
+      const theta = ((c + (r % 2) * 0.5) / ringSegments) * Math.PI * 2;
       const dir: Vec3 = [
         sinPolar * Math.sin(theta),
         Math.cos(polar),
@@ -124,7 +129,7 @@ export function buildFaceGeometry(rng: OrbRng, targetPoints = 30000): FaceGeomet
       let shade = reliefShade(p, lambert);
       /* dark swept-up hair: streaks follow the strand direction */
       const strand = 0.5 + 0.5 * Math.sin(Math.atan2(p[0], p[2] + 0.06) * 22 + p[1] * 4);
-      shade *= 1 - hair * (0.58 - 0.3 * strand);
+      shade *= 1 - hair * (0.72 - 0.3 * strand);
       /* trimmed beard: darker than skin, stubble speckle from the seed */
       shade *= 1 - beard * (0.5 - 0.14 * random);
 
@@ -231,9 +236,11 @@ function reliefShade(p: Vec3, lambert: number): number {
   let dark = Math.min(eyeSocketMask(p) * 1.3, 1) * 0.85;
   dark = Math.max(dark, g(0, -0.345, 0.5, 0.1, 0.02, 0.08) * 0.6); /* mouth line */
 
-  let bright = g(0, -0.05, 0.52, 0.45, 0.55, 0.28) * 0.3; /* face glow */
-  bright = Math.max(bright, g(0, 0.42, 0.44, 0.3, 0.16, 0.2) * 0.5); /* forehead */
-  bright = Math.max(bright, g(0, -0.555, 0.36, 0.1, 0.05, 0.1) * 0.4); /* chin */
+  /* muted paint: the scan layer owns the face, the lattice only rims
+     it — bright paint here reads as a glowing hairline band */
+  let bright = g(0, -0.05, 0.52, 0.45, 0.55, 0.28) * 0.15; /* face glow */
+  bright = Math.max(bright, g(0, 0.42, 0.44, 0.3, 0.16, 0.2) * 0.25); /* forehead */
+  bright = Math.max(bright, g(0, -0.555, 0.36, 0.1, 0.05, 0.1) * 0.3); /* chin */
 
   return clamp(lambert * (1 - dark * 0.85) + bright * 0.55, 0, 1);
 }

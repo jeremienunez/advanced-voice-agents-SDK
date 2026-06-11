@@ -31,8 +31,8 @@ for (let i = 0; i < geo.count; i++) {
   x = xr; z = zr;
 
   const zoom = Number(process.argv[4] ?? 1);
-  const qz = z - 2.9;
-  const persp = (2.0 / -qz) * zoom;
+  const qz = z - 3.1; /* mirrors the shader camera */
+  const persp = (2.25 / -qz) * zoom;
   const sx = x * persp;
   const syc = (y - 0.06 * zoom) * persp;
   const px = Math.round((sx * (H / W) * 0.5 + 0.5) * W);

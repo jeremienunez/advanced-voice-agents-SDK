@@ -80,16 +80,19 @@ void main(){
   float band = step(.985, fract(position.y*1.6 + uTime*.4));
   p.x += uGlitch*band*.07;
 
-  /* close camera: strong perspective bows the lattice rows around the
-     features — that curvature is what makes the head read in 3D */
-  vec3 q = p - vec3(0., .06, 2.15);
-  float persp = 1.5 / -q.z;
+  /* moderate tele camera: enough perspective to bow the lattice rows
+     in 3D, far enough that the face (z~.6) no longer balloons against
+     the skull sides (z~0) — close-camera ratio read as a pinched
+     cranium head-on */
+  vec3 q = p - vec3(0., .06, 3.1);
+  float persp = 2.25 / -q.z;
   vec2 scr = q.xy * persp;
   scr.x *= uRes.y/uRes.x;
   gl_Position = vec4(scr, 0., 1.);
   /* uniform lattice dots: size barely varies, the order is the point —
      the dense scan layer renders finer (aScale) so it doesn't blow out */
-  gl_PointSize = (2.0 + 3.0*persp) * (1. + .1*rnd) * (1. + .25*iris) * aScale;
+  gl_PointSize = (2.0 + 3.0*persp) * (1. + .1*rnd) * (1. + .25*iris) * aScale
+               * (1. - hair*.3);
 
   /* scan sweep */
   float scanY = fract(uTime*.05)*3.4-1.9;
@@ -109,7 +112,10 @@ void main(){
   float a=(.62+.2*fl)*(.78+.22*talk);
   /* the scan layer is ~16x denser than the lattice: rein in additive
      accumulation so the face glows instead of blowing out */
-  a *= mix(.27, 1., step(.99, aScale));
+  a *= mix(.32, 1., step(.99, aScale));
+  /* dark hair: the structural lattice runs hot next to the reined-in
+     face — without this the crown reads as a glowing swim cap */
+  a *= 1. - hair*.55;
   a = max(a, iris*.5);
   a *= mix(1.,.25,uEcho);
   a *= bust;                       /* projector fade at the base   */
