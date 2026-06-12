@@ -1,4 +1,4 @@
-import { clamp, type Vec3 } from "./vector-math.js";
+import { clamp, type Vec3 } from "../vector-math.js";
 
 export function mouthMask(p: Vec3): number {
   return Math.exp(
@@ -29,6 +29,13 @@ export function beardMask(p: Vec3): number {
   m = Math.max(m, g(-0.44, -0.14, 0.04, 0.09, 0.24, 0.18));
   m *= 1 - Math.min(1, g(0, -0.385, 0.48, 0.09, 0.04, 0.09) * 1.4);
   return clamp(m * 1.25, 0, 1);
+}
+
+/** Brow arches: one gaussian band just above each eye socket. */
+export function browMask(p: Vec3): number {
+  const g = (cx: number): number =>
+    Math.exp(-(((p[0] - cx) / 0.15) ** 2 + ((p[1] - 0.24) / 0.075) ** 2 + ((p[2] - 0.48) / 0.16) ** 2));
+  return clamp(Math.max(g(0.2), g(-0.2)) * 1.15, 0, 1);
 }
 
 function smooth01(a: number, b: number, x: number): number {

@@ -325,29 +325,63 @@ mask-gated du point cloud. Constantes sourcees (Bentivoglio 1997, etc.),
 bornes BDD falsifiables. Plan detaille:
 `~/.claude/plans/reflective-gathering-dusk.md`.
 
-- [ ] T1 core: transcripts role-aware (fix bug role "user" hardcode,
-      gemini part.text = assistant). BDD role-propagation.
-- [ ] T2 core: protocole affect (VoiceAffect, union member, tool
+- [x] T1 core: transcripts role-aware (fix bug role "user" hardcode,
+      gemini part.text = assistant). BDD role-propagation. Commit 5e15a59.
+- [x] T2 core: protocole affect (VoiceAffect, union member, tool
       sideChannel:"affect" intercepte avant pending flow, onAffect,
       reducer client). BDD + test falsification securite (args modele
-      ne peuvent pas declencher le side-channel).
-- [ ] T3 starter: FaceControls (20) + ressorts analytiques (stables
+      ne peuvent pas declencher le side-channel). Intensite omise par
+      le modele -> defaut documente 0.6 (constate en live Gemini, fixe).
+- [x] T3 starter: FaceControls (20) + ressorts analytiques (stables
       dt<=50ms, presets par controle). BDD stabilite/convergence.
-- [ ] T4 starter: blink stochastique (taux par etat 19/27/24/14 par min,
+- [x] T4 starter: blink stochastique (taux par etat 19/27/24/14 par min,
       IBI gamma + refractaire 300ms, fermeture 40%/ouverture 60%) +
       idle (respiration 0.25Hz, derive regard, saccades). Remplace
       blinkAmount periodique. BDD bornes empiriques.
-- [ ] T5 starter: enveloppe audio (attack/silence, borne 48ms) +
+- [x] T5 starter: enveloppe audio (attack/silence, borne 48ms) +
       mapper affect (override LLM avec decroissance vers baseline
       mood, asymetrie L/R bornee). BDD.
-- [ ] T6 geometrie/shader: browMask + aAux3, uExpr/uBlink -> uCtrl[20],
+- [x] T6 geometrie/shader: browMask + aAux3, uExpr/uBlink -> uCtrl[20],
       asymetrie sign(position.x), face-rig orchestrateur. BDD masques.
-- [ ] T7 integration: tool set_affect + suffix prompt serveur, plumb
-      snapshot.affect -> VoiceOrb, seeds par instance, reduced-motion
-      neutre. Enregistrer scripts bdd dans matrix.
-- [ ] T8 verification: audit:solid, session live Gemini (compter les
-      events affect — falsifiable), E2E fake emitFunctionCall,
-      sweep reduced-motion, docs + commits.
+- [x] T7 integration: tool set_affect + suffix prompt serveur (porte par
+      le prompt compiler, comme knowledge-policy), plumb snapshot.affect
+      -> VoiceOrb (restamp horloge rAF), seeds par instance
+      (2002/3003/4004/4005), reduced-motion neutre. Scripts bdd
+      enregistres dans matrix + package.json core/starter.
+- [ ] T8 verification: audit:solid OK (75/75, incl. fix learning heal +
+      LOC), pack:dry-run OK, session live Gemini OK (event affect
+      {smile} recu dans le journal SDK — critere falsifiable >=1 par
+      echange emotionnel atteint; a re-tester avec le defaut 0.6).
+      IMPORTANT avant retest live: hard-refresh la page (le move
+      face-* -> face/ a casse le HMR de la page ouverte — rig fige).
+      Reste: verif visuelle E2E fake provider (RTC_E2E_FAKE_PROVIDER=1
+      — ports 8787/5177 occupes par le dev server longue duree; la
+      sonde fake emet smile 0.8 a +2.5s), sweep reduced-motion,
+      commits (user). Note: les passes audit:solid/e2e reassignent
+      l'agent actif (solid seam) — recharger HUGO via Agents.
+
+## Front starter - Palier 2 expressivite (2026-06-12)
+
+Sources: ThreeLS/Llorach 2016 (bandes audio -> bouche), TalkingHead
+met4citizen (moods/vivacite), Rhubarb ecarte (offline). Plan detaille:
+`~/.claude/plans/reflective-gathering-dusk.md` section Palier 2.
+
+- [x] E1 core: snapshot.outputBands — 4 bandes ThreeLS (0-500/500-700/
+      700-3000/3000-6000 Hz) en distribution relative via Goertzel sur
+      PCM16 (fenetres DFT 256), publiees avec outputLevel (48ms),
+      invariantes au gain. BDD sines/bruit/silence/16kHz.
+- [x] E2 starter: face/viseme.ts — formules ThreeLS adaptees
+      (kiss->mouthFunnel, lipsClosed->mouthClose, mouthOpen->jawOpen);
+      fallback enveloppe EXACT sans bands. Plumb HoloFrame.levelBands
+      -> VoiceOrb outputBands -> RtcLab.
+- [x] E3 starter: presets affect profonds (smile Duchenne, concern
+      headPitch, surprise eyeWiden, thinking headYaw seede), emphase
+      sur attack (raised-cosine 300ms, refractaire 800ms), gaze wander
+      par mood (muted .9 >= idle .8 > engaged .5), bob parole borne
+      0.08. face/liveliness.ts; poses mood absorbees dans moodBaseline.
+- [ ] E4: gates passes (audit:solid + pack:dry-run), docs OK. Reste la
+      verification visuelle live par Jeremie (hard-refresh d'abord) et
+      la sonde fake provider quand les ports se liberent.
 
 ## Front starter - command deck 3D / three.js (2026-06-11)
 

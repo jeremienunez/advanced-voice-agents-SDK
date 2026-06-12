@@ -11,6 +11,7 @@ import type {
 } from "../types/session.types.js";
 import type { ProviderFunctionCall } from "../types/transport.types.js";
 import { AgentError, ERROR_CODES } from "../types/error.types.js";
+import { toAffect } from "./affect-side-channel.js";
 import { createAgentLogger } from "../utils/logger.js";
 import { ToolExecutionPolicyEngine } from "./tool-execution-policy-engine.js";
 import { createStateMachine, type SessionStateMachine } from "./state-machine.js";
@@ -148,6 +149,13 @@ export class RealtimeVoiceSession implements IVoiceSession {
 
   private async handleFunctionCall(call: ProviderFunctionCall): Promise<void> {
     const args = parseToolArguments(call.arguments);
+    /* server-DEFINED side-channel tools are render hints, not actions:
+       route to the callback and answer the model without a pending call */
+    if (this.tools.get(call.name)?.sideChannel === "affect") {
+      this.callbacks.onAffect?.(toAffect(args));
+      await this.provider.submitFunctionResult(call.callId, { ok: true }, true);
+      return;
+    }
     const pending = createPendingToolCall(call, args);
     this.context = addPendingToolCall(this.context, pending);
     this.callbacks.onToolCall?.(pending);

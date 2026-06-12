@@ -13,11 +13,14 @@ export function HologramBust({
   level = 0,
   mood = 0,
   presence = 1,
+  seed = 2002,
 }: {
   level?: number;
   mood?: HoloFrame["mood"];
   /** 0..1 — scattered cloud at 0, fully assembled figure at 1. */
   presence?: number;
+  /** Per-instance blink/idle seed so co-visible busts never sync. */
+  seed?: number;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef({ level, mood, presence });
@@ -31,7 +34,7 @@ export function HologramBust({
     if (!host) return undefined;
     const engine = getSceneEngine();
     if (!engine.available) return undefined; /* silent fallback, as before */
-    const view = createHoloView();
+    const view = createHoloView(seed);
     let smoothedPresence = inputRef.current.presence;
     const unregister = engine.registerView({
       element: host,

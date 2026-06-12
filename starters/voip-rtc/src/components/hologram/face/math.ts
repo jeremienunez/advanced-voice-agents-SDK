@@ -1,8 +1,8 @@
 /* SDF toolbox shared by the face sculpt. */
 
-import type { Vec3 } from "./vector-math.js";
+import type { Vec3 } from "../vector-math.js";
 
-export { type Vec3, type Vec4 } from "./vector-math.js";
+export { type Vec3, type Vec4 } from "../vector-math.js";
 
 export function ell(
   p: Vec3,

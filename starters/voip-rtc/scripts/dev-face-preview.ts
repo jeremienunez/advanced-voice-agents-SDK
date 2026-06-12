@@ -1,7 +1,7 @@
 /* Scratch tool: renders the procedural bust to PNG so the sculpt can be
    judged on image during development. Mirrors the idle vertex math. */
 import { deflateSync } from "node:zlib";
-import { buildFaceGeometry } from "../src/components/hologram/face-geometry.js";
+import { buildFaceGeometry } from "../src/components/hologram/face/geometry.js";
 import { OrbSeededRng } from "../src/components/hologram/orb-rng.js";
 
 const W = 540;

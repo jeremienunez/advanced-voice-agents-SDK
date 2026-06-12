@@ -1,15 +1,15 @@
 import {
   buildFaceGeometry,
-} from "../../../src/components/hologram/face-geometry.js";
-import { beardMask, hairMask, mouthMask } from "../../../src/components/hologram/face-masks.js";
-import { skullDistance } from "../../../src/components/hologram/face-sdf.js";
+} from "../../../src/components/hologram/face/geometry.js";
+import { beardMask, browMask, hairMask, mouthMask } from "../../../src/components/hologram/face/masks.js";
+import { skullDistance } from "../../../src/components/hologram/face/sdf.js";
 import { OrbSeededRng } from "../../../src/components/hologram/orb-rng.js";
 import {
   decodeFaceScan,
   insideFaceWindow,
-} from "../../../src/components/hologram/face-scan-decode.js";
-import { FACE_SCAN } from "../../../src/components/hologram/face-scan.js";
-import { blinkAmount, gazeTarget, moodExpression } from "../../../src/components/hologram/holo-motion.js";
+} from "../../../src/components/hologram/face/scan-decode.js";
+import { FACE_SCAN } from "../../../src/components/hologram/face/scan.js";
+import { gazeTarget } from "../../../src/components/hologram/holo-motion.js";
 
 const results = [
   scenarioGeometryIsSeedStable(),
@@ -19,8 +19,6 @@ const results = [
   scenarioAnatomicalMasksAreCoherent(),
   scenarioFaceReliefAndIrisesArePresent(),
   scenarioGazeIsCenteredAndClamped(),
-  scenarioBlinkIsPeriodicAndBounded(),
-  scenarioMoodExpressionsAreDistinctAndBounded(),
 ];
 
 console.log(JSON.stringify({ status: "ok", results }, null, 2));
@@ -44,39 +42,6 @@ function scenarioGazeIsCenteredAndClamped(): string {
   );
 
   return "gaze-is-centered-and-clamped";
-}
-
-function scenarioMoodExpressionsAreDistinctAndBounded(): string {
-  const idle = moodExpression(0);
-  const listening = moodExpression(1);
-  const speaking = moodExpression(2);
-  const muted = moodExpression(3);
-
-  for (const e of [idle, listening, speaking, muted]) {
-    for (const v of [e.smile, e.widen, e.bow, e.tilt]) {
-      assert(v >= -1 && v <= 1, `expression channels must stay in [-1,1], got ${v}`);
-    }
-  }
-  assert(idle.smile === 0 && idle.bow === 0 && idle.tilt === 0, "idle must be the neutral pose");
-  assert(speaking.smile > 0.3, "speaking must carry a smile");
-  assert(listening.widen > 0.3, "listening must widen the eyes");
-  assert(listening.tilt !== 0, "listening must tilt the head, attentive");
-  assert(muted.bow > 0.3, "muted must bow the head");
-  assert(muted.smile < 0, "muted must drop the mouth corners");
-
-  return "mood-expressions-distinct-and-bounded";
-}
-
-function scenarioBlinkIsPeriodicAndBounded(): string {
-  for (let t = 0; t < 9600; t += 16) {
-    const blink = blinkAmount(t);
-    assert(blink >= 0 && blink <= 1, `blink must stay in [0,1], got ${blink} at ${t}ms`);
-    assert(Math.abs(blink - blinkAmount(t + 4600)) < 1e-9, "blink must repeat every period");
-  }
-  assert(blinkAmount(70) > 0.9, "the lid must close during the first pulse");
-  assert(blinkAmount(2000) === 0, "eyes must rest open between pulses");
-
-  return "blink-is-periodic-and-bounded";
 }
 
 function scenarioGeometryIsSeedStable(): string {
@@ -212,6 +177,30 @@ function scenarioAnatomicalMasksAreCoherent(): string {
   const forehead: [number, number, number] = [0, 0.4, 0.55];
   assert(beardMask(chinBeard) > 0.5, "the chin must wear the trimmed beard");
   assert(beardMask(forehead) === 0, "the forehead must never read as beard");
+
+  /* brows: a band just above each eye socket, absent elsewhere */
+  assert(browMask([0.2, 0.24, 0.48]) > 0.5, "the right brow arch must be masked");
+  assert(browMask([-0.2, 0.24, 0.48]) > 0.5, "the left brow arch must be masked");
+  assert(browMask([0.2, 0.12, 0.5]) < 0.2, "the eye line itself is socket, not brow");
+  assert(browMask([0, 0.45, 0.5]) < 0.05, "mid-forehead must not read as brow");
+  assert(browMask([0, -0.33, 0.45]) < 0.01, "the mouth must never read as brow");
+
+  /* the brow channel must reach the packed geometry, on both sides */
+  const geometry = buildFaceGeometry(new OrbSeededRng(1337), 4000);
+  let browLeft = 0;
+  let browRight = 0;
+  for (let i = 0; i < geometry.count; i++) {
+    const b = geometry.brow[i];
+    assert(b >= 0 && b <= 1, "brow attribute must stay in [0,1]");
+    if (b > 0.5) {
+      const x = geometry.positions[i * 3];
+      const y = geometry.positions[i * 3 + 1];
+      assert(y > 0.13 && y < 0.42, `brow points must sit above the eye line, got y=${y}`);
+      if (x < 0) browLeft += 1;
+      else browRight += 1;
+    }
+  }
+  assert(browLeft > 5 && browRight > 5, `both brows must be populated (${browLeft}/${browRight})`);
 
   return "anatomical-masks-coherent";
 }

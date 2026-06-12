@@ -12,7 +12,11 @@ export class E2EFakeRealtimeProvider implements IRealtimeProvider {
   state: TransportState = "disconnected";
   lastSpeechEndMs: number | null = null;
   currentResponseItemId: string | null = null;
-  private transcriptHandler: ((text: string, isFinal: boolean) => void) | null = null;
+  private transcriptHandler:
+    | ((text: string, isFinal: boolean, role?: "user" | "assistant") => void)
+    | null = null;
+  private functionHandler: ((call: ProviderFunctionCall) => void) | null = null;
+  readonly submittedResults: Array<{ callId: string; result: unknown }> = [];
 
   get isConnected(): boolean {
     return this.state === "connected";
@@ -24,6 +28,16 @@ export class E2EFakeRealtimeProvider implements IRealtimeProvider {
       "I prefer concise answers for route planning tests.",
       true,
     );
+    /* deterministic affect probe: lets the E2E harness (and a human)
+       see the hologram smile without a real model */
+    setTimeout(() => {
+      if (this.state !== "connected") return;
+      this.emitFunctionCall({
+        callId: "e2e-affect-1",
+        name: "set_affect",
+        arguments: JSON.stringify({ label: "smile", intensity: 0.8 }),
+      });
+    }, 2500);
   }
 
   async disconnect(): Promise<void> {
@@ -45,16 +59,27 @@ export class E2EFakeRealtimeProvider implements IRealtimeProvider {
     _audioEndMs: number,
   ): Promise<void> {}
   async submitFunctionResult(
-    _callId: string,
-    _result: unknown,
+    callId: string,
+    result: unknown,
     _triggerResponse?: boolean,
-  ): Promise<void> {}
-  onFunctionCall(_handler: (call: ProviderFunctionCall) => void): void {}
+  ): Promise<void> {
+    this.submittedResults.push({ callId, result });
+  }
+  onFunctionCall(handler: (call: ProviderFunctionCall) => void): void {
+    this.functionHandler = handler;
+  }
+  /** E2E hook: lets harness code drive a deterministic function call
+      (e.g. set_affect) without a real model. */
+  emitFunctionCall(call: ProviderFunctionCall): void {
+    this.functionHandler?.(call);
+  }
   onSpeechStarted(_handler: () => void): void {}
   onSpeechStopped(_handler: (audioEndMs?: number) => void): void {}
   onResponseStarted(_handler: (responseId: string) => void): void {}
   onResponseCompleted(_handler: (responseId: string) => void): void {}
-  onTranscript(handler: (text: string, isFinal: boolean) => void): void {
+  onTranscript(
+    handler: (text: string, isFinal: boolean, role?: "user" | "assistant") => void,
+  ): void {
     this.transcriptHandler = handler;
   }
   onError(_handler: (error: ProviderError) => void): void {}

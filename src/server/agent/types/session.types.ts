@@ -88,6 +88,7 @@ export interface VoiceSessionCallbacks {
   onAudioOutput?: (chunk: AudioChunk) => void;
   onInterrupted?: () => void;
   onTranscript?: (text: string, isFinal: boolean, role?: "user" | "assistant") => void;
+  onAffect?: (affect: import("../../../sdk/types/browser-voice.js").VoiceAffect) => void;
 }
 
 export interface VoiceSessionToolContext {
@@ -113,6 +114,10 @@ export interface VoiceSessionTool {
   description: string;
   parameters: Record<string, unknown>;
   policy?: VoiceSessionToolPolicy;
+  /** Server-defined render-hint channel: calls are routed to the matching
+      session callback instead of the pending-tool flow. Only the tool
+      DEFINITION can set this — model arguments never reach it. */
+  sideChannel?: "affect";
   execute(
     args: Record<string, unknown>,
     context: VoiceSessionToolContext,

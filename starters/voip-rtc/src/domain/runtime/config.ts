@@ -36,8 +36,10 @@ export const initialSnapshot: BrowserVoiceSessionSnapshot = {
   durationMs: 0,
   isMuted: false,
   outputLevel: 0,
+  outputBands: [0, 0, 0, 0],
   error: null,
   learning: null,
+  affect: null,
 };
 
 export function createFallbackRuntimeProviders(): RuntimeProviderConfig[] {

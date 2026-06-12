@@ -1,14 +1,21 @@
-/** GLSL for the hologram point lattice, ported verbatim from the legacy
-    raw-WebGL renderer. The vertex shader does its own clip-space
-    perspective (eye z=2.15) — three's camera matrices are deliberately
-    unused, which is what keeps the port pixel-identical. */
+/** GLSL for the hologram point lattice. The vertex shader does its own
+    clip-space perspective (eye z≈3.1) — three's camera matrices are
+    deliberately unused. Facial deformation is driven by the uCtrl[]
+    array, one float per FaceControl, indices generated from
+    FACE_CONTROL_KEYS so TS and GLSL share one source of truth. */
+
+import { FACE_CONTROL_KEYS } from "./face/controls.js";
+
+const CTRL_COUNT = FACE_CONTROL_KEYS.length;
+const CTRL_DEFS = FACE_CONTROL_KEYS.map((key, i) => `#define C_${key} uCtrl[${i}]`).join("\n");
 
 export const HOLO_VERTEX_SHADER = `
-attribute vec4 aAux; attribute vec4 aAux2; attribute float aScale;
+${CTRL_DEFS}
+attribute vec4 aAux; attribute vec4 aAux2; attribute float aScale; attribute float aBrow;
 uniform vec2 uRes;
 uniform vec2 uGaze;
-uniform vec4 uExpr; /* smile, widen, bow, tilt — eased mood expression */
-uniform float uTime,uLevel,uBlink,uGlitch,uEcho,uPresence,uMirror;
+uniform float uCtrl[${CTRL_COUNT}];
+uniform float uTime,uLevel,uGlitch,uEcho,uPresence,uMirror;
 uniform mediump float uMood;
 varying vec3 vCol; varying float vA;
 
@@ -27,6 +34,8 @@ void main(){
   float jaw=aAux.x, hair=aAux.y, warm=aAux.z, rnd=aAux.w;
   float eye=aAux2.x, shade=aAux2.y, bust=aAux2.z, iris=aAux2.w;
   float talk=uLevel;
+  /* anatomical side select: x>0 carries the L channels */
+  float left = step(0., position.x);
 
   /* materialization: below full presence the cloud drifts apart and
      converges as the agent takes shape */
@@ -34,36 +43,48 @@ void main(){
   p += vec3(sin(rnd*97.+uTime*.5), cos(rnd*57.-uTime*.4), sin(rnd*31.+uTime*.3))
        * scatter * scatter * (.55 + .45*rnd);
 
-  /* murmur: the jaw drops and the lips tremble with the voice */
-  p.y -= jaw*talk*.12;
+  /* voice: the jaw drops with the audio envelope, lips tremble */
+  p.y -= jaw*C_jawOpen*.12;
   p.y += jaw*sin(uTime*33.+rnd*24.)*talk*.02;
   p.z += jaw*sin(uTime*26.+rnd*13.)*talk*.011;
-  /* micro-expressions: mouth corners and lids follow the mood */
-  p.y += jaw*smoothstep(.05,.16,abs(position.x))*uExpr.x*.05;
-  p.y += (p.y - .12)*eye*uExpr.y*.22;
-  /* blink: the socket lattice squeezes onto the lid line */
-  p.y += (.12 - p.y)*uBlink*eye*.85;
+  /* sustained silence presses the lips toward the mouth line */
+  p.y += (-.33 - p.y)*jaw*C_mouthClose*.08;
+  /* funnel: the lips gather toward the mouth center */
+  p.x -= position.x*jaw*C_mouthFunnel*.18;
+  /* mouth corners: per-side smile lift / frown drop */
+  float corner = jaw*smoothstep(.05,.16,abs(position.x));
+  p.y += corner*(mix(C_mouthSmileR, C_mouthSmileL, left)
+               - mix(C_mouthFrownR, C_mouthFrownL, left))*.07;
+  /* lids: per-side stochastic blink + widen/squint posture */
+  float lid = mix(C_eyeBlinkR, C_eyeBlinkL, left);
+  p.y += (p.y - .12)*eye*C_eyeWiden*.22;
+  p.y += (.12 - p.y)*eye*(lid*.85 + C_eyeSquint*.4);
+  /* brows: inner/outer raise against the knit */
+  float inner = 1.-smoothstep(.08,.28,abs(position.x));
+  float browLift = inner*C_browInnerUp
+                 + (1.-inner)*mix(C_browOuterUpR, C_browOuterUpL, left);
+  p.y += aBrow*(browLift*.07 - C_browDown*.05);
   /* the eyes lead the head toward the pointer */
   p.x += uGaze.x*eye*.018;
   p.y += uGaze.y*eye*.012;
-  /* whisper ripple + hair drift + breath */
+  /* whisper ripple + hair drift + breath (rig-driven, ≈0.25Hz) */
   p.x += sin(p.y*6.5-uTime*2.2)*.005*(.2+talk);
   p.x += sin(uTime*1.15+rnd*40.)*hair*.012;
   p.y += cos(uTime*.85+rnd*30.)*hair*.01;
-  p *= .95 + .01*sin(uTime*.7);
+  p *= .945 + .012*C_breath;
   p.y += .10;
 
   /* slow presence sway plus the head turning toward the pointer */
-  float yaw = sin(uTime*.18)*.09 + uGaze.x*.30;
+  float yaw = sin(uTime*.18)*.09 + uGaze.x*.30 + C_headYaw*.22;
   float cy=cos(yaw), sy=sin(yaw);
   p = vec3(p.x*cy+p.z*sy, p.y, -p.x*sy+p.z*cy);
-  /* pitch: pointer height, minus the muted bow */
-  float pit = uGaze.y*.14 - uExpr.z*.12;
+  /* pitch: pointer height plus the rig posture (muted bow is negative) */
+  float pit = uGaze.y*.14 + C_headPitch*.14;
   float cp=cos(pit), sp=sin(pit);
   float py0 = p.y - .26;
   p = vec3(p.x, py0*cp - p.z*sp + .26, py0*sp + p.z*cp);
-  /* attentive roll toward one shoulder while listening */
-  float rol = uExpr.w*.08;
+  /* roll toward one shoulder (attentive listening) */
+  float rol = C_headRoll*.08;
   float cl=cos(rol), sl=sin(rol);
   py0 = p.y - .26;
   p = vec3(p.x*cl - py0*sl, p.x*sl + py0*cl + .26, p.z);
@@ -106,6 +127,8 @@ void main(){
   col = moodTint(col, uMood);
   /* linear relief: sockets sleep, nose / brow / lips catch the light */
   col *= .12 + 1.25*shade;
+  /* the mouth glows with the voice */
+  col *= 1. + jaw*C_glowMouth*.45;
 
   /* calm breathing, no per-point strobe: a lattice should feel stable */
   float fl=.85+.15*sin(uTime*1.7+rnd*6.28);
@@ -120,7 +143,7 @@ void main(){
   a *= mix(1.,.25,uEcho);
   a *= bust;                       /* projector fade at the base   */
   a *= mix(.18, 1., uPresence);    /* faint until materialized     */
-  a *= 1.-uBlink*iris;             /* iris hides behind the lid    */
+  a *= 1.-lid*iris;                /* iris hides behind the lid    */
   if(uMood>2.5) a*=.45;            /* muted: the figure recedes    */
   a += scan*.3*(1.-uMirror);
   a *= mirrorFade;

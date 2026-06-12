@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import type { ViewDrawContext } from "../scene/view-registry.js";
+import { FACE_CONTROL_KEYS } from "./face/controls.js";
 import { HoloFigure, type HoloFrame, type HoloUniformMap } from "./holo-figure.js";
 import { HOLO_FRAGMENT_SHADER, HOLO_VERTEX_SHADER } from "./holo-shaders.js";
 import { getSharedFaceGeometry } from "./shared-geometry.js";
@@ -18,6 +19,7 @@ export function getSharedHoloGeometry(): THREE.BufferGeometry {
     sharedGeometry.setAttribute("aAux", new THREE.BufferAttribute(face.aux, 4));
     sharedGeometry.setAttribute("aAux2", new THREE.BufferAttribute(face.aux2, 4));
     sharedGeometry.setAttribute("aScale", new THREE.BufferAttribute(face.scale, 1));
+    sharedGeometry.setAttribute("aBrow", new THREE.BufferAttribute(face.brow, 1));
   }
   return sharedGeometry;
 }
@@ -27,14 +29,13 @@ export function createHoloUniforms(): HoloUniformMap {
     uRes: { value: new THREE.Vector2(1, 1) },
     uTime: { value: 0 },
     uLevel: { value: 0 },
-    uBlink: { value: 0 },
     uGlitch: { value: 0 },
     uEcho: { value: 0 },
     uMood: { value: 0 },
     uPresence: { value: 1 },
     uGaze: { value: new THREE.Vector2(0, 0) },
     uMirror: { value: 0 },
-    uExpr: { value: new THREE.Vector4(0, 0, 0, 0) },
+    uCtrl: { value: new Float32Array(FACE_CONTROL_KEYS.length) },
   };
 }
 
@@ -71,7 +72,7 @@ export interface HoloViewHandle {
   dispose(): void;
 }
 
-export function createHoloView(): HoloViewHandle {
+export function createHoloView(seed?: number): HoloViewHandle {
   const uniforms = createHoloUniforms();
   const material = createHoloPassMaterial(uniforms, { mirror: 0, echo: 0 });
   const passUniforms = material.uniforms; /* own uMirror/uEcho live here */
@@ -81,7 +82,7 @@ export function createHoloView(): HoloViewHandle {
   scene.add(points);
   /* the shader emits clip space directly; any camera satisfies three */
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-  const figure = new HoloFigure();
+  const figure = new HoloFigure(seed);
 
   return {
     draw(context, frame) {

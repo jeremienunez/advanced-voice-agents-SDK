@@ -108,6 +108,7 @@ export const publicApiEntries = [
       "ToolConfirmationPolicy", "ToolDefinition", "ToolManifest", "ToolName", "ToolPlannerPort", "ToolReadiness",
       "ToolRegistryAdapterPort", "ToolRegistryExecutionInput", "ToolRegistryItem", "ToolRegistryRuntimeContext", "ToolRuntimeBinding", "ToolRuntimeContext",
       "ToolSideEffect", "ToolValidationIssue", "ToolValidationReport", "ToolValidationRequest", "VectorizationIndexKind", "VectorizationPlan",
+      "VoiceAffect", "VoiceAffectLabel",
       "VoiceAgentSdkDefinition", "VoiceLearningStatus", "VoiceLearningSummary", "VoiceProvider", "VoiceRecommendation", "VoiceSessionStartOptions",
       "VoiceSessionSummary",
     ],
@@ -245,7 +246,7 @@ export const publicApiEntries = [
     ],
     types: [
       "BrowserVoiceMediaBridge", "BrowserVoiceMediaBridgeFactory", "BrowserVoiceMediaBridgeOptions", "BrowserVoiceServiceConfig", "BrowserVoiceSessionRequest", "BrowserVoiceSocket",
-      "BrowserVoiceUserContext", "ServerVoiceMessage",
+      "BrowserVoiceUserContext", "ServerVoiceMessage", "VoiceAffect", "VoiceAffectLabel",
     ],
   },
   {
@@ -263,7 +264,7 @@ export const publicApiEntries = [
     ],
     types: [
       "BrowserVoiceAudioMode", "BrowserVoiceSessionCallbacks", "BrowserVoiceSessionClientOptions", "BrowserVoiceSessionSnapshot", "BrowserVoiceState", "BrowserVoiceSupport",
-      "ClientVoiceMessage", "ServerVoiceMessage", "ToolCallEntry", "TranscriptEntry", "VoiceLearningStatus", "VoiceLearningSummary",
+      "ClientVoiceMessage", "ServerVoiceMessage", "ToolCallEntry", "TranscriptEntry", "VoiceAffect", "VoiceAffectLabel", "VoiceLearningStatus", "VoiceLearningSummary",
       "VoiceProvider", "VoiceSessionStartOptions", "VoiceSessionSummary", "VoiceWSCallbacks", "VoiceWSClient",
     ],
   },

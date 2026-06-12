@@ -105,3 +105,56 @@ not a regression to fix.
   `git diff <paths>` first to confirm only my changes are in them.
 - When told to wait, stop ALL repo writes (code, git, browser reloads can
   also race their dev loop) and state plainly what was already committed.
+
+## 2026-06-12 — Never commit; Jeremie tests live first and commits himself
+
+Correction during the FaceControls/affect work: I committed the T1
+role-transcript slice right after green tests ("commit plus je veux tester
+avant c'est moi qui fait ca stp").
+
+Rule: green BDD + tsc is necessary but NOT sufficient for history. The
+acceptance step is Jeremie verifying live in-app. My stopping point is a
+clean working tree + test report + "ready for your test". No git commit,
+no push, ever — not even "one commit per task" from an approved plan.
+
+## 2026-06-12 — Always-on tools invalidate every BDD literal on tool lists
+
+Adding set_affect to EVERY session via toolsForRequest broke two
+unrelated-looking gates one after the other: prompt-compiler-port
+(instructions literal "...create_summary" missing ",set_affect") then
+provider-factory (tools.length === 0 fixture now 1). Two full
+audit:solid cycles burned because I fixed one stale expectation, reran,
+hit the next.
+- Before rerunning a 2-min fail-fast gate after a toolset/protocol
+  change, grep the whole BDD surface for the invariant that changed
+  (tools.length, toolNames, instruction literals) and fix ALL stale
+  expectations in one pass.
+- A tool schema is a contract with the model: if a param is documented
+  "Default to 0.6", the coercion layer must implement that default.
+  Gemini live really does omit optional params (live session showed
+  smile/intensity 0 — invisible). Write the omitted-param BDD scenario
+  the moment a schema declares a default.
+
+## 2026-06-12 — "Nothing animates" after a file move: check browser console FIRST
+
+Jeremie reported mouth/expression frozen in live test right after the
+face-* modules were restructured into face/. I traced the whole data
+flow statically (UI props, SDK client, rig, shader, geometry masks —
+all sound) before reading the console, which held the answer in one
+line: Vite HMR 404s on the old module paths, VoiceOrb/HologramBust
+"Failed to reload" — the open page was running a stale half-bundle, the
+rig never ran. A hard refresh fixed it.
+- For any "X stopped working in the browser" report that follows a file
+  rename/move/restructure: read console messages (HMR reload failures,
+  404s) BEFORE tracing code. 30 seconds vs 15 minutes.
+- Vite keeps serving the stale graph after failed HMR; behavior bugs
+  observed on such a page are not evidence about the current code.
+
+## 2026-06-12 — Adding a required snapshot field: grep ALL literal constructors
+
+Adding `outputBands` to BrowserVoiceSessionSnapshot broke the starter
+typecheck at the gate (config.ts had its own `initialSnapshot` literal).
+The core INITIAL_SNAPSHOT was not the only constructor of that type.
+- After adding a required field to a public interface, grep the whole
+  workspace for other object literals typed against it (`: TypeName =`)
+  BEFORE running the 2-minute gate.

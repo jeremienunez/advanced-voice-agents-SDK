@@ -29,7 +29,7 @@ export function AgentDetailPanel({
     return (
       <aside className="agentDetailPanel empty">
         <div className="agentDetailStage" aria-hidden="true">
-          <HologramBust presence={0.08} />
+          <HologramBust presence={0.08} seed={4004} />
           <span className="agentDetailStageTag">awaiting selection</span>
         </div>
         <h2>No agent selected</h2>
@@ -50,7 +50,7 @@ export function AgentDetailPanel({
   return (
     <aside className="agentDetailPanel">
       <div className="agentDetailStage" aria-hidden="true">
-        <HologramBust presence={agentPresence(agent)} />
+        <HologramBust presence={agentPresence(agent)} seed={4005} />
         <span className="agentDetailStageTag">{readinessLabel(agent)}</span>
       </div>
       <header>

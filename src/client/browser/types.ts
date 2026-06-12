@@ -7,6 +7,8 @@ export type {
   BrowserVoiceState,
   ClientVoiceMessage,
   ServerVoiceMessage,
+  VoiceAffect,
+  VoiceAffectLabel,
   VoiceLearningStatus,
   VoiceLearningSummary,
   VoiceProvider,

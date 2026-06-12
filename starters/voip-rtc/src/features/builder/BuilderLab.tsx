@@ -229,6 +229,7 @@ export function BuilderLab({
           <div className="builderHoloStage" aria-hidden="true">
             <HologramBust
               presence={(Math.min(builder.unlockedStep, 5) + 1) / 6}
+              seed={3003}
             />
             <span className="builderHoloCaption">
               {builder.draft?.identity.publicAgentName ?? "awaiting identity"}

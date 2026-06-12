@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import type { VoiceAffect } from "@voiceagentsdk/core/client/browser";
+import type { AffectSignal } from "../../../components/hologram/face/affect.js";
 import { gazeTarget } from "../../../components/hologram/holo-motion.js";
 import {
   prefersStaticMotion,
@@ -19,16 +21,23 @@ interface VoiceSignal {
   isMuted: boolean;
   isSpeaking: boolean;
   level: number;
+  bands: readonly [number, number, number, number] | null;
 }
 
 export function VoiceOrb({
   state,
   isMuted,
   outputLevel,
+  outputBands = null,
+  affect = null,
 }: {
   state: string;
   isMuted: boolean;
   outputLevel: number;
+  /** Spectral split of the output audio — viseme mouth shaping. */
+  outputBands?: readonly [number, number, number, number] | null;
+  /** Latest LLM-signaled affect from the session snapshot (wall clock). */
+  affect?: (VoiceAffect & { at: number }) | null;
 }) {
   const fieldRef = useRef<HTMLDivElement>(null);
   const signalRef = useRef<VoiceSignal>({
@@ -36,7 +45,13 @@ export function VoiceOrb({
     isMuted: false,
     isSpeaking: false,
     level: 0,
+    bands: null,
   });
+  /* the rig decays affect on the rAF clock — restamp the wall-clock
+     arrival time with the frame time when a new affect lands */
+  const affectRef = useRef<(VoiceAffect & { at: number }) | null>(affect);
+  const framedAffectRef = useRef<AffectSignal | null>(null);
+  affectRef.current = affect;
   const [renderError, setRenderError] = useState<string | null>(null);
   const [reducedMotion, setReducedMotion] = useState(prefersStaticMotion);
   const staticRenderRef = useRef<(() => void) | null>(null);
@@ -53,9 +68,9 @@ export function VoiceOrb({
   } as CSSProperties;
 
   useEffect(() => {
-    signalRef.current = { isListening, isMuted, isSpeaking, level };
+    signalRef.current = { isListening, isMuted, isSpeaking, level, bands: outputBands };
     staticRenderRef.current?.(); /* reduced motion: one frame per state change */
-  }, [isListening, isMuted, isSpeaking, level]);
+  }, [isListening, isMuted, isSpeaking, level, outputBands]);
 
   useEffect(() => watchMotionPreference(setReducedMotion), []);
 
@@ -77,7 +92,7 @@ export function VoiceOrb({
       setRenderError("webgl unavailable");
       return undefined;
     }
-    const stage = createRtcStageScene();
+    const stage = createRtcStageScene(1001); /* distinct blink/idle seed */
     const post = createRtcStagePost(renderer, stage.scene, stage.camera);
     let lastStamp = 0;
     let lastW = 0;
@@ -97,7 +112,7 @@ export function VoiceOrb({
         syncRendererSize(renderer);
         post.setSize(canvas.clientWidth, canvas.clientHeight);
         stage.update(
-          { timeMs: staticFrameTimeMs(), level: staticLevel, mood, gaze, mirror: true },
+          { timeMs: staticFrameTimeMs(), level: staticLevel, mood, gaze, mirror: true, still: true },
           { width: canvas.width, height: canvas.height },
         );
         post.render(0.016);
@@ -131,6 +146,7 @@ export function VoiceOrb({
     };
     window.addEventListener("pointermove", onPointerMove);
 
+    let seenAffectAt: number | null = null;
     const animate = (stamp: number) => {
       const signal = signalRef.current;
       const target = signal.isMuted
@@ -140,6 +156,14 @@ export function VoiceOrb({
       gaze.x += (wantedGaze.x - gaze.x) * 0.045;
       gaze.y += (wantedGaze.y - gaze.y) * 0.045;
 
+      const wallAffect = affectRef.current;
+      if ((wallAffect?.at ?? null) !== seenAffectAt) {
+        seenAffectAt = wallAffect?.at ?? null;
+        framedAffectRef.current = wallAffect
+          ? { label: wallAffect.label, intensity: wallAffect.intensity, at: stamp }
+          : null;
+      }
+
       const mood = signal.isMuted ? 3 : signal.isSpeaking ? 2 : signal.isListening ? 1 : 0;
       syncRendererSize(renderer);
       if (canvas.clientWidth !== lastW || canvas.clientHeight !== lastH) {
@@ -148,7 +172,15 @@ export function VoiceOrb({
         post.setSize(lastW, lastH);
       }
       stage.update(
-        { timeMs: stamp, level: smoothedLevel, mood, gaze, mirror: true },
+        {
+          timeMs: stamp,
+          level: smoothedLevel,
+          levelBands: signal.isMuted ? null : signal.bands,
+          mood,
+          gaze,
+          mirror: true,
+          affect: framedAffectRef.current,
+        },
         { width: canvas.width, height: canvas.height },
       );
       post.render(lastStamp ? (stamp - lastStamp) / 1000 : 0.016);

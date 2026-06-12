@@ -1,4 +1,5 @@
 import type { VoiceSessionTool } from "@voiceagentsdk/core/server";
+import { affectSideChannelTool } from "./affect-tool.js";
 import { runtimeAgentFromDraft } from "../runtime/compiled-agent.js";
 import { runtimeKnowledgeTools } from "../runtime/knowledge-tools.js";
 import { runtimeActionTools } from "../runtime/tools/action-tools.js";
@@ -19,5 +20,5 @@ export function toolsForRequest(
       })
     : [];
   const actions = agent ? runtimeActionTools(agent) : [];
-  return [...knowledge, ...actions];
+  return [...knowledge, ...actions, affectSideChannelTool()];
 }

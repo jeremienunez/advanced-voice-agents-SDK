@@ -3,7 +3,7 @@
    Face: landmarks registered on eyes ±0.2/0.12, mouth 0/-0.345, Z_GAIN=0.9.
    Skull: visual-hull rings from segmenter silhouettes, triplanar photo
    luminance (front/profile/back). */
-import type { FaceScanData } from "./face-scan-decode.js";
+import type { FaceScanData } from "./scan-decode.js";
 
 export const FACE_SCAN: FaceScanData = {
   count: 16784,

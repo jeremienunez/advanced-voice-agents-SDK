@@ -1,7 +1,33 @@
-import type { AgentEvolutionInput } from "@voiceagentsdk/core/sdk";
-import { SERVER_POLICY_START } from "../builder/domain/prompt/policy.js";
+import type {
+  AgentBuildDraft,
+  AgentEvolutionInput,
+  CompiledAgentArtifact,
+} from "@voiceagentsdk/core/sdk";
+import {
+  appendServerOwnedPromptPolicy,
+  assertServerOwnedPromptPolicy,
+  SERVER_POLICY_START,
+} from "../builder/domain/prompt/policy.js";
 
-export function buildPromptVersion(
+/** Learned prompt version with the server-owned policy imposed (not just
+    verified): legacy drafts compiled before the policy existed would
+    otherwise fail learning forever; append is idempotent (strips then
+    re-appends as the final suffix). */
+export function securedPromptVersion(
+  draft: AgentBuildDraft,
+  compiled: CompiledAgentArtifact,
+  input: AgentEvolutionInput,
+): string {
+  const prompt = appendServerOwnedPromptPolicy(
+    buildPromptVersion(compiled.prompt, input),
+    draft,
+    compiled.selectedTools,
+  );
+  assertServerOwnedPromptPolicy(prompt);
+  return prompt;
+}
+
+function buildPromptVersion(
   currentPrompt: string,
   input: AgentEvolutionInput,
 ): string {

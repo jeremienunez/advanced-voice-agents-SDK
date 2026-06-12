@@ -9,9 +9,9 @@ import type {
 import { mutateDraft } from "../builder/domain/drafts/mutations.js";
 import { requireDraft, saveDraft } from "../builder/state/draft-store.js";
 import { createGlobalActiveAgentAssignment } from "../builder/state/active-agent-assignment.js";
+import { setActiveAgentFromDraft } from "./evolution-active-agent.js";
 import { decideInfraEvolution } from "./evolution-infra.js";
-import { activeScopeForDraft } from "./evolution-scope.js";
-import { buildPromptVersion } from "./evolution-prompt.js";
+import { securedPromptVersion } from "./evolution-prompt.js";
 import {
   artifactIdFor,
   currentEvolution,
@@ -27,9 +27,7 @@ export class StarterAgentEvolution implements AgentEvolutionPort {
       createGlobalActiveAgentAssignment();
   }
 
-  async validateAndApply(
-    input: AgentEvolutionInput,
-  ): Promise<AgentEvolutionResult> {
+  async validateAndApply(input: AgentEvolutionInput): Promise<AgentEvolutionResult> {
     const draft = requireDraft(input.draftId);
     if (!draft.compiled) {
       return {
@@ -46,8 +44,7 @@ export class StarterAgentEvolution implements AgentEvolutionPort {
     const artifactId = artifactIdFor(draft.id, nextVersion);
     const previousArtifactId = current.currentArtifactId ||
       artifactIdFor(draft.id, current.version);
-    const prompt = buildPromptVersion(draft.compiled.prompt, input);
-    assertServerOwnedPromptPolicy(prompt);
+    const prompt = securedPromptVersion(draft, draft.compiled, input);
     const infraDecision = decideInfraEvolution(input, now);
     const nextArtifact: CompiledAgentArtifact = {
       ...draft.compiled,
@@ -118,12 +115,9 @@ export class StarterAgentEvolution implements AgentEvolutionPort {
     const nextDraft = builder.build();
 
     saveDraft(nextDraft);
-    await this.activeAgentAssignment.setActiveAgent({
-      draftId: nextDraft.id,
-      ...activeScopeForDraft(nextDraft, {
-        tenantId: input.tenantId,
-        userId: input.userId,
-      }),
+    await setActiveAgentFromDraft(this.activeAgentAssignment, nextDraft, {
+      tenantId: input.tenantId,
+      userId: input.userId,
     });
     return {
       status: "applied",
@@ -209,10 +203,7 @@ export class StarterAgentEvolution implements AgentEvolutionPort {
       .build();
 
     saveDraft(nextDraft);
-    await this.activeAgentAssignment.setActiveAgent({
-      ...activeScopeForDraft(nextDraft, scope),
-      draftId: nextDraft.id,
-    });
+    await setActiveAgentFromDraft(this.activeAgentAssignment, nextDraft, scope);
     return {
       status: "applied",
       draftId,
@@ -282,10 +273,7 @@ export class StarterAgentEvolution implements AgentEvolutionPort {
       .build();
 
     saveDraft(nextDraft);
-    await this.activeAgentAssignment.setActiveAgent({
-      ...activeScopeForDraft(nextDraft, scope),
-      draftId: nextDraft.id,
-    });
+    await setActiveAgentFromDraft(this.activeAgentAssignment, nextDraft, scope);
     return {
       status: "applied",
       draftId,

@@ -6,7 +6,7 @@ import type {
   VoiceSessionStartOptions,
 } from "../types.js";
 import { VoiceWebSocketClient } from "../voice-ws.js";
-import { pcm16OutputLevel, smoothAudioLevel } from "./audio-level.js";
+import { pcm16BandLevels, pcm16OutputLevel, smoothAudioLevel } from "./audio-level.js";
 import { createMicrophoneAudioNodes } from "./audio-nodes.js";
 import { checkBrowserVoiceSupport } from "./support.js";
 import type {
@@ -20,6 +20,8 @@ import {
   INITIAL_SNAPSHOT,
   upsertToolCall,
 } from "./snapshot.js";
+
+const ZERO_BANDS = [0, 0, 0, 0] as const;
 
 export class BrowserVoiceSessionClient {
   private audioContext: AudioContext | null = null;
@@ -170,11 +172,17 @@ export class BrowserVoiceSessionClient {
           state: "listening",
           sessionId: message.sessionId,
           outputLevel: 0,
+          outputBands: ZERO_BANDS,
           error: null,
         });
         break;
       case "session.ended":
-        this.updateSnapshot({ ...this.snapshot, state: "ended", outputLevel: 0 });
+        this.updateSnapshot({
+          ...this.snapshot,
+          state: "ended",
+          outputLevel: 0,
+          outputBands: ZERO_BANDS,
+        });
         break;
       case "learning.status":
         this.updateSnapshot({
@@ -191,10 +199,18 @@ export class BrowserVoiceSessionClient {
           state: message.state,
           outputLevel:
             message.state === "speaking" ? this.snapshot.outputLevel : 0,
+          outputBands:
+            message.state === "speaking" ? this.snapshot.outputBands : ZERO_BANDS,
         });
         break;
       case "transcript":
         this.updateSnapshot(addTranscript(this.snapshot, message));
+        break;
+      case "affect":
+        this.updateSnapshot({
+          ...this.snapshot,
+          affect: { ...message.affect, at: Date.now() },
+        });
         break;
       case "tool.call":
         this.updateSnapshot({
@@ -253,7 +269,9 @@ export class BrowserVoiceSessionClient {
     }
 
     this.lastOutputLevelAt = now;
-    this.updateSnapshot({ ...this.snapshot, outputLevel });
+    /* playback contract is PCM16 mono 24kHz (PlaybackProcessor ring) */
+    const outputBands = pcm16BandLevels(buffer, 24_000);
+    this.updateSnapshot({ ...this.snapshot, outputLevel, outputBands });
   }
 
   private fail(message: string): void {
@@ -263,6 +281,7 @@ export class BrowserVoiceSessionClient {
       ...this.snapshot,
       state: "error",
       outputLevel: 0,
+      outputBands: ZERO_BANDS,
       error: message,
     });
   }

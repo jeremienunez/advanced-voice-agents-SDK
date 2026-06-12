@@ -1,7 +1,7 @@
-import { FACE_SCAN } from "./face-scan.js";
-import { ell, smin, sph } from "./face-math.js";
-import { beardMask } from "./face-masks.js";
-import { clamp, type Vec3 } from "./vector-math.js";
+import { FACE_SCAN } from "./scan.js";
+import { ell, smin, sph } from "./math.js";
+import { beardMask } from "./masks.js";
+import { clamp, type Vec3 } from "../vector-math.js";
 
 /** Core head SDF, before the photo hull. The hair volumes deliberately
     overshoot the subject's silhouette: the front-photo hull is the one

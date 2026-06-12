@@ -19,6 +19,20 @@ export interface VoiceSessionStartOptions {
   providerOptions?: Record<string, unknown>;
 }
 
+/** Closed label set for the agent's facial affect side-channel. */
+export type VoiceAffectLabel =
+  | "neutral"
+  | "smile"
+  | "concern"
+  | "surprise"
+  | "thinking";
+
+export interface VoiceAffect {
+  label: VoiceAffectLabel;
+  /** Always clamped to [0,1] server-side. */
+  intensity: number;
+}
+
 export type ClientVoiceMessage =
   | ({ type: "session.start" } & VoiceSessionStartOptions)
   | { type: "session.end" }
@@ -55,6 +69,7 @@ export type ServerVoiceMessage =
       isFinal: boolean;
       role: "user" | "assistant";
     }
+  | { type: "affect"; affect: VoiceAffect }
   | { type: "text_delta"; text: string }
   | {
       type: "tool_start";

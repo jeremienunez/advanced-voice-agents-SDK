@@ -3,7 +3,8 @@ export {
 } from "./types.js";
 
 export type {
-  BrowserVoiceState, ClientVoiceMessage, ServerVoiceMessage, VoiceLearningStatus,
+  BrowserVoiceState, ClientVoiceMessage, ServerVoiceMessage, VoiceAffect,
+  VoiceAffectLabel, VoiceLearningStatus,
   VoiceLearningSummary, VoiceProvider, VoiceSessionStartOptions, VoiceSessionSummary,
   VoiceWSCallbacks, VoiceWSClient,
 } from "./types.js";

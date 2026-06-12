@@ -18,14 +18,14 @@ export interface RtcStageScene {
   dispose(): void;
 }
 
-export function createRtcStageScene(): RtcStageScene {
+export function createRtcStageScene(seed?: number): RtcStageScene {
   const scene = new THREE.Scene();
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
   const props: StageProp[] = [createStageFloor(), createProjectorCone()];
   for (const prop of props) scene.add(prop.object);
 
   const uniforms = createHoloUniforms();
-  const figure = new HoloFigure();
+  const figure = new HoloFigure(seed);
   const passes = [
     { pass: { mirror: 1, echo: 0 }, order: 1 },
     { pass: { mirror: 0, echo: 1 }, order: 2 },

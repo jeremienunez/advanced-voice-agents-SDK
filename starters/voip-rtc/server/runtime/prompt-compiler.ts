@@ -4,6 +4,7 @@ import type {
   PromptCompilerPort,
   RuntimePromptCompileInput,
 } from "@voiceagentsdk/core/sdk";
+import { withAffectChannelPolicy } from "./affect-policy.js";
 import { withRuntimeKnowledgePolicy } from "./knowledge-policy.js";
 
 interface StarterPromptCompilerOptions {
@@ -19,13 +20,13 @@ export function createStarterPromptCompiler(
   return {
     compilePrompt(input) {
       const compiled = options.builderService.getCompiledArtifact(input.agentId);
-      if (compiled?.prompt) {
-        return withRuntimeKnowledgePolicy(compiled.prompt, compiled);
-      }
-      return options.sdk.promptFor({
-        channel: input.channel,
-        variables: promptVariables(input),
-      });
+      const base = compiled?.prompt
+        ? withRuntimeKnowledgePolicy(compiled.prompt, compiled)
+        : options.sdk.promptFor({
+            channel: input.channel,
+            variables: promptVariables(input),
+          });
+      return withAffectChannelPolicy(base, input.toolNames);
     },
   };
 }

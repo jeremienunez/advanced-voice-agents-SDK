@@ -18,6 +18,7 @@ const owner = identity("tenant-learning", "user-learning");
 
 const results = [
   await scenarioLearningKeepsServerPolicyFinal(),
+  await scenarioLearningHealsLegacyDraftCompiledWithoutPolicy(),
 ];
 
 console.log(JSON.stringify({ status: "ok", results }, null, 2));
@@ -61,6 +62,59 @@ async function scenarioLearningKeepsServerPolicyFinal() {
   );
 
   return "learning-preserves-server-owned-policy-suffix";
+}
+
+/* Drafts compiled before the server policy existed (legacy local state)
+   used to fail learning forever — the loop must impose the policy, not
+   only verify it. */
+async function scenarioLearningHealsLegacyDraftCompiledWithoutPolicy() {
+  const draft = draftForLearningPolicy("draft_learning_policy_legacy_bdd");
+  saveDraft(draft);
+
+  const workflows = createBuilderWorkflows({
+    availableSecretNames: [],
+    availableToolHandlerRefs: runtimeToolHandlerRefs(),
+    planner: promptPlanner(),
+  } as unknown as BuilderWorkflowDependencies);
+  const { artifact } = await workflows.compileAgent({
+    draftId: draft.id,
+    selectedTools: ["create_summary"],
+  }, { identity: owner });
+
+  const policyStart = artifact.prompt.indexOf(
+    "BEGIN SERVER-OWNED SAFETY AND TOOL POLICY",
+  );
+  const legacyPrompt = artifact.prompt.slice(0, policyStart).trim();
+  const stored = getDraft(draft.id);
+  assert(stored?.compiled !== undefined, "compiled draft must be stored");
+  saveDraft({
+    ...stored,
+    compiled: { ...stored.compiled, prompt: legacyPrompt },
+  });
+
+  const result = await new StarterAgentEvolution()
+    .validateAndApply(learningInput(draft.id));
+  const evolved = getDraft(draft.id)?.compiled?.prompt ?? "";
+
+  assert(
+    result.status === "applied",
+    `learning must heal a legacy draft compiled without policy, got ${result.status}`,
+  );
+  assert(
+    evolved.includes("## Learned Session Memory"),
+    "learned memory block must be inserted on the healed prompt",
+  );
+  assert(
+    evolved.indexOf("## Learned Session Memory") <
+      evolved.lastIndexOf("BEGIN SERVER-OWNED SAFETY AND TOOL POLICY"),
+    "learned memory must sit before the re-imposed server policy",
+  );
+  assert(
+    evolved.trim().endsWith(policyEnd),
+    "learning must re-impose the server policy as the final suffix",
+  );
+
+  return "learning-heals-legacy-draft-compiled-without-policy";
 }
 
 function promptPlanner(): Pick<PromptPlannerPort, "composeFinalPrompt"> {

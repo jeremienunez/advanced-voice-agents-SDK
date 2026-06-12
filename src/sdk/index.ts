@@ -70,7 +70,8 @@ export type {
   ToolReadiness, ToolRegistryAdapterPort, ToolRegistryExecutionInput, ToolRegistryItem,
   ToolRegistryRuntimeContext, ToolRuntimeBinding, ToolRuntimeContext, ToolSideEffect,
   ToolValidationIssue, ToolValidationReport, ToolValidationRequest, VectorizationIndexKind,
-  VectorizationPlan, VoiceAgentSdkDefinition, VoiceLearningStatus, VoiceLearningSummary,
+  VectorizationPlan, VoiceAffect, VoiceAffectLabel, VoiceAgentSdkDefinition,
+  VoiceLearningStatus, VoiceLearningSummary,
   VoiceProvider, VoiceRecommendation, VoiceSessionStartOptions, VoiceSessionSummary,
 } from "./types.js";
 

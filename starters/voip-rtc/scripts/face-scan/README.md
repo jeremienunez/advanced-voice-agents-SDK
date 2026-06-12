@@ -1,7 +1,7 @@
 # face-scan — photo-driven hologram head pipeline
 
 Turns reference photos (front / right profile / back) into the committed
-point-cloud asset `src/components/hologram/face-scan.ts` rendered by the
+point-cloud asset `src/components/hologram/face/scan.ts` rendered by the
 RTC hologram. Everything is computed from the images — no hand-traced
 geometry anywhere.
 
@@ -47,7 +47,7 @@ subject, fix extraction before going further.
 Z_GAIN=0.9 bun scripts/face-scan/pack-face-scan.ts
 ```
 
-Emits `src/components/hologram/face-scan.ts` (quantized: positions
+Emits `src/components/hologram/face/scan.ts` (quantized: positions
 Int16 / `POS_SCALE`, shade Uint8, base64).
 
 **Face layer** — registration onto the shader's facial frame:

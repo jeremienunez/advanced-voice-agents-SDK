@@ -56,7 +56,10 @@ async function scenarioSessionFactoryDelegatesProviderCreationToPort() {
     input.instructions.includes("compiled prompt"),
     "compiled instructions must be passed",
   );
-  assert(input.tools.length === 0, "runtime tools must be passed");
+  assert(
+    input.tools.length === 1 && input.tools[0]?.name === "set_affect",
+    "runtime tools must be passed (affect side-channel always exposed)",
+  );
   assert(session.config.providerId === "gemini", "session config stays provider scoped");
 
   return "session-factory-delegates-provider-creation";

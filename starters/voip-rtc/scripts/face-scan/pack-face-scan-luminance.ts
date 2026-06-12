@@ -1,4 +1,4 @@
-import { insideFaceWindow, POS_SCALE } from "../../src/components/hologram/face-scan-decode.js";
+import { insideFaceWindow, POS_SCALE } from "../../src/components/hologram/face/scan-decode.js";
 import type { Vec3 } from "../../src/components/hologram/vector-math.js";
 import type {
   EllipseSection,

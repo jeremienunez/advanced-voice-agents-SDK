@@ -1,5 +1,121 @@
 # Changelog
 
+## feat(face): Palier 2 expressivite — visemes audio + vivacite TalkingHead
+
+Status: implemented locally
+Date: 2026-06-12
+
+### Intent
+
+"Je veux vraiment que le visage soit super expressif": la bouche doit
+suivre la FORME du son (pas juste le volume), et le visage doit porter
+les comportements d'engagement des references etudiees (ThreeLS,
+TalkingHead met4citizen; Rhubarb ecarte — offline).
+
+### Journal
+
+- Core — `snapshot.outputBands`: distribution spectrale relative sur les
+  4 bandes ThreeLS (0-500/500-700/700-3000/3000-6000 Hz, Llorach 2016),
+  Goertzel sur grille DFT (fenetres 256, 3 max par chunk PCM16 24kHz),
+  publiee avec outputLevel (cadence 48ms), invariante au gain, remise a
+  zero aux memes points que le level. BDD sines/bruit/silence/16kHz.
+- Starter — `face/viseme.ts`: formules ThreeLS adaptees du dB absolu a
+  la distribution relative — voyelles ouvertes -> jawOpen (graves moins
+  sibilantes), "oo" -> mouthFunnel (creux 700-3000 gate par la formante
+  500-700), sibilantes -> mouthClose; gate enveloppe partout; fallback
+  EXACT sur le chemin enveloppe sans bands (HologramBust, still).
+- Starter — `face/liveliness.ts`: emphase sur attaque (flash sourcils +
+  micro-nod, raised-cosine 300ms, refractaire 800ms), gaze wander par
+  mood (complement du eye-contact TalkingHead 0.2 idle / 0.5 speaking:
+  muted 0.9 >= idle 0.8 > engaged 0.5), head-bob de parole borne 0.08
+  gate par l'enveloppe (speaking uniquement).
+- Starter — presets affect approfondis: smile Duchenne (+eyeSquint),
+  concern baisse la tete (headPitch -0.25i), surprise ecarquille
+  (+eyeWiden 0.55i), thinking averte le regard (headYaw seede ±0.18i).
+  Poses mood absorbees dans moodBaseline (poseForMood supprime du rig);
+  canaux tete clampes signes [-1,1].
+- Plumb: HoloFrame/FaceRigFrame.levelBands, VoiceOrb outputBands prop,
+  RtcLab passe snapshot.outputBands. Reduced-motion: still ignore
+  emphase/bob (BDD), bands absents -> fallback enveloppe.
+- BDD nouveaux: test:audio-band-levels:bdd (core), test:face-viseme:bdd,
+  test:face-liveliness:bdd (starter) — enregistres dans la matrix.
+
+### Validation
+
+- audit:solid + pack:dry-run; verification visuelle live par Jeremie
+  (hard-refresh d'abord — voir note HMR plus bas).
+
+## feat(voice): rig facial FaceControls + side-channel affect LLM
+
+Status: implemented locally
+Date: 2026-06-12
+
+### Intent
+
+Rendre le visage hologramme vivant et semantiquement expressif:
+audio/transcript/affect -> calque FaceControls (20 controles ARKit/FACS
+0..1) -> ressorts amortis analytiques -> deplacement mask-gated du point
+cloud. Le LLM signale ses changements de ton via un tool side-channel
+`set_affect` intercepte par le serveur (jamais execute comme action).
+
+### Journal
+
+- Core — transcripts role-aware (commit 5e15a59): `onTranscript` gagne
+  `role?` sur le port + 4 transports; gemini `part.text` etiquete
+  assistant; bridge fallback "user". BDD role-propagation.
+- Core — protocole affect: `VoiceAffect{label,intensity}` (labels
+  fermes: neutral/smile/concern/surprise/thinking), union member
+  `{type:"affect"}`, `VoiceSessionTool.sideChannel:"affect"`,
+  interception dans `handleFunctionCall` AVANT le pending flow
+  (`affect-side-channel.ts`), `onAffect` -> bridge -> reducer snapshot
+  client. Intensite omise par le modele -> defaut documente 0.6
+  (constate en session live Gemini: appel avec label seul donnait un
+  smile invisible a 0). Test falsification securite: des ARGUMENTS
+  modele contenant "sideChannel" ne declenchent pas le canal — le
+  cycle policy complet s'applique.
+- Starter — rig pur: `face/controls.ts` (20 controles, presets
+  omega/zeta par groupe), `face/springs.ts` (pas analytique ferme,
+  inconditionnellement stable dt<=50ms), `face/audio.ts` (enveloppe
+  attack/silence, resolution 48ms documentee), `face/affect.ts`
+  (override LLM avec decroissance tau~6s vers baseline mood, asymetrie
+  L/R seedee bornee), `holo-micromotion.ts` (blink stochastique par
+  etat 19/27/24/14 par min, IBI gamma + refractaire 300ms, fermeture
+  40%/ouverture 60%; respiration 0.25Hz, derive regard, saccades —
+  bornes Bentivoglio 1997 falsifiables en BDD), `face/rig.ts`
+  (orchestrateur stateful, remplace la moitie expression de HoloFigure).
+- Starter — geometrie/shader: `browMask` + attribut `aAux3`,
+  `uExpr`/`uBlink` remplaces par `uCtrl[20]`, asymetrie
+  `sign(position.x)`, breath remplace le scale bake sinusoidal.
+- Starter — integration: tool `set_affect` toujours expose par le
+  toolset; contrat d'expression appende par le prompt compiler
+  (`affect-policy.ts`, meme pattern que knowledge-policy — suffix
+  server-owned apres learning); `snapshot.affect` -> RtcLab -> VoiceOrb
+  (restamp wall-clock -> horloge rAF); seeds distincts par instance;
+  reduced-motion: pose statique neutre, yeux ouverts.
+- E2E fake provider: `emitFunctionCall` + sonde affect deterministe
+  (smile 0.8 a +2.5s) pour verifier le sourire sans vrai modele.
+- BDD nouveaux: voice-affect-side-channel (core), face-rig,
+  holo-micromotion (starter); attentes prompt-compiler/provider-factory
+  mises a jour (set_affect toujours dans le toolset).
+- fix(learning) decouvert par le gate e2e: un draft compile avant
+  l'existence de la server policy (etat local herite, ex. agent HUGO)
+  faisait echouer le learning a CHAQUE session ("Compiled prompt is
+  missing server policy" — visible en live comme "Learning loop
+  failed"). `validateAndApply` impose desormais la policy
+  (`appendServerOwnedPromptPolicy`, idempotent: strip + re-append en
+  suffix final) au lieu de seulement la verifier; l'assert reste en
+  garde finale. BDD: learning-heals-legacy-draft-compiled-without-policy.
+
+### Validation
+
+- `pnpm audit:solid` OK / `pnpm pack:dry-run` OK.
+- Session live Gemini (agent reel): event `{type:"affect",
+  label:"smile"}` recu dans le journal SDK du client — le critere
+  falsifiable ">=1 event affect par echange emotionnel" est atteint;
+  l'intensite omise par Gemini a motive le defaut 0.6.
+- Reste a verifier visuellement: sonde fake provider (ports occupes par
+  le dev server longue duree), sweep reduced-motion complet.
+
 ## feat: command deck 3d — portage three.js + atmosphere persistante
 
 Status: implemented locally
@@ -89,9 +205,9 @@ regenerable depuis les photos de reference en deux commandes.
   repere facial du shader — yeux ±0.2/0.12, bouche 0/-0.345 —, lissage de
   profondeur par voisinage, couture sur le SDF crane, hull silhouette
   trace a la main depuis la photo de face, quantization Int16/Uint8).
-- `src/components/hologram/face-scan.ts` (genere, commite): asset ~16.8k
+- `src/components/hologram/face/scan.ts` (genere, commite): asset ~16.8k
   points du visage du sujet, luminance photo bakee en canal shade.
-- `face-geometry.ts`: builder par calques — calque SCAN (la ressemblance)
+- `face/geometry.ts`: builder par calques — calque SCAN (la ressemblance)
   + calque LATTICE (crane/cheveux/oreilles/cou, fenetre visage exclue,
   cap de resolution leve 56→120 anneaux, ~28.5k points total, tri
   couronne→cou); `skullCoreDistance` (cheveux genereux volontairement) +
@@ -188,7 +304,7 @@ VoiceOrb par un buste hologramme procedural.
   loader, rtc.css, ui-components — remplacees par tokens ou nouvelle palette.
 - `StudioShell.tsx`: persistance du theme (`studio_theme` en localStorage,
   meme pattern que `studio_mode`).
-- `features/rtc/components/voice-orb/`: `face-geometry.ts` (buste SDF —
+- `features/rtc/components/voice-orb/`: `face/geometry.ts` (buste SDF —
   crane, arcades, joues, nez arete/pointe/ailes, levres sup/inf, machoire,
   menton, oreilles, cou, epaules; globes oculaires avec iris; shading
   lambert precompute; fade projecteur a la base; deterministe par seed) et
@@ -276,7 +392,7 @@ VoiceOrb par un buste hologramme procedural.
   uniformes brillants sans strobe par point, glints d'iris. Echelle/
   miroir recalibres (tete seule). Nouvel outil dev
   scripts/dev-face-preview.ts (rendu PNG offline du nuage, zoom + mode
-  diagnostic shade) pour iterer sans navigateur. face-math.ts extrait
+  diagnostic shade) pour iterer sans navigateur. face/math.ts extrait
   (LOC). BDD reecrit sur la nouvelle spec: lattice ordonne haut-bas,
   points sur surface (tous), relief orbites vs front, iris en petit
   cluster, fade du cou — 7 scenarios verts. Verifie navigateur RTC +

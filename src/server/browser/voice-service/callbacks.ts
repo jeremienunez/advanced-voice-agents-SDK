@@ -58,6 +58,9 @@ export function createBrowserSessionCallbacks(
         role: speaker,
       });
     },
+    onAffect: (affect) => {
+      deps.emitControl(deps.socket, { type: "affect", affect });
+    },
     onInterrupted: () => {
       void deps.mediaBridge.clearOutput();
       deps.emitControl(deps.socket, {

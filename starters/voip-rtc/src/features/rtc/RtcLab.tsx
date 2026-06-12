@@ -80,6 +80,8 @@ export function RtcLab({
           state={rtc.snapshot.state}
           isMuted={rtc.snapshot.isMuted}
           outputLevel={rtc.snapshot.outputLevel}
+          outputBands={rtc.snapshot.outputBands}
+          affect={rtc.snapshot.affect}
         />
 
         <aside className="rtcHud rtcHudLeft">

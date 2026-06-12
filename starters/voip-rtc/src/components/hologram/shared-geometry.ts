@@ -1,7 +1,7 @@
 import {
   buildFaceGeometry,
   type FaceGeometry,
-} from "./face-geometry.js";
+} from "./face/geometry.js";
 import { OrbSeededRng } from "./orb-rng.js";
 
 /* One bust for the whole studio: the face is part of the design, not a

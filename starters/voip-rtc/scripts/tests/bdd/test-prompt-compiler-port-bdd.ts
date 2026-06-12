@@ -27,6 +27,7 @@ const results = [
   await scenarioSessionFactoryUsesPromptCompilerPort(),
   await scenarioStarterCompilerOwnsCompiledAndFallbackPrompts(),
   await scenarioRuntimeKnowledgePolicyBelongsToCompiler(),
+  await scenarioAffectChannelPolicyBelongsToCompiler(),
 ];
 
 console.log(JSON.stringify({ status: "ok", results }, null, 2));
@@ -57,7 +58,7 @@ async function scenarioSessionFactoryUsesPromptCompilerPort(): Promise<string> {
   );
   assert(
     providerCalls.at(0)?.instructions ===
-      "PORT voice gemini dev create_summary",
+      "PORT voice gemini dev create_summary,set_affect",
     "provider instructions must come from the compiler port",
   );
 
@@ -118,6 +119,30 @@ async function scenarioRuntimeKnowledgePolicyBelongsToCompiler(): Promise<string
   );
 
   return "runtime-knowledge-policy-belongs-to-compiler";
+}
+
+async function scenarioAffectChannelPolicyBelongsToCompiler(): Promise<string> {
+  const compiler = createStarterPromptCompiler({
+    builderService: compiledBuilder(artifact({ prompt: "Compiled prompt body" })),
+    sdk: sdk(),
+  });
+
+  const withTool = await compiler.compilePrompt({
+    ...input(),
+    toolNames: ["create_summary", "set_affect"],
+  });
+  assert(
+    withTool.includes("Expression side-channel:") && withTool.includes("set_affect"),
+    "the affect contract must be appended by the compiler when the tool is exposed",
+  );
+
+  const withoutTool = await compiler.compilePrompt(input());
+  assert(
+    !withoutTool.includes("set_affect"),
+    "no affect instructions when the session does not expose the tool",
+  );
+
+  return "affect-channel-policy-belongs-to-compiler";
 }
 
 function recordingPromptCompiler(

@@ -1,6 +1,7 @@
 import type {
   BrowserVoiceState,
   ServerVoiceMessage,
+  VoiceAffect,
   VoiceLearningSummary,
 } from "../types.js";
 
@@ -35,8 +36,14 @@ export interface BrowserVoiceSessionSnapshot {
   durationMs: number;
   isMuted: boolean;
   outputLevel: number;
+  /** Relative 4-band spectral distribution of the agent's output audio
+      (ThreeLS split 0-500/500-700/700-3000/3000-6000 Hz) — drives
+      viseme-style mouth shaping downstream. All zeros when quiet. */
+  outputBands: readonly [number, number, number, number];
   error: string | null;
   learning: VoiceLearningSummary | null;
+  /** Latest model-signaled facial affect, timestamped at reception. */
+  affect: (VoiceAffect & { at: number }) | null;
 }
 
 export interface BrowserVoiceSessionCallbacks {
