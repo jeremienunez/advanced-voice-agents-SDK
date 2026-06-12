@@ -216,7 +216,9 @@ export interface IRealtimeProvider {
   onResponseDone?(handler: (event: ProviderResponseDone) => void): void;
   /** Fired when server-side VAD cancels a response (barge-in) */
   onResponseCancelled?(handler: (responseId: string) => void): void;
-  onTranscript(handler: (text: string, isFinal: boolean) => void): void;
+  onTranscript(
+    handler: (text: string, isFinal: boolean, role?: "user" | "assistant") => void,
+  ): void;
   onError(handler: (error: ProviderError) => void): void;
 
   // Per-turn context injection (returns item ID for cleanup)

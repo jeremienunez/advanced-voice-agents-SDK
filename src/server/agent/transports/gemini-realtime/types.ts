@@ -30,7 +30,7 @@ export interface GeminiRealtimeHandlers {
   onSpeechStopped: ((audioEndMs?: number) => void) | null;
   onResponseStarted: ((responseId: string) => void) | null;
   onResponseCompleted: ((responseId: string) => void) | null;
-  onTranscript: ((text: string, isFinal: boolean) => void) | null;
+  onTranscript: ((text: string, isFinal: boolean, role?: "user" | "assistant") => void) | null;
   onError: ((error: ProviderError) => void) | null;
 }
 

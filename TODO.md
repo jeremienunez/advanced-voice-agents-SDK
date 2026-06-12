@@ -317,6 +317,38 @@ Puis verifier dans le navigateur:
 - Environment charge;
 - pas d'erreurs console.
 
+## Front starter - rig facial FaceControls + affect LLM (2026-06-12)
+
+Architecture validee: audio/transcript/affect -> calque FaceControls (20
+controles ARKit/FACS 0..1) -> ressorts amortis analytiques -> deplacement
+mask-gated du point cloud. Constantes sourcees (Bentivoglio 1997, etc.),
+bornes BDD falsifiables. Plan detaille:
+`~/.claude/plans/reflective-gathering-dusk.md`.
+
+- [ ] T1 core: transcripts role-aware (fix bug role "user" hardcode,
+      gemini part.text = assistant). BDD role-propagation.
+- [ ] T2 core: protocole affect (VoiceAffect, union member, tool
+      sideChannel:"affect" intercepte avant pending flow, onAffect,
+      reducer client). BDD + test falsification securite (args modele
+      ne peuvent pas declencher le side-channel).
+- [ ] T3 starter: FaceControls (20) + ressorts analytiques (stables
+      dt<=50ms, presets par controle). BDD stabilite/convergence.
+- [ ] T4 starter: blink stochastique (taux par etat 19/27/24/14 par min,
+      IBI gamma + refractaire 300ms, fermeture 40%/ouverture 60%) +
+      idle (respiration 0.25Hz, derive regard, saccades). Remplace
+      blinkAmount periodique. BDD bornes empiriques.
+- [ ] T5 starter: enveloppe audio (attack/silence, borne 48ms) +
+      mapper affect (override LLM avec decroissance vers baseline
+      mood, asymetrie L/R bornee). BDD.
+- [ ] T6 geometrie/shader: browMask + aAux3, uExpr/uBlink -> uCtrl[20],
+      asymetrie sign(position.x), face-rig orchestrateur. BDD masques.
+- [ ] T7 integration: tool set_affect + suffix prompt serveur, plumb
+      snapshot.affect -> VoiceOrb, seeds par instance, reduced-motion
+      neutre. Enregistrer scripts bdd dans matrix.
+- [ ] T8 verification: audit:solid, session live Gemini (compter les
+      events affect — falsifiable), E2E fake emitFunctionCall,
+      sweep reduced-motion, docs + commits.
+
 ## Front starter - command deck 3D / three.js (2026-06-11)
 
 - [x] Fondation: three 0.184.0 pin exact + postprocessing + @types/three

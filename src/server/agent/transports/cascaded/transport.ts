@@ -138,7 +138,7 @@ export class CascadedRealtimeTransport implements IRealtimeProvider {
   onSpeechStopped(handler: (audioEndMs?: number) => void): void { this.pipeline.handlers.onSpeechStopped = handler; }
   onResponseStarted(handler: (id: string) => void): void { this.pipeline.handlers.onResponseStarted = handler; }
   onResponseCompleted(handler: (id: string) => void): void { this.pipeline.handlers.onResponseCompleted = handler; }
-  onTranscript(handler: (text: string, isFinal: boolean) => void): void { this.pipeline.handlers.onTranscript = handler; }
+  onTranscript(handler: (text: string, isFinal: boolean, role?: "user" | "assistant") => void): void { this.pipeline.handlers.onTranscript = handler; }
   onError(handler: (error: ProviderError) => void): void { this.pipeline.handlers.onError = handler; }
 
   async injectSystemMessage(content: string): Promise<void> {

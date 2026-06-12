@@ -157,7 +157,7 @@ export class OpenAIRealtimeTransport
   }
 
   onResponseCancelled(handler: (responseId: string) => void): void { this.handlers.onResponseCancelled = handler; }
-  onTranscript(handler: (text: string, isFinal: boolean) => void): void { this.handlers.onTranscript = handler; }
+  onTranscript(handler: (text: string, isFinal: boolean, role?: "user" | "assistant") => void): void { this.handlers.onTranscript = handler; }
 
   onError(handler: (error: ProviderError) => void): void {
     this.handlers.onError = (apiError) => {

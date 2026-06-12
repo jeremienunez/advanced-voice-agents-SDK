@@ -34,6 +34,7 @@ export const qualityMatrix: Record<QualityGroup, string[]> = {
     "test:log-redaction:bdd",
     "test:debug-audio:bdd",
     "test:voice-session-confirmation-boundary:bdd",
+    "test:transcript-role-propagation:bdd",
     "test:cascaded-tool-timeout:bdd",
     "test:browser-tool-call-state:bdd",
     "test:adaptive-learning-loop:bdd",

@@ -116,11 +116,11 @@ export class RealtimeVoiceSession implements IVoiceSession {
     this.provider.onAudio((chunk) => {
       this.callbacks.onAudioOutput?.(chunk);
     });
-    this.provider.onTranscript((text, isFinal) => {
+    this.provider.onTranscript((text, isFinal, role) => {
       if (isFinal) {
         this.context = incrementMessageCount(this.context);
       }
-      this.callbacks.onTranscript?.(text, isFinal);
+      this.callbacks.onTranscript?.(text, isFinal, role);
     });
     this.provider.onSpeechStarted(() => {
       this.transitionTo("listening");

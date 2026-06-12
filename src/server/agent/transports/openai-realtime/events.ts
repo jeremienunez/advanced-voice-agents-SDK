@@ -75,7 +75,8 @@ export function handleOpenAIRealtimeMessage(
         handleResponseDone(raw, state);
         break;
       case "conversation.item.input_audio_transcription.completed":
-        state.handlers.onTranscript?.(raw.transcript as string, true);
+        /* input transcription — the user's mic, never the model */
+        state.handlers.onTranscript?.(raw.transcript as string, true, "user");
         break;
       case "error":
         handleError(raw, state);

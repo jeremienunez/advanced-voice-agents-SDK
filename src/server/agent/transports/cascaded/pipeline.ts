@@ -49,7 +49,7 @@ export async function processCascadedTurn(
       });
 
       if (!transcript.trim()) return;
-      state.handlers.onTranscript?.(transcript, true);
+      state.handlers.onTranscript?.(transcript, true, "user");
       state.history.push({ role: "user", content: transcript });
     } else {
       state.history.push({

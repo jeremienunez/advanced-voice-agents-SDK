@@ -103,7 +103,8 @@ function handlePart(
   }
 
   if (part.text) {
-    state.handlers.onTranscript?.(part.text, false);
+    /* modelTurn parts are the model speaking — never user transcription */
+    state.handlers.onTranscript?.(part.text, false, "assistant");
   }
 }
 

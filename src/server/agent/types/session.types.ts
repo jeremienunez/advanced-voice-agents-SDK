@@ -87,7 +87,7 @@ export interface VoiceSessionCallbacks {
   onEnded?: (summary: SessionSummary) => void;
   onAudioOutput?: (chunk: AudioChunk) => void;
   onInterrupted?: () => void;
-  onTranscript?: (text: string, isFinal: boolean) => void;
+  onTranscript?: (text: string, isFinal: boolean, role?: "user" | "assistant") => void;
 }
 
 export interface VoiceSessionToolContext {

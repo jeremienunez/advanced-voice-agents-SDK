@@ -39,6 +39,6 @@ export interface OpenAIEventHandlers {
     usage?: unknown;
   }) => void;
   onResponseCancelled?: (responseId: string) => void;
-  onTranscript?: (text: string, isFinal: boolean) => void;
+  onTranscript?: (text: string, isFinal: boolean, role?: "user" | "assistant") => void;
   onError?: (error: OpenAIApiError) => void;
 }

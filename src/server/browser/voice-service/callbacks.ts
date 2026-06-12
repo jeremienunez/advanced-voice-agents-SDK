@@ -39,11 +39,12 @@ export function createBrowserSessionCallbacks(
         deps.emitControl(deps.socket, { type: "state.change", state: mapped });
       }
     },
-    onTranscript: (text, isFinal) => {
+    onTranscript: (text, isFinal, role) => {
+      const speaker = role ?? "user";
       const activeSession = deps.getActiveSession(deps.socket);
       if (activeSession) {
         activeSession.transcript.push({
-          role: "user",
+          role: speaker,
           text,
           isFinal,
           timestamp: Date.now(),
@@ -54,7 +55,7 @@ export function createBrowserSessionCallbacks(
         type: "transcript",
         text,
         isFinal,
-        role: "user",
+        role: speaker,
       });
     },
     onInterrupted: () => {

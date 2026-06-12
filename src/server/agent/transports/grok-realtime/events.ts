@@ -37,10 +37,11 @@ export function handleGrokRealtimeMessage(
       handleAudioDelta(msg, state);
       break;
     case GROK_EVENTS.TRANSCRIPT_DELTA:
-      state.handlers.onTranscript?.(msg.delta as string, false);
+      /* response transcript stream — the model speaking */
+      state.handlers.onTranscript?.(msg.delta as string, false, "assistant");
       break;
     case GROK_EVENTS.TRANSCRIPT_DONE:
-      state.handlers.onTranscript?.(msg.transcript as string, true);
+      state.handlers.onTranscript?.(msg.transcript as string, true, "assistant");
       break;
     case GROK_EVENTS.SPEECH_STARTED:
       state.handlers.onSpeechStarted?.();

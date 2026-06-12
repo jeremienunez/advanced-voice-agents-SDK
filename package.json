@@ -82,6 +82,7 @@
     "test:secret-hygiene:bdd": "bun run scripts/tests/bdd/test-secret-hygiene-bdd.ts",
     "test:voice-session-confirmation-boundary:bdd": "pnpm exec tsc --noEmit --target ES2023 --module NodeNext --moduleResolution NodeNext --lib ES2023,DOM --strict --skipLibCheck scripts/tests/bdd/test-voice-session-confirmation-boundary-bdd.ts && bun run scripts/tests/bdd/test-voice-session-confirmation-boundary-bdd.ts",
     "test:cascaded-tool-timeout:bdd": "pnpm exec tsc --noEmit --target ES2023 --module NodeNext --moduleResolution NodeNext --lib ES2023,DOM --strict --skipLibCheck scripts/tests/bdd/test-cascaded-tool-timeout-bdd.ts && bun run scripts/tests/bdd/test-cascaded-tool-timeout-bdd.ts",
+    "test:transcript-role-propagation:bdd": "pnpm exec tsc --noEmit --target ES2023 --module NodeNext --moduleResolution NodeNext --lib ES2023,DOM --strict --skipLibCheck scripts/tests/bdd/test-transcript-role-propagation-bdd.ts && bun run scripts/tests/bdd/test-transcript-role-propagation-bdd.ts",
     "test:browser-tool-call-state:bdd": "pnpm exec tsc --noEmit --target ES2023 --module NodeNext --moduleResolution NodeNext --lib ES2023,DOM --strict --skipLibCheck scripts/tests/bdd/test-browser-tool-call-state-bdd.ts && bun run scripts/tests/bdd/test-browser-tool-call-state-bdd.ts",
     "test:store-adapter-contracts:bdd": "pnpm build && pnpm --filter @voiceagentsdk/starter-voip-rtc test:store-adapter-contracts:bdd",
     "test:builder-draft-ownership:bdd": "pnpm --filter @voiceagentsdk/starter-voip-rtc test:builder-draft-ownership:bdd",

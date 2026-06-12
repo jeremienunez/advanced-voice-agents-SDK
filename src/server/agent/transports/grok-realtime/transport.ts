@@ -160,7 +160,7 @@ export class GrokRealtimeTransport implements IRealtimeProvider {
   onSpeechStopped(handler: (audioEndMs?: number) => void): void { this.handlers.onSpeechStopped = handler; }
   onResponseStarted(handler: (responseId: string) => void): void { this.handlers.onResponseStarted = handler; }
   onResponseCompleted(handler: (responseId: string) => void): void { this.handlers.onResponseCompleted = handler; }
-  onTranscript(handler: (text: string, isFinal: boolean) => void): void { this.handlers.onTranscript = handler; }
+  onTranscript(handler: (text: string, isFinal: boolean, role?: "user" | "assistant") => void): void { this.handlers.onTranscript = handler; }
   onError(handler: (error: ProviderError) => void): void { this.handlers.onError = handler; }
 
   async injectSystemMessage(content: string): Promise<void> {

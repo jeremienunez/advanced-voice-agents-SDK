@@ -11,7 +11,7 @@ export interface CascadedHandlers {
   onSpeechStopped: ((audioEndMs?: number) => void) | null;
   onResponseStarted: ((id: string) => void) | null;
   onResponseCompleted: ((id: string) => void) | null;
-  onTranscript: ((text: string, isFinal: boolean) => void) | null;
+  onTranscript: ((text: string, isFinal: boolean, role?: "user" | "assistant") => void) | null;
   onError: ((error: ProviderError) => void) | null;
 }
 
